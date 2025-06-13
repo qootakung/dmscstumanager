@@ -5,6 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogOut, Settings } from 'lucide-react';
 import Auth from '@/components/Auth';
 import Dashboard from '@/components/Dashboard';
+import StudentManagement from '@/components/StudentManagement';
+import Reports from '@/components/Reports';
+import AdminPanel from '@/components/AdminPanel';
 import { getCurrentUser, logout } from '@/utils/storage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -52,6 +55,8 @@ const Index = () => {
     return <Auth onLogin={handleLogin} />;
   }
 
+  const isAdmin = currentUser.role === 'admin';
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -66,7 +71,7 @@ const Index = () => {
             <span className="text-sm text-muted-foreground">
               สวัสดี, {currentUser.username}
             </span>
-            {currentUser.role === 'admin' && (
+            {isAdmin && (
               <Button
                 variant="outline"
                 size="sm"
@@ -93,12 +98,14 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-1'}`}>
             <TabsTrigger value="dashboard">หน้าแรก</TabsTrigger>
-            <TabsTrigger value="students">จัดการนักเรียน</TabsTrigger>
-            <TabsTrigger value="reports">รายงาน</TabsTrigger>
-            {currentUser.role === 'admin' && (
-              <TabsTrigger value="admin">จัดการระบบ</TabsTrigger>
+            {isAdmin && (
+              <>
+                <TabsTrigger value="students">จัดการนักเรียน</TabsTrigger>
+                <TabsTrigger value="reports">รายงาน</TabsTrigger>
+                <TabsTrigger value="admin">จัดการระบบ</TabsTrigger>
+              </>
             )}
           </TabsList>
 
@@ -106,27 +113,20 @@ const Index = () => {
             <Dashboard />
           </TabsContent>
 
-          <TabsContent value="students" className="mt-6">
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold mb-4">จัดการข้อมูลนักเรียน</h2>
-              <p className="text-muted-foreground">ฟีเจอร์นี้กำลังพัฒนา...</p>
-            </div>
-          </TabsContent>
+          {isAdmin && (
+            <>
+              <TabsContent value="students" className="mt-6">
+                <StudentManagement />
+              </TabsContent>
 
-          <TabsContent value="reports" className="mt-6">
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold mb-4">ระบบรายงาน</h2>
-              <p className="text-muted-foreground">ฟีเจอร์นี้กำลังพัฒนา...</p>
-            </div>
-          </TabsContent>
+              <TabsContent value="reports" className="mt-6">
+                <Reports />
+              </TabsContent>
 
-          {currentUser.role === 'admin' && (
-            <TabsContent value="admin" className="mt-6">
-              <div className="text-center py-12">
-                <h2 className="text-2xl font-bold mb-4">จัดการระบบ</h2>
-                <p className="text-muted-foreground">ฟีเจอร์นี้กำลังพัฒนา...</p>
-              </div>
-            </TabsContent>
+              <TabsContent value="admin" className="mt-6">
+                <AdminPanel />
+              </TabsContent>
+            </>
           )}
         </Tabs>
       </main>
