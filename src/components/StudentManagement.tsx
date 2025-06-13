@@ -12,6 +12,7 @@ const StudentManagement: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState('form');
   const [formData, setFormData] = useState<Partial<Student>>({
     academicYear: '2568',
     grade: 'อ.1',
@@ -21,6 +22,13 @@ const StudentManagement: React.FC = () => {
   useEffect(() => {
     loadStudents();
   }, []);
+
+  // Reload students when tab changes to list (helpful after import)
+  useEffect(() => {
+    if (activeTab === 'list') {
+      loadStudents();
+    }
+  }, [activeTab]);
 
   const loadStudents = () => {
     const studentData = getStudents();
@@ -79,6 +87,7 @@ const StudentManagement: React.FC = () => {
     setSelectedStudent(student);
     setFormData(student);
     setIsEditing(true);
+    setActiveTab('form');
   };
 
   const handleDelete = async (student: Student) => {
@@ -125,7 +134,7 @@ const StudentManagement: React.FC = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="form" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="form">เพิ่ม/แก้ไขข้อมูล</TabsTrigger>
           <TabsTrigger value="list">รายชื่อนักเรียน</TabsTrigger>
