@@ -1,12 +1,135 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LogOut, Settings } from 'lucide-react';
+import Auth from '@/components/Auth';
+import Dashboard from '@/components/Dashboard';
+import { getCurrentUser, logout } from '@/utils/storage';
+import type { User } from '@/types/student';
+import Swal from 'sweetalert2';
 
 const Index = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    const user = getCurrentUser();
+    setCurrentUser(user);
+  };
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'ออกจากระบบ?',
+      text: 'คุณต้องการออกจากระบบหรือไม่?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'ออกจากระบบ',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#ef4444',
+    });
+
+    if (result.isConfirmed) {
+      logout();
+      setCurrentUser(null);
+      await Swal.fire({
+        title: 'ออกจากระบบสำเร็จ!',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+  };
+
+  if (!currentUser) {
+    return <Auth onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-bold text-school-primary">
+              ระบบจัดการข้อมูลโรงเรียนบ้านดอนมูล
+            </h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-muted-foreground">
+              สวัสดี, {currentUser.username}
+            </span>
+            {currentUser.role === 'admin' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveTab('admin')}
+                className="text-school-primary border-school-primary hover:bg-school-primary hover:text-white"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="text-destructive border-destructive hover:bg-destructive hover:text-white"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              ออกจากระบบ
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="dashboard">หน้าแรก</TabsTrigger>
+            <TabsTrigger value="students">จัดการนักเรียน</TabsTrigger>
+            <TabsTrigger value="reports">รายงาน</TabsTrigger>
+            {currentUser.role === 'admin' && (
+              <TabsTrigger value="admin">จัดการระบบ</TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="dashboard" className="mt-6">
+            <Dashboard />
+          </TabsContent>
+
+          <TabsContent value="students" className="mt-6">
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold mb-4">จัดการข้อมูลนักเรียน</h2>
+              <p className="text-muted-foreground">ฟีเจอร์นี้กำลังพัฒนา...</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="reports" className="mt-6">
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold mb-4">ระบบรายงาน</h2>
+              <p className="text-muted-foreground">ฟีเจอร์นี้กำลังพัฒนา...</p>
+            </div>
+          </TabsContent>
+
+          {currentUser.role === 'admin' && (
+            <TabsContent value="admin" className="mt-6">
+              <div className="text-center py-12">
+                <h2 className="text-2xl font-bold mb-4">จัดการระบบ</h2>
+                <p className="text-muted-foreground">ฟีเจอร์นี้กำลังพัฒนา...</p>
+              </div>
+            </TabsContent>
+          )}
+        </Tabs>
+      </main>
     </div>
   );
 };
