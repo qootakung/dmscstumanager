@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getStudents, addStudent, updateStudent, deleteStudent, gradeOptions, generateAcademicYears } from '@/utils/storage';
-import { Plus, Edit, trash-2, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload } from 'lucide-react';
 import type { Student } from '@/types/student';
 import Swal from 'sweetalert2';
 
@@ -525,7 +524,7 @@ const StudentManagement: React.FC = () => {
                               onClick={() => handleDelete(student)}
                               className="text-destructive border-destructive hover:bg-destructive hover:text-white"
                             >
-                              <trash-2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </td>
