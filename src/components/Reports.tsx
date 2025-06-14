@@ -1,17 +1,18 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Download } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import { getStudents } from '@/utils/storage';
 import type { Student, ReportOptions } from '@/types/student';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/components/ui/use-toast";
+import { createRoot } from 'react-dom/client';
+import StudentReportPrintable from './student/StudentReportPrintable';
 
 interface AdditionalFieldOptions {
   citizenId: boolean;
@@ -22,6 +23,16 @@ interface AdditionalFieldOptions {
   phone: boolean;
   note: boolean;
 }
+
+const gradeOrder = [
+  'อนุบาล 1', 'อนุบาล 2', 'อนุบาล 3',
+  'ประถมศึกษาปีที่ 1', 'ประถมศึกษาปีที่ 2', 'ประถมศึกษาปีที่ 3',
+  'ประถมศึกษาปีที่ 4', 'ประถมศึกษาปีที่ 5', 'ประถมศึกษาปีที่ 6'
+];
+
+const sortGrades = (grades: string[]): string[] => {
+  return [...grades].sort((a, b) => gradeOrder.indexOf(a) - gradeOrder.indexOf(b));
+};
 
 const Reports: React.FC = () => {
   const [reportOptions, setReportOptions] = useState<ReportOptions>({
@@ -41,6 +52,14 @@ const Reports: React.FC = () => {
   });
   const [students, setStudents] = useState<Student[]>([]);
   const academicYears = [...new Set(students.map(s => s.academicYear))].sort().reverse();
+
+  const classLevels = useMemo(() => {
+    if (!reportOptions.academicYear) return [];
+    const grades = students
+      .filter(s => s.academicYear === reportOptions.academicYear)
+      .map(s => s.grade);
+    return sortGrades([...new Set(grades)]);
+  }, [students, reportOptions.academicYear]);
 
   useEffect(() => {
     const storedStudents = getStudents();
@@ -80,11 +99,42 @@ const Reports: React.FC = () => {
     return filtered;
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '', 'height=800,width=1000');
+    if (!printWindow) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "กรุณาอนุญาต pop-ups เพื่อพิมพ์รายงาน",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    document.querySelectorAll('link[rel="stylesheet"], style').forEach(style => {
+      printWindow.document.head.appendChild(style.cloneNode(true));
+    });
+
+    printWindow.document.title = 'พิมพ์รายงานนักเรียน';
+    const printRootEl = printWindow.document.createElement('div');
+    printWindow.document.body.appendChild(printRootEl);
+    
+    const studentsToPrint = getFilteredStudents();
+    
+    const root = createRoot(printRootEl);
+    root.render(<StudentReportPrintable students={studentsToPrint} reportOptions={reportOptions} />);
+
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 1000);
+  };
+
   const renderReportPreview = () => {
     if (!reportOptions.classLevel || !reportOptions.academicYear) return null;
 
     const filteredStudents = getFilteredStudents();
-    const previewStudents = filteredStudents.slice(0, 5);
+    const previewStudents = filteredStudents;
 
     // สร้างคอลัมน์พื้นฐาน
     const baseColumns = [
@@ -129,7 +179,7 @@ const Reports: React.FC = () => {
           </p>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-auto max-h-96">
           <table className="w-full border-collapse border border-gray-300 text-sm">
             <thead>
               <tr className="bg-gray-100">
@@ -182,7 +232,7 @@ const Reports: React.FC = () => {
         </div>
         
         <p className="text-sm text-gray-600 mt-2">
-          แสดงตัวอย่าง {previewStudents.length} รายการแรก จากทั้งหมด {filteredStudents.length} รายการ
+          รวมทั้งหมด {filteredStudents.length} รายการ
         </p>
       </div>
     );
@@ -279,7 +329,7 @@ const Reports: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Label htmlFor="reportType">ประเภทรายงาน</Label>
-            <Select onValueChange={(value) => handleOptionChange('reportType', value)}>
+            <Select onValueChange={(value) => handleOptionChange('reportType', value)} defaultValue={reportOptions.reportType}>
               <SelectTrigger id="reportType">
                 <SelectValue placeholder="เลือกประเภทรายงาน" />
               </SelectTrigger>
@@ -291,27 +341,21 @@ const Reports: React.FC = () => {
           </div>
           <div>
             <Label htmlFor="classLevel">ระดับชั้น</Label>
-            <Select onValueChange={(value) => handleOptionChange('classLevel', value)}>
+            <Select onValueChange={(value) => handleOptionChange('classLevel', value)} value={reportOptions.classLevel}>
               <SelectTrigger id="classLevel">
                 <SelectValue placeholder="เลือกระดับชั้น" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">ทุกระดับชั้น</SelectItem>
-                <SelectItem value="อนุบาล 1">อนุบาล 1</SelectItem>
-                <SelectItem value="อนุบาล 2">อนุบาล 2</SelectItem>
-                <SelectItem value="อนุบาล 3">อนุบาล 3</SelectItem>
-                <SelectItem value="ประถมศึกษาปีที่ 1">ประถมศึกษาปีที่ 1</SelectItem>
-                <SelectItem value="ประถมศึกษาปีที่ 2">ประถมศึกษาปีที่ 2</SelectItem>
-                <SelectItem value="ประถมศึกษาปีที่ 3">ประถมศึกษาปีที่ 3</SelectItem>
-                <SelectItem value="ประถมศึกษาปีที่ 4">ประถมศึกษาปีที่ 4</SelectItem>
-                <SelectItem value="ประถมศึกษาปีที่ 5">ประถมศึกษาปีที่ 5</SelectItem>
-                <SelectItem value="ประถมศึกษาปีที่ 6">ประถมศึกษาปีที่ 6</SelectItem>
+                {classLevels.map(level => (
+                  <SelectItem key={level} value={level}>{level}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label htmlFor="academicYear">ปีการศึกษา</Label>
-            <Select onValueChange={(value) => handleOptionChange('academicYear', value)}>
+            <Select onValueChange={(value) => handleOptionChange('academicYear', value)} value={reportOptions.academicYear}>
               <SelectTrigger id="academicYear">
                 <SelectValue placeholder="เลือกปีการศึกษา" />
               </SelectTrigger>
@@ -401,10 +445,16 @@ const Reports: React.FC = () => {
 
         {renderReportPreview()}
 
-        <Button onClick={generateExcel} className="bg-green-500 text-white hover:bg-green-600 font-sarabun">
-          <Download className="h-4 w-4 mr-2" />
-          ส่งออก Excel
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={generateExcel} className="bg-green-500 text-white hover:bg-green-600 font-sarabun">
+            <Download className="h-4 w-4 mr-2" />
+            ส่งออก Excel
+          </Button>
+          <Button onClick={handlePrint} variant="outline" className="font-sarabun">
+            <Printer className="h-4 w-4 mr-2" />
+            พิมพ์รายงาน
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
