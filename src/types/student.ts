@@ -1,4 +1,3 @@
-
 export interface Student {
   id: string;
   academicYear: string;
@@ -64,4 +63,15 @@ export interface ReportOptions {
     note: boolean;
   };
   customColumns?: number;
+}
+
+export interface StudentHealthRecord {
+  id: string;
+  student_id: string;
+  measurement_date: string;
+  weight_kg: number | null;
+  height_cm: number | null;
+  academic_year: string;
+  created_at: string;
+  updated_at: string;
 }

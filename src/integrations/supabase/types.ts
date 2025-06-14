@@ -33,6 +33,47 @@ export type Database = {
         }
         Relationships: []
       }
+      student_health_records: {
+        Row: {
+          academic_year: string
+          created_at: string
+          height_cm: number | null
+          id: string
+          measurement_date: string
+          student_id: string
+          updated_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          measurement_date: string
+          student_id: string
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          measurement_date?: string
+          student_id?: string
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_health_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           academicYear: string | null

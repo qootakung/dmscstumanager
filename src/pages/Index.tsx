@@ -9,6 +9,7 @@ import TeacherManagement from '@/components/TeacherManagement';
 import Reports from '@/components/Reports';
 import TeacherReports from '@/components/TeacherReports';
 import AdminPanel from '@/components/AdminPanel';
+import StudentHealth from '@/components/StudentHealth';
 import { getCurrentUser, logout } from '@/utils/storage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -142,6 +143,15 @@ const Index = () => {
                           ข้อมูลครู
                         </Button>
                       </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Button 
+                          variant="ghost" 
+                          className="justify-start"
+                          onClick={() => setActiveTab('student-health')}
+                        >
+                          น้ำหนัก-ส่วนสูง
+                        </Button>
+                      </NavigationMenuLink>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -197,6 +207,7 @@ const Index = () => {
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'students' && <StudentManagement />}
           {activeTab === 'teachers' && <TeacherManagement />}
+          {activeTab === 'student-health' && <StudentHealth />}
           {activeTab === 'student-reports' && <Reports />}
           {activeTab === 'teacher-reports' && <TeacherReports />}
           {isAdmin && activeTab === 'admin' && <AdminPanel />}

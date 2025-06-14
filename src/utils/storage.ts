@@ -164,6 +164,38 @@ export const logout = (): void => {
   setCurrentUser(null);
 };
 
+// Student Health Records
+export const getStudentHealthRecords = async (filters: { academicYear?: string, studentId?: string }) => {
+  let query = supabase.from('student_health_records').select('*');
+
+  if (filters.academicYear) {
+    query = query.eq('academic_year', filters.academicYear);
+  }
+  if (filters.studentId) {
+    query = query.eq('student_id', filters.studentId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching student health records:', error);
+    return [];
+  }
+  return data;
+}
+
+export const upsertStudentHealthRecords = async (records: any[]) => {
+  const { data, error } = await supabase.from('student_health_records').upsert(records, {
+    onConflict: 'student_id,measurement_date'
+  }).select();
+
+  if (error) {
+    console.error('Error upserting student health records:', error);
+    return null;
+  }
+  return data;
+}
+
 // Statistics
 export const getStudentStatistics = async () => {
   const students = await getStudents();
