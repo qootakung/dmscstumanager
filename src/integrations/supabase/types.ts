@@ -9,7 +9,168 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      students: {
+        Row: {
+          academicYear: string | null
+          birthDate: string | null
+          citizenId: string | null
+          createdAt: string | null
+          district: string | null
+          fatherFirstName: string | null
+          fatherLastName: string | null
+          fatherTitle: string | null
+          firstNameEn: string | null
+          firstNameTh: string | null
+          gender: string | null
+          grade: string | null
+          guardianFirstName: string | null
+          guardianLastName: string | null
+          guardianPhone: string | null
+          guardianTitle: string | null
+          houseNumber: string | null
+          id: string
+          lastNameEn: string | null
+          lastNameTh: string | null
+          moo: string | null
+          motherFirstName: string | null
+          motherLastName: string | null
+          motherTitle: string | null
+          postalCode: string | null
+          province: string | null
+          studentId: string | null
+          subDistrict: string | null
+          titleTh: string | null
+          updatedAt: string | null
+        }
+        Insert: {
+          academicYear?: string | null
+          birthDate?: string | null
+          citizenId?: string | null
+          createdAt?: string | null
+          district?: string | null
+          fatherFirstName?: string | null
+          fatherLastName?: string | null
+          fatherTitle?: string | null
+          firstNameEn?: string | null
+          firstNameTh?: string | null
+          gender?: string | null
+          grade?: string | null
+          guardianFirstName?: string | null
+          guardianLastName?: string | null
+          guardianPhone?: string | null
+          guardianTitle?: string | null
+          houseNumber?: string | null
+          id?: string
+          lastNameEn?: string | null
+          lastNameTh?: string | null
+          moo?: string | null
+          motherFirstName?: string | null
+          motherLastName?: string | null
+          motherTitle?: string | null
+          postalCode?: string | null
+          province?: string | null
+          studentId?: string | null
+          subDistrict?: string | null
+          titleTh?: string | null
+          updatedAt?: string | null
+        }
+        Update: {
+          academicYear?: string | null
+          birthDate?: string | null
+          citizenId?: string | null
+          createdAt?: string | null
+          district?: string | null
+          fatherFirstName?: string | null
+          fatherLastName?: string | null
+          fatherTitle?: string | null
+          firstNameEn?: string | null
+          firstNameTh?: string | null
+          gender?: string | null
+          grade?: string | null
+          guardianFirstName?: string | null
+          guardianLastName?: string | null
+          guardianPhone?: string | null
+          guardianTitle?: string | null
+          houseNumber?: string | null
+          id?: string
+          lastNameEn?: string | null
+          lastNameTh?: string | null
+          moo?: string | null
+          motherFirstName?: string | null
+          motherLastName?: string | null
+          motherTitle?: string | null
+          postalCode?: string | null
+          province?: string | null
+          studentId?: string | null
+          subDistrict?: string | null
+          titleTh?: string | null
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
+      teachers: {
+        Row: {
+          academicYear: string | null
+          appointmentDate: string | null
+          birthDate: string | null
+          citizenId: string | null
+          createdAt: string | null
+          education: string | null
+          email: string | null
+          firstName: string | null
+          id: string
+          lastName: string | null
+          lineId: string | null
+          majorSubject: string | null
+          phone: string | null
+          position: string | null
+          positionNumber: string | null
+          salary: string | null
+          scoutLevel: string | null
+          updatedAt: string | null
+        }
+        Insert: {
+          academicYear?: string | null
+          appointmentDate?: string | null
+          birthDate?: string | null
+          citizenId?: string | null
+          createdAt?: string | null
+          education?: string | null
+          email?: string | null
+          firstName?: string | null
+          id?: string
+          lastName?: string | null
+          lineId?: string | null
+          majorSubject?: string | null
+          phone?: string | null
+          position?: string | null
+          positionNumber?: string | null
+          salary?: string | null
+          scoutLevel?: string | null
+          updatedAt?: string | null
+        }
+        Update: {
+          academicYear?: string | null
+          appointmentDate?: string | null
+          birthDate?: string | null
+          citizenId?: string | null
+          createdAt?: string | null
+          education?: string | null
+          email?: string | null
+          firstName?: string | null
+          id?: string
+          lastName?: string | null
+          lineId?: string | null
+          majorSubject?: string | null
+          phone?: string | null
+          position?: string | null
+          positionNumber?: string | null
+          salary?: string | null
+          scoutLevel?: string | null
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

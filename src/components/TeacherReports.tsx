@@ -31,13 +31,17 @@ const TeacherReports: React.FC = () => {
     selectedDate: '',
   });
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const academicYears = [...new Set(teachers.map(t => t.academicYear))].sort().reverse();
-
+  
   useEffect(() => {
-    const storedTeachers = getTeachers();
-    setTeachers(storedTeachers);
-    console.log('Loaded teachers:', storedTeachers);
+    const fetchTeachers = async () => {
+        const storedTeachers = await getTeachers();
+        setTeachers(storedTeachers);
+        console.log('Loaded teachers:', storedTeachers);
+    };
+    fetchTeachers();
   }, []);
+  
+  const academicYears = useMemo(() => [...new Set(teachers.map(t => t.academicYear))].sort().reverse(), [teachers]);
 
   const handleOptionChange = (field: keyof TeacherReportOptions, value: any) => {
     setReportOptions(prev => ({ ...prev, [field]: value }));

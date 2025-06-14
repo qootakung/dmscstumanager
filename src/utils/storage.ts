@@ -1,6 +1,6 @@
 import { Student, User } from '@/types/student';
+import { supabase } from '@/integrations/supabase/client';
 
-const STUDENTS_KEY = 'dmsc_students';
 const USERS_KEY = 'dmsc_users';
 const CURRENT_USER_KEY = 'dmsc_current_user';
 
@@ -16,52 +16,53 @@ export const generateAcademicYears = (): string[] => {
 export const gradeOptions = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
 
 // Student data management
-export const saveStudents = (students: Student[]): void => {
-  localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+export const getStudents = async (): Promise<Student[]> => {
+  const { data, error } = await supabase.from('students').select('*').order('studentId', { ascending: true });
+  if (error) {
+    console.error('Error fetching students:', error);
+    return [];
+  }
+  return data as Student[];
 };
 
-export const getStudents = (): Student[] => {
-  const data = localStorage.getItem(STUDENTS_KEY);
-  return data ? JSON.parse(data) : [];
+export const addStudent = async (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt'>): Promise<Student | null> => {
+  const { data, error } = await supabase.from('students').insert(student).select().single();
+  if (error) {
+    console.error('Error adding student:', error);
+    return null;
+  }
+  return data as Student;
 };
 
-export const addStudent = (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt'>): Student => {
-  const students = getStudents();
-  const newStudent: Student = {
-    ...student,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  students.push(newStudent);
-  saveStudents(students);
-  return newStudent;
+export const updateStudent = async (id: string, studentData: Partial<Student>): Promise<Student | null> => {
+  const { data, error } = await supabase
+    .from('students')
+    .update({ ...studentData, updatedAt: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating student:', error);
+    return null;
+  }
+  return data as Student;
 };
 
-export const updateStudent = (id: string, studentData: Partial<Student>): Student | null => {
-  const students = getStudents();
-  const index = students.findIndex(s => s.id === id);
-  if (index === -1) return null;
-  
-  students[index] = {
-    ...students[index],
-    ...studentData,
-    updatedAt: new Date().toISOString(),
-  };
-  saveStudents(students);
-  return students[index];
-};
-
-export const deleteStudent = (id: string): boolean => {
-  const students = getStudents();
-  const filteredStudents = students.filter(s => s.id !== id);
-  if (filteredStudents.length === students.length) return false;
-  saveStudents(filteredStudents);
+export const deleteStudent = async (id: string): Promise<boolean> => {
+  const { error } = await supabase.from('students').delete().eq('id', id);
+  if (error) {
+    console.error('Error deleting student:', error);
+    return false;
+  }
   return true;
 };
 
-export const clearAllStudents = (): void => {
-  saveStudents([]);
+export const clearAllStudents = async (): Promise<void> => {
+  const { error } = await supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  if (error) {
+    console.error('Error clearing all students:', error);
+  }
 };
 
 // User management
@@ -129,8 +130,8 @@ export const logout = (): void => {
 };
 
 // Statistics
-export const getStudentStatistics = () => {
-  const students = getStudents();
+export const getStudentStatistics = async () => {
+  const students = await getStudents();
   const currentYear = new Date().getFullYear() + 543; // Convert to Buddhist year
   const currentAcademicYear = currentYear.toString();
   
@@ -152,15 +153,4 @@ export const getStudentStatistics = () => {
     byGender: genderStats,
     academicYears: [...new Set(students.map(s => s.academicYear))].sort().reverse(),
   };
-};
-
-// Add getTeachers function for compatibility
-export const getTeachers = () => {
-  try {
-    const teachers = localStorage.getItem('school_teachers');
-    return teachers ? JSON.parse(teachers) : [];
-  } catch (error) {
-    console.error('Error loading teachers:', error);
-    return [];
-  }
 };

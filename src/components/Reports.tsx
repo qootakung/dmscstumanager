@@ -42,7 +42,16 @@ const Reports: React.FC = () => {
     customColumns: 0,
   });
   const [students, setStudents] = useState<Student[]>([]);
-  const academicYears = [...new Set(students.map(s => s.academicYear))].sort().reverse();
+  
+  useEffect(() => {
+    const fetchStudents = async () => {
+        const storedStudents = await getStudents();
+        setStudents(storedStudents);
+    };
+    fetchStudents();
+  }, []);
+
+  const academicYears = useMemo(() => [...new Set(students.map(s => s.academicYear))].sort().reverse(), [students]);
 
   const classLevels = useMemo(() => {
     if (!reportOptions.academicYear) return [];
@@ -51,11 +60,6 @@ const Reports: React.FC = () => {
       .map(s => s.grade);
     return sortGrades([...new Set(grades)]);
   }, [students, reportOptions.academicYear]);
-
-  useEffect(() => {
-    const storedStudents = getStudents();
-    setStudents(storedStudents);
-  }, []);
 
   const handleOptionChange = (field: keyof ReportOptions, value: any) => {
     setReportOptions(prev => ({ ...prev, [field]: value }));

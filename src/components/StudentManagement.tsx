@@ -19,6 +19,11 @@ const StudentManagement: React.FC = () => {
     gender: 'ชาย'
   });
 
+  const loadStudents = async () => {
+    const studentData = await getStudents();
+    setStudents(studentData);
+  };
+
   useEffect(() => {
     loadStudents();
   }, []);
@@ -29,11 +34,6 @@ const StudentManagement: React.FC = () => {
       loadStudents();
     }
   }, [activeTab]);
-
-  const loadStudents = () => {
-    const studentData = getStudents();
-    setStudents(studentData);
-  };
 
   const handleInputChange = (field: keyof Student, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -54,7 +54,7 @@ const StudentManagement: React.FC = () => {
 
     try {
       if (isEditing && selectedStudent) {
-        updateStudent(selectedStudent.id, formData);
+        await updateStudent(selectedStudent.id, formData);
         await Swal.fire({
           title: 'แก้ไขข้อมูลสำเร็จ!',
           icon: 'success',
@@ -62,7 +62,7 @@ const StudentManagement: React.FC = () => {
           showConfirmButton: false
         });
       } else {
-        addStudent(formData as Omit<Student, 'id' | 'createdAt' | 'updatedAt'>);
+        await addStudent(formData as Omit<Student, 'id' | 'createdAt' | 'updatedAt'>);
         await Swal.fire({
           title: 'เพิ่มข้อมูลสำเร็จ!',
           icon: 'success',
@@ -71,7 +71,7 @@ const StudentManagement: React.FC = () => {
         });
       }
       
-      loadStudents();
+      await loadStudents();
       resetForm();
     } catch (error) {
       await Swal.fire({
@@ -102,8 +102,8 @@ const StudentManagement: React.FC = () => {
     });
 
     if (result.isConfirmed) {
-      deleteStudent(student.id);
-      loadStudents();
+      await deleteStudent(student.id);
+      await loadStudents();
       await Swal.fire({
         title: 'ลบข้อมูลสำเร็จ!',
         icon: 'success',
@@ -160,7 +160,7 @@ const StudentManagement: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="import" className="mt-6">
-          <StudentImport />
+          <StudentImport onImportSuccess={loadStudents} />
         </TabsContent>
       </Tabs>
     </div>

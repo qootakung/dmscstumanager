@@ -17,6 +17,11 @@ const TeacherManagement: React.FC = () => {
     position: 'ครูผู้ช่วย'
   });
 
+  const loadTeachers = async () => {
+    const teacherData = await getTeachers();
+    setTeachers(teacherData);
+  };
+
   useEffect(() => {
     loadTeachers();
   }, []);
@@ -26,11 +31,6 @@ const TeacherManagement: React.FC = () => {
       loadTeachers();
     }
   }, [activeTab]);
-
-  const loadTeachers = () => {
-    const teacherData = getTeachers();
-    setTeachers(teacherData);
-  };
 
   const handleInputChange = (field: keyof Teacher, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -51,7 +51,7 @@ const TeacherManagement: React.FC = () => {
 
     try {
       if (isEditing && selectedTeacher) {
-        updateTeacher(selectedTeacher.id, formData);
+        await updateTeacher(selectedTeacher.id, formData);
         await Swal.fire({
           title: 'แก้ไขข้อมูลสำเร็จ!',
           icon: 'success',
@@ -59,7 +59,7 @@ const TeacherManagement: React.FC = () => {
           showConfirmButton: false
         });
       } else {
-        addTeacher(formData as Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>);
+        await addTeacher(formData as Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>);
         await Swal.fire({
           title: 'เพิ่มข้อมูลสำเร็จ!',
           icon: 'success',
@@ -68,7 +68,7 @@ const TeacherManagement: React.FC = () => {
         });
       }
       
-      loadTeachers();
+      await loadTeachers();
       resetForm();
     } catch (error) {
       await Swal.fire({
@@ -99,8 +99,8 @@ const TeacherManagement: React.FC = () => {
     });
 
     if (result.isConfirmed) {
-      deleteTeacher(teacher.id);
-      loadTeachers();
+      await deleteTeacher(teacher.id);
+      await loadTeachers();
       await Swal.fire({
         title: 'ลบข้อมูลสำเร็จ!',
         icon: 'success',
