@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import { getTeachers } from '@/utils/teacherStorage';
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
@@ -64,18 +65,24 @@ const TeacherReports: React.FC = () => {
     });
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
-    <Card>
-      <CardHeader>
+    <Card className="print:border-none print:shadow-none">
+      <CardHeader className="print:hidden">
         <CardTitle>รายงานข้อมูลครู</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <TeacherReportForm
-          reportOptions={reportOptions}
-          academicYears={academicYears}
-          onOptionChange={handleOptionChange}
-          onAdditionalFieldChange={handleAdditionalFieldChange}
-        />
+      <CardContent className="space-y-4 print:p-0 print:space-y-0">
+        <div className="print:hidden">
+          <TeacherReportForm
+            reportOptions={reportOptions}
+            academicYears={academicYears}
+            onOptionChange={handleOptionChange}
+            onAdditionalFieldChange={handleAdditionalFieldChange}
+          />
+        </div>
 
         <TeacherReportPreview
           reportOptions={reportOptions}
@@ -83,10 +90,16 @@ const TeacherReports: React.FC = () => {
           formatThaiDate={formatThaiDate}
         />
 
-        <Button onClick={handleGenerateExcel} className="bg-green-500 text-white hover:bg-green-600 font-sarabun">
-          <Download className="h-4 w-4 mr-2" />
-          ส่งออก Excel
-        </Button>
+        <div className="flex flex-wrap gap-4 print:hidden">
+          <Button onClick={handleGenerateExcel} className="bg-green-500 text-white hover:bg-green-600 font-sarabun">
+            <Download className="h-4 w-4 mr-2" />
+            ส่งออก Excel
+          </Button>
+          <Button onClick={handlePrint} variant="outline" className="font-sarabun">
+            <Printer className="h-4 w-4 mr-2" />
+            พิมพ์รายงาน
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

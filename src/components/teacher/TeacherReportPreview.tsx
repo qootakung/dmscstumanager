@@ -56,7 +56,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   const allColumns = [...baseColumns, ...additionalColumns, ...customColumns];
 
   return (
-    <div className="mt-6 border rounded-lg p-4 bg-white">
+    <div className="mt-6 border rounded-lg p-4 bg-white print:border-none print:shadow-none print:p-0 print:m-0">
       <div className="text-center mb-4 font-sarabun">
         <h3 className="text-lg font-bold">
           {reportOptions.reportType === '1' 
@@ -127,7 +127,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
         </table>
       </div>
       
-      <p className="text-sm text-gray-600 mt-2">
+      <p className="text-sm text-gray-600 mt-2 print:hidden">
         แสดงตัวอย่าง {previewTeachers.length} รายการแรก จากทั้งหมด {filteredTeachers.length} รายการ
       </p>
     </div>
