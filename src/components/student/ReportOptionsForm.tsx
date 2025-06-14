@@ -100,7 +100,7 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
               checked={reportOptions.additionalFields.signature}
               onCheckedChange={(checked) => handleAdditionalFieldChange('signature', Boolean(checked))}
             />
-            <Label htmlFor="signature">ลายเซ็น</Label>
+            <Label htmlFor="signature">ลายมือชื่อ</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -116,7 +116,7 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
               checked={reportOptions.additionalFields.timeIn}
               onCheckedChange={(checked) => handleAdditionalFieldChange('timeIn', Boolean(checked))}
             />
-            <Label htmlFor="timeIn">เวลาเข้า</Label>
+            <Label htmlFor="timeIn">เวลามา</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -124,7 +124,7 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
               checked={reportOptions.additionalFields.timeOut}
               onCheckedChange={(checked) => handleAdditionalFieldChange('timeOut', Boolean(checked))}
             />
-            <Label htmlFor="timeOut">เวลาออก</Label>
+            <Label htmlFor="timeOut">เวลากลับ</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
