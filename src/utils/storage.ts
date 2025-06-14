@@ -1,4 +1,3 @@
-
 import { Student, User } from '@/types/student';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -144,8 +143,14 @@ export const getStudentStatistics = async () => {
   }, {} as Record<string, number>);
   
   const genderStats = {
-    ชาย: currentYearStudents.filter(s => s.gender === 'ชาย' || s.gender === 'ช').length,
-    หญิง: currentYearStudents.filter(s => s.gender === 'หญิง' || s.gender === 'ญ').length,
+    ชาย: currentYearStudents.filter(s => {
+      const gender = s.gender?.trim();
+      return gender === 'ชาย' || gender === 'ช';
+    }).length,
+    หญิง: currentYearStudents.filter(s => {
+      const gender = s.gender?.trim();
+      return gender === 'หญิง' || gender === 'ญ';
+    }).length,
   };
   
   return {
