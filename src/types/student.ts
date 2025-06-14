@@ -54,6 +54,7 @@ export interface ReportOptions {
   classLevel: string;
   academicYear: string;
   additionalFields: {
+    gender: boolean;
     citizenId: boolean;
     signature: boolean;
     guardianSignature: boolean;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns } from '@/utils/studentReportUtils';
@@ -45,9 +44,11 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
                 <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
                 <td className="border border-gray-300 px-2 py-1 text-center">{student.studentId}</td>
                 <td className="border border-gray-300 px-2 py-1">{student.firstNameTh} {student.lastNameTh}</td>
-                <td className="border border-gray-300 px-2 py-1 text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
-
+                
                 {/* Additional fields */}
+                {reportOptions.additionalFields.gender && (
+                  <td className="border border-gray-300 px-2 py-1 text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
+                )}
                 {reportOptions.additionalFields.citizenId && (
                   <td className="border border-gray-300 px-2 py-1 text-center">{student.citizenId}</td>
                 )}

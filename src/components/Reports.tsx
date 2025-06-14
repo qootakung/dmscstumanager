@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,23 +13,13 @@ import ReportOptionsForm from './student/ReportOptionsForm';
 import ReportPreview from './student/ReportPreview';
 import { sortGrades } from '@/utils/studentReportUtils';
 
-
-interface AdditionalFieldOptions {
-  citizenId: boolean;
-  signature: boolean;
-  guardianSignature: boolean;
-  timeIn: boolean;
-  timeOut: boolean;
-  phone: boolean;
-  note: boolean;
-}
-
 const Reports: React.FC = () => {
   const [reportOptions, setReportOptions] = useState<ReportOptions>({
     reportType: '1',
     classLevel: 'all',
     academicYear: new Date().getFullYear().toString(),
     additionalFields: {
+      gender: false,
       citizenId: false,
       signature: false,
       guardianSignature: false,
@@ -65,7 +54,7 @@ const Reports: React.FC = () => {
     setReportOptions(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleAdditionalFieldChange = (field: keyof AdditionalFieldOptions, checked: boolean) => {
+  const handleAdditionalFieldChange = (field: keyof ReportOptions['additionalFields'], checked: boolean) => {
     setReportOptions(prev => ({
       ...prev,
       additionalFields: {
@@ -144,11 +133,11 @@ const Reports: React.FC = () => {
       'ลำดับที่',
       'รหัสนักเรียน', 
       'ชื่อ - นามสกุล',
-      'เพศ'
     ];
 
     // เพิ่มคอลัมน์เพิ่มเติมที่เลือก
     const additionalColumns = [];
+    if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
     if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
     if (reportOptions.additionalFields.signature) additionalColumns.push('ลายเซ็น');
     if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
@@ -172,13 +161,13 @@ const Reports: React.FC = () => {
       ...headerData,
       allColumns,
       ...filteredStudents.map((student, index) => {
-        const row = [
+        const row: (string | number)[] = [
           index + 1,
           student.studentId,
           `${student.firstNameTh} ${student.lastNameTh}`,
-          student.gender === 'ชาย' ? 'ช' : 'ญ'
         ];
 
+        if (reportOptions.additionalFields.gender) row.push(student.gender === 'ชาย' ? 'ช' : 'ญ');
         if (reportOptions.additionalFields.citizenId) row.push(student.citizenId);
         if (reportOptions.additionalFields.signature) row.push('');
         if (reportOptions.additionalFields.guardianSignature) row.push('');
@@ -187,7 +176,7 @@ const Reports: React.FC = () => {
         if (reportOptions.additionalFields.phone) row.push(student.guardianPhone);
         if (reportOptions.additionalFields.note) row.push('');
 
-        for (let i = 0; i < reportOptions.customColumns; i++) {
+        for (let i = 0; i < (reportOptions.customColumns || 0); i++) {
           row.push('');
         }
 

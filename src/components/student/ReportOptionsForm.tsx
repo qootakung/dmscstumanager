@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +19,7 @@ interface AdditionalFieldOptions {
 interface ReportOptionsFormProps {
   reportOptions: ReportOptions;
   handleOptionChange: (field: keyof ReportOptions, value: any) => void;
-  handleAdditionalFieldChange: (field: keyof AdditionalFieldOptions, checked: boolean) => void;
+  handleAdditionalFieldChange: (field: keyof ReportOptions['additionalFields'], checked: boolean) => void;
   classLevels: string[];
   academicYears: string[];
 }
@@ -79,6 +78,14 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
       <div className="space-y-2">
         <Label>คอลัมน์เพิ่มเติม</Label>
         <div className="flex flex-wrap gap-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="gender"
+              checked={reportOptions.additionalFields.gender}
+              onCheckedChange={(checked) => handleAdditionalFieldChange('gender', Boolean(checked))}
+            />
+            <Label htmlFor="gender">เพศ</Label>
+          </div>
           <div className="flex items-center space-x-2">
             <Checkbox
               id="citizenId"

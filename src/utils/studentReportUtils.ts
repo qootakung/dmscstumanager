@@ -1,4 +1,3 @@
-
 import type { ReportOptions } from '@/types/student';
 
 export const gradeOrder = [
@@ -12,8 +11,9 @@ export const sortGrades = (grades: string[]): string[] => {
 };
 
 export const getReportColumns = (reportOptions: ReportOptions) => {
-  const baseColumns = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ - นามสกุล', 'เพศ'];
+  const baseColumns = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ - นามสกุล'];
   const additionalColumns = [];
+  if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
   if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายเซ็น');
   if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
