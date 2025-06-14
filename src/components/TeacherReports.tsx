@@ -14,7 +14,7 @@ import { toast } from "@/components/ui/use-toast";
 const TeacherReports: React.FC = () => {
   const [reportOptions, setReportOptions] = useState<TeacherReportOptions>({
     reportType: '1',
-    academicYear: new Date().getFullYear().toString(),
+    academicYear: '2568',
     additionalFields: {
       email: false,
       citizenId: false,
@@ -36,6 +36,7 @@ const TeacherReports: React.FC = () => {
   useEffect(() => {
     const storedTeachers = getTeachers();
     setTeachers(storedTeachers);
+    console.log('Loaded teachers:', storedTeachers);
   }, []);
 
   const handleOptionChange = (field: keyof TeacherReportOptions, value: any) => {

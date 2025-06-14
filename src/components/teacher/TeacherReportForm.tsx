@@ -13,18 +13,32 @@ interface TeacherReportFormProps {
   onAdditionalFieldChange: (field: keyof TeacherReportOptions['additionalFields'], checked: boolean) => void;
 }
 
+// Generate academic years from 2568 to 2600
+const generateAcademicYears = (): string[] => {
+  const years: string[] = [];
+  for (let year = 2568; year <= 2600; year++) {
+    years.push(year.toString());
+  }
+  return years;
+};
+
 const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
   reportOptions,
   academicYears,
   onOptionChange,
   onAdditionalFieldChange,
 }) => {
+  const availableYears = generateAcademicYears();
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="reportType">ประเภทรายงาน</Label>
-          <Select onValueChange={(value) => onOptionChange('reportType', value as '1' | '2')}>
+          <Select 
+            value={reportOptions.reportType} 
+            onValueChange={(value) => onOptionChange('reportType', value as '1' | '2')}
+          >
             <SelectTrigger id="reportType">
               <SelectValue placeholder="เลือกประเภทรายงาน" />
             </SelectTrigger>
@@ -36,12 +50,15 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
         </div>
         <div>
           <Label htmlFor="academicYear">ปีการศึกษา</Label>
-          <Select onValueChange={(value) => onOptionChange('academicYear', value)}>
+          <Select 
+            value={reportOptions.academicYear} 
+            onValueChange={(value) => onOptionChange('academicYear', value)}
+          >
             <SelectTrigger id="academicYear">
               <SelectValue placeholder="เลือกปีการศึกษา" />
             </SelectTrigger>
             <SelectContent>
-              {academicYears.map(year => (
+              {availableYears.map(year => (
                 <SelectItem key={year} value={year}>{year}</SelectItem>
               ))}
             </SelectContent>
