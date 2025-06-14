@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -215,7 +216,9 @@ const Reports: React.FC = () => {
     if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
     if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
     if (reportOptions.additionalFields.phone) colWidths.push({ wch: 15 });
-    customColumns.forEach(() => colWidths.push({ wch: 20 }));
+    for (let i = 0; i < (reportOptions.customColumns || 0); i++) {
+      colWidths.push({ wch: 20 });
+    }
     if (reportOptions.additionalFields.note) colWidths.push({ wch: 30 });
     ws['!cols'] = colWidths;
 
