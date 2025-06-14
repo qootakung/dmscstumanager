@@ -242,7 +242,7 @@ export type Database = {
     }
     Functions: {
       get_student_health_details: {
-        Args: { p_academic_year: string; p_month?: number }
+        Args: { p_academic_year: string; p_month?: number; p_grade?: string }
         Returns: {
           record_id: string
           student_record_id: string

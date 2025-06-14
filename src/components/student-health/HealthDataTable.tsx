@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/healthStorage';
@@ -44,7 +45,7 @@ const HealthDataTable: React.FC = () => {
         updateStudentHealthRecord(recordId, updates),
     onSuccess: () => {
       toast.success('อัปเดตข้อมูลสำเร็จ');
-      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth] });
+      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade] });
     },
     onError: () => {
       toast.error('อัปเดตข้อมูลไม่สำเร็จ');
