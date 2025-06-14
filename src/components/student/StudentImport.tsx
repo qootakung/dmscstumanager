@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -55,7 +54,7 @@ const StudentImport: React.FC = () => {
           }
 
           // Add student to database
-          addStudent(studentData);
+          await addStudent(studentData);
           successCount++;
         } catch (error) {
           failedCount++;

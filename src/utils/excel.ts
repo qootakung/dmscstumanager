@@ -1,3 +1,4 @@
+
 // Excel utility functions for importing and exporting data
 import * as XLSX from 'xlsx';
 import { Student } from '@/types/student';
@@ -15,13 +16,41 @@ export const importFromExcel = (file: File): Promise<any[]> => {
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
         
         // Map Excel columns to our Student model
         const students = jsonData.map((row: any) => {
+          const birthDateValue = row['วันเกิด'];
+          let birthDateISO = '';
+
+          if (birthDateValue instanceof Date) {
+            let year = birthDateValue.getFullYear();
+            if (year > 2500) { // Correct for Buddhist year
+              year -= 543;
+            }
+            const month = (birthDateValue.getMonth() + 1).toString().padStart(2, '0');
+            const day = birthDateValue.getDate().toString().padStart(2, '0');
+            birthDateISO = `${year}-${month}-${day}`;
+          } else if (typeof birthDateValue === 'string') {
+            const parts = birthDateValue.split(/[/.-]/);
+            if (parts.length === 3) {
+              const [day, month, yearStr] = parts;
+              let year = parseInt(yearStr, 10);
+              if (!isNaN(year)) {
+                if (year > 2500) { // Correct for Buddhist year
+                  year -= 543;
+                }
+                // Ensure month and day are two digits
+                const paddedMonth = month.padStart(2, '0');
+                const paddedDay = day.padStart(2, '0');
+                birthDateISO = `${year}-${paddedMonth}-${paddedDay}`;
+              }
+            }
+          }
+
           const student: Partial<Student> = {
             citizenId: row['เลขประจำตัวประชาชน'] || '',
             grade: row['ชั้น'] || '',
@@ -32,7 +61,7 @@ export const importFromExcel = (file: File): Promise<any[]> => {
             lastNameTh: row['นามสกุล'] || '',
             firstNameEn: row['ชื่อ (อังกฤษ)'] || '',
             lastNameEn: row['นามสกุล (อังกฤษ)'] || '',
-            birthDate: row['วันเกิด'] || '',
+            birthDate: birthDateISO,
             
             // Father information
             fatherTitle: row['คำนำหน้าชื่อบิดา'] || '',
