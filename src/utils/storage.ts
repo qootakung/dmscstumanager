@@ -93,7 +93,14 @@ export const getUsers = async (): Promise<User[]> => {
     }
   }
   
-  return (users || []) as User[];
+  if (!users) {
+    return [];
+  }
+
+  return users.map(({ created_at, ...rest }) => ({
+    ...rest,
+    createdAt: created_at,
+  }));
 };
 
 export const addUser = async (userData: Omit<User, 'id' | 'createdAt'>): Promise<User | null> => {
@@ -102,7 +109,14 @@ export const addUser = async (userData: Omit<User, 'id' | 'createdAt'>): Promise
     console.error('Error adding user:', error);
     return null;
   }
-  return data as User;
+  if (!data) {
+    return null;
+  }
+  const { created_at, ...rest } = data;
+  return {
+    ...rest,
+    createdAt: created_at,
+  };
 };
 
 export const getCurrentUser = (): User | null => {
@@ -134,7 +148,11 @@ export const login = async (username: string, password: string): Promise<User | 
     return null;
   }
 
-  const user = data as User;
+  const { created_at, ...rest } = data;
+  const user = {
+    ...rest,
+    createdAt: created_at
+  };
   setCurrentUser(user);
   return user;
 };
