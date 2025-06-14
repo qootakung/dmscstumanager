@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -128,15 +129,28 @@ const TeacherManagement: React.FC = () => {
     if (!file) return;
 
     try {
-      const importedTeachers = await importTeachersFromExcel(file);
+      const { data: importedTeachers, errors } = await importTeachersFromExcel(file);
+
+      if (errors.length > 0) {
+        const errorMessages = errors.map(err => `<p>${err.message}</p>`).join('');
+        await Swal.fire({
+          title: 'พบข้อผิดพลาดในไฟล์',
+          html: `ข้อมูลบางส่วนไม่ถูกต้องและถูกข้ามไป:<div class="text-left max-h-40 overflow-y-auto mt-2 p-2 bg-red-50 border border-red-200 rounded">${errorMessages}</div>`,
+          icon: 'warning',
+          confirmButtonText: 'ตกลง'
+        });
+      }
+
       if (importedTeachers.length === 0) {
-        Swal.fire('ไม่พบข้อมูล', 'ไม่พบข้อมูลครูที่ถูกต้องในไฟล์ที่เลือก', 'info');
+        if (errors.length === 0) {
+          Swal.fire('ไม่พบข้อมูล', 'ไม่พบข้อมูลครูที่สามารถนำเข้าได้ในไฟล์', 'info');
+        }
         return;
       }
 
       const result = await Swal.fire({
         title: `นำเข้าข้อมูลครู ${importedTeachers.length} คน?`,
-        text: 'คุณต้องการเพิ่มข้อมูลครูเหล่านี้ในระบบหรือไม่?',
+        text: 'คุณต้องการเพิ่มข้อมูลครูที่ถูกต้องลงในระบบหรือไม่?',
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'ยืนยัน',
@@ -148,12 +162,7 @@ const TeacherManagement: React.FC = () => {
         let errorCount = 0;
         
         for (const teacher of importedTeachers) {
-          const teacherData = {
-            academicYear: '2568',
-            position: 'ครูผู้ช่วย',
-            ...teacher,
-          };
-          const added = await addTeacher(teacherData as Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>);
+          const added = await addTeacher(teacher);
           if (added) {
             successCount++;
           } else {
