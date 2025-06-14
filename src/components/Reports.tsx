@@ -11,7 +11,7 @@ import { createRoot } from 'react-dom/client';
 import StudentReportPrintable from './student/StudentReportPrintable';
 import ReportOptionsForm from './student/ReportOptionsForm';
 import ReportPreview from './student/ReportPreview';
-import { sortGrades } from '@/utils/studentReportUtils';
+import { sortGrades, getReportColumns } from '@/utils/studentReportUtils';
 
 const Reports: React.FC = () => {
   const [reportOptions, setReportOptions] = useState<ReportOptions>({
@@ -151,18 +151,7 @@ const Reports: React.FC = () => {
     if(ws['C5']) ws['C5'].s = summaryStyle;
 
     // Table Columns
-    const baseColumns = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ - นามสกุล'];
-    const additionalColumns = [];
-    if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
-    if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
-    if (reportOptions.additionalFields.signature) additionalColumns.push('ลายเซ็น');
-    if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
-    if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลาเข้า');
-    if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลาออก');
-    if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
-    const customColumns = Array.from({ length: reportOptions.customColumns || 0 }, () => '');
-    const noteColumn = reportOptions.additionalFields.note ? ['หมายเหตุ'] : [];
-    const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
+    const allColumns = getReportColumns(reportOptions);
 
     // Table Header
     const tableHeaderRow = 7;
