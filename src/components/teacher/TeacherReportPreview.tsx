@@ -2,17 +2,20 @@
 import React from 'react';
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
+import { cn } from '@/lib/utils';
 
 interface TeacherReportPreviewProps {
   reportOptions: TeacherReportOptions;
   teachers: Teacher[];
   formatThaiDate: (dateString: string) => string;
+  className?: string;
 }
 
 const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   reportOptions,
   teachers,
   formatThaiDate,
+  className,
 }) => {
   if (!reportOptions.academicYear) return null;
 
@@ -65,7 +68,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
 
   return (
-    <div className="mt-6 border rounded-lg p-4 bg-white print:border-none print:shadow-none print:p-0 print:m-0">
+    <div className={cn("mt-6 border rounded-lg p-4 bg-white print:border-none print:shadow-none print:p-0 print:m-0", className)}>
       <div className="text-center mb-4 font-sarabun">
         <h3 className="text-lg font-bold">
           {reportOptions.reportType === '1' 

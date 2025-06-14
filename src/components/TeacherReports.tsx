@@ -10,6 +10,7 @@ import { generateTeacherExcel, formatThaiDate } from '@/utils/teacherReportExcel
 import TeacherReportForm from '@/components/teacher/TeacherReportForm';
 import TeacherReportPreview from '@/components/teacher/TeacherReportPreview';
 import { toast } from "@/components/ui/use-toast";
+import { printTeacherReport } from '@/utils/teacherReportPrint';
 
 const TeacherReports: React.FC = () => {
   const [reportOptions, setReportOptions] = useState<TeacherReportOptions>({
@@ -71,7 +72,7 @@ const TeacherReports: React.FC = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    printTeacherReport(teachers, reportOptions);
   };
 
   return (
