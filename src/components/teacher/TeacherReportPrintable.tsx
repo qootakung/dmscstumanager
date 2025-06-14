@@ -18,12 +18,22 @@ const TeacherReportPrintable: React.FC<TeacherReportPrintableProps> = ({ teacher
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
+        @media print {
+          table, th, td {
+            border: 1px solid #d1d5db !important; /* Tailwind gray-300 */
+            border-collapse: collapse !important;
+          }
+          th {
+            background-color: #f3f4f6 !important; /* Tailwind gray-100 */
+          }
+        }
       `}</style>
       <TeacherReportPreview
         reportOptions={reportOptions}
         teachers={teachers}
         formatThaiDate={formatThaiDate}
         className="!m-0 !p-0 !border-none !shadow-none"
+        showTotal={false}
       />
     </div>
   );

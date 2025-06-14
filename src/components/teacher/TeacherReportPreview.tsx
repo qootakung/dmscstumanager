@@ -9,6 +9,7 @@ interface TeacherReportPreviewProps {
   teachers: Teacher[];
   formatThaiDate: (dateString: string) => string;
   className?: string;
+  showTotal?: boolean;
 }
 
 const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
@@ -16,6 +17,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   teachers,
   formatThaiDate,
   className,
+  showTotal = true,
 }) => {
   if (!reportOptions.academicYear) return null;
 
@@ -70,7 +72,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   return (
     <div className={cn("mt-6 border rounded-lg p-4 bg-white print:border-none print:shadow-none print:p-0 print:m-0", className)}>
       <div className="text-center mb-4 font-sarabun">
-        <h3 className="text-lg font-bold">
+        <h3 className="text-base font-bold">
           {reportOptions.reportType === '1' 
             ? 'รายชื่อข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล' 
             : 'แบบลงทะเบียนการประชุมข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล'
@@ -155,9 +157,11 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
         </table>
       </div>
       
-      <p className="text-sm text-gray-600 mt-2 print:hidden">
-        รวมทั้งหมด {filteredTeachers.length} รายการ
-      </p>
+      {showTotal && (
+        <p className="text-sm text-gray-600 mt-2 print:hidden">
+          รวมทั้งหมด {filteredTeachers.length} รายการ
+        </p>
+      )}
     </div>
   );
 };
