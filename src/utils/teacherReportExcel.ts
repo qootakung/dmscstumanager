@@ -70,8 +70,18 @@ export const generateTeacherExcel = (
   if (reportOptions.additionalFields.major) additionalColumns.push('วิชาเอก');
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
+  if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
+  if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
+  if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
+  
   const customColumns = Array.from({ length: reportOptions.customColumns || 0 }, () => '');
-  const allColumns = [...baseColumns, ...additionalColumns, ...customColumns];
+  
+  const noteColumn: string[] = [];
+  if (reportOptions.additionalFields.note) {
+    noteColumn.push('หมายเหตุ');
+  }
+
+  const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
 
   // Table Header
   const tableStartRow = headerContent.length + 2;
@@ -97,7 +107,14 @@ export const generateTeacherExcel = (
     if (reportOptions.additionalFields.major) row.push(teacher.majorSubject || '');
     if (reportOptions.additionalFields.phone) row.push(teacher.phone || '');
     if (reportOptions.additionalFields.lineId) row.push(teacher.lineId || '');
+    if (reportOptions.additionalFields.signature) row.push('');
+    if (reportOptions.additionalFields.timeIn) row.push('');
+    if (reportOptions.additionalFields.timeOut) row.push('');
+    
     for (let i = 0; i < (reportOptions.customColumns || 0); i++) { row.push(''); }
+
+    if (reportOptions.additionalFields.note) { row.push(''); }
+
     return row;
   });
   
@@ -137,7 +154,14 @@ export const generateTeacherExcel = (
   if (reportOptions.additionalFields.major) colWidths.push({ wch: 20 });
   if (reportOptions.additionalFields.phone) colWidths.push({ wch: 15 });
   if (reportOptions.additionalFields.lineId) colWidths.push({ wch: 15 });
+  if (reportOptions.additionalFields.signature) colWidths.push({ wch: 20 });
+  if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
+  if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
+
   customColumns.forEach(() => colWidths.push({ wch: 20 }));
+
+  if (reportOptions.additionalFields.note) colWidths.push({ wch: 25 });
+  
   ws['!cols'] = colWidths;
 
   // Row heights

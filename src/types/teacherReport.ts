@@ -13,6 +13,10 @@ export interface TeacherReportOptions {
     phone: boolean;
     lineId: boolean;
     appointmentDate: boolean;
+    signature: boolean;
+    timeIn: boolean;
+    timeOut: boolean;
+    note: boolean;
   };
   customColumns: number;
   showDate: boolean;

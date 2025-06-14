@@ -170,6 +170,38 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
             />
             <Label htmlFor="lineId">ID Line</Label>
           </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="signature"
+              checked={reportOptions.additionalFields.signature}
+              onCheckedChange={(checked) => onAdditionalFieldChange('signature', Boolean(checked))}
+            />
+            <Label htmlFor="signature">ลายมือชื่อ</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="timeIn"
+              checked={reportOptions.additionalFields.timeIn}
+              onCheckedChange={(checked) => onAdditionalFieldChange('timeIn', Boolean(checked))}
+            />
+            <Label htmlFor="timeIn">เวลามา</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="timeOut"
+              checked={reportOptions.additionalFields.timeOut}
+              onCheckedChange={(checked) => onAdditionalFieldChange('timeOut', Boolean(checked))}
+            />
+            <Label htmlFor="timeOut">เวลากลับ</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="note"
+              checked={reportOptions.additionalFields.note}
+              onCheckedChange={(checked) => onAdditionalFieldChange('note', Boolean(checked))}
+            />
+            <Label htmlFor="note">หมายเหตุ</Label>
+          </div>
         </div>
       </div>
 

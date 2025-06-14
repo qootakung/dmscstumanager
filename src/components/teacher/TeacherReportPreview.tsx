@@ -44,6 +44,9 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   if (reportOptions.additionalFields.major) additionalColumns.push('วิชาเอก');
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
+  if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
+  if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
+  if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
   // เพิ่มคอลัมน์ว่างตามจำนวนที่ระบุ
   const customColumns = [];
@@ -53,7 +56,13 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
     }
   }
 
-  const allColumns = [...baseColumns, ...additionalColumns, ...customColumns];
+  // เพิ่มคอลัมน์หมายเหตุท้ายสุด
+  const noteColumn = [];
+  if (reportOptions.additionalFields.note) {
+    noteColumn.push('หมายเหตุ');
+  }
+
+  const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
 
   return (
     <div className="mt-6 border rounded-lg p-4 bg-white print:border-none print:shadow-none print:p-0 print:m-0">
@@ -118,11 +127,25 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
                 {reportOptions.additionalFields.lineId && (
                   <td className="border border-gray-300 px-2 py-1 text-center">{teacher.lineId}</td>
                 )}
+                {reportOptions.additionalFields.signature && (
+                  <td className="border border-gray-300 px-2 py-1"></td>
+                )}
+                {reportOptions.additionalFields.timeIn && (
+                  <td className="border border-gray-300 px-2 py-1"></td>
+                )}
+                {reportOptions.additionalFields.timeOut && (
+                  <td className="border border-gray-300 px-2 py-1"></td>
+                )}
                 
                 {/* Custom empty columns */}
                 {customColumns.map((_, colIndex) => (
                   <td key={`custom-${colIndex}`} className="border border-gray-300 px-2 py-1"></td>
                 ))}
+
+                {/* Note column */}
+                {reportOptions.additionalFields.note && (
+                  <td className="border border-gray-300 px-2 py-1"></td>
+                )}
               </tr>
             ))}
           </tbody>
