@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Download } from 'lucide-react';
 import { getStudents } from '@/utils/storage';
 import type { Student, ReportOptions } from '@/types/student';
@@ -69,6 +69,14 @@ const Reports: React.FC = () => {
     if (reportOptions.classLevel !== 'all') {
       filtered = filtered.filter(student => student.grade === reportOptions.classLevel);
     }
+    
+    // Sort by studentId (รหัสนักเรียน) from smallest to largest
+    filtered.sort((a, b) => {
+      const aId = parseInt(a.studentId) || 0;
+      const bId = parseInt(b.studentId) || 0;
+      return aId - bId;
+    });
+    
     return filtered;
   };
 
@@ -111,14 +119,14 @@ const Reports: React.FC = () => {
         <div className="text-center mb-4 font-sarabun">
           <h3 className="text-lg font-bold">
             {reportOptions.reportType === '1' 
-              ? 'รายชื่อนักเรียน' 
-              : 'แบบลงทะเบียนการประชุมนักเรียน'
+              ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' 
+              : 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'
             }
           </h3>
+          <p className="text-sm">ปีการศึกษา {reportOptions.academicYear}</p>
           <p className="text-sm">
             {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`}
           </p>
-          <p className="text-sm">ปีการศึกษา {reportOptions.academicYear}</p>
         </div>
         
         <div className="overflow-x-auto">
@@ -183,6 +191,17 @@ const Reports: React.FC = () => {
   const generateExcel = () => {
     const filteredStudents = getFilteredStudents();
 
+    // สร้างหัวเรื่อง
+    const headerData = [
+      [reportOptions.reportType === '1' 
+        ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' 
+        : 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'
+      ],
+      [`ปีการศึกษา ${reportOptions.academicYear}`],
+      [reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`],
+      []
+    ];
+
     // สร้างคอลัมน์พื้นฐาน
     const baseColumns = [
       'ลำดับที่',
@@ -211,50 +230,40 @@ const Reports: React.FC = () => {
 
     const allColumns = [...baseColumns, ...additionalColumns, ...customColumns];
 
-    const data = filteredStudents.map((student, index) => {
-      const row: any = {
-        [allColumns[0]]: index + 1,
-        [allColumns[1]]: student.studentId,
-        [allColumns[2]]: `${student.firstNameTh} ${student.lastNameTh}`,
-        [allColumns[3]]: student.gender === 'ชาย' ? 'ช' : 'ญ',
-      };
+    // สร้างข้อมูลสำหรับ Excel
+    const excelData = [
+      ...headerData,
+      allColumns,
+      ...filteredStudents.map((student, index) => {
+        const row = [
+          index + 1,
+          student.studentId,
+          `${student.firstNameTh} ${student.lastNameTh}`,
+          student.gender === 'ชาย' ? 'ช' : 'ญ'
+        ];
 
-      let columnIndex = 4;
-      if (reportOptions.additionalFields.citizenId) {
-        row[allColumns[columnIndex++]] = student.citizenId;
-      }
-      if (reportOptions.additionalFields.signature) {
-        row[allColumns[columnIndex++]] = '';
-      }
-      if (reportOptions.additionalFields.guardianSignature) {
-        row[allColumns[columnIndex++]] = '';
-      }
-      if (reportOptions.additionalFields.timeIn) {
-        row[allColumns[columnIndex++]] = '';
-      }
-      if (reportOptions.additionalFields.timeOut) {
-        row[allColumns[columnIndex++]] = '';
-      }
-      if (reportOptions.additionalFields.phone) {
-        row[allColumns[columnIndex++]] = student.guardianPhone;
-      }
-      if (reportOptions.additionalFields.note) {
-        row[allColumns[columnIndex++]] = '';
-      }
+        if (reportOptions.additionalFields.citizenId) row.push(student.citizenId);
+        if (reportOptions.additionalFields.signature) row.push('');
+        if (reportOptions.additionalFields.guardianSignature) row.push('');
+        if (reportOptions.additionalFields.timeIn) row.push('');
+        if (reportOptions.additionalFields.timeOut) row.push('');
+        if (reportOptions.additionalFields.phone) row.push(student.guardianPhone);
+        if (reportOptions.additionalFields.note) row.push('');
 
-      for (let i = 0; i < reportOptions.customColumns; i++) {
-        row[allColumns[columnIndex++]] = '';
-      }
+        for (let i = 0; i < reportOptions.customColumns; i++) {
+          row.push('');
+        }
 
-      return row;
-    });
+        return row;
+      })
+    ];
 
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data, { header: allColumns });
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
     XLSX.utils.book_append_sheet(wb, ws, 'รายงานข้อมูลนักเรียน');
     const wbbuf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([new Uint8Array(wbbuf)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-    saveAs(blob, `report-${Date.now()}.xlsx`);
+    saveAs(blob, `student-report-${Date.now()}.xlsx`);
     toast({
       title: "ดาวน์โหลดรายงานสำเร็จ!",
       description: "ไฟล์ Excel กำลังถูกดาวน์โหลด...",
@@ -288,15 +297,15 @@ const Reports: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">ทุกระดับชั้น</SelectItem>
-                <SelectItem value="1">อนุบาล 1</SelectItem>
-                <SelectItem value="2">อนุบาล 2</SelectItem>
-                <SelectItem value="3">อนุบาล 3</SelectItem>
-                <SelectItem value="1">ประถมศึกษาปีที่ 1</SelectItem>
-                <SelectItem value="2">ประถมศึกษาปีที่ 2</SelectItem>
-                <SelectItem value="3">ประถมศึกษาปีที่ 3</SelectItem>
-                <SelectItem value="4">ประถมศึกษาปีที่ 4</SelectItem>
-                <SelectItem value="5">ประถมศึกษาปีที่ 5</SelectItem>
-                <SelectItem value="6">ประถมศึกษาปีที่ 6</SelectItem>
+                <SelectItem value="อนุบาล 1">อนุบาล 1</SelectItem>
+                <SelectItem value="อนุบาล 2">อนุบาล 2</SelectItem>
+                <SelectItem value="อนุบาล 3">อนุบาล 3</SelectItem>
+                <SelectItem value="ประถมศึกษาปีที่ 1">ประถมศึกษาปีที่ 1</SelectItem>
+                <SelectItem value="ประถมศึกษาปีที่ 2">ประถมศึกษาปีที่ 2</SelectItem>
+                <SelectItem value="ประถมศึกษาปีที่ 3">ประถมศึกษาปีที่ 3</SelectItem>
+                <SelectItem value="ประถมศึกษาปีที่ 4">ประถมศึกษาปีที่ 4</SelectItem>
+                <SelectItem value="ประถมศึกษาปีที่ 5">ประถมศึกษาปีที่ 5</SelectItem>
+                <SelectItem value="ประถมศึกษาปีที่ 6">ประถมศึกษาปีที่ 6</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -318,73 +327,75 @@ const Reports: React.FC = () => {
         <div className="space-y-2">
           <Label>คอลัมน์เพิ่มเติม</Label>
           <div className="flex flex-wrap gap-4">
-            <div>
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="citizenId"
                 checked={reportOptions.additionalFields.citizenId}
-                onCheckedChange={(checked) => handleAdditionalFieldChange('citizenId', checked!)}
+                onCheckedChange={(checked) => handleAdditionalFieldChange('citizenId', Boolean(checked))}
               />
-              <Label htmlFor="citizenId" className="ml-2">เลขบัตรประจำตัวประชาชน</Label>
+              <Label htmlFor="citizenId">เลขบัตรประจำตัวประชาชน</Label>
             </div>
-            <div>
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="signature"
                 checked={reportOptions.additionalFields.signature}
-                onCheckedChange={(checked) => handleAdditionalFieldChange('signature', checked!)}
+                onCheckedChange={(checked) => handleAdditionalFieldChange('signature', Boolean(checked))}
               />
-              <Label htmlFor="signature" className="ml-2">ลายเซ็น</Label>
+              <Label htmlFor="signature">ลายเซ็น</Label>
             </div>
-            <div>
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="guardianSignature"
                 checked={reportOptions.additionalFields.guardianSignature}
-                onCheckedChange={(checked) => handleAdditionalFieldChange('guardianSignature', checked!)}
+                onCheckedChange={(checked) => handleAdditionalFieldChange('guardianSignature', Boolean(checked))}
               />
-              <Label htmlFor="guardianSignature" className="ml-2">ลายเซ็นผู้ปกครอง</Label>
+              <Label htmlFor="guardianSignature">ลายเซ็นผู้ปกครอง</Label>
             </div>
-            <div>
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="timeIn"
                 checked={reportOptions.additionalFields.timeIn}
-                onCheckedChange={(checked) => handleAdditionalFieldChange('timeIn', checked!)}
+                onCheckedChange={(checked) => handleAdditionalFieldChange('timeIn', Boolean(checked))}
               />
-              <Label htmlFor="timeIn" className="ml-2">เวลาเข้า</Label>
+              <Label htmlFor="timeIn">เวลาเข้า</Label>
             </div>
-            <div>
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="timeOut"
                 checked={reportOptions.additionalFields.timeOut}
-                onCheckedChange={(checked) => handleAdditionalFieldChange('timeOut', checked!)}
+                onCheckedChange={(checked) => handleAdditionalFieldChange('timeOut', Boolean(checked))}
               />
-              <Label htmlFor="timeOut" className="ml-2">เวลาออก</Label>
+              <Label htmlFor="timeOut">เวลาออก</Label>
             </div>
-            <div>
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="phone"
                 checked={reportOptions.additionalFields.phone}
-                onCheckedChange={(checked) => handleAdditionalFieldChange('phone', checked!)}
+                onCheckedChange={(checked) => handleAdditionalFieldChange('phone', Boolean(checked))}
               />
-              <Label htmlFor="phone" className="ml-2">เบอร์โทร</Label>
+              <Label htmlFor="phone">เบอร์โทร</Label>
             </div>
-            <div>
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="note"
                 checked={reportOptions.additionalFields.note}
-                onCheckedChange={(checked) => handleAdditionalFieldChange('note', checked!)}
+                onCheckedChange={(checked) => handleAdditionalFieldChange('note', Boolean(checked))}
               />
-              <Label htmlFor="note" className="ml-2">หมายเหตุ</Label>
+              <Label htmlFor="note">หมายเหตุ</Label>
             </div>
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="customColumns">จำนวนคอลัมน์ว่างที่ต้องการเพิ่ม</Label>
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="customColumns">จำนวนคอลัมน์เพิ่มเติม:</Label>
           <Input
             type="number"
             id="customColumns"
             value={reportOptions.customColumns?.toString() || '0'}
-            onChange={(e) => handleOptionChange('customColumns', parseInt(e.target.value))}
+            onChange={(e) => handleOptionChange('customColumns', parseInt(e.target.value) || 0)}
             className="w-24"
+            min="0"
+            max="10"
           />
         </div>
 
@@ -392,7 +403,7 @@ const Reports: React.FC = () => {
 
         <Button onClick={generateExcel} className="bg-green-500 text-white hover:bg-green-600 font-sarabun">
           <Download className="h-4 w-4 mr-2" />
-          สร้าง Excel
+          ส่งออก Excel
         </Button>
       </CardContent>
     </Card>
