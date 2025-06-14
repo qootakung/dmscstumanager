@@ -1,7 +1,10 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Download, Upload } from 'lucide-react';
 import { getTeachers, addTeacher, updateTeacher, deleteTeacher } from '@/utils/teacherStorage';
+import { downloadTeacherTemplate, importTeachersFromExcel } from '@/utils/teacherExcel';
 import type { Teacher } from '@/types/teacher';
 import Swal from 'sweetalert2';
 import TeacherForm from './teacher/TeacherForm';
@@ -16,6 +19,7 @@ const TeacherManagement: React.FC = () => {
     academicYear: '2568',
     position: 'ครูผู้ช่วย'
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadTeachers = async () => {
     const teacherData = await getTeachers();
@@ -119,6 +123,62 @@ const TeacherManagement: React.FC = () => {
     setIsEditing(false);
   };
 
+  const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const importedTeachers = await importTeachersFromExcel(file);
+      if (importedTeachers.length === 0) {
+        Swal.fire('ไม่พบข้อมูล', 'ไม่พบข้อมูลครูที่ถูกต้องในไฟล์ที่เลือก', 'info');
+        return;
+      }
+
+      const result = await Swal.fire({
+        title: `นำเข้าข้อมูลครู ${importedTeachers.length} คน?`,
+        text: 'คุณต้องการเพิ่มข้อมูลครูเหล่านี้ในระบบหรือไม่?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+      });
+
+      if (result.isConfirmed) {
+        let successCount = 0;
+        let errorCount = 0;
+        
+        for (const teacher of importedTeachers) {
+          const teacherData = {
+            academicYear: '2568',
+            position: 'ครูผู้ช่วย',
+            ...teacher,
+          };
+          const added = await addTeacher(teacherData as Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>);
+          if (added) {
+            successCount++;
+          } else {
+            errorCount++;
+          }
+        }
+
+        await Swal.fire(
+          'นำเข้าสำเร็จ!',
+          `เพิ่มข้อมูลครูสำเร็จ ${successCount} คน, ผิดพลาด ${errorCount} คน`,
+          'success'
+        );
+        await loadTeachers();
+        setActiveTab('list');
+      }
+    } catch (error) {
+      Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอ่านไฟล์ Excel ได้', 'error');
+      console.error(error);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -129,6 +189,29 @@ const TeacherManagement: React.FC = () => {
           เพิ่ม แก้ไข และจัดการข้อมูลครูทั้งหมด
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">นำเข้าข้อมูลครู</CardTitle>
+        </CardHeader>
+        <CardContent className="flex gap-4">
+          <Button onClick={downloadTeacherTemplate} variant="outline" className="font-sarabun">
+            <Download className="mr-2 h-4 w-4" />
+            ดาวน์โหลดไฟล์ตัวอย่าง
+          </Button>
+          <Button onClick={() => fileInputRef.current?.click()} className="font-sarabun">
+            <Upload className="mr-2 h-4 w-4" />
+            นำเข้าจาก Excel
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileImport}
+            className="hidden"
+            accept=".xlsx, .xls"
+          />
+        </CardContent>
+      </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">

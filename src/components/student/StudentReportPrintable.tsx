@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { sortGrades, getReportColumns } from '@/utils/studentReportUtils';
@@ -37,10 +38,10 @@ const ReportPage: React.FC<{ students: Student[], reportOptions: ReportOptions, 
               {reportOptions.additionalFields.timeIn && <td className="border border-gray-300 px-2 py-1"></td>}
               {reportOptions.additionalFields.timeOut && <td className="border border-gray-300 px-2 py-1"></td>}
               {reportOptions.additionalFields.phone && <td className="border border-gray-300 px-2 py-1 text-center">{student.guardianPhone}</td>}
-              {reportOptions.additionalFields.note && <td className="border border-gray-300 px-2 py-1"></td>}
               {Array.from({ length: reportOptions.customColumns || 0 }).map((_, colIndex) => (
                 <td key={`custom-${colIndex}`} className="border border-gray-300 px-2 py-1"></td>
               ))}
+              {reportOptions.additionalFields.note && <td className="border border-gray-300 px-2 py-1"></td>}
             </tr>
           ))}
         </tbody>

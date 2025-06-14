@@ -1,3 +1,4 @@
+
 import type { ReportOptions } from '@/types/student';
 
 export const gradeOrder = [
@@ -20,7 +21,6 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลาเข้า');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลาออก');
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
-  if (reportOptions.additionalFields.note) additionalColumns.push('หมายเหตุ');
 
   const customColumns: string[] = [];
   if (reportOptions.customColumns && reportOptions.customColumns > 0) {
@@ -29,5 +29,10 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
     }
   }
 
-  return [...baseColumns, ...additionalColumns, ...customColumns];
+  const noteColumn: string[] = [];
+  if (reportOptions.additionalFields.note) {
+    noteColumn.push('หมายเหตุ');
+  }
+
+  return [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
 };

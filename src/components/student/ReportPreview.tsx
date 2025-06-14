@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns } from '@/utils/studentReportUtils';
@@ -67,14 +68,16 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
                 {reportOptions.additionalFields.phone && (
                   <td className="border border-gray-300 px-2 py-1 text-center">{student.guardianPhone}</td>
                 )}
-                {reportOptions.additionalFields.note && (
-                  <td className="border border-gray-300 px-2 py-1"></td>
-                )}
 
                 {/* Custom empty columns */}
                 {Array.from({ length: reportOptions.customColumns || 0 }).map((_, colIndex) => (
                   <td key={`custom-${colIndex}`} className="border border-gray-300 px-2 py-1"></td>
                 ))}
+
+                {/* Note column at the end */}
+                {reportOptions.additionalFields.note && (
+                  <td className="border border-gray-300 px-2 py-1"></td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -144,7 +144,6 @@ const Reports: React.FC = () => {
     if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลาเข้า');
     if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลาออก');
     if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
-    if (reportOptions.additionalFields.note) additionalColumns.push('หมายเหตุ');
 
     // เพิ่มคอลัมน์ว่างตามจำนวนที่ระบุ
     const customColumns = [];
@@ -153,8 +152,13 @@ const Reports: React.FC = () => {
         customColumns.push('');
       }
     }
+    
+    const noteColumn = [];
+    if (reportOptions.additionalFields.note) {
+      noteColumn.push('หมายเหตุ');
+    }
 
-    const allColumns = [...baseColumns, ...additionalColumns, ...customColumns];
+    const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
 
     // สร้างข้อมูลสำหรับ Excel
     const excelData = [
@@ -174,16 +178,17 @@ const Reports: React.FC = () => {
         if (reportOptions.additionalFields.timeIn) row.push('');
         if (reportOptions.additionalFields.timeOut) row.push('');
         if (reportOptions.additionalFields.phone) row.push(student.guardianPhone);
-        if (reportOptions.additionalFields.note) row.push('');
 
         for (let i = 0; i < (reportOptions.customColumns || 0); i++) {
           row.push('');
         }
+        
+        if (reportOptions.additionalFields.note) row.push('');
 
         return row;
       })
     ];
-
+    
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(excelData);
     XLSX.utils.book_append_sheet(wb, ws, 'รายงานข้อมูลนักเรียน');
