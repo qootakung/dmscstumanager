@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Student Health Records
@@ -21,10 +20,11 @@ export const getStudentHealthRecords = async (filters: { academicYear?: string, 
   return data;
 }
 
-export const getStudentHealthDetails = async (academicYear: string, month?: number) => {
+export const getStudentHealthDetails = async (academicYear: string, month?: number, grade?: string) => {
   const { data, error } = await supabase.rpc('get_student_health_details', {
     p_academic_year: academicYear,
     p_month: month || null,
+    p_grade: grade || null,
   });
 
   if (error) {

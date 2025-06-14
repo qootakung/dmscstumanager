@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/healthStorage';
+import { gradeOptions as allGradeOptionsList } from '@/utils/data';
 import { StudentHealthDetails } from '@/types/student';
 import {
   Table,
@@ -15,18 +17,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { FileExcel, Printer } from 'lucide-react';
+import { exportToExcel } from '@/utils/excel';
+import { printHealthReport } from '@/utils/healthReportPrint';
 
 const HealthDataTable: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  const [selectedGrade, setSelectedGrade] = useState<string>('all');
   const currentAcademicYear = (new Date().getFullYear() + 543).toString();
   
   const [editingCell, setEditingCell] = useState<{ recordId: string; column: 'weight' | 'height' } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
 
   const { data: healthData, isLoading } = useQuery({
-    queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth],
-    queryFn: () => getStudentHealthDetails(currentAcademicYear, selectedMonth === 'all' ? undefined : parseInt(selectedMonth, 10)),
+    queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade],
+    queryFn: () => getStudentHealthDetails(
+      currentAcademicYear,
+      selectedMonth === 'all' ? undefined : parseInt(selectedMonth, 10),
+      selectedGrade === 'all' ? undefined : selectedGrade
+    ),
   });
 
   const updateMutation = useMutation({
@@ -118,21 +129,77 @@ const HealthDataTable: React.FC = () => {
     })),
   ];
 
+  const gradeOptions = [
+    { value: 'all', label: 'ทุกระดับชั้น' },
+    ...allGradeOptionsList.map(g => ({ value: g, label: g })),
+  ];
+
+  const handleExport = () => {
+    if (!healthData || healthData.length === 0) {
+      toast.info('ไม่มีข้อมูลสำหรับส่งออก');
+      return;
+    }
+    const dataForExport = healthData.map(record => ({
+      'รหัสนักเรียน': record.student_code,
+      'ชื่อ-นามสกุล': record.full_name,
+      'อายุ': `${record.age_years} ปี ${record.age_months} เดือน ${record.age_days} วัน`,
+      'น้ำหนัก (กก.)': record.weight_kg,
+      'ส่วนสูง (ซม.)': record.height_cm,
+      'วันที่ชั่ง': new Date(record.measurement_date).toLocaleDateString('th-TH'),
+    }));
+    exportToExcel(dataForExport, `ข้อมูลสุขภาพ-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`);
+  };
+
+  const handlePrint = () => {
+    if (!healthData || healthData.length === 0) {
+        toast.info('ไม่มีข้อมูลสำหรับพิมพ์');
+        return;
+    }
+    printHealthReport(
+        healthData,
+        gradeOptions.find(g => g.value === selectedGrade)?.label || 'ทุกระดับชั้น',
+        monthOptions.find(m => m.value === selectedMonth)?.label || 'ทุกเดือน',
+        currentAcademicYear
+    );
+  };
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>ตารางข้อมูลสุขภาพนักเรียน</CardTitle>
-        <div className="w-[200px]">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth} disabled={isLoading}>
-            <SelectTrigger>
-              <SelectValue placeholder="เลือกเดือน" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <CardHeader>
+        <div className="flex flex-row items-center justify-between">
+            <CardTitle>ตารางข้อมูลสุขภาพนักเรียน</CardTitle>
+            <div className="flex items-center gap-2">
+                <Button onClick={handleExport} variant="outline" disabled={isLoading || !healthData || healthData.length === 0}>
+                    <FileExcel className="mr-2 h-4 w-4" />
+                    ส่งออก Excel
+                </Button>
+                <Button onClick={handlePrint} variant="outline" disabled={isLoading || !healthData || healthData.length === 0}>
+                    <Printer className="mr-2 h-4 w-4" />
+                    พิมพ์รายงาน
+                </Button>
+            </div>
+        </div>
+        <div className="flex items-center gap-2 pt-4">
+            <div className="w-[200px]">
+                <Select value={selectedGrade} onValueChange={setSelectedGrade} disabled={isLoading}>
+                    <SelectTrigger><SelectValue placeholder="เลือกระดับชั้น" /></SelectTrigger>
+                    <SelectContent>
+                    {gradeOptions.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="w-[200px]">
+                <Select value={selectedMonth} onValueChange={setSelectedMonth} disabled={isLoading}>
+                    <SelectTrigger><SelectValue placeholder="เลือกเดือน" /></SelectTrigger>
+                    <SelectContent>
+                    {monthOptions.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -171,7 +238,7 @@ const HealthDataTable: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-24">
-                    ไม่พบข้อมูลสำหรับเดือนที่เลือก
+                    ไม่พบข้อมูลสำหรับตัวกรองที่เลือก
                   </TableCell>
                 </TableRow>
               )}
