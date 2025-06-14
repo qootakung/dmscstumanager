@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
-import { getStudents, upsertStudentHealthRecords } from '@/utils/storage';
+import { getStudents } from '@/utils/studentStorage';
+import { upsertStudentHealthRecords } from '@/utils/healthStorage';
 import { exportStudentsForHealthImport, importHealthDataFromExcel } from '@/utils/excel';
 import Swal from 'sweetalert2';
 

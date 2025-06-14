@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/storage';
+import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/healthStorage';
 import { StudentHealthDetails } from '@/types/student';
 import {
   Table,
