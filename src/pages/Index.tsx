@@ -114,14 +114,14 @@ const Index = () => {
                     <Button 
                       variant="ghost" 
                       onClick={() => setActiveTab('dashboard')}
-                      className={activeTab === 'dashboard' ? 'bg-school-primary text-white' : ''}
+                      className={`px-6 ${activeTab === 'dashboard' ? 'bg-school-primary text-white' : ''}`}
                     >
                       หน้าแรก
                     </Button>
                   </NavigationMenuItem>
                   
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className="data-[state=open]:bg-school-primary data-[state=open]:text-white">
+                    <NavigationMenuTrigger className={`px-6 ${'data-[state=open]:bg-school-primary data-[state=open]:text-white'}`}>
                       จัดการข้อมูล
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
@@ -149,7 +149,7 @@ const Index = () => {
                   </NavigationMenuItem>
 
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className="data-[state=open]:bg-school-primary data-[state=open]:text-white">
+                    <NavigationMenuTrigger className={`px-6 ${'data-[state=open]:bg-school-primary data-[state=open]:text-white'}`}>
                       รายงาน
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
@@ -181,7 +181,7 @@ const Index = () => {
                       <Button 
                         variant="ghost" 
                         onClick={() => setActiveTab('admin')}
-                        className={activeTab === 'admin' ? 'bg-school-primary text-white' : ''}
+                        className={`px-6 ${activeTab === 'admin' ? 'bg-school-primary text-white' : ''}`}
                       >
                         จัดการระบบ
                       </Button>

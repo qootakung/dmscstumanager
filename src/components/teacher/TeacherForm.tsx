@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Save, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { th } from 'date-fns/locale';
 import type { Teacher } from '@/types/teacher';
 import { generateAcademicYears } from '@/utils/storage';
@@ -29,7 +28,30 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
   onCancel
 }) => {
   const academicYears = generateAcademicYears();
-  
+  const [appointmentDateDisplay, setAppointmentDateDisplay] = useState('');
+  const [birthDateDisplay, setBirthDateDisplay] = useState('');
+
+  useEffect(() => {
+    if (formData.appointmentDate) {
+      try {
+        setAppointmentDateDisplay(format(new Date(formData.appointmentDate), 'MM/dd/yyyy'));
+      } catch {
+        setAppointmentDateDisplay(formData.appointmentDate);
+      }
+    } else {
+      setAppointmentDateDisplay('');
+    }
+    if (formData.birthDate) {
+      try {
+        setBirthDateDisplay(format(new Date(formData.birthDate), 'MM/dd/yyyy'));
+      } catch {
+        setBirthDateDisplay(formData.birthDate);
+      }
+    } else {
+      setBirthDateDisplay('');
+    }
+  }, [formData.appointmentDate, formData.birthDate]);
+
   const positionOptions = [
     'ครูผู้ช่วย',
     'ครู ยังไม่มีวิทยฐานะ',
@@ -42,6 +64,28 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
     'ครูอัตราจ้าง',
     'เจ้าหน้าที่ธุรการ'
   ];
+
+  const handleDateInputChange = (field: 'appointmentDate' | 'birthDate', value: string) => {
+    if (field === 'appointmentDate') {
+      setAppointmentDateDisplay(value);
+    } else {
+      setBirthDateDisplay(value);
+    }
+
+    if (!value) {
+      onInputChange(field, '');
+      return;
+    }
+
+    try {
+      const parsedDate = parse(value, 'MM/dd/yyyy', new Date());
+      if (!isNaN(parsedDate.getTime())) {
+        onInputChange(field, format(parsedDate, 'yyyy-MM-dd'));
+      }
+    } catch (e) {
+      // Invalid date format, do nothing to formData yet
+    }
+  };
 
   const handleDateSelect = (field: 'appointmentDate' | 'birthDate', date: Date | undefined) => {
     if (date) {
@@ -151,25 +195,31 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
             {/* วันที่บรรจุ */}
             <div className="space-y-2">
               <Label htmlFor="appointmentDate">วันที่บรรจุ</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.appointmentDate ? format(new Date(formData.appointmentDate), 'PPP', { locale: th }) : "เลือกวันที่บรรจุ"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.appointmentDate ? new Date(formData.appointmentDate) : undefined}
-                    onSelect={(date) => handleDateSelect('appointmentDate', date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="appointmentDate"
+                  type="text"
+                  placeholder="mm/dd/yyyy"
+                  value={appointmentDateDisplay}
+                  onChange={(e) => handleDateInputChange('appointmentDate', e.target.value)}
+                  className="flex-1"
+                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <CalendarIcon className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.appointmentDate ? new Date(formData.appointmentDate) : undefined}
+                      onSelect={(date) => handleDateSelect('appointmentDate', date)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             {/* วุฒิการศึกษา */}
@@ -200,25 +250,31 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
             {/* วัน/เดือน/ปีเกิด */}
             <div className="space-y-2">
               <Label htmlFor="birthDate">วัน/เดือน/ปีเกิด</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.birthDate ? format(new Date(formData.birthDate), 'PPP', { locale: th }) : "เลือกวันเกิด"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.birthDate ? new Date(formData.birthDate) : undefined}
-                    onSelect={(date) => handleDateSelect('birthDate', date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="birthDate"
+                  type="text"
+                  placeholder="mm/dd/yyyy"
+                  value={birthDateDisplay}
+                  onChange={(e) => handleDateInputChange('birthDate', e.target.value)}
+                  className="flex-1"
+                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <CalendarIcon className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.birthDate ? new Date(formData.birthDate) : undefined}
+                      onSelect={(date) => handleDateSelect('birthDate', date)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             {/* วุฒิทางลูกเสือ */}
