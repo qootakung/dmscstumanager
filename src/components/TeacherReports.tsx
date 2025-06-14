@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -175,6 +174,122 @@ const TeacherReports: React.FC = () => {
     } else {
       return 'แบบลงทะเบียนการประชุมข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล';
     }
+  };
+
+  const renderReportPreview = () => {
+    if (!reportOptions.academicYear) return null;
+
+    const filteredTeachers = getFilteredTeachers();
+    const previewTeachers = filteredTeachers.slice(0, 5);
+
+    // สร้างคอลัมน์พื้นฐาน
+    const baseColumns = [
+      'ลำดับที่',
+      'ชื่อ - นามสกุล',
+      'ตำแหน่ง'
+    ];
+
+    // เพิ่มคอลัมน์เพิ่มเติมที่เลือก
+    const additionalColumns = [];
+    if (reportOptions.additionalFields.email) additionalColumns.push('Email');
+    if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
+    if (reportOptions.additionalFields.salary) additionalColumns.push('เงินเดือน');
+    if (reportOptions.additionalFields.birthDate) additionalColumns.push('วัน/เดือน/ปีเกิด');
+    if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่งเพิ่มเติม');
+    if (reportOptions.additionalFields.education) additionalColumns.push('วุฒิการศึกษา');
+    if (reportOptions.additionalFields.majorSubject) additionalColumns.push('วิชาเอก');
+    if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
+    if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
+
+    // เพิ่มคอลัมน์ว่างตามจำนวนที่ระบุ
+    const customColumns = [];
+    if (reportOptions.customColumns && reportOptions.customColumns > 0) {
+      for (let i = 1; i <= reportOptions.customColumns; i++) {
+        customColumns.push('');
+      }
+    }
+
+    const allColumns = [...baseColumns, ...additionalColumns, ...customColumns];
+
+    return (
+      <div className="mt-6 border rounded-lg p-4 bg-white">
+        <div className="text-center mb-4 font-sarabun">
+          <h3 className="text-lg font-bold">
+            {reportOptions.reportType === '1' 
+              ? 'รายชื่อข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล' 
+              : 'แบบลงทะเบียนการประชุมข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล'
+            }
+          </h3>
+          <p className="text-sm">ปีการศึกษา {reportOptions.academicYear}</p>
+          <p className="text-sm">วันที่ {new Date().toLocaleDateString('th-TH', {
+            year: 'numeric',
+            month: 'long', 
+            day: 'numeric'
+          })}</p>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-gray-300 text-sm">
+            <thead>
+              <tr className="bg-gray-100">
+                {allColumns.map((column, index) => (
+                  <th key={index} className="border border-gray-300 px-2 py-1 text-center font-medium">
+                    {column}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {previewTeachers.map((teacher, index) => (
+                <tr key={teacher.id}>
+                  <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
+                  <td className="border border-gray-300 px-2 py-1">{teacher.firstName} {teacher.lastName}</td>
+                  <td className="border border-gray-300 px-2 py-1">{teacher.position}</td>
+                  
+                  {/* Additional fields */}
+                  {reportOptions.additionalFields.email && (
+                    <td className="border border-gray-300 px-2 py-1">{teacher.email || ''}</td>
+                  )}
+                  {reportOptions.additionalFields.citizenId && (
+                    <td className="border border-gray-300 px-2 py-1 text-center">{teacher.citizenId}</td>
+                  )}
+                  {reportOptions.additionalFields.salary && (
+                    <td className="border border-gray-300 px-2 py-1 text-center">{teacher.salary}</td>
+                  )}
+                  {reportOptions.additionalFields.birthDate && (
+                    <td className="border border-gray-300 px-2 py-1 text-center">{new Date(teacher.birthDate).toLocaleDateString('th-TH')}</td>
+                  )}
+                  {reportOptions.additionalFields.position && (
+                    <td className="border border-gray-300 px-2 py-1">{teacher.position}</td>
+                  )}
+                  {reportOptions.additionalFields.education && (
+                    <td className="border border-gray-300 px-2 py-1">{teacher.education}</td>
+                  )}
+                  {reportOptions.additionalFields.majorSubject && (
+                    <td className="border border-gray-300 px-2 py-1">{teacher.majorSubject}</td>
+                  )}
+                  {reportOptions.additionalFields.phone && (
+                    <td className="border border-gray-300 px-2 py-1 text-center">{teacher.phone}</td>
+                  )}
+                  {reportOptions.additionalFields.lineId && (
+                    <td className="border border-gray-300 px-2 py-1">{teacher.lineId}</td>
+                  )}
+                  
+                  {/* Custom empty columns */}
+                  {customColumns.map((_, colIndex) => (
+                    <td key={`custom-${colIndex}`} className="border border-gray-300 px-2 py-1"></td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <p className="text-sm text-gray-600 mt-2">
+          แสดงตัวอย่าง {previewTeachers.length} รายการแรก จากทั้งหมด {filteredTeachers.length} รายการ
+        </p>
+      </div>
+    );
   };
 
   return (
@@ -363,107 +478,7 @@ const TeacherReports: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div id="teacher-report-preview" className="bg-white p-6 border rounded-lg font-sarabun" style={{ fontSize: '16px' }}>
-            <div className="header text-center space-y-2">
-              <h1 className="text-xl font-bold">{getReportTitle()}</h1>
-              <h2 className="text-lg font-bold">
-                ปีการศึกษา {reportOptions.academicYear}
-              </h2>
-              {selectedDate && (
-                <p className="text-base font-bold">
-                  วันที่ {format(selectedDate, 'dd MMMM yyyy', { locale: th })}
-                </p>
-              )}
-            </div>
-
-            <div className="mt-6">
-              <table className="w-full border-collapse border border-gray-400">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-400 p-2 text-center">ที่</th>
-                    <th className="border border-gray-400 p-2 text-center">ชื่อ-นามสกุล</th>
-                    <th className="border border-gray-400 p-2 text-center">ตำแหน่ง</th>
-                    {reportOptions.additionalFields.email && (
-                      <th className="border border-gray-400 p-2 text-center">Email</th>
-                    )}
-                    {reportOptions.additionalFields.citizenId && (
-                      <th className="border border-gray-400 p-2 text-center">เลขบัตรประชาชน</th>
-                    )}
-                    {reportOptions.additionalFields.salary && (
-                      <th className="border border-gray-400 p-2 text-center">เงินเดือน</th>
-                    )}
-                    {reportOptions.additionalFields.birthDate && (
-                      <th className="border border-gray-400 p-2 text-center">วันเกิด</th>
-                    )}
-                    {reportOptions.additionalFields.education && (
-                      <th className="border border-gray-400 p-2 text-center">วุฒิการศึกษา</th>
-                    )}
-                    {reportOptions.additionalFields.majorSubject && (
-                      <th className="border border-gray-400 p-2 text-center">วิชาเอก</th>
-                    )}
-                    {reportOptions.additionalFields.phone && (
-                      <th className="border border-gray-400 p-2 text-center">เบอร์โทร</th>
-                    )}
-                    {reportOptions.additionalFields.lineId && (
-                      <th className="border border-gray-400 p-2 text-center">ID Line</th>
-                    )}
-                    {Array.from({ length: reportOptions.customColumns }, (_, i) => (
-                      <th key={i} className="border border-gray-400 p-2 text-center">คอลัมน์ {i + 1}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTeachers.length > 0 ? (
-                    filteredTeachers.slice(0, 10).map((teacher, index) => (
-                      <tr key={teacher.id}>
-                        <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
-                        <td className="border border-gray-400 p-2">{teacher.firstName} {teacher.lastName}</td>
-                        <td className="border border-gray-400 p-2 text-center">{teacher.position}</td>
-                        {reportOptions.additionalFields.email && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.email || ''}</td>
-                        )}
-                        {reportOptions.additionalFields.citizenId && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.citizenId || ''}</td>
-                        )}
-                        {reportOptions.additionalFields.salary && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.salary || ''}</td>
-                        )}
-                        {reportOptions.additionalFields.birthDate && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.birthDate || ''}</td>
-                        )}
-                        {reportOptions.additionalFields.education && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.education || ''}</td>
-                        )}
-                        {reportOptions.additionalFields.majorSubject && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.majorSubject || ''}</td>
-                        )}
-                        {reportOptions.additionalFields.phone && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.phone || ''}</td>
-                        )}
-                        {reportOptions.additionalFields.lineId && (
-                          <td className="border border-gray-400 p-2 text-center">{teacher.lineId || ''}</td>
-                        )}
-                        {Array.from({ length: reportOptions.customColumns }, (_, i) => (
-                          <td key={i} className="border border-gray-400 p-2 text-center"></td>
-                        ))}
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={3 + Object.values(reportOptions.additionalFields).filter(Boolean).length + reportOptions.customColumns} className="border border-gray-400 p-4 text-center text-gray-500">
-                        ไม่พบข้อมูลครูตามเงื่อนไขที่เลือก
-                      </td>
-                    </tr>
-                  )}
-                  {filteredTeachers.length > 10 && (
-                    <tr>
-                      <td colSpan={3 + Object.values(reportOptions.additionalFields).filter(Boolean).length + reportOptions.customColumns} className="border border-gray-400 p-2 text-center text-gray-500">
-                        ... และอีก {filteredTeachers.length - 10} คน
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            {renderReportPreview()}
           </div>
         </CardContent>
       </Card>

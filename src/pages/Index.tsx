@@ -13,6 +13,14 @@ import AdminPanel from '@/components/AdminPanel';
 import { getCurrentUser, logout } from '@/utils/storage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 const Index = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -95,52 +103,111 @@ const Index = () => {
             </Button>
           </div>
         </div>
+        
+        {/* Navigation Menu */}
+        {isAdmin && (
+          <div className="border-t bg-gray-50">
+            <div className="container mx-auto px-4 py-2">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setActiveTab('dashboard')}
+                      className={activeTab === 'dashboard' ? 'bg-school-primary text-white' : ''}
+                    >
+                      หน้าแรก
+                    </Button>
+                  </NavigationMenuItem>
+                  
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="data-[state=open]:bg-school-primary data-[state=open]:text-white">
+                      จัดการข้อมูล
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid gap-3 p-6 w-48">
+                        <NavigationMenuLink asChild>
+                          <Button 
+                            variant="ghost" 
+                            className="justify-start"
+                            onClick={() => setActiveTab('students')}
+                          >
+                            ข้อมูลนักเรียน
+                          </Button>
+                        </NavigationMenuLink>
+                        <NavigationMenuLink asChild>
+                          <Button 
+                            variant="ghost" 
+                            className="justify-start"
+                            onClick={() => setActiveTab('teachers')}
+                          >
+                            ข้อมูลครู
+                          </Button>
+                        </NavigationMenuLink>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="data-[state=open]:bg-school-primary data-[state=open]:text-white">
+                      รายงาน
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid gap-3 p-6 w-48">
+                        <NavigationMenuLink asChild>
+                          <Button 
+                            variant="ghost" 
+                            className="justify-start"
+                            onClick={() => setActiveTab('student-reports')}
+                          >
+                            รายงานข้อมูลนักเรียน
+                          </Button>
+                        </NavigationMenuLink>
+                        <NavigationMenuLink asChild>
+                          <Button 
+                            variant="ghost" 
+                            className="justify-start"
+                            onClick={() => setActiveTab('teacher-reports')}
+                          >
+                            รายงานข้อมูลครู
+                          </Button>
+                        </NavigationMenuLink>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  {isAdmin && (
+                    <NavigationMenuItem>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setActiveTab('admin')}
+                        className={activeTab === 'admin' ? 'bg-school-primary text-white' : ''}
+                      >
+                        จัดการระบบ
+                      </Button>
+                    </NavigationMenuItem>
+                  )}
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-1'} bg-white shadow-md`}>
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-school-primary data-[state=active]:text-white">หน้าแรก</TabsTrigger>
-            {isAdmin && (
-              <>
-                <TabsTrigger value="students" className="data-[state=active]:bg-school-primary data-[state=active]:text-white">จัดการนักเรียน</TabsTrigger>
-                <TabsTrigger value="teachers" className="data-[state=active]:bg-school-primary data-[state=active]:text-white">จัดการครู</TabsTrigger>
-                <TabsTrigger value="student-reports" className="data-[state=active]:bg-school-primary data-[state=active]:text-white">รายงานนักเรียน</TabsTrigger>
-                <TabsTrigger value="teacher-reports" className="data-[state=active]:bg-school-primary data-[state=active]:text-white">รายงานครู</TabsTrigger>
-                <TabsTrigger value="admin" className="data-[state=active]:bg-school-primary data-[state=active]:text-white">จัดการระบบ</TabsTrigger>
-              </>
-            )}
-          </TabsList>
-
-          <TabsContent value="dashboard" className="mt-6">
-            <Dashboard />
-          </TabsContent>
-
+        <div className="w-full">
+          {activeTab === 'dashboard' && <Dashboard />}
           {isAdmin && (
             <>
-              <TabsContent value="students" className="mt-6">
-                <StudentManagement />
-              </TabsContent>
-
-              <TabsContent value="teachers" className="mt-6">
-                <TeacherManagement />
-              </TabsContent>
-
-              <TabsContent value="student-reports" className="mt-6">
-                <Reports />
-              </TabsContent>
-
-              <TabsContent value="teacher-reports" className="mt-6">
-                <TeacherReports />
-              </TabsContent>
-
-              <TabsContent value="admin" className="mt-6">
-                <AdminPanel />
-              </TabsContent>
+              {activeTab === 'students' && <StudentManagement />}
+              {activeTab === 'teachers' && <TeacherManagement />}
+              {activeTab === 'student-reports' && <Reports />}
+              {activeTab === 'teacher-reports' && <TeacherReports />}
+              {activeTab === 'admin' && <AdminPanel />}
             </>
           )}
-        </Tabs>
+        </div>
       </main>
     </div>
   );

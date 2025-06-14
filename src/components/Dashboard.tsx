@@ -2,20 +2,27 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getStudentStatistics } from '@/utils/storage';
-import { Users, GraduationCap, Calendar, BookOpen, School, UserCheck } from 'lucide-react';
+import { getTeacherStatistics } from '@/utils/teacherStorage';
+import { Users, GraduationCap, Calendar, BookOpen, UserCheck, UserCog } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const Dashboard: React.FC = () => {
-  const stats = getStudentStatistics();
+  const studentStats = getStudentStatistics();
+  const teacherStats = getTeacherStatistics();
   
-  const gradeChartData = Object.entries(stats.byGrade).map(([grade, count]) => ({
+  const gradeChartData = Object.entries(studentStats.byGrade).map(([grade, count]) => ({
     grade,
     students: count,
   }));
 
-  const genderChartData = Object.entries(stats.byGender).map(([gender, count]) => ({
+  const genderChartData = Object.entries(studentStats.byGender).map(([gender, count]) => ({
     name: gender,
     value: count,
+  }));
+
+  const positionChartData = Object.entries(teacherStats.byPosition).map(([position, count]) => ({
+    position: position.length > 15 ? position.substring(0, 15) + '...' : position,
+    teachers: count,
   }));
 
   // สีสันสำหรับกราฟแต่ละระดับชั้น
@@ -28,39 +35,15 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header with School Image */}
-      <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 rounded-xl p-8 text-white overflow-hidden">
-        <div className="absolute top-0 right-0 opacity-20">
-          <School size={200} />
-        </div>
-        <div className="relative z-10 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-white/20 p-4 rounded-full">
-              <GraduationCap size={64} className="text-white" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold mb-2 font-sarabun">
-            ระบบจัดการข้อมูลสารสนเทศ
-          </h1>
-          <h2 className="text-2xl font-medium mb-4 font-sarabun">
-            โรงเรียนบ้านดอนมูล
-          </h2>
-          <div className="inline-flex items-center bg-white/20 px-4 py-2 rounded-full">
-            <BookOpen className="mr-2" size={20} />
-            <span className="font-medium">พัฒนาการศึกษาด้วยเทคโนโลยี</span>
-          </div>
-        </div>
-      </div>
-
       {/* Statistics Cards with vibrant colors */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">นักเรียนทั้งหมด</CardTitle>
             <Users className="h-6 w-6" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.total}</div>
+            <div className="text-3xl font-bold">{studentStats.total}</div>
             <p className="text-blue-100 text-sm">คน</p>
           </CardContent>
         </Card>
@@ -71,7 +54,7 @@ const Dashboard: React.FC = () => {
             <UserCheck className="h-6 w-6" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.byGender.ชาย || 0}</div>
+            <div className="text-3xl font-bold">{studentStats.byGender.ชาย || 0}</div>
             <p className="text-emerald-100 text-sm">ช = ชาย</p>
           </CardContent>
         </Card>
@@ -82,7 +65,7 @@ const Dashboard: React.FC = () => {
             <UserCheck className="h-6 w-6" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.byGender.หญิง || 0}</div>
+            <div className="text-3xl font-bold">{studentStats.byGender.หญิง || 0}</div>
             <p className="text-orange-100 text-sm">ญ = หญิง</p>
           </CardContent>
         </Card>
@@ -93,8 +76,30 @@ const Dashboard: React.FC = () => {
             <Calendar className="h-6 w-6" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.academicYears.length}</div>
+            <div className="text-3xl font-bold">{studentStats.academicYears.length}</div>
             <p className="text-purple-100 text-sm">ปี</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ครูทั้งหมด</CardTitle>
+            <UserCog className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{teacherStats.total}</div>
+            <p className="text-teal-100 text-sm">คน</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-rose-500 to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ปีการศึกษาครู</CardTitle>
+            <GraduationCap className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{teacherStats.academicYears.length}</div>
+            <p className="text-pink-100 text-sm">ปี</p>
           </CardContent>
         </Card>
       </div>
@@ -172,15 +177,51 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
+      {/* Teacher Position Chart */}
+      {teacherStats.total > 0 && (
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-bold">จำนวนครูแยกตามตำแหน่ง</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={positionChartData} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis type="number" stroke="#64748b" fontSize={12} />
+                <YAxis dataKey="position" type="category" stroke="#64748b" fontSize={12} width={120} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1e293b', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                  }} 
+                />
+                <Bar 
+                  dataKey="teachers" 
+                  radius={[0, 6, 6, 0]}
+                  fill="url(#colorGradient)"
+                >
+                  {positionChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={gradeColors[index % gradeColors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Academic Years with enhanced styling */}
-      {stats.academicYears.length > 0 && (
+      {studentStats.academicYears.length > 0 && (
         <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
           <CardHeader className="bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-t-lg">
             <CardTitle className="text-lg font-bold">ปีการศึกษาที่มีข้อมูล</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-3">
-              {stats.academicYears.map((year, index) => (
+              {studentStats.academicYears.map((year, index) => (
                 <span
                   key={year}
                   className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-shadow"
