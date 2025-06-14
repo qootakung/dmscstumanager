@@ -1,10 +1,11 @@
+
 export interface Student {
   id: string;
   academicYear: string;
   citizenId: string;
   studentId: string;
   grade: string;
-  gender: 'ชาย' | 'หญิง';
+  gender: 'ชาย' | 'หญิง' | 'ช' | 'ญ';
   titleTh: string;
   firstNameTh: string;
   lastNameTh: string;
