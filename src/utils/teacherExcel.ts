@@ -1,106 +1,102 @@
 
-import * as XLSX from 'xlsx';
+import * as xlsx from 'xlsx';
 import { saveAs } from 'file-saver';
-import type { Teacher } from '@/types/teacher';
+import type { Teacher, TeacherPosition } from '@/types/teacher';
 
-const teacherHeaders = {
-  academicYear: 'ปีการศึกษา',
-  positionNumber: 'เลขตำแหน่ง',
-  firstName: 'ชื่อ',
-  lastName: 'นามสกุล',
-  position: 'ตำแหน่ง',
-  citizenId: 'เลขบัตรประชาชน',
-  education: 'วุฒิการศึกษา',
-  majorSubject: 'วิชาเอก',
-  birthDate: 'วันเกิด (ปปปป-ดด-วว)',
-  appointmentDate: 'วันบรรจุ (ปปปป-ดด-วว)',
-  salary: 'เงินเดือน',
-  phone: 'เบอร์โทร',
-  lineId: 'LINE ID',
-  email: 'อีเมล',
-  scoutLevel: 'วุฒิทางลูกเสือ',
+const TEACHER_POSITIONS: ReadonlyArray<TeacherPosition> = [
+  'ครูผู้ช่วย', 'ครู ยังไม่มีวิทยฐานะ', 'ครู วิทยฐานะครูชำนาญการ',
+  'ครู วิทยฐานะครูชำนาญการพิเศษ', 'ครู วิทยฐานะครูเชี่ยวชาญ', 'ครู วิทยฐานะครูเชี่ยวชาญพิเศษ',
+  'ผู้อำนวยการโรงเรียน', 'นักการภารโรง', 'ครูอัตราจ้าง', 'เจ้าหน้าที่ธุรการ'
+];
+
+const isTeacherPosition = (value: any): value is TeacherPosition => {
+  return TEACHER_POSITIONS.includes(value);
 };
 
-const headerMap: { [key: string]: keyof Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'> } = Object.entries(teacherHeaders).reduce((acc, [key, value]) => {
-  acc[value] = key as keyof Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>;
-  return acc;
-}, {} as any);
-
-
-export const downloadTeacherTemplate = () => {
-  const ws = XLSX.utils.json_to_sheet([{}], { header: Object.values(teacherHeaders) });
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Teachers');
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'teacher_import_template.xlsx');
-};
-
-const parseDateExcel = (dateValue: any): string => {
-  if (!dateValue) return '';
-
-  if (dateValue instanceof Date) {
-      let year = dateValue.getFullYear();
-      if (year > 2500) { // Correct for Buddhist year
-          year -= 543;
-      }
-      const month = (dateValue.getMonth() + 1).toString().padStart(2, '0');
-      const day = dateValue.getDate().toString().padStart(2, '0');
-      return `${year}-${month}-${day}`;
+const toDateString = (date: any): string => {
+  if (!date) return '';
+  try {
+    const d = xlsx.SSF.parse_date_code(date);
+    const jsDate = new Date(d.y, d.m - 1, d.d, d.H, d.M, d.S);
+    if (isNaN(jsDate.getTime())) {
+      const parsed = new Date(date);
+      if (isNaN(parsed.getTime())) return '';
+      return parsed.toISOString();
+    }
+    return jsDate.toISOString();
+  } catch (e) {
+    return '';
   }
-
-  if (typeof dateValue === 'string') {
-      const parts = dateValue.split(/[/.-]/);
-      if (parts.length === 3) {
-          let day, month, yearStr;
-          if (parts[0].length === 4) { // YYYY-MM-DD
-              [yearStr, month, day] = parts;
-          } else { // DD-MM-YYYY
-              [day, month, yearStr] = parts;
-          }
-          let year = parseInt(yearStr, 10);
-          if (!isNaN(year)) {
-              if (year > 2500) {
-                  year -= 543;
-              }
-              return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-          }
-      }
-  }
-  return '';
 };
 
-export const importTeachersFromExcel = (file: File): Promise<Partial<Teacher>[]> => {
-  return new Promise((resolve, reject) => {
+export const processTeachersFile = (file: File): Promise<{ data: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>[], errors: { row: number, message: string }[] }> => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      try {
-        const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+      const data = new Uint8Array(e.target?.result as ArrayBuffer);
+      const workbook = xlsx.read(data, { type: 'array', cellDates: true });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = xlsx.utils.sheet_to_json(worksheet, { header: 1, raw: true }) as any[][];
 
-        const teachers = jsonData.map((row: any) => {
-          const teacher: Partial<Teacher> = {};
-          for (const excelHeader in headerMap) {
-            if (row[excelHeader] !== undefined) {
-              const teacherField = headerMap[excelHeader];
-              if (teacherField === 'birthDate' || teacherField === 'appointmentDate') {
-                teacher[teacherField] = parseDateExcel(row[excelHeader]);
-              } else {
-                teacher[teacherField] = String(row[excelHeader]);
-              }
-            }
-          }
-          return teacher;
+      const teachers: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>[] = [];
+      const errors: { row: number, message: string }[] = [];
+      
+      for (let i = 1; i < jsonData.length; i++) {
+        const row = jsonData[i];
+        if (!row || row.filter(cell => cell !== null && cell !== undefined && cell !== '').length === 0) continue;
+
+        const position = row[3] ? String(row[3]).trim() : '';
+
+        if (!isTeacherPosition(position)) {
+          errors.push({ row: i + 1, message: `ตำแหน่ง "${position || ''}" ในแถวที่ ${i + 1} ไม่ถูกต้อง` });
+          continue;
+        }
+
+        teachers.push({
+          positionNumber: String(row[0] || ''),
+          firstName: String(row[1] || ''),
+          lastName: String(row[2] || ''),
+          position: position,
+          appointmentDate: toDateString(row[4]),
+          education: String(row[5] || ''),
+          citizenId: String(row[6] || ''),
+          birthDate: toDateString(row[7]),
+          scoutLevel: String(row[8] || ''),
+          majorSubject: String(row[9] || ''),
+          salary: String(row[10] || ''),
+          phone: String(row[11] || ''),
+          lineId: String(row[12] || ''),
+          email: String(row[13] || ''),
+          academicYear: String(row[14] || ''),
         });
-        
-        resolve(teachers.filter(t => t.firstName && t.lastName && t.positionNumber));
-      } catch (error) {
-        console.error("Error parsing teacher excel file:", error);
-        reject(error);
       }
+
+      resolve({ data: teachers, errors });
     };
     reader.readAsArrayBuffer(file);
   });
+};
+
+export const downloadTeacherTemplate = () => {
+    const headers = [
+        'เลขที่ตำแหน่ง', 'ชื่อ', 'นามสกุล', 'ตำแหน่ง', 'วัน/เดือน/ปี ที่บรรจุ (ค.ศ.)',
+        'วุฒิการศึกษา', 'เลขบัตรประชาชน', 'วัน/เดือน/ปี เกิด (ค.ศ.)', 'วุฒิทางลูกเสือ', 'วิชาเอก',
+        'เงินเดือน', 'เบอร์โทร', 'Line ID', 'Email', 'ปีการศึกษา'
+    ];
+    const exampleData = [
+        ['1234', 'สมชาย', 'ใจดี', 'ครูผู้ช่วย', '2023-05-15', 'ปริญญาตรี', '1234567890123', '1990-01-01', 'B.T.C', 'คณิตศาสตร์', '15000', '0812345678', 'somchai.j', 'somchai.j@example.com', '2567']
+    ];
+
+    const wb = xlsx.utils.book_new();
+
+    const ws_data = xlsx.utils.aoa_to_sheet([headers, ...exampleData]);
+    xlsx.utils.book_append_sheet(wb, ws_data, 'ข้อมูลครู');
+
+    const ws_positions = xlsx.utils.aoa_to_sheet([['ตำแหน่งที่ถูกต้อง'], ...TEACHER_POSITIONS.map(p => [p])]);
+    xlsx.utils.book_append_sheet(wb, ws_positions, 'รายชื่อตำแหน่ง');
+    
+    const excelBuffer = xlsx.write(wb, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    saveAs(data, 'template-teacher-import.xlsx');
 };
