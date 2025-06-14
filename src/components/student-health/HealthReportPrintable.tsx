@@ -24,7 +24,7 @@ const HealthReportPrintable: React.FC<HealthReportPrintableProps> = ({ data, gra
             margin: 1.5cm;
           }
           body {
-            font-size: 10pt;
+            font-size: 9pt;
           }
           .p-4 {
              padding: 0 !important;
