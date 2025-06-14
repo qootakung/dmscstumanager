@@ -75,3 +75,14 @@ export interface StudentHealthRecord {
   created_at: string;
   updated_at: string;
 }
+
+export interface StudentHealthDetails {
+  record_id: string;
+  student_record_id: string;
+  student_code: string;
+  full_name: string;
+  age_years: number;
+  weight_kg: number | null;
+  height_cm: number | null;
+  measurement_date: string;
+}

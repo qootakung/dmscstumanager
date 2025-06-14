@@ -2,6 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import HealthImportExport from './student-health/HealthImportExport';
+import HealthDataTable from './student-health/HealthDataTable';
 
 const StudentHealth: React.FC = () => {
   return (
@@ -15,11 +16,15 @@ const StudentHealth: React.FC = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="import-export" className="w-full">
-        <TabsList className="grid w-full grid-cols-1">
+      <Tabs defaultValue="data-table" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="data-table">ข้อมูลสุขภาพนักเรียน</TabsTrigger>
           <TabsTrigger value="import-export">นำเข้า / ส่งออกข้อมูล</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="data-table" className="mt-6">
+          <HealthDataTable />
+        </TabsContent>
         <TabsContent value="import-export" className="mt-6">
           <HealthImportExport />
         </TabsContent>

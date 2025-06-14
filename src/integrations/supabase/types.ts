@@ -241,7 +241,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_student_health_details: {
+        Args: { p_academic_year: string; p_month?: number }
+        Returns: {
+          record_id: string
+          student_record_id: string
+          student_code: string
+          full_name: string
+          age_years: number
+          weight_kg: number
+          height_cm: number
+          measurement_date: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
