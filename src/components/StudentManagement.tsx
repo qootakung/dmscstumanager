@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getStudents, addStudent, updateStudent, deleteStudent } from '@/utils/storage';
@@ -160,7 +159,7 @@ const StudentManagement: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="import" className="mt-6">
-          <StudentImport onImportSuccess={loadStudents} />
+          <StudentImport />
         </TabsContent>
       </Tabs>
     </div>

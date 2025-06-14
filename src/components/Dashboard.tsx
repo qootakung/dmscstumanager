@@ -1,14 +1,50 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getStudentStatistics } from '@/utils/storage';
 import { getTeacherStatistics } from '@/utils/teacherStorage';
 import { Users, GraduationCap, Calendar, BookOpen, UserCheck, UserCog } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Skeleton } from "@/components/ui/skeleton";
+
+type StudentStats = Awaited<ReturnType<typeof getStudentStatistics>>;
+type TeacherStats = Awaited<ReturnType<typeof getTeacherStatistics>>;
 
 const Dashboard: React.FC = () => {
-  const studentStats = getStudentStatistics();
-  const teacherStats = getTeacherStatistics();
+  const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
+  const [teacherStats, setTeacherStats] = useState<TeacherStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const [sStats, tStats] = await Promise.all([
+          getStudentStatistics(),
+          getTeacherStatistics(),
+        ]);
+        setStudentStats(sStats);
+        setTeacherStats(tStats);
+      } catch (error) {
+        console.error("Error fetching dashboard statistics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStatistics();
+  }, []);
+
+  if (loading || !studentStats || !teacherStats) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-[400px]" />
+          <Skeleton className="h-[400px]" />
+        </div>
+      </div>
+    );
+  }
   
   const gradeChartData = Object.entries(studentStats.byGrade).map(([grade, count]) => ({
     grade,
@@ -125,6 +161,12 @@ const Dashboard: React.FC = () => {
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
                   }} 
                 />
+                <defs>
+                  <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.8}/>
+                  </linearGradient>
+                </defs>
                 <Bar 
                   dataKey="students" 
                   radius={[6, 6, 0, 0]}
@@ -185,7 +227,7 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="p-6">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={positionChartData} layout="horizontal">
+              <BarChart data={positionChartData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" stroke="#64748b" fontSize={12} />
                 <YAxis dataKey="position" type="category" stroke="#64748b" fontSize={12} width={120} />
@@ -201,7 +243,6 @@ const Dashboard: React.FC = () => {
                 <Bar 
                   dataKey="teachers" 
                   radius={[0, 6, 6, 0]}
-                  fill="url(#colorGradient)"
                 >
                   {positionChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={gradeColors[index % gradeColors.length]} />

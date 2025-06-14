@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
@@ -41,7 +40,7 @@ const TeacherReports: React.FC = () => {
     fetchTeachers();
   }, []);
   
-  const academicYears = useMemo(() => [...new Set(teachers.map(t => t.academicYear))].sort().reverse(), [teachers]);
+  const academicYears = useMemo(() => [...new Set(teachers.map(t => t.academicYear).filter(Boolean) as string[])].sort().reverse(), [teachers]);
 
   const handleOptionChange = (field: keyof TeacherReportOptions, value: any) => {
     setReportOptions(prev => ({ ...prev, [field]: value }));
