@@ -1,97 +1,26 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
+import type { useForm } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Save, X } from 'lucide-react';
-import { format, parse } from 'date-fns';
-import { th } from 'date-fns/locale';
-import type { Teacher } from '@/types/teacher';
+import { Save, X } from 'lucide-react';
+import { Form } from '@/components/ui/form';
 import { generateAcademicYears } from '@/utils/storage';
+import { positionOptions, type TeacherFormData } from '@/schemas/teacherSchema';
+import { TextInputFormField } from './form-fields/TextInputFormField';
+import { SelectFormField } from './form-fields/SelectFormField';
+import { DatePickerWithInput } from './form-fields/DatePickerWithInput';
+
 
 interface TeacherFormProps {
-  formData: Partial<Teacher>;
+  form: ReturnType<typeof useForm<TeacherFormData>>;
   isEditing: boolean;
-  onInputChange: (field: keyof Teacher, value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (data: TeacherFormData) => void;
   onCancel: () => void;
 }
 
-const TeacherForm: React.FC<TeacherFormProps> = ({
-  formData,
-  isEditing,
-  onInputChange,
-  onSubmit,
-  onCancel
-}) => {
+const TeacherForm: React.FC<TeacherFormProps> = ({ form, isEditing, onSubmit, onCancel }) => {
   const academicYears = generateAcademicYears();
-  const [appointmentDateDisplay, setAppointmentDateDisplay] = useState('');
-  const [birthDateDisplay, setBirthDateDisplay] = useState('');
-
-  useEffect(() => {
-    if (formData.appointmentDate) {
-      try {
-        setAppointmentDateDisplay(format(new Date(formData.appointmentDate), 'MM/dd/yyyy'));
-      } catch {
-        setAppointmentDateDisplay(formData.appointmentDate);
-      }
-    } else {
-      setAppointmentDateDisplay('');
-    }
-    if (formData.birthDate) {
-      try {
-        setBirthDateDisplay(format(new Date(formData.birthDate), 'MM/dd/yyyy'));
-      } catch {
-        setBirthDateDisplay(formData.birthDate);
-      }
-    } else {
-      setBirthDateDisplay('');
-    }
-  }, [formData.appointmentDate, formData.birthDate]);
-
-  const positionOptions = [
-    'ครูผู้ช่วย',
-    'ครู ยังไม่มีวิทยฐานะ',
-    'ครู วิทยฐานะครูชำนาญการ',
-    'ครู วิทยฐานะครูชำนาญการพิเศษ',
-    'ครู วิทยฐานะครูเชี่ยวชาญ',
-    'ครู วิทยฐานะครูเชี่ยวชาญพิเศษ',
-    'ผู้อำนวยการโรงเรียน',
-    'นักการภารโรง',
-    'ครูอัตราจ้าง',
-    'เจ้าหน้าที่ธุรการ'
-  ];
-
-  const handleDateInputChange = (field: 'appointmentDate' | 'birthDate', value: string) => {
-    if (field === 'appointmentDate') {
-      setAppointmentDateDisplay(value);
-    } else {
-      setBirthDateDisplay(value);
-    }
-
-    if (!value) {
-      onInputChange(field, '');
-      return;
-    }
-
-    try {
-      const parsedDate = parse(value, 'MM/dd/yyyy', new Date());
-      if (!isNaN(parsedDate.getTime())) {
-        onInputChange(field, format(parsedDate, 'yyyy-MM-dd'));
-      }
-    } catch (e) {
-      // Invalid date format, do nothing to formData yet
-    }
-  };
-
-  const handleDateSelect = (field: 'appointmentDate' | 'birthDate', date: Date | undefined) => {
-    if (date) {
-      onInputChange(field, format(date, 'yyyy-MM-dd'));
-    }
-  };
 
   const formatPhoneNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
@@ -101,12 +30,12 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
         return !match[2] ? match[1] : `${match[1]} ${match[2]}${match[3] ? ` ${match[3]}` : ''}`;
       }
     }
-    return value;
+    return value.slice(0, 12);
   };
 
-  const handlePhoneChange = (value: string) => {
-    const formatted = formatPhoneNumber(value);
-    onInputChange('phone', formatted);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    form.setValue('phone', formatted, { shouldValidate: true });
   };
 
   return (
@@ -115,252 +44,38 @@ const TeacherForm: React.FC<TeacherFormProps> = ({
         <CardTitle>{isEditing ? 'แก้ไขข้อมูลครู' : 'เพิ่มข้อมูลครูใหม่'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* เลขตำแหน่ง */}
-            <div className="space-y-2">
-              <Label htmlFor="positionNumber">เลขตำแหน่ง *</Label>
-              <Input
-                id="positionNumber"
-                type="text"
-                placeholder="เลขตำแหน่ง"
-                value={formData.positionNumber || ''}
-                onChange={(e) => onInputChange('positionNumber', e.target.value)}
-                required
-              />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TextInputFormField name="positionNumber" label="เลขตำแหน่ง" placeholder="เลขตำแหน่ง" required />
+              <SelectFormField name="academicYear" label="ปีการศึกษา" placeholder="เลือกปีการศึกษา" options={academicYears} />
+              <TextInputFormField name="firstName" label="ชื่อ" placeholder="ชื่อ" required />
+              <TextInputFormField name="lastName" label="นามสกุล" placeholder="นามสกุล" required />
+              <SelectFormField name="position" label="ตำแหน่ง" placeholder="เลือกตำแหน่ง" options={positionOptions} />
+              <DatePickerWithInput name="appointmentDate" label="วันที่บรรจุ" />
+              <TextInputFormField name="education" label="วุฒิการศึกษา" placeholder="วุฒิการศึกษา" />
+              <TextInputFormField name="citizenId" label="เลขบัตรประชาชน" placeholder="เลขบัตรประชาชน 13 หลัก" maxLength={13} />
+              <DatePickerWithInput name="birthDate" label="วัน/เดือน/ปีเกิด" />
+              <TextInputFormField name="scoutLevel" label="วุฒิทางลูกเสือ" placeholder="วุฒิทางลูกเสือ" />
+              <TextInputFormField name="majorSubject" label="วิชาเอก" placeholder="วิชาเอก" />
+              <TextInputFormField name="salary" label="เงินเดือน" placeholder="เงินเดือน" />
+              <TextInputFormField name="phone" label="เบอร์โทร" placeholder="0xx xxx xxxx" onChange={handlePhoneChange} />
+              <TextInputFormField name="lineId" label="ID Line" placeholder="ID Line" />
+              <TextInputFormField name="email" label="Email" type="email" placeholder="อีเมล" />
             </div>
 
-            {/* ปีการศึกษา */}
-            <div className="space-y-2">
-              <Label htmlFor="academicYear">ปีการศึกษา</Label>
-              <Select
-                value={formData.academicYear || ''}
-                onValueChange={(value) => onInputChange('academicYear', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="เลือกปีการศึกษา" />
-                </SelectTrigger>
-                <SelectContent>
-                  {academicYears.map(year => (
-                    <SelectItem key={year} value={year}>{year}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex gap-4 pt-6">
+              <Button type="submit" className="bg-school-primary hover:bg-school-primary/90">
+                <Save className="w-4 h-4 mr-2" />
+                {isEditing ? 'อัปเดตข้อมูล' : 'บันทึกข้อมูล'}
+              </Button>
+              <Button type="button" variant="outline" onClick={onCancel}>
+                <X className="w-4 h-4 mr-2" />
+                ยกเลิก
+              </Button>
             </div>
-
-            {/* ชื่อ */}
-            <div className="space-y-2">
-              <Label htmlFor="firstName">ชื่อ *</Label>
-              <Input
-                id="firstName"
-                type="text"
-                placeholder="ชื่อ"
-                value={formData.firstName || ''}
-                onChange={(e) => onInputChange('firstName', e.target.value)}
-                required
-              />
-            </div>
-
-            {/* นามสกุล */}
-            <div className="space-y-2">
-              <Label htmlFor="lastName">นามสกุล *</Label>
-              <Input
-                id="lastName"
-                type="text"
-                placeholder="นามสกุล"
-                value={formData.lastName || ''}
-                onChange={(e) => onInputChange('lastName', e.target.value)}
-                required
-              />
-            </div>
-
-            {/* ตำแหน่ง */}
-            <div className="space-y-2">
-              <Label htmlFor="position">ตำแหน่ง</Label>
-              <Select
-                value={formData.position || ''}
-                onValueChange={(value) => onInputChange('position', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="เลือกตำแหน่ง" />
-                </SelectTrigger>
-                <SelectContent>
-                  {positionOptions.map(position => (
-                    <SelectItem key={position} value={position}>{position}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* วันที่บรรจุ */}
-            <div className="space-y-2">
-              <Label htmlFor="appointmentDate">วันที่บรรจุ</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="appointmentDate"
-                  type="text"
-                  placeholder="mm/dd/yyyy"
-                  value={appointmentDateDisplay}
-                  onChange={(e) => handleDateInputChange('appointmentDate', e.target.value)}
-                  className="flex-1"
-                />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <CalendarIcon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={formData.appointmentDate ? new Date(formData.appointmentDate) : undefined}
-                      onSelect={(date) => handleDateSelect('appointmentDate', date)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            {/* วุฒิการศึกษา */}
-            <div className="space-y-2">
-              <Label htmlFor="education">วุฒิการศึกษา</Label>
-              <Input
-                id="education"
-                type="text"
-                placeholder="วุฒิการศึกษา"
-                value={formData.education || ''}
-                onChange={(e) => onInputChange('education', e.target.value)}
-              />
-            </div>
-
-            {/* เลขบัตรประชาชน */}
-            <div className="space-y-2">
-              <Label htmlFor="citizenId">เลขบัตรประชาชน</Label>
-              <Input
-                id="citizenId"
-                type="text"
-                placeholder="เลขบัตรประชาชน 13 หลัก"
-                maxLength={13}
-                value={formData.citizenId || ''}
-                onChange={(e) => onInputChange('citizenId', e.target.value)}
-              />
-            </div>
-
-            {/* วัน/เดือน/ปีเกิด */}
-            <div className="space-y-2">
-              <Label htmlFor="birthDate">วัน/เดือน/ปีเกิด</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="birthDate"
-                  type="text"
-                  placeholder="mm/dd/yyyy"
-                  value={birthDateDisplay}
-                  onChange={(e) => handleDateInputChange('birthDate', e.target.value)}
-                  className="flex-1"
-                />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <CalendarIcon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={formData.birthDate ? new Date(formData.birthDate) : undefined}
-                      onSelect={(date) => handleDateSelect('birthDate', date)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            {/* วุฒิทางลูกเสือ */}
-            <div className="space-y-2">
-              <Label htmlFor="scoutLevel">วุฒิทางลูกเสือ</Label>
-              <Input
-                id="scoutLevel"
-                type="text"
-                placeholder="วุฒิทางลูกเสือ"
-                value={formData.scoutLevel || ''}
-                onChange={(e) => onInputChange('scoutLevel', e.target.value)}
-              />
-            </div>
-
-            {/* วิชาเอก */}
-            <div className="space-y-2">
-              <Label htmlFor="majorSubject">วิชาเอก</Label>
-              <Input
-                id="majorSubject"
-                type="text"
-                placeholder="วิชาเอก"
-                value={formData.majorSubject || ''}
-                onChange={(e) => onInputChange('majorSubject', e.target.value)}
-              />
-            </div>
-
-            {/* เงินเดือน */}
-            <div className="space-y-2">
-              <Label htmlFor="salary">เงินเดือน</Label>
-              <Input
-                id="salary"
-                type="text"
-                placeholder="เงินเดือน"
-                value={formData.salary || ''}
-                onChange={(e) => onInputChange('salary', e.target.value)}
-              />
-            </div>
-
-            {/* เบอร์โทร */}
-            <div className="space-y-2">
-              <Label htmlFor="phone">เบอร์โทร</Label>
-              <Input
-                id="phone"
-                type="text"
-                placeholder="0xx xxx xxxx"
-                value={formData.phone || ''}
-                onChange={(e) => handlePhoneChange(e.target.value)}
-              />
-            </div>
-
-            {/* ID Line */}
-            <div className="space-y-2">
-              <Label htmlFor="lineId">ID Line</Label>
-              <Input
-                id="lineId"
-                type="text"
-                placeholder="ID Line"
-                value={formData.lineId || ''}
-                onChange={(e) => onInputChange('lineId', e.target.value)}
-              />
-            </div>
-
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="อีเมล"
-                value={formData.email || ''}
-                onChange={(e) => onInputChange('email', e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 pt-6">
-            <Button type="submit" className="bg-school-primary hover:bg-school-primary/90">
-              <Save className="w-4 h-4 mr-2" />
-              {isEditing ? 'อัปเดตข้อมูล' : 'บันทึกข้อมูล'}
-            </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
-              <X className="w-4 h-4 mr-2" />
-              ยกเลิก
-            </Button>
-          </div>
-        </form>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

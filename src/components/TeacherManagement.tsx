@@ -1,5 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format, isValid } from 'date-fns';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,17 +13,35 @@ import type { Teacher } from '@/types/teacher';
 import Swal from 'sweetalert2';
 import TeacherForm from './teacher/TeacherForm';
 import TeacherList from './teacher/TeacherList';
+import { teacherSchema, type TeacherFormData } from '@/schemas/teacherSchema';
 
 const TeacherManagement: React.FC = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
-  const [formData, setFormData] = useState<Partial<Teacher>>({
-    academicYear: '2568',
-    position: 'ครูผู้ช่วย'
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const form = useForm<TeacherFormData>({
+    resolver: zodResolver(teacherSchema),
+    defaultValues: {
+      academicYear: '2568',
+      position: 'ครูผู้ช่วย',
+      positionNumber: '',
+      firstName: '',
+      lastName: '',
+      education: '',
+      citizenId: '',
+      scoutLevel: '',
+      majorSubject: '',
+      salary: '',
+      phone: '',
+      lineId: '',
+      email: '',
+      appointmentDate: null,
+      birthDate: null,
+    },
+  });
 
   const loadTeachers = async () => {
     const teacherData = await getTeachers();
@@ -37,26 +58,16 @@ const TeacherManagement: React.FC = () => {
     }
   }, [activeTab]);
 
-  const handleInputChange = (field: keyof Teacher, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.positionNumber || !formData.firstName || !formData.lastName) {
-      await Swal.fire({
-        title: 'ข้อมูลไม่ครบถ้วน!',
-        text: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน',
-        icon: 'warning',
-        confirmButtonText: 'ตกลง'
-      });
-      return;
-    }
+  const handleSubmit = async (data: TeacherFormData) => {
+    const submissionData = {
+      ...data,
+      appointmentDate: data.appointmentDate && isValid(data.appointmentDate) ? format(data.appointmentDate, 'yyyy-MM-dd') : '',
+      birthDate: data.birthDate && isValid(data.birthDate) ? format(data.birthDate, 'yyyy-MM-dd') : '',
+    };
 
     try {
       if (isEditing && selectedTeacher) {
-        await updateTeacher(selectedTeacher.id, formData);
+        await updateTeacher(selectedTeacher.id, submissionData);
         await Swal.fire({
           title: 'แก้ไขข้อมูลสำเร็จ!',
           icon: 'success',
@@ -64,7 +75,7 @@ const TeacherManagement: React.FC = () => {
           showConfirmButton: false
         });
       } else {
-        await addTeacher(formData as Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>);
+        await addTeacher(submissionData as Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>);
         await Swal.fire({
           title: 'เพิ่มข้อมูลสำเร็จ!',
           icon: 'success',
@@ -87,7 +98,19 @@ const TeacherManagement: React.FC = () => {
 
   const handleEdit = (teacher: Teacher) => {
     setSelectedTeacher(teacher);
-    setFormData(teacher);
+    
+    const parseDate = (dateStr: string | undefined) => {
+        if (!dateStr) return null;
+        const date = new Date(dateStr);
+        return isValid(date) ? date : null;
+    }
+
+    form.reset({
+        ...teacher,
+        appointmentDate: parseDate(teacher.appointmentDate),
+        birthDate: parseDate(teacher.birthDate),
+    });
+    
     setIsEditing(true);
     setActiveTab('form');
   };
@@ -116,9 +139,22 @@ const TeacherManagement: React.FC = () => {
   };
 
   const resetForm = () => {
-    setFormData({
+    form.reset({
       academicYear: '2568',
-      position: 'ครูผู้ช่วย'
+      position: 'ครูผู้ช่วย',
+      positionNumber: '',
+      firstName: '',
+      lastName: '',
+      education: '',
+      citizenId: '',
+      scoutLevel: '',
+      majorSubject: '',
+      salary: '',
+      phone: '',
+      lineId: '',
+      email: '',
+      appointmentDate: null,
+      birthDate: null,
     });
     setSelectedTeacher(null);
     setIsEditing(false);
@@ -230,9 +266,8 @@ const TeacherManagement: React.FC = () => {
 
         <TabsContent value="form" className="mt-6">
           <TeacherForm
-            formData={formData}
+            form={form}
             isEditing={isEditing}
-            onInputChange={handleInputChange}
             onSubmit={handleSubmit}
             onCancel={resetForm}
           />
