@@ -1,4 +1,3 @@
-
 // Excel utility functions for importing and exporting data
 import * as XLSX from 'xlsx';
 import { Student } from '@/types/student';
@@ -51,11 +50,19 @@ export const importFromExcel = (file: File): Promise<any[]> => {
             }
           }
 
+          const rawGender = (row['เพศ'] || '').toString().trim();
+          let gender: 'ชาย' | 'หญิง';
+          if (rawGender === 'ช' || rawGender === 'ชาย') {
+            gender = 'ชาย';
+          } else { // This will correctly handle 'ญ' and 'หญิง' as female
+            gender = 'หญิง';
+          }
+
           const student: Partial<Student> = {
             citizenId: row['เลขประจำตัวประชาชน'] || '',
             grade: row['ชั้น'] || '',
             studentId: row['รหัสนักเรียน'] || '',
-            gender: row['เพศ'] === 'ชาย' ? 'ชาย' : 'หญิง',
+            gender: gender,
             titleTh: row['คำนำหน้าชื่อ'] || '',
             firstNameTh: row['ชื่อ'] || '',
             lastNameTh: row['นามสกุล'] || '',
