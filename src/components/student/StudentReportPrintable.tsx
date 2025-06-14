@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { sortGrades, getReportColumns } from '@/utils/studentReportUtils';
@@ -11,7 +10,7 @@ const ReportPage: React.FC<{ students: Student[], reportOptions: ReportOptions, 
 
   return (
     <div className="p-4 font-sarabun">
-      <div className="text-center mb-4">
+      <div className="text-center mb-2">
         <h3 className="text-lg font-bold">
           {reportOptions.reportType === '1' ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' : 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'}
         </h3>
@@ -19,11 +18,11 @@ const ReportPage: React.FC<{ students: Student[], reportOptions: ReportOptions, 
         <p className="text-sm">
           {classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${classLevel}`}
         </p>
-        <div className="text-sm flex justify-center gap-x-4 mt-2">
-          <span>จำนวนเพศชาย {maleCount} คน</span>
-          <span>เพศหญิง {femaleCount} คน</span>
-          <span>รวม {totalCount} คน</span>
-        </div>
+      </div>
+      <div className="text-sm flex justify-start gap-x-4 mb-2">
+        <span>จำนวนเพศชาย {maleCount} คน</span>
+        <span>เพศหญิง {femaleCount} คน</span>
+        <span>รวม {totalCount} คน</span>
       </div>
       <table className="w-full border-collapse border border-gray-300 text-sm">
         <thead>
