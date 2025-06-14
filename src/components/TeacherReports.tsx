@@ -167,12 +167,12 @@ const TeacherReports: React.FC = () => {
               {previewTeachers.map((teacher, index) => (
                 <tr key={teacher.id}>
                   <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
-                  <td className="border border-gray-300 px-2 py-1">{teacher.fullName}</td>
+                  <td className="border border-gray-300 px-2 py-1">{teacher.firstName} {teacher.lastName}</td>
                   <td className="border border-gray-300 px-2 py-1">{teacher.position}</td>
                   
                   {/* Additional fields */}
                   {reportOptions.additionalFields.email && (
-                    <td className="border border-gray-300 px-2 py-1"></td>
+                    <td className="border border-gray-300 px-2 py-1">{teacher.email || ''}</td>
                   )}
                   {reportOptions.additionalFields.citizenId && (
                     <td className="border border-gray-300 px-2 py-1 text-center">{teacher.citizenId}</td>
@@ -190,7 +190,7 @@ const TeacherReports: React.FC = () => {
                     <td className="border border-gray-300 px-2 py-1">{teacher.education}</td>
                   )}
                   {reportOptions.additionalFields.major && (
-                    <td className="border border-gray-300 px-2 py-1">{teacher.major}</td>
+                    <td className="border border-gray-300 px-2 py-1">{teacher.majorSubject}</td>
                   )}
                   {reportOptions.additionalFields.phone && (
                     <td className="border border-gray-300 px-2 py-1 text-center">{teacher.phone}</td>
@@ -270,17 +270,17 @@ const TeacherReports: React.FC = () => {
       ...filteredTeachers.map((teacher, index) => {
         const row = [
           index + 1,
-          teacher.fullName,
+          `${teacher.firstName} ${teacher.lastName}`,
           teacher.position
         ];
 
-        if (reportOptions.additionalFields.email) row.push('');
+        if (reportOptions.additionalFields.email) row.push(teacher.email || '');
         if (reportOptions.additionalFields.citizenId) row.push(teacher.citizenId);
         if (reportOptions.additionalFields.salary) row.push(teacher.salary);
         if (reportOptions.additionalFields.birthDate) row.push(teacher.birthDate);
         if (reportOptions.additionalFields.position) row.push(teacher.position);
         if (reportOptions.additionalFields.education) row.push(teacher.education);
-        if (reportOptions.additionalFields.major) row.push(teacher.major);
+        if (reportOptions.additionalFields.major) row.push(teacher.majorSubject);
         if (reportOptions.additionalFields.phone) row.push(teacher.phone);
         if (reportOptions.additionalFields.lineId) row.push(teacher.lineId);
 
