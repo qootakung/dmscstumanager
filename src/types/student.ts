@@ -82,6 +82,8 @@ export interface StudentHealthDetails {
   student_code: string;
   full_name: string;
   age_years: number;
+  age_months: number;
+  age_days: number;
   weight_kg: number | null;
   height_cm: number | null;
   measurement_date: string;

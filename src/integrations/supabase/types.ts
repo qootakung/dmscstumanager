@@ -249,6 +249,8 @@ export type Database = {
           student_code: string
           full_name: string
           age_years: number
+          age_months: number
+          age_days: number
           weight_kg: number
           height_cm: number
           measurement_date: string

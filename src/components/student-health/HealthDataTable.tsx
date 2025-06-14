@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/healthStorage';
@@ -143,7 +142,7 @@ const HealthDataTable: React.FC = () => {
               <TableRow>
                 <TableHead className="w-[120px]">รหัสนักเรียน</TableHead>
                 <TableHead>ชื่อ-นามสกุล</TableHead>
-                <TableHead className="w-[100px]">อายุ (ปี)</TableHead>
+                <TableHead className="w-[200px]">อายุ</TableHead>
                 <TableHead className="w-[150px]">น้ำหนัก (กก.)</TableHead>
                 <TableHead className="w-[150px]">ส่วนสูง (ซม.)</TableHead>
                 <TableHead className="w-[180px]">วันที่ชั่ง</TableHead>
@@ -163,7 +162,7 @@ const HealthDataTable: React.FC = () => {
                   <TableRow key={record.record_id}>
                     <TableCell>{record.student_code}</TableCell>
                     <TableCell>{record.full_name}</TableCell>
-                    <TableCell className="text-center">{record.age_years}</TableCell>
+                    <TableCell className="text-center">{`${record.age_years} ปี ${record.age_months} เดือน ${record.age_days} วัน`}</TableCell>
                     <TableCell>{renderCell(record, 'weight')}</TableCell>
                     <TableCell>{renderCell(record, 'height')}</TableCell>
                     <TableCell>{new Date(record.measurement_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
