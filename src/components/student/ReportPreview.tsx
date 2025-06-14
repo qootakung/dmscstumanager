@@ -12,6 +12,9 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
   if (!reportOptions.classLevel || !reportOptions.academicYear) return null;
 
   const allColumns = getReportColumns(reportOptions);
+  const maleCount = students.filter(s => s.gender === 'ชาย').length;
+  const femaleCount = students.filter(s => s.gender === 'หญิง').length;
+  const totalCount = students.length;
 
   return (
     <div className="mt-6 border rounded-lg p-4 bg-white">
@@ -26,6 +29,11 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
         <p className="text-sm">
           {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`}
         </p>
+        <div className="text-sm flex justify-center gap-x-4 mt-2">
+          <span>จำนวนเพศชาย {maleCount} คน</span>
+          <span>เพศหญิง {femaleCount} คน</span>
+          <span>รวม {totalCount} คน</span>
+        </div>
       </div>
 
       <div className="overflow-auto max-h-96">

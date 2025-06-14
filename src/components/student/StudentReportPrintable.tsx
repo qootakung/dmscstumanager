@@ -5,6 +5,9 @@ import { sortGrades, getReportColumns } from '@/utils/studentReportUtils';
 
 const ReportPage: React.FC<{ students: Student[], reportOptions: ReportOptions, classLevel: string }> = ({ students, reportOptions, classLevel }) => {
   const allColumns = getReportColumns(reportOptions);
+  const maleCount = students.filter(s => s.gender === 'ชาย').length;
+  const femaleCount = students.filter(s => s.gender === 'หญิง').length;
+  const totalCount = students.length;
 
   return (
     <div className="p-4 font-sarabun">
@@ -16,6 +19,11 @@ const ReportPage: React.FC<{ students: Student[], reportOptions: ReportOptions, 
         <p className="text-sm">
           {classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${classLevel}`}
         </p>
+        <div className="text-sm flex justify-center gap-x-4 mt-2">
+          <span>จำนวนเพศชาย {maleCount} คน</span>
+          <span>เพศหญิง {femaleCount} คน</span>
+          <span>รวม {totalCount} คน</span>
+        </div>
       </div>
       <table className="w-full border-collapse border border-gray-300 text-sm">
         <thead>
