@@ -1,4 +1,3 @@
-
 import { Student, User } from '@/types/student';
 
 const STUDENTS_KEY = 'dmsc_students';
@@ -153,4 +152,15 @@ export const getStudentStatistics = () => {
     byGender: genderStats,
     academicYears: [...new Set(students.map(s => s.academicYear))].sort().reverse(),
   };
+};
+
+// Add getTeachers function for compatibility
+export const getTeachers = () => {
+  try {
+    const teachers = localStorage.getItem('school_teachers');
+    return teachers ? JSON.parse(teachers) : [];
+  } catch (error) {
+    console.error('Error loading teachers:', error);
+    return [];
+  }
 };

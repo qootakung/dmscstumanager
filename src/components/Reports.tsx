@@ -1,9 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, FileText, Printer } from 'lucide-react';
@@ -27,7 +28,8 @@ const Reports: React.FC = () => {
       timeOut: false,
       phone: false,
       note: false,
-    }
+    },
+    customColumns: 0
   });
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
@@ -49,7 +51,15 @@ const Reports: React.FC = () => {
       }
       return true;
     });
-    setFilteredStudents(filtered);
+    
+    // เรียงลำดับตามรหัสนักเรียน (จากน้อยไปมาก)
+    const sorted = filtered.sort((a, b) => {
+      const numA = parseInt(a.studentId) || 0;
+      const numB = parseInt(b.studentId) || 0;
+      return numA - numB;
+    });
+    
+    setFilteredStudents(sorted);
   };
 
   const handleReportOptionChange = (field: keyof ReportOptions, value: any) => {
@@ -83,28 +93,20 @@ const Reports: React.FC = () => {
           'ที่': index + 1,
           'รหัสนักเรียน': student.studentId,
           'ชื่อ-นามสกุล': `${student.titleTh} ${student.firstNameTh} ${student.lastNameTh}`,
+          'เพศ': student.gender === 'ชาย' ? 'ช' : 'ญ',
         };
 
-        if (reportOptions.additionalFields.citizenId) {
-          baseData['เลขบัตรประชาชน'] = student.citizenId;
-        }
-        if (reportOptions.additionalFields.phone) {
-          baseData['เบอร์โทร'] = student.guardianPhone || '';
-        }
-        if (reportOptions.additionalFields.timeIn) {
-          baseData['เวลามา'] = '';
-        }
-        if (reportOptions.additionalFields.timeOut) {
-          baseData['เวลากลับ'] = '';
-        }
-        if (reportOptions.additionalFields.signature) {
-          baseData['ลายมือชื่อ'] = '';
-        }
-        if (reportOptions.additionalFields.guardianSignature) {
-          baseData['ลายมือชื่อผู้ปกครอง'] = '';
-        }
-        if (reportOptions.additionalFields.note) {
-          baseData['หมายเหตุ'] = '';
+        if (reportOptions.additionalFields.citizenId) baseData['เลขบัตรประชาชน'] = student.citizenId;
+        if (reportOptions.additionalFields.phone) baseData['เบอร์โทร'] = student.guardianPhone || '';
+        if (reportOptions.additionalFields.timeIn) baseData['เวลามา'] = '';
+        if (reportOptions.additionalFields.timeOut) baseData['เวลากลับ'] = '';
+        if (reportOptions.additionalFields.signature) baseData['ลายมือชื่อ'] = '';
+        if (reportOptions.additionalFields.guardianSignature) baseData['ลายมือชื่อผู้ปกครอง'] = '';
+        if (reportOptions.additionalFields.note) baseData['หมายเหตุ'] = '';
+
+        // เพิ่มคอลัมน์ที่กำหนดเอง
+        for (let i = 1; i <= (reportOptions.customColumns || 0); i++) {
+          baseData[`คอลัมน์ ${i}`] = '';
         }
 
         return baseData;
@@ -200,7 +202,7 @@ const Reports: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-school-primary mb-2">
-          ระบบรายงานข้อมูล
+          ระบบรายงานข้อมูลนักเรียน
         </h2>
         <p className="text-muted-foreground">
           สร้างรายงานข้อมูลนักเรียนและแบบลงทะเบียนการประชุม
@@ -286,6 +288,19 @@ const Reports: React.FC = () => {
                   />
                 </PopoverContent>
               </Popover>
+            </div>
+
+            <div>
+              <Label htmlFor="customColumns">จำนวนคอลัมน์เพิ่มเติม</Label>
+              <Input
+                id="customColumns"
+                type="number"
+                min="0"
+                max="10"
+                value={reportOptions.customColumns || 0}
+                onChange={(e) => handleReportOptionChange('customColumns', parseInt(e.target.value) || 0)}
+                placeholder="ระบุจำนวนคอลัมน์"
+              />
             </div>
           </CardContent>
         </Card>
@@ -391,6 +406,7 @@ const Reports: React.FC = () => {
                     <th className="border border-gray-400 p-2 text-center">ที่</th>
                     <th className="border border-gray-400 p-2 text-center">รหัสนักเรียน</th>
                     <th className="border border-gray-400 p-2 text-center">ชื่อ-นามสกุล</th>
+                    <th className="border border-gray-400 p-2 text-center">เพศ</th>
                     {reportOptions.additionalFields.citizenId && (
                       <th className="border border-gray-400 p-2 text-center">เลขบัตรประชาชน</th>
                     )}
@@ -412,6 +428,9 @@ const Reports: React.FC = () => {
                     {reportOptions.additionalFields.note && (
                       <th className="border border-gray-400 p-2 text-center">หมายเหตุ</th>
                     )}
+                    {Array.from({ length: reportOptions.customColumns || 0 }, (_, i) => (
+                      <th key={i} className="border border-gray-400 p-2 text-center">คอลัมน์ {i + 1}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -421,6 +440,7 @@ const Reports: React.FC = () => {
                         <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
                         <td className="border border-gray-400 p-2 text-center">{student.studentId}</td>
                         <td className="border border-gray-400 p-2">{student.titleTh} {student.firstNameTh} {student.lastNameTh}</td>
+                        <td className="border border-gray-400 p-2 text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
                         {reportOptions.additionalFields.citizenId && (
                           <td className="border border-gray-400 p-2 text-center">{student.citizenId}</td>
                         )}
@@ -442,18 +462,21 @@ const Reports: React.FC = () => {
                         {reportOptions.additionalFields.note && (
                           <td className="border border-gray-400 p-2 text-center"></td>
                         )}
+                        {Array.from({ length: reportOptions.customColumns || 0 }, (_, i) => (
+                          <td key={i} className="border border-gray-400 p-2 text-center"></td>
+                        ))}
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={3 + Object.values(reportOptions.additionalFields).filter(Boolean).length} className="border border-gray-400 p-4 text-center text-gray-500">
+                      <td colSpan={4 + Object.values(reportOptions.additionalFields).filter(Boolean).length + (reportOptions.customColumns || 0)} className="border border-gray-400 p-4 text-center text-gray-500">
                         ไม่พบข้อมูลนักเรียนตามเงื่อนไขที่เลือก
                       </td>
                     </tr>
                   )}
                   {filteredStudents.length > 10 && (
                     <tr>
-                      <td colSpan={3 + Object.values(reportOptions.additionalFields).filter(Boolean).length} className="border border-gray-400 p-2 text-center text-gray-500">
+                      <td colSpan={4 + Object.values(reportOptions.additionalFields).filter(Boolean).length + (reportOptions.customColumns || 0)} className="border border-gray-400 p-2 text-center text-gray-500">
                         ... และอีก {filteredStudents.length - 10} คน
                       </td>
                     </tr>

@@ -1,4 +1,3 @@
-
 export interface Student {
   id: string;
   academicYear: string;
@@ -51,9 +50,8 @@ export interface User {
 
 export interface ReportOptions {
   reportType: '1' | '2';
-  classLevel: string | 'all';
+  classLevel: string;
   academicYear: string;
-  selectedDate?: string;
   additionalFields: {
     citizenId: boolean;
     signature: boolean;
@@ -63,4 +61,5 @@ export interface ReportOptions {
     phone: boolean;
     note: boolean;
   };
+  customColumns?: number;
 }
