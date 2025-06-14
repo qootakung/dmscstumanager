@@ -1,7 +1,8 @@
+
 // Excel utility functions for importing and exporting data
 import * as XLSX from 'xlsx';
 import { Student } from '@/types/student';
-import { getStudents } from './storage';
+import { getStudents, gradeOptions } from './storage';
 
 export const exportToExcel = (data: any[], filename: string) => {
   const worksheet = XLSX.utils.json_to_sheet(data);
@@ -11,7 +12,21 @@ export const exportToExcel = (data: any[], filename: string) => {
 };
 
 export const exportStudentsForHealthImport = (students: Student[]) => {
-  const dataForExport = students.map(student => ({
+  const sortedStudents = [...students].sort((a, b) => {
+    const gradeAIndex = gradeOptions.indexOf(a.grade);
+    const gradeBIndex = gradeOptions.indexOf(b.grade);
+
+    if (gradeAIndex !== gradeBIndex) {
+      if (gradeAIndex === -1) return 1; // Put unknown grades at the end
+      if (gradeBIndex === -1) return -1;
+      return gradeAIndex - gradeBIndex;
+    }
+
+    // If grades are the same, sort by student ID numerically
+    return (a.studentId || '').localeCompare(b.studentId || '', undefined, { numeric: true });
+  });
+
+  const dataForExport = sortedStudents.map(student => ({
     'รหัสนักเรียน': student.studentId,
     'ชื่อ-นามสกุล': `${student.firstNameTh} ${student.lastNameTh}`,
     'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': '',
