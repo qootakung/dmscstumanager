@@ -1,7 +1,6 @@
 import { Student, User } from '@/types/student';
 import { supabase } from '@/integrations/supabase/client';
 
-const USERS_KEY = 'dmsc_users';
 const CURRENT_USER_KEY = 'dmsc_current_user';
 
 // Generate academic years from 2568 to 2600
@@ -66,40 +65,44 @@ export const clearAllStudents = async (): Promise<void> => {
 };
 
 // User management
-export const getUsers = (): User[] => {
-  const data = localStorage.getItem(USERS_KEY);
-  const users = data ? JSON.parse(data) : [];
-  
+export const getUsers = async (): Promise<User[]> => {
+  let { data: users, error } = await supabase.from('app_users').select('*');
+
+  if (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+
   // Ensure default admin exists
-  if (users.length === 0) {
-    const defaultAdmin: User = {
-      id: '1',
+  if (users && users.length === 0) {
+    const defaultAdmin: Omit<User, 'id' | 'createdAt'> = {
       username: 'dmsc@',
       password: 'donmoondmsc@',
       role: 'admin',
-      createdAt: new Date().toISOString(),
     };
-    users.push(defaultAdmin);
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    const { data: newAdmin, error: addAdminError } = await supabase
+      .from('app_users')
+      .insert(defaultAdmin)
+      .select()
+      .single();
+    
+    if (addAdminError) {
+      console.error('Error creating default admin:', addAdminError);
+    } else if (newAdmin) {
+      users = [newAdmin];
+    }
   }
   
-  return users;
+  return (users || []) as User[];
 };
 
-export const saveUsers = (users: User[]): void => {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-};
-
-export const addUser = (userData: Omit<User, 'id' | 'createdAt'>): User => {
-  const users = getUsers();
-  const newUser: User = {
-    ...userData,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-  };
-  users.push(newUser);
-  saveUsers(users);
-  return newUser;
+export const addUser = async (userData: Omit<User, 'id' | 'createdAt'>): Promise<User | null> => {
+  const { data, error } = await supabase.from('app_users').insert(userData).select().single();
+  if (error) {
+    console.error('Error adding user:', error);
+    return null;
+  }
+  return data as User;
 };
 
 export const getCurrentUser = (): User | null => {
@@ -115,14 +118,25 @@ export const setCurrentUser = (user: User | null): void => {
   }
 };
 
-export const login = (username: string, password: string): User | null => {
-  const users = getUsers();
-  const user = users.find(u => u.username === username && u.password === password);
-  if (user) {
-    setCurrentUser(user);
-    return user;
+export const login = async (username: string, password: string): Promise<User | null> => {
+  const { data, error } = await supabase
+    .from('app_users')
+    .select('*')
+    .eq('username', username)
+    .eq('password', password)
+    .single();
+  
+  if (error || !data) {
+    if (error && error.code !== 'PGRST116') { // "Matched row not found" is a valid login failure, not an error.
+      console.error('Login error:', error);
+    }
+    setCurrentUser(null);
+    return null;
   }
-  return null;
+
+  const user = data as User;
+  setCurrentUser(user);
+  return user;
 };
 
 export const logout = (): void => {

@@ -24,8 +24,8 @@ const AdminPanel: React.FC = () => {
     loadUsers();
   }, []);
 
-  const loadUsers = () => {
-    const userData = getUsers();
+  const loadUsers = async () => {
+    const userData = await getUsers();
     setUsers(userData);
   };
 
@@ -55,7 +55,9 @@ const AdminPanel: React.FC = () => {
     }
 
     try {
-      addUser(newUser);
+      const addedUser = await addUser(newUser);
+      if (!addedUser) throw new Error('Failed to add user');
+
       await Swal.fire({
         title: 'เพิ่มผู้ใช้สำเร็จ!',
         icon: 'success',
@@ -64,7 +66,7 @@ const AdminPanel: React.FC = () => {
       });
       
       setNewUser({ username: '', password: '', role: 'user' });
-      loadUsers();
+      await loadUsers();
     } catch (error) {
       await Swal.fire({
         title: 'เกิดข้อผิดพลาด!',

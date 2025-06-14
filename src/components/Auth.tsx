@@ -21,7 +21,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
-      const user = login(username, password);
+      const user = await login(username, password);
       if (user) {
         await Swal.fire({
           title: 'เข้าสู่ระบบสำเร็จ!',
