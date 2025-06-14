@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Student Health Records
@@ -25,7 +26,7 @@ export const getStudentHealthDetails = async (academicYear: string, month?: numb
     p_academic_year: academicYear,
     p_month: month || null,
     p_grade: grade || null,
-  });
+  } as any); // Using 'as any' to bypass a temporary type mismatch after migration.
 
   if (error) {
     console.error('Error fetching student health details:', error);

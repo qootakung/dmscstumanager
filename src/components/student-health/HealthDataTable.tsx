@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/healthStorage';
@@ -18,9 +17,9 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileExcel, Printer } from 'lucide-react';
+import { FileSpreadsheet, Printer } from 'lucide-react';
 import { exportToExcel } from '@/utils/excel';
-import { printHealthReport } from '@/utils/healthReportPrint';
+import { printHealthReport } from '@/utils/healthReportPrint.tsx';
 
 const HealthDataTable: React.FC = () => {
   const queryClient = useQueryClient();
@@ -170,7 +169,7 @@ const HealthDataTable: React.FC = () => {
             <CardTitle>ตารางข้อมูลสุขภาพนักเรียน</CardTitle>
             <div className="flex items-center gap-2">
                 <Button onClick={handleExport} variant="outline" disabled={isLoading || !healthData || healthData.length === 0}>
-                    <FileExcel className="mr-2 h-4 w-4" />
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
                     ส่งออก Excel
                 </Button>
                 <Button onClick={handlePrint} variant="outline" disabled={isLoading || !healthData || healthData.length === 0}>
