@@ -20,6 +20,8 @@ export interface Teacher {
   updatedAt: string;
 }
 
+export type TeacherPosition = Teacher['position'];
+
 export interface TeacherReportOptions {
   reportType: '1' | '2'; // 1 = ข้อมูลครู, 2 = แบบลงทะเบียนการประชุม
   academicYear: string;

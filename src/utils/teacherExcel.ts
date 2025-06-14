@@ -1,4 +1,3 @@
-
 import * as xlsx from 'xlsx';
 import { saveAs } from 'file-saver';
 import type { Teacher, TeacherPosition } from '@/types/teacher';
@@ -29,7 +28,7 @@ const toDateString = (date: any): string => {
   }
 };
 
-export const processTeachersFile = (file: File): Promise<{ data: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>[], errors: { row: number, message: string }[] }> => {
+export const importTeachersFromExcel = (file: File): Promise<{ data: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>[], errors: { row: number, message: string }[] }> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
