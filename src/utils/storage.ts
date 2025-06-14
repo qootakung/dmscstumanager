@@ -99,6 +99,7 @@ export const getUsers = async (): Promise<User[]> => {
 
   return users.map(({ created_at, ...rest }) => ({
     ...rest,
+    role: rest.role as 'admin' | 'user',
     createdAt: created_at,
   }));
 };
@@ -115,6 +116,7 @@ export const addUser = async (userData: Omit<User, 'id' | 'createdAt'>): Promise
   const { created_at, ...rest } = data;
   return {
     ...rest,
+    role: rest.role as 'admin' | 'user',
     createdAt: created_at,
   };
 };
@@ -151,6 +153,7 @@ export const login = async (username: string, password: string): Promise<User | 
   const { created_at, ...rest } = data;
   const user = {
     ...rest,
+    role: rest.role as 'admin' | 'user',
     createdAt: created_at
   };
   setCurrentUser(user);
