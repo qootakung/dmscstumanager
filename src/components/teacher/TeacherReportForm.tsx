@@ -92,6 +92,14 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center space-x-2">
             <Checkbox
+              id="position"
+              checked={reportOptions.additionalFields.position}
+              onCheckedChange={(checked) => onAdditionalFieldChange('position', Boolean(checked))}
+            />
+            <Label htmlFor="position">ตำแหน่ง</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
               id="email"
               checked={reportOptions.additionalFields.email}
               onCheckedChange={(checked) => onAdditionalFieldChange('email', Boolean(checked))}
@@ -121,6 +129,14 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
               onCheckedChange={(checked) => onAdditionalFieldChange('birthDate', Boolean(checked))}
             />
             <Label htmlFor="birthDate">วัน/เดือน/ปีเกิด</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="appointmentDate"
+              checked={reportOptions.additionalFields.appointmentDate}
+              onCheckedChange={(checked) => onAdditionalFieldChange('appointmentDate', Boolean(checked))}
+            />
+            <Label htmlFor="appointmentDate">วันที่บรรจุ</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox

@@ -12,6 +12,7 @@ export interface TeacherReportOptions {
     major: boolean;
     phone: boolean;
     lineId: boolean;
+    appointmentDate: boolean;
   };
   customColumns: number;
   showDate: boolean;

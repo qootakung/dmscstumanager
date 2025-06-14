@@ -25,6 +25,7 @@ const TeacherReports: React.FC = () => {
       major: false,
       phone: false,
       lineId: false,
+      appointmentDate: false,
     },
     customColumns: 0,
     showDate: false,

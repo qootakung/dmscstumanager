@@ -24,22 +24,22 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
       return aNum - bNum;
     });
 
-  const previewTeachers = filteredTeachers.slice(0, 5);
+  const previewTeachers = filteredTeachers;
 
   // สร้างคอลัมน์พื้นฐาน
   const baseColumns = [
     'ลำดับที่',
     'ชื่อ - นามสกุล',
-    'ตำแหน่ง'
   ];
 
   // เพิ่มคอลัมน์เพิ่มเติมที่เลือก
   const additionalColumns = [];
+  if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่ง');
   if (reportOptions.additionalFields.email) additionalColumns.push('Email');
   if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
   if (reportOptions.additionalFields.salary) additionalColumns.push('เงินเดือน');
   if (reportOptions.additionalFields.birthDate) additionalColumns.push('วัน/เดือน/ปีเกิด');
-  if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่ง');
+  if (reportOptions.additionalFields.appointmentDate) additionalColumns.push('วันที่บรรจุ');
   if (reportOptions.additionalFields.education) additionalColumns.push('วุฒิการศึกษา');
   if (reportOptions.additionalFields.major) additionalColumns.push('วิชาเอก');
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
@@ -86,9 +86,11 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
               <tr key={teacher.id}>
                 <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
                 <td className="border border-gray-300 px-2 py-1">{teacher.firstName} {teacher.lastName}</td>
-                <td className="border border-gray-300 px-2 py-1">{teacher.position}</td>
                 
                 {/* Additional fields */}
+                {reportOptions.additionalFields.position && (
+                  <td className="border border-gray-300 px-2 py-1">{teacher.position}</td>
+                )}
                 {reportOptions.additionalFields.email && (
                   <td className="border border-gray-300 px-2 py-1">{teacher.email || ''}</td>
                 )}
@@ -99,10 +101,10 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
                   <td className="border border-gray-300 px-2 py-1 text-center">{teacher.salary}</td>
                 )}
                 {reportOptions.additionalFields.birthDate && (
-                  <td className="border border-gray-300 px-2 py-1 text-center">{teacher.birthDate}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-center">{formatThaiDate(teacher.birthDate)}</td>
                 )}
-                {reportOptions.additionalFields.position && (
-                  <td className="border border-gray-300 px-2 py-1">{teacher.position}</td>
+                {reportOptions.additionalFields.appointmentDate && (
+                  <td className="border border-gray-300 px-2 py-1 text-center">{formatThaiDate(teacher.appointmentDate)}</td>
                 )}
                 {reportOptions.additionalFields.education && (
                   <td className="border border-gray-300 px-2 py-1">{teacher.education}</td>
@@ -128,7 +130,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
       </div>
       
       <p className="text-sm text-gray-600 mt-2 print:hidden">
-        แสดงตัวอย่าง {previewTeachers.length} รายการแรก จากทั้งหมด {filteredTeachers.length} รายการ
+        รวมทั้งหมด {filteredTeachers.length} รายการ
       </p>
     </div>
   );

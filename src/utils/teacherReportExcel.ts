@@ -48,16 +48,16 @@ export const generateTeacherExcel = (
   const baseColumns = [
     'ลำดับที่',
     'ชื่อ - นามสกุล',
-    'ตำแหน่ง'
   ];
 
   // เพิ่มคอลัมน์เพิ่มเติมที่เลือก
   const additionalColumns = [];
+  if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่ง');
   if (reportOptions.additionalFields.email) additionalColumns.push('Email');
   if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
   if (reportOptions.additionalFields.salary) additionalColumns.push('เงินเดือน');
   if (reportOptions.additionalFields.birthDate) additionalColumns.push('วัน/เดือน/ปีเกิด');
-  if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่ง');
+  if (reportOptions.additionalFields.appointmentDate) additionalColumns.push('วันที่บรรจุ');
   if (reportOptions.additionalFields.education) additionalColumns.push('วุฒิการศึกษา');
   if (reportOptions.additionalFields.major) additionalColumns.push('วิชาเอก');
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
@@ -78,23 +78,23 @@ export const generateTeacherExcel = (
     ...headerData,
     allColumns,
     ...filteredTeachers.map((teacher, index) => {
-      const row = [
+      const row: (string|number)[] = [
         index + 1,
         `${teacher.firstName} ${teacher.lastName}`,
-        teacher.position
       ];
 
+      if (reportOptions.additionalFields.position) row.push(teacher.position);
       if (reportOptions.additionalFields.email) row.push(teacher.email || '');
       if (reportOptions.additionalFields.citizenId) row.push(teacher.citizenId);
       if (reportOptions.additionalFields.salary) row.push(teacher.salary);
-      if (reportOptions.additionalFields.birthDate) row.push(teacher.birthDate);
-      if (reportOptions.additionalFields.position) row.push(teacher.position);
+      if (reportOptions.additionalFields.birthDate) row.push(formatThaiDate(teacher.birthDate));
+      if (reportOptions.additionalFields.appointmentDate) row.push(formatThaiDate(teacher.appointmentDate));
       if (reportOptions.additionalFields.education) row.push(teacher.education);
       if (reportOptions.additionalFields.major) row.push(teacher.majorSubject);
       if (reportOptions.additionalFields.phone) row.push(teacher.phone);
       if (reportOptions.additionalFields.lineId) row.push(teacher.lineId);
 
-      for (let i = 0; i < reportOptions.customColumns; i++) {
+      for (let i = 0; i < (reportOptions.customColumns || 0); i++) {
         row.push('');
       }
 

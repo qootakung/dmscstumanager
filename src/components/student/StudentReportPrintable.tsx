@@ -30,7 +30,7 @@ const ReportPage: React.FC<{ students: Student[], reportOptions: ReportOptions, 
             <tr key={student.id}>
               <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
               <td className="border border-gray-300 px-2 py-1 text-center">{student.studentId}</td>
-              <td className="border border-gray-300 px-2 py-1">{student.firstNameTh} {student.lastNameTh}</td>
+              <td className="border border-gray-300 px-2 py-1">{(student.titleTh || '')}{student.firstNameTh} {student.lastNameTh}</td>
               {reportOptions.additionalFields.gender && <td className="border border-gray-300 px-2 py-1 text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>}
               {reportOptions.additionalFields.citizenId && <td className="border border-gray-300 px-2 py-1 text-center">{student.citizenId}</td>}
               {reportOptions.additionalFields.signature && <td className="border border-gray-300 px-2 py-1"></td>}
