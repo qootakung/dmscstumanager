@@ -1,14 +1,22 @@
 import React from 'react';
 import { StudentHealthDetails } from '@/types/student';
+import { Teacher } from '@/types/teacher';
 
 interface HealthReportStatisticsProps {
   data: StudentHealthDetails[];
   grade: string;
   month: string;
   academicYear: string;
+  teacher?: Teacher;
 }
 
-const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, grade, month, academicYear }) => {
+const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ 
+  data, 
+  grade, 
+  month, 
+  academicYear,
+  teacher 
+}) => {
   // Calculate BMI and categorize by weight status
   const calculateBMI = (weight: number | null, height: number | null) => {
     if (!weight || !height) return null;
@@ -276,8 +284,17 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
 
       <div className="text-right mt-8">
         <p>(...............................................)</p>
-        <p>นายธุปนนท์ ศรีสู่</p>
-        <p>ครูประจำชั้น ป.4</p>
+        {teacher ? (
+          <>
+            <p>{teacher.firstName} {teacher.lastName}</p>
+            <p>{teacher.position}</p>
+          </>
+        ) : (
+          <>
+            <p>นายธุปนนท์ ศรีสู่</p>
+            <p>ครูประจำชั้น ป.4</p>
+          </>
+        )}
       </div>
     </div>
   );

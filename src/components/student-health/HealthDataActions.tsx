@@ -1,15 +1,16 @@
-
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, FileSpreadsheet, Printer } from 'lucide-react';
 import { StudentHealthDetails } from '@/types/student';
+import { Teacher } from '@/types/teacher';
 import { useReactToPrint } from 'react-to-print';
 import HealthReportPrintable from './HealthReportPrintable';
 import HealthReportAdvanced from './HealthReportAdvanced';
 import HealthReportStatistics from './HealthReportStatistics';
+import TeacherSelectionDialog from './TeacherSelectionDialog';
 
 interface HealthDataActionsProps {
-  healthData: StudentHealthDetails[];
+  data: StudentHealthDetails[];
   selectedGrade: string;
   selectedMonth: string;
   currentAcademicYear: string;
@@ -17,7 +18,7 @@ interface HealthDataActionsProps {
 }
 
 const HealthDataActions: React.FC<HealthDataActionsProps> = ({
-  healthData,
+  data,
   selectedGrade,
   selectedMonth,
   currentAcademicYear,
@@ -26,6 +27,9 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
   const basicReportRef = useRef<HTMLDivElement>(null);
   const advancedReportRef = useRef<HTMLDivElement>(null);
   const statisticsReportRef = useRef<HTMLDivElement>(null);
+  
+  const [showTeacherDialog, setShowTeacherDialog] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
 
   const handleBasicPrint = useReactToPrint({
     contentRef: basicReportRef,
@@ -41,6 +45,19 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
     contentRef: statisticsReportRef,
     documentTitle: `health-report-statistics-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
   });
+
+  const handleStatisticsButtonClick = () => {
+    if (!data || data.length === 0) return;
+    setShowTeacherDialog(true);
+  };
+
+  const handleTeacherSelected = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    // Trigger print after teacher is selected
+    setTimeout(() => {
+      handleStatisticsPrint();
+    }, 100);
+  };
 
   const getMonthName = (month: string) => {
     if (month === 'all') return 'ทุกเดือน';
@@ -58,88 +75,97 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
     console.log('Export Excel functionality to be implemented');
   };
 
-  const hasData = healthData && healthData.length > 0;
+  const hasData = data && data.length > 0;
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <Button
-        onClick={handleExportExcel}
-        disabled={isLoading || !hasData}
-        variant="outline"
-        size="sm"
-      >
-        <FileSpreadsheet className="h-4 w-4 mr-2" />
-        ส่งออก Excel
-      </Button>
-      
-      <Button
-        onClick={handleBasicPrint}
-        disabled={isLoading || !hasData}
-        variant="outline"
-        size="sm"
-      >
-        <Printer className="h-4 w-4 mr-2" />
-        พิมพ์รายงานพื้นฐาน
-      </Button>
+    <>
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button
+          onClick={handleExportExcel}
+          disabled={isLoading || !hasData}
+          variant="outline"
+          size="sm"
+        >
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          ส่งออก Excel
+        </Button>
+        
+        <Button
+          onClick={handleBasicPrint}
+          disabled={isLoading || !hasData}
+          variant="outline"
+          size="sm"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          พิมพ์รายงานพื้นฐาน
+        </Button>
 
-      <Button
-        onClick={handleAdvancedPrint}
-        disabled={isLoading || !hasData}
-        variant="outline"
-        size="sm"
-      >
-        <Printer className="h-4 w-4 mr-2" />
-        พิมพ์รายงาน BMI
-      </Button>
+        <Button
+          onClick={handleAdvancedPrint}
+          disabled={isLoading || !hasData}
+          variant="outline"
+          size="sm"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          พิมพ์รายงาน BMI
+        </Button>
 
-      <Button
-        onClick={handleStatisticsPrint}
-        disabled={isLoading || !hasData}
-        variant="outline"
-        size="sm"
-      >
-        <Printer className="h-4 w-4 mr-2" />
-        พิมพ์รายงานสถิติ
-      </Button>
+        <Button
+          onClick={handleStatisticsButtonClick}
+          disabled={isLoading || !hasData}
+          variant="outline"
+          size="sm"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          พิมพ์รายงานสถิติ
+        </Button>
 
-      {/* Hidden components for printing - only render when we have data */}
-      {hasData && (
-        <>
-          <div style={{ display: 'none' }}>
-            <div ref={basicReportRef}>
-              <HealthReportPrintable
-                data={healthData}
-                grade={getGradeName(selectedGrade)}
-                month={getMonthName(selectedMonth)}
-                academicYear={currentAcademicYear}
-              />
+        {/* Hidden components for printing - only render when we have data */}
+        {hasData && (
+          <>
+            <div style={{ display: 'none' }}>
+              <div ref={basicReportRef}>
+                <HealthReportPrintable
+                  data={data}
+                  grade={getGradeName(selectedGrade)}
+                  month={getMonthName(selectedMonth)}
+                  academicYear={currentAcademicYear}
+                />
+              </div>
             </div>
-          </div>
 
-          <div style={{ display: 'none' }}>
-            <div ref={advancedReportRef}>
-              <HealthReportAdvanced
-                data={healthData}
-                grade={getGradeName(selectedGrade)}
-                month={getMonthName(selectedMonth)}
-                academicYear={currentAcademicYear}
-              />
+            <div style={{ display: 'none' }}>
+              <div ref={advancedReportRef}>
+                <HealthReportAdvanced
+                  data={data}
+                  grade={getGradeName(selectedGrade)}
+                  month={getMonthName(selectedMonth)}
+                  academicYear={currentAcademicYear}
+                />
+              </div>
             </div>
-          </div>
 
-          <div style={{ display: 'none' }}>
-            <div ref={statisticsReportRef}>
-              <HealthReportStatistics
-                data={healthData}
-                grade={getGradeName(selectedGrade)}
-                month={getMonthName(selectedMonth)}
-                academicYear={currentAcademicYear}
-              />
+            <div style={{ display: 'none' }}>
+              <div ref={statisticsReportRef}>
+                <HealthReportStatistics
+                  data={data}
+                  grade={getGradeName(selectedGrade)}
+                  month={getMonthName(selectedMonth)}
+                  academicYear={currentAcademicYear}
+                  teacher={selectedTeacher}
+                />
+              </div>
             </div>
-          </div>
-        </>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+
+      <TeacherSelectionDialog
+        open={showTeacherDialog}
+        onOpenChange={setShowTeacherDialog}
+        onConfirm={handleTeacherSelected}
+      />
+    </>
   );
 };
 
