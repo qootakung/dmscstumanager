@@ -12,6 +12,7 @@ import TeacherReports from '@/components/TeacherReports';
 import AdminPanel from '@/components/AdminPanel';
 import StudentHealth from '@/components/StudentHealth';
 import StudentAnalysis from '@/components/StudentAnalysis';
+import FinancialReports from '@/components/FinancialReports';
 import { getCurrentUser, logout } from '@/utils/userStorage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -193,6 +194,15 @@ const Index = () => {
                           รายงานข้อมูลครู
                         </Button>
                       </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Button 
+                          variant="ghost" 
+                          className="justify-start"
+                          onClick={() => setActiveTab('financial-reports')}
+                        >
+                          รายงานการเงิน
+                        </Button>
+                      </NavigationMenuLink>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -224,6 +234,7 @@ const Index = () => {
           {activeTab === 'student-analysis' && <StudentAnalysis />}
           {activeTab === 'student-reports' && <Reports />}
           {activeTab === 'teacher-reports' && <TeacherReports />}
+          {activeTab === 'financial-reports' && <FinancialReports />}
           {isAdmin && activeTab === 'admin' && <AdminPanel />}
         </div>
       </main>
