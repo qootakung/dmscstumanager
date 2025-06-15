@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
+import ReactToPrint from 'react-to-print';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import PrintPreviewStatic from './PrintPreviewStatic';
@@ -17,23 +17,6 @@ interface PrintPreviewDialogProps {
 const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenChange, voucherData, paymentOptions }) => {
   const componentRef = useRef<HTMLDivElement>(null);
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}_${voucherData.semester}`,
-    pageStyle: `
-      @page {
-        size: A4;
-        margin: 1.5cm;
-      }
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact !important;
-          color-adjust: exact !important;
-        }
-      }
-    `,
-  } as any);
-
   if (!isOpen) {
     return null;
   }
@@ -45,18 +28,36 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
           <DialogTitle>ตัวอย่างก่อนพิมพ์</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-auto bg-gray-100 p-8">
-            <div ref={componentRef} className="p-6 bg-white shadow-lg mx-auto">
-                 <PrintPreviewStatic voucherData={voucherData} paymentOptions={paymentOptions} />
+            <div className="p-6 bg-white shadow-lg mx-auto">
+                 <PrintPreviewStatic ref={componentRef} voucherData={voucherData} paymentOptions={paymentOptions} />
             </div>
         </div>
         <DialogFooter className="p-4 border-t bg-background flex-row justify-end items-center space-x-2">
           <DialogClose asChild>
             <Button variant="outline">ปิด</Button>
           </DialogClose>
-          <Button onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
-            พิมพ์เอกสาร
-          </Button>
+          <ReactToPrint
+            trigger={() => (
+              <Button>
+                <Printer className="mr-2 h-4 w-4" />
+                พิมพ์เอกสาร
+              </Button>
+            )}
+            content={() => componentRef.current}
+            documentTitle={`หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}_${voucherData.semester}`}
+            pageStyle={`
+              @page {
+                size: A4;
+                margin: 1.5cm;
+              }
+              @media print {
+                body {
+                  -webkit-print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+              }
+            `}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>
