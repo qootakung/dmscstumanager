@@ -96,19 +96,18 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
       {/* จำนวนนักเรียน */}
       <div className="mb-2">
         <span>นักเรียนจำนวนทั้งสิ้น</span>
-        <span className="inline-block border-b border-dotted w-10 mx-1 text-center">{
-          voucherData.students.length
-        }</span>
+        <span className="inline-block border-b border-dotted w-10 mx-1 text-center">
+          {voucherData.students.length}
+        </span>
         <span>คน ได้รับเงินจากโรงเรียนบ้านดอนมูล</span>
-        <span className="inline-block border-b border-dotted w-20 mx-1 text-center">{
-          voucherData.students.length
-        }</span>
-        <span>บาท</span>
+        <span className="inline-block border-b border-dotted w-20 mx-1 text-center">
+          {voucherData.students.length}
+        </span>
       </div>
       {/* แก้ไขข้อความสังกัด */}
       <div>
         <span>
-          สังกัดสำนักงานเขตพื้นที่การศึกษา ประถมศึกษา ประถมศึกษาลำพูนเขต 2 <br />
+          สังกัดสำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูนเขต 2 <br />
           ข้าพเจ้าขอรับรองว่าเงินที่ได้รับไปได้นำไปตามวัตถุประสงค์ของทางราชการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายินยอมชดใช้เงินคืนให้กับโรงเรียนต่อไป
         </span>
       </div>
