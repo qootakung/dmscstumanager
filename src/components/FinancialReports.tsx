@@ -571,7 +571,6 @@ const FinancialReports = () => {
                 <SelectTrigger>
                   <SelectValue
                     placeholder="เลือกผู้จ่ายเงิน"
-                    // ให้แสดงแต่ชื่อ-นามสกุล ใน dropdown value
                     {...(voucherData.payerName
                       ? {
                           children: voucherData.payerName
@@ -598,12 +597,19 @@ const FinancialReports = () => {
                 onValueChange={handleTeacherSelect}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="เลือกครูประจำชั้น" />
+                  <SelectValue
+                    placeholder="เลือกครูประจำชั้น"
+                    {...(voucherData.selectedTeacher
+                      ? {
+                          children: `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
+                        }
+                      : {})}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {teachers.map((teacher) => (
                     <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.firstName} {teacher.lastName} - {teacher.position}
+                      {teacher.firstName} {teacher.lastName}
                     </SelectItem>
                   ))}
                 </SelectContent>
