@@ -8,33 +8,31 @@ import HealthReportPrintable from './HealthReportPrintable';
 import HealthReportAdvanced from './HealthReportAdvanced';
 
 interface HealthDataActionsProps {
-  data: StudentHealthDetails[];
+  healthData: StudentHealthDetails[];
   selectedGrade: string;
   selectedMonth: string;
-  academicYear: string;
-  onExportExcel: () => void;
+  currentAcademicYear: string;
   isLoading: boolean;
 }
 
 const HealthDataActions: React.FC<HealthDataActionsProps> = ({
-  data,
+  healthData,
   selectedGrade,
   selectedMonth,
-  academicYear,
-  onExportExcel,
+  currentAcademicYear,
   isLoading
 }) => {
   const basicReportRef = useRef<HTMLDivElement>(null);
   const advancedReportRef = useRef<HTMLDivElement>(null);
 
   const handleBasicPrint = useReactToPrint({
-    content: () => basicReportRef.current,
-    documentTitle: `health-report-basic-${selectedGrade}-${selectedMonth}-${academicYear}`,
+    contentRef: basicReportRef,
+    documentTitle: `health-report-basic-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
   });
 
   const handleAdvancedPrint = useReactToPrint({
-    content: () => advancedReportRef.current,
-    documentTitle: `health-report-advanced-${selectedGrade}-${selectedMonth}-${academicYear}`,
+    contentRef: advancedReportRef,
+    documentTitle: `health-report-advanced-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
   });
 
   const getMonthName = (month: string) => {
@@ -48,11 +46,16 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
     return grade === 'all' ? 'ทุกระดับชั้น' : grade;
   };
 
+  const handleExportExcel = () => {
+    // TODO: Implement Excel export functionality
+    console.log('Export Excel functionality to be implemented');
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Button
-        onClick={onExportExcel}
-        disabled={isLoading || data.length === 0}
+        onClick={handleExportExcel}
+        disabled={isLoading || healthData.length === 0}
         variant="outline"
         size="sm"
       >
@@ -62,7 +65,7 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
       
       <Button
         onClick={handleBasicPrint}
-        disabled={isLoading || data.length === 0}
+        disabled={isLoading || healthData.length === 0}
         variant="outline"
         size="sm"
       >
@@ -72,7 +75,7 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
 
       <Button
         onClick={handleAdvancedPrint}
-        disabled={isLoading || data.length === 0}
+        disabled={isLoading || healthData.length === 0}
         variant="outline"
         size="sm"
       >
@@ -84,10 +87,10 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
       <div style={{ display: 'none' }}>
         <div ref={basicReportRef}>
           <HealthReportPrintable
-            data={data}
+            data={healthData}
             grade={getGradeName(selectedGrade)}
             month={getMonthName(selectedMonth)}
-            academicYear={academicYear}
+            academicYear={currentAcademicYear}
           />
         </div>
       </div>
@@ -95,10 +98,10 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
       <div style={{ display: 'none' }}>
         <div ref={advancedReportRef}>
           <HealthReportAdvanced
-            data={data}
+            data={healthData}
             grade={getGradeName(selectedGrade)}
             month={getMonthName(selectedMonth)}
-            academicYear={academicYear}
+            academicYear={currentAcademicYear}
           />
         </div>
       </div>

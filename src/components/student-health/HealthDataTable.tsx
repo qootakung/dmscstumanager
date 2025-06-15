@@ -95,7 +95,7 @@ const HealthDataTable: React.FC = () => {
         <div className="flex flex-row items-center justify-between">
           <CardTitle>ตารางข้อมูลสุขภาพนักเรียน</CardTitle>
           <HealthDataActions
-            healthData={healthData}
+            healthData={healthData || []}
             selectedGrade={selectedGrade}
             selectedMonth={selectedMonth}
             currentAcademicYear={currentAcademicYear}
