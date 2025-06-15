@@ -41,7 +41,7 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
   return (
     <>
       {/* Hidden component for printing */}
-      <div style={{ display: 'none' }}>
+      <div style={{ position: 'absolute', left: '-9999px', top: 0, zIndex: -1 }}>
         <PrintPreviewStatic ref={componentRef} voucherData={voucherData} paymentOptions={paymentOptions} />
       </div>
 
