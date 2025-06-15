@@ -117,7 +117,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
   const getCategoryCount = (categories: any, category: string) => categories[category] || { male: 0, female: 0, total: 0 };
 
   return (
-    <div className="p-4 font-sarabun">
+    <div className="p-2 font-sarabun text-xs">
       <style>{`
         body { 
           -webkit-print-color-adjust: exact !important;
@@ -126,27 +126,29 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
         @media print {
           @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 0.8cm;
           }
           body {
-            font-size: 9pt;
+            font-size: 7pt;
           }
-          .p-4 {
+          .p-2 {
              padding: 0 !important;
           }
           h1, h2, h3 {
-            font-size: 12pt;
+            font-size: 9pt;
+            margin-bottom: 4px;
           }
           table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            font-size: 7pt;
           }
           th, td {
             border: 1px solid #000 !important;
-            padding: 4px 6px !important;
+            padding: 2px 3px !important;
             vertical-align: middle;
-            font-size: 9pt;
+            line-height: 1.1;
           }
           th {
             background-color: #f2f2f2 !important;
@@ -159,274 +161,278 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
           .highlight-row {
             background-color: #e6f3ff !important;
           }
+          .signature-section {
+            margin-top: 8px;
+            font-size: 7pt;
+          }
         }
       `}</style>
       
-      <header className="text-center mb-6">
-        <h1 className="text-lg font-bold">อัตราความชุกของปัญหาโภชนาการ</h1>
-        <h2 className="text-lg font-bold">โรงเรียนบ้านดอนมูล</h2>
-        <p className="text-sm mt-2">ชั้น {grade} เดือน {month} ปีการศึกษา {academicYear}</p>
+      <header className="text-center mb-3">
+        <h1 className="text-sm font-bold">อัตราความชุกของปัญหาโภชนาการ</h1>
+        <h2 className="text-sm font-bold">โรงเรียนบ้านดอนมูล</h2>
+        <p className="text-xs mt-1">ชั้น {grade} เดือน {month} ปีการศึกษา {academicYear}</p>
       </header>
 
       {/* น้ำหนักตามเกณฑ์อายุ */}
-      <table className="w-full border-collapse border border-black mb-6 text-xs">
+      <table className="w-full border-collapse border border-black mb-2 text-xs">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-black p-2" rowSpan={2}>น้ำหนักตามเกณฑ์อายุ</th>
-            <th className="border border-black p-2">ชาย<br/>(คน)</th>
-            <th className="border border-black p-2">หญิง<br/>(คน)</th>
-            <th className="border border-black p-2">รวม<br/>(คน)</th>
-            <th className="border border-black p-2">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-2">ความ<br/>ครอบคลุม<br/>(%)</th>
+            <th className="border border-black p-1" rowSpan={2}>น้ำหนักตามเกณฑ์อายุ</th>
+            <th className="border border-black p-1">ชาย<br/>(คน)</th>
+            <th className="border border-black p-1">หญิง<br/>(คน)</th>
+            <th className="border border-black p-1">รวม<br/>(คน)</th>
+            <th className="border border-black p-1">ภาวะโภชนาการ<br/>(%)</th>
+            <th className="border border-black p-1">ความ<br/>ครอบคลุม<br/>(%)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักมากกว่าเกณฑ์ ({'>+2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'obese').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'obese').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'obese').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightCategories, 'obese').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- น้ำหนักมากกว่าเกณฑ์ ({'>+2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'obese').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'obese').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'obese').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'obese').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักค่อนข้างมาก ({'>+1.5 SD. ถึง +2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'overweight').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'overweight').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'overweight').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightCategories, 'overweight').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- น้ำหนักค่อนข้างมาก ({'>+1.5 SD. ถึง +2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'overweight').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'overweight').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'overweight').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'overweight').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักตามเกณฑ์ (-1.5 SD. ถึง +1.5 SD.)</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'normal').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'normal').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'normal').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightCategories, 'normal').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- น้ำหนักตามเกณฑ์ (-1.5 SD. ถึง +1.5 SD.)</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'normal').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'normal').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'normal').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'normal').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักค่อนข้างน้อย ({'<-1.5 SD. ถึง -2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'underweight').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'underweight').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'underweight').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightCategories, 'underweight').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- น้ำหนักค่อนข้างน้อย ({'<-1.5 SD. ถึง -2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'underweight').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'underweight').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'underweight').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'underweight').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักน้อยกว่าเกณฑ์ ({'<-2 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'severely-underweight').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'severely-underweight').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightCategories, 'severely-underweight').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightCategories, 'severely-underweight').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- น้ำหนักน้อยกว่าเกณฑ์ ({'<-2 SD.'}) ** ส่งรายงาน **</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'severely-underweight').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'severely-underweight').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'severely-underweight').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'severely-underweight').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr className="highlight-row">
-            <td className="border border-black p-2 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-2 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-2 text-center"></td>
-            <td className="border border-black p-2 text-center font-bold">100.00</td>
+            <td className="border border-black p-1 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
+            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
+            <td className="border border-black p-1 text-center"></td>
+            <td className="border border-black p-1 text-center font-bold">100.00</td>
           </tr>
           <tr>
-            <td className="border border-black p-2">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0.00</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0.00</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr className="highlight-row">
-            <td className="border border-black p-2 font-bold">จำนวนนักเรียนทั้งหมด</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-2 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-2 text-center"></td>
-            <td className="border border-black p-2 text-center font-bold">100.00</td>
+            <td className="border border-black p-1 font-bold">จำนวนนักเรียนทั้งหมด</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
+            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
+            <td className="border border-black p-1 text-center"></td>
+            <td className="border border-black p-1 text-center font-bold">100.00</td>
           </tr>
         </tbody>
       </table>
 
       {/* ส่วนสูงตามเกณฑ์อายุ */}
-      <table className="w-full border-collapse border border-black mb-6 text-xs">
+      <table className="w-full border-collapse border border-black mb-2 text-xs">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-black p-2" rowSpan={2}>ส่วนสูงตามเกณฑ์อายุ</th>
-            <th className="border border-black p-2">ชาย<br/>(คน)</th>
-            <th className="border border-black p-2">หญิง<br/>(คน)</th>
-            <th className="border border-black p-2">รวม<br/>(คน)</th>
-            <th className="border border-black p-2">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-2">ความ<br/>ครอบคลุม<br/>(%)</th>
+            <th className="border border-black p-1" rowSpan={2}>ส่วนสูงตามเกณฑ์อายุ</th>
+            <th className="border border-black p-1">ชาย<br/>(คน)</th>
+            <th className="border border-black p-1">หญิง<br/>(คน)</th>
+            <th className="border border-black p-1">รวม<br/>(คน)</th>
+            <th className="border border-black p-1">ภาวะโภชนาการ<br/>(%)</th>
+            <th className="border border-black p-1">ความ<br/>ครอบคลุม<br/>(%)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="border border-black p-2">- สูงกว่าเกณฑ์ ({'>+2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'very-tall').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'very-tall').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'very-tall').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(heightCategories, 'very-tall').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- สูงกว่าเกณฑ์ ({'>+2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-tall').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-tall').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-tall').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'very-tall').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ค่อนข้างสูง ({'>+1.5 SD. ถึง +2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'tall').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'tall').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'tall').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(heightCategories, 'tall').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- ค่อนข้างสูง ({'>+1.5 SD. ถึง +2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'tall').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'tall').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'tall').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'tall').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ส่วนสูงตามเกณฑ์ (-1.5 SD. ถึง +1.5 SD.)</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'normal').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'normal').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'normal').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(heightCategories, 'normal').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- ส่วนสูงตามเกณฑ์ (-1.5 SD. ถึง +1.5 SD.)</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'normal').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'normal').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'normal').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'normal').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ค่อนข้างเตี้ย ({'<-1.5 SD. ถึง -2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'short').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'short').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'short').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(heightCategories, 'short').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- ค่อนข้างเตี้ย ({'<-1.5 SD. ถึง -2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'short').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'short').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'short').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'short').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- เตี้ย ({'<-2 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'very-short').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'very-short').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(heightCategories, 'very-short').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(heightCategories, 'very-short').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- เตี้ย ({'<-2 SD.'}) ** ส่งรายงาน **</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-short').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-short').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-short').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'very-short').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr className="highlight-row">
-            <td className="border border-black p-2 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-2 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-2 text-center"></td>
-            <td className="border border-black p-2 text-center font-bold">100.00</td>
+            <td className="border border-black p-1 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
+            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
+            <td className="border border-black p-1 text-center"></td>
+            <td className="border border-black p-1 text-center font-bold">100.00</td>
           </tr>
           <tr>
-            <td className="border border-black p-2">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0.00</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0.00</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr className="highlight-row">
-            <td className="border border-black p-2 font-bold">จำนวนนักเรียนทั้งหมด</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-2 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-2 text-center"></td>
-            <td className="border border-black p-2 text-center font-bold">100.00</td>
+            <td className="border border-black p-1 font-bold">จำนวนนักเรียนทั้งหมด</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
+            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
+            <td className="border border-black p-1 text-center"></td>
+            <td className="border border-black p-1 text-center font-bold">100.00</td>
           </tr>
         </tbody>
       </table>
 
       {/* น้ำหนักตามเกณฑ์ส่วนสูง */}
-      <table className="w-full border-collapse border border-black mb-6 text-xs">
+      <table className="w-full border-collapse border border-black mb-2 text-xs">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-black p-2" rowSpan={2}>น้ำหนักตามเกณฑ์ส่วนสูง</th>
-            <th className="border border-black p-2">ชาย<br/>(คน)</th>
-            <th className="border border-black p-2">หญิง<br/>(คน)</th>
-            <th className="border border-black p-2">รวม<br/>(คน)</th>
-            <th className="border border-black p-2">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-2">ความ<br/>ครอบคลุม<br/>(%)</th>
+            <th className="border border-black p-1" rowSpan={2}>น้ำหนักตามเกณฑ์ส่วนสูง</th>
+            <th className="border border-black p-1">ชาย<br/>(คน)</th>
+            <th className="border border-black p-1">หญิง<br/>(คน)</th>
+            <th className="border border-black p-1">รวม<br/>(คน)</th>
+            <th className="border border-black p-1">ภาวะโภชนาการ<br/>(%)</th>
+            <th className="border border-black p-1">ความ<br/>ครอบคลุม<br/>(%)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="border border-black p-2">- อ้วน ({'>+3 SD.'}) * รวมกัน *</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'obese').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'obese').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'obese').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'obese').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- อ้วน ({'>+3 SD.'}) * รวมกัน *</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'obese').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'obese').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'obese').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'obese').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- เกินเกณฑ์ ({'>+2 SD. ถึง +3 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'overweight').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- เกินเกณฑ์ ({'>+2 SD. ถึง +3 SD.'}) ** ส่งรายงาน **</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'overweight').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ปกติ ({'+1.5 SD. ถึง +2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'normal').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'normal').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'normal').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'normal').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- ปกติ ({'+1.5 SD. ถึง +2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'normal').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'normal').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'normal').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'normal').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- สมส่วน (-1.5 SD. ถึง +1.5 SD.)</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0.00</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- สมส่วน (-1.5 SD. ถึง +1.5 SD.)</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0.00</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ค่อนข้างผอม ({'<-1.5 SD. ถึง -2 SD.'})</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'thin').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'thin').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'thin').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'thin').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- ค่อนข้างผอม ({'<-1.5 SD. ถึง -2 SD.'})</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'thin').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'thin').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'thin').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'thin').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ผอม ({'<-2 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').male}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').female}</td>
-            <td className="border border-black p-2 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').total}</td>
-            <td className="border border-black p-2 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'very-thin').total)}</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">- ผอม ({'<-2 SD.'}) ** ส่งรายงาน **</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').male}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').female}</td>
+            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').total}</td>
+            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'very-thin').total)}</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr className="highlight-row">
-            <td className="border border-black p-2 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-2 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-2 text-center"></td>
-            <td className="border border-black p-2 text-center font-bold">100.00</td>
+            <td className="border border-black p-1 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
+            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
+            <td className="border border-black p-1 text-center"></td>
+            <td className="border border-black p-1 text-center font-bold">100.00</td>
           </tr>
           <tr>
-            <td className="border border-black p-2">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0</td>
-            <td className="border border-black p-2 text-center">0.00</td>
-            <td className="border border-black p-2 text-center"></td>
+            <td className="border border-black p-1">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0</td>
+            <td className="border border-black p-1 text-center">0.00</td>
+            <td className="border border-black p-1 text-center"></td>
           </tr>
           <tr className="highlight-row">
-            <td className="border border-black p-2 font-bold">จำนวนนักเรียนทั้งหมด</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-2 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-2 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-2 text-center"></td>
-            <td className="border border-black p-2 text-center font-bold">100.00</td>
+            <td className="border border-black p-1 font-bold">จำนวนนักเรียนทั้งหมด</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
+            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
+            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
+            <td className="border border-black p-1 text-center"></td>
+            <td className="border border-black p-1 text-center font-bold">100.00</td>
           </tr>
         </tbody>
       </table>
 
-      <div className="text-right mt-8">
-        <p>(...............................................)</p>
+      <div className="text-right mt-4 signature-section">
+        <p className="text-xs">(...............................................)</p>
         {teacher ? (
           <>
-            <p>{teacher.firstName} {teacher.lastName}</p>
-            <p>{teacher.position}</p>
+            <p className="text-xs">{teacher.firstName} {teacher.lastName}</p>
+            <p className="text-xs">{teacher.position}</p>
           </>
         ) : (
           <>
-            <p>นายธุปนนท์ ศรีสู่</p>
-            <p>ครูประจำชั้น ป.4</p>
+            <p className="text-xs">นายธุปนนท์ ศรีสู่</p>
+            <p className="text-xs">ครูประจำชั้น ป.4</p>
           </>
         )}
       </div>
