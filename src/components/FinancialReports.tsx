@@ -415,15 +415,30 @@ const FinancialReports = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="payerName">ชื่อผู้จ่ายเงิน</Label>
-              <Input
-                id="payerName"
+              {/* เปลี่ยนจาก Input เป็น Select */}
+              <Select
                 value={voucherData.payerName}
-                onChange={(e) => setVoucherData(prev => ({
-                  ...prev,
-                  payerName: e.target.value
-                }))}
-                placeholder="ชื่อผู้จ่ายเงิน"
-              />
+                onValueChange={(value) =>
+                  setVoucherData((prev) => ({
+                    ...prev,
+                    payerName: value
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกผู้จ่ายเงิน" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map((teacher) => (
+                    <SelectItem
+                      key={teacher.id}
+                      value={`${teacher.firstName} ${teacher.lastName}`}
+                    >
+                      {teacher.firstName} {teacher.lastName} - {teacher.position}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="teacher">ครูประจำชั้น</Label>
