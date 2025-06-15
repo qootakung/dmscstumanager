@@ -13,6 +13,7 @@ import { toast } from '@/components/ui/use-toast';
 import ImportTemplate from './student-analysis/ImportTemplate';
 import AnalysisReportPrintable from './student-analysis/AnalysisReportPrintable';
 import type { StudentScore } from '@/types/studentAnalysis';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 
 const StudentAnalysis: React.FC = () => {
@@ -39,7 +40,7 @@ const StudentAnalysis: React.FC = () => {
         description: "ส่งคำสั่งพิมพ์รายงานเรียบร้อยแล้ว",
       });
     },
-  });
+  } as any);
 
   const subjects = [
     'ภาษาไทย',
@@ -359,15 +360,69 @@ const StudentAnalysis: React.FC = () => {
             <TabsContent value="analysis" className="animate-fade-in">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-blue-600" />
-                    รายละเอียดการวิเคราะห์ผู้เรียน
-                    {filteredStudents.length > 0 && (
-                      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                        {filteredStudents.length} คน
-                      </span>
-                    )}
-                  </CardTitle>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-blue-600" />
+                      รายละเอียดการวิเคราะห์ผู้เรียน
+                      {filteredStudents.length > 0 && (
+                        <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          {filteredStudents.length} คน
+                        </span>
+                      )}
+                    </CardTitle>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" disabled={students.length === 0}>
+                          <Printer className="mr-2 h-4 w-4" />
+                          พิมพ์รายงาน
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="grid gap-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium leading-none">พิมพ์รายงานสรุปผล</h4>
+                            <p className="text-sm text-muted-foreground">
+                              ระบุปีการศึกษาและกดพิมพ์เพื่อสร้างรายงาน
+                            </p>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="academicYear-print">ปีการศึกษา</Label>
+                            <Input
+                              id="academicYear-print"
+                              placeholder="เช่น 2567"
+                              value={academicYear}
+                              onChange={(e) => setAcademicYear(e.target.value)}
+                            />
+                          </div>
+                          <Button
+                            className="w-full"
+                            onClick={() => {
+                              if (!academicYear.trim()) {
+                                toast({
+                                  title: "กรุณาระบุปีการศึกษา",
+                                  description: "โปรดป้อนปีการศึกษาก่อนพิมพ์รายงาน",
+                                  variant: "destructive"
+                                });
+                                return;
+                              }
+                               if (students.length === 0) {
+                                toast({
+                                  title: "ไม่มีข้อมูลสำหรับพิมพ์",
+                                  description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
+                                  variant: "destructive"
+                                });
+                                return;
+                              }
+                              handlePrint();
+                            }}
+                          >
+                            <Printer className="mr-2 h-4 w-4" />
+                            ยืนยันการพิมพ์
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {filteredStudents.length > 0 ? (
@@ -613,50 +668,7 @@ const StudentAnalysis: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Print Section */}
-                  <div className="mt-6 border-t pt-6">
-                    <h3 className="text-lg font-medium text-purple-700 mb-4 text-center">พิมพ์รายงานสรุปผล</h3>
-                    <div className="space-y-4 max-w-md mx-auto">
-                      <div className="space-y-2">
-                        <Label htmlFor="academicYear" className="text-purple-800">ปีการศึกษา</Label>
-                        <Input
-                          id="academicYear"
-                          placeholder="เช่น 2567"
-                          value={academicYear}
-                          onChange={(e) => setAcademicYear(e.target.value)}
-                          className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        className="w-full h-20 flex-col gap-2 border-purple-200 hover:bg-purple-50 text-purple-700 hover:text-purple-800"
-                        onClick={() => {
-                          if (!academicYear.trim()) {
-                            toast({
-                              title: "กรุณาระบุปีการศึกษา",
-                              description: "โปรดป้อนปีการศึกษาก่อนพิมพ์รายงาน",
-                              variant: "destructive"
-                            });
-                            return;
-                          }
-                          if (students.length === 0) {
-                            toast({
-                              title: "ไม่มีข้อมูลสำหรับพิมพ์",
-                              description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
-                              variant: "destructive"
-                            });
-                            return;
-                          }
-                          handlePrint();
-                        }}
-                        disabled={students.length === 0}
-                      >
-                        <Printer className="w-6 h-6 text-purple-600" />
-                        <span className="font-semibold">พิมพ์รายงาน</span>
-                        <span className="text-xs text-gray-500">สรุปผลการวิเคราะห์รายบุคคล</span>
-                      </Button>
-                    </div>
-                  </div>
+                  {/* Print Section Removed */}
                 </CardContent>
               </Card>
             </TabsContent>
