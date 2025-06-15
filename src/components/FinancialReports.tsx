@@ -108,10 +108,21 @@ const FinancialReports = () => {
     } else {
       gradeStudents = students.filter(student => student.grade === grade);
     }
+    
+    const sortedStudents = [...gradeStudents].sort((a, b) => {
+      const aId = a.studentId || '';
+      const bId = b.studentId || '';
+
+      if (aId.length !== bId.length) {
+        return aId.length - bId.length;
+      }
+      return aId.localeCompare(bId, undefined, { numeric: true });
+    });
+      
     setVoucherData(prev => ({
       ...prev,
       grade,
-      students: gradeStudents
+      students: sortedStudents
     }));
   };
 
