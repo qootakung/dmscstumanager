@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { getStudents } from '@/utils/studentStorage';
 import { upsertStudentHealthRecords } from '@/utils/healthStorage';
@@ -13,8 +13,12 @@ import Swal from 'sweetalert2';
 const HealthImportExport: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState<{ current: number, total: number } | null>(null);
-  const [importResult, setImportResult] = useState<{ success: number, fail: number } | null>(null);
+  const [importResult, setImportResult] = useState<{ 
+    success: number, 
+    fail: number, 
+    errors?: string[], 
+    skipped?: number 
+  } | null>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -48,7 +52,6 @@ const HealthImportExport: React.FC = () => {
 
     setIsImporting(true);
     setImportResult(null);
-    setImportProgress(null);
 
     try {
       // Show loading dialog
@@ -61,29 +64,71 @@ const HealthImportExport: React.FC = () => {
         }
       });
 
-      const healthRecords = await importHealthDataFromExcel(file);
+      const importData = await importHealthDataFromExcel(file);
+      console.log('Import data result:', importData);
       
-      if (healthRecords && healthRecords.length > 0) {
-        // Update progress
-        setImportProgress({ current: 0, total: healthRecords.length });
+      if (importData.errors.length > 0) {
+        console.log('Validation errors found:', importData.errors);
         
-        Swal.update({
-          title: 'กำลังบันทึกข้อมูล...',
-          text: `กำลังบันทึก 0 / ${healthRecords.length} รายการ`
+        // Show detailed validation errors
+        Swal.fire({
+          icon: 'error',
+          title: 'พบข้อผิดพลาดในข้อมูล',
+          html: `
+            <div class="text-left max-h-96 overflow-y-auto">
+              <p class="mb-4"><strong>กรุณาตรวจสอบและแก้ไขข้อมูลต่อไปนี้:</strong></p>
+              <ul class="text-sm space-y-1">
+                ${importData.errors.map(error => `<li class="text-red-600">• ${error}</li>`).join('')}
+              </ul>
+              ${importData.validRecords > 0 ? 
+                `<p class="mt-4 text-green-600">✓ ข้อมูลที่ถูกต้อง: ${importData.validRecords} รายการ</p>` : 
+                ''
+              }
+              ${importData.skippedRecords > 0 ? 
+                `<p class="mt-2 text-gray-600">→ ข้ามแถวตัวอย่าง: ${importData.skippedRecords} รายการ</p>` : 
+                ''
+              }
+            </div>
+          `,
+          confirmButtonText: 'ตกลง',
+          width: '600px'
         });
 
-        const result = await upsertStudentHealthRecords(healthRecords);
+        setImportResult({ 
+          success: 0, 
+          fail: importData.errors.length, 
+          errors: importData.errors,
+          skipped: importData.skippedRecords 
+        });
+        return;
+      }
+      
+      if (importData.healthRecords && importData.healthRecords.length > 0) {
+        Swal.update({
+          title: 'กำลังบันทึกข้อมูล...',
+          text: `กำลังบันทึก ${importData.healthRecords.length} รายการ`
+        });
+
+        const result = await upsertStudentHealthRecords(importData.healthRecords);
         
         if (result && result.length > 0) {
-          setImportResult({ success: result.length, fail: healthRecords.length - result.length });
+          setImportResult({ 
+            success: result.length, 
+            fail: importData.healthRecords.length - result.length,
+            skipped: importData.skippedRecords 
+          });
           Swal.fire({
             icon: 'success',
             title: 'นำเข้าสำเร็จ!',
             html: `
               <div class="text-center">
                 <p class="text-green-600 mb-2">✓ นำเข้าสำเร็จ: ${result.length} รายการ</p>
-                ${healthRecords.length - result.length > 0 ? 
-                  `<p class="text-red-600">✗ ไม่สำเร็จ: ${healthRecords.length - result.length} รายการ</p>` : 
+                ${importData.healthRecords.length - result.length > 0 ? 
+                  `<p class="text-red-600">✗ ไม่สำเร็จ: ${importData.healthRecords.length - result.length} รายการ</p>` : 
+                  ''
+                }
+                ${importData.skippedRecords > 0 ? 
+                  `<p class="text-gray-600 mt-2">→ ข้ามแถวตัวอย่าง: ${importData.skippedRecords} รายการ</p>` : 
                   ''
                 }
               </div>
@@ -91,14 +136,14 @@ const HealthImportExport: React.FC = () => {
             confirmButtonText: 'ตกลง'
           });
         } else {
-          setImportResult({ success: 0, fail: healthRecords.length });
-          Swal.fire('นำเข้าไม่สำเร็จ', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาตรวจสอบรหัสนักเรียน', 'error');
+          setImportResult({ success: 0, fail: importData.healthRecords.length });
+          Swal.fire('นำเข้าไม่สำเร็จ', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
         }
       } else {
         Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลที่สามารถนำเข้าได้ในไฟล์', 'warning');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Import error:', error);
       Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด',
@@ -107,7 +152,6 @@ const HealthImportExport: React.FC = () => {
       });
     } finally {
       setIsImporting(false);
-      setImportProgress(null);
     }
   }, []);
 
@@ -173,11 +217,6 @@ const HealthImportExport: React.FC = () => {
                 <div className="flex flex-col items-center gap-2">
                   <Loader2 className="w-8 h-8 animate-spin text-school-primary" />
                   <p>กำลังประมวลผล...</p>
-                  {importProgress && (
-                    <p className="text-sm text-gray-600">
-                      {importProgress.current} / {importProgress.total} รายการ
-                    </p>
-                  )}
                 </div>
               ) : isDragActive ? (
                 <p>วางไฟล์ที่นี่...</p>
@@ -192,15 +231,38 @@ const HealthImportExport: React.FC = () => {
             {importResult && (
                <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
                   <p className="font-bold mb-2">ผลการนำเข้า:</p>
-                  <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>สำเร็จ: {importResult.success} รายการ</span>
-                  </div>
-                  {importResult.fail > 0 && (
-                      <div className="flex items-center gap-2 text-red-600 mt-1">
-                          <XCircle className="w-4 h-4" />
-                          <span>ไม่สำเร็จ: {importResult.fail} รายการ (อาจเนื่องจากรหัสนักเรียนไม่ถูกต้อง)</span>
+                  <div className="space-y-1">
+                    {importResult.success > 0 && (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>สำเร็จ: {importResult.success} รายการ</span>
                       </div>
+                    )}
+                    {importResult.fail > 0 && (
+                      <div className="flex items-center gap-2 text-red-600">
+                        <XCircle className="w-4 h-4" />
+                        <span>ไม่สำเร็จ: {importResult.fail} รายการ</span>
+                      </div>
+                    )}
+                    {importResult.skipped && importResult.skipped > 0 && (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>ข้ามแถวตัวอย่าง: {importResult.skipped} รายการ</span>
+                      </div>
+                    )}
+                  </div>
+                  {importResult.errors && importResult.errors.length > 0 && (
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded max-h-40 overflow-y-auto">
+                      <p className="font-medium text-red-800 mb-2">รายการข้อผิดพลาด:</p>
+                      <ul className="text-xs text-red-700 space-y-1">
+                        {importResult.errors.slice(0, 10).map((error, index) => (
+                          <li key={index}>• {error}</li>
+                        ))}
+                        {importResult.errors.length > 10 && (
+                          <li className="text-gray-600">... และอีก {importResult.errors.length - 10} รายการ</li>
+                        )}
+                      </ul>
+                    </div>
                   )}
                </div>
             )}

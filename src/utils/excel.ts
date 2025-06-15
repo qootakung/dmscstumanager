@@ -1,4 +1,3 @@
-
 // Excel utility functions for importing and exporting data
 import * as XLSX from 'xlsx';
 import { Student } from '@/types/student';
@@ -165,75 +164,146 @@ export const importFromExcel = (file: File): Promise<any[]> => {
   });
 };
 
-export const importHealthDataFromExcel = (file: File): Promise<any[]> => {
+export const importHealthDataFromExcel = (file: File): Promise<{ 
+  healthRecords: any[], 
+  errors: string[], 
+  validRecords: number,
+  skippedRecords: number 
+}> => {
   return new Promise(async (resolve, reject) => {
-    const students = await getStudents();
-    const studentMap = new Map(students.map(s => [s.studentId, s.id]));
+    try {
+      console.log('Starting health data import...');
+      const students = await getStudents();
+      console.log('Found', students.length, 'students in system');
+      
+      const studentMap = new Map(students.map(s => [s.studentId, s.id]));
+      console.log('Student ID mappings:', Array.from(studentMap.keys()));
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = e.target?.result;
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        const currentAcademicYear = (new Date().getFullYear() + 543).toString();
+          console.log('Excel data rows:', jsonData.length);
 
-        const healthRecords = jsonData.map((row: any, index: number) => {
-          // Skip the example row (first row after header)
-          if (index === 0 && row['รหัสนักเรียน']?.toString().includes('ตัวอย่าง')) {
-            return null;
-          }
+          const currentAcademicYear = (new Date().getFullYear() + 543).toString();
+          const errors: string[] = [];
+          const healthRecords: any[] = [];
+          let validRecords = 0;
+          let skippedRecords = 0;
 
-          const studentId = row['รหัสนักเรียน']?.toString().trim();
-          if (!studentId || studentId.includes('ตัวอย่าง')) return null;
+          jsonData.forEach((row: any, index: number) => {
+            const rowNumber = index + 2; // +2 because Excel rows start at 1 and we have header
+            
+            // Skip the example row (first row after header)
+            const studentIdRaw = row['รหัสนักเรียน']?.toString().trim();
+            if (!studentIdRaw || studentIdRaw.includes('ตัวอย่าง')) {
+              console.log(`Row ${rowNumber}: Skipping example/empty row`);
+              skippedRecords++;
+              return;
+            }
 
-          const studentUUID = studentMap.get(studentId);
-          if (!studentUUID) {
-              console.warn(`Student with ID ${studentId} not found. Skipping.`);
-              return null;
-          }
+            console.log(`Processing row ${rowNumber}: Student ID = ${studentIdRaw}`);
 
-          const measurementDateValue = row['วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)'];
-          let measurementDateISO = '';
-          if (measurementDateValue instanceof Date) {
-            let year = measurementDateValue.getFullYear();
-            if (year > 2500) year -= 543;
-            const month = (measurementDateValue.getMonth() + 1).toString().padStart(2, '0');
-            const day = measurementDateValue.getDate().toString().padStart(2, '0');
-            measurementDateISO = `${year}-${month}-${day}`;
-          } else if (typeof measurementDateValue === 'string') {
-             const parts = measurementDateValue.split(/[/.-]/);
-             if (parts.length === 3) {
-                 const [day, month, yearStr] = parts;
-                 let year = parseInt(yearStr, 10);
-                 if (year > 2500) year -= 543; // Buddhist year
-                 measurementDateISO = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-             }
-          }
+            const studentUUID = studentMap.get(studentIdRaw);
+            if (!studentUUID) {
+              const errorMsg = `แถวที่ ${rowNumber}: ไม่พบรหัสนักเรียน "${studentIdRaw}" ในระบบ`;
+              console.warn(errorMsg);
+              errors.push(errorMsg);
+              return;
+            }
 
-          if (!measurementDateISO) return null;
+            // Process measurement date
+            const measurementDateValue = row['วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)'];
+            let measurementDateISO = '';
+            
+            if (!measurementDateValue) {
+              errors.push(`แถวที่ ${rowNumber}: กรุณาระบุวันที่ชั่งน้ำหนัก`);
+              return;
+            }
 
-          const weight = parseFloat(row['น้ำหนัก (กก.)']);
-          const height = parseFloat(row['ส่วนสูง (ซม.)']);
+            if (measurementDateValue instanceof Date) {
+              let year = measurementDateValue.getFullYear();
+              if (year > 2500) year -= 543;
+              const month = (measurementDateValue.getMonth() + 1).toString().padStart(2, '0');
+              const day = measurementDateValue.getDate().toString().padStart(2, '0');
+              measurementDateISO = `${year}-${month}-${day}`;
+              console.log(`Row ${rowNumber}: Date processed as ${measurementDateISO}`);
+            } else if (typeof measurementDateValue === 'string') {
+              const parts = measurementDateValue.split(/[/.-]/);
+              if (parts.length === 3) {
+                const [day, month, yearStr] = parts;
+                let year = parseInt(yearStr, 10);
+                if (isNaN(year)) {
+                  errors.push(`แถวที่ ${rowNumber}: รูปแบบปีไม่ถูกต้อง "${yearStr}"`);
+                  return;
+                }
+                if (year > 2500) year -= 543; // Buddhist year conversion
+                measurementDateISO = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                console.log(`Row ${rowNumber}: Date string processed as ${measurementDateISO}`);
+              } else {
+                errors.push(`แถวที่ ${rowNumber}: รูปแบบวันที่ไม่ถูกต้อง "${measurementDateValue}" (ใช้รูปแบบ วว/ดด/ปปปป)`);
+                return;
+              }
+            }
 
-          return {
-            student_id: studentUUID,
-            measurement_date: measurementDateISO,
-            weight_kg: isNaN(weight) ? null : weight,
-            height_cm: isNaN(height) ? null : height,
-            academic_year: currentAcademicYear,
-          };
-        }).filter(Boolean);
+            if (!measurementDateISO) {
+              errors.push(`แถวที่ ${rowNumber}: ไม่สามารถประมวลผลวันที่ได้`);
+              return;
+            }
 
-        resolve(healthRecords);
-      } catch (error) {
-        console.error("Error processing Excel file for health data:", error);
-        reject(error);
-      }
-    };
-    reader.readAsArrayBuffer(file);
+            // Process weight and height
+            const weightRaw = row['น้ำหนัก (กก.)'];
+            const heightRaw = row['ส่วนสูง (ซม.)'];
+            
+            const weight = weightRaw ? parseFloat(weightRaw.toString()) : null;
+            const height = heightRaw ? parseFloat(heightRaw.toString()) : null;
+
+            if (weight !== null && (isNaN(weight) || weight <= 0)) {
+              errors.push(`แถวที่ ${rowNumber}: น้ำหนักไม่ถูกต้อง "${weightRaw}"`);
+              return;
+            }
+
+            if (height !== null && (isNaN(height) || height <= 0)) {
+              errors.push(`แถวที่ ${rowNumber}: ส่วนสูงไม่ถูกต้อง "${heightRaw}"`);
+              return;
+            }
+
+            if (weight === null && height === null) {
+              errors.push(`แถวที่ ${rowNumber}: กรุณาระบุน้ำหนักหรือส่วนสูงอย่างน้อย 1 ค่า`);
+              return;
+            }
+
+            const healthRecord = {
+              student_id: studentUUID,
+              measurement_date: measurementDateISO,
+              weight_kg: weight,
+              height_cm: height,
+              academic_year: currentAcademicYear,
+            };
+
+            healthRecords.push(healthRecord);
+            validRecords++;
+            console.log(`Row ${rowNumber}: Valid record created for student ${studentIdRaw}`);
+          });
+
+          console.log(`Import summary: ${validRecords} valid, ${errors.length} errors, ${skippedRecords} skipped`);
+          resolve({ healthRecords, errors, validRecords, skippedRecords });
+          
+        } catch (error) {
+          console.error("Error processing Excel file for health data:", error);
+          reject(new Error('ไม่สามารถอ่านไฟล์ Excel ได้ กรุณาตรวจสอบรูปแบบไฟล์'));
+        }
+      };
+      
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Error in importHealthDataFromExcel:", error);
+      reject(error);
+    }
   });
 };
