@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/healthStorage';
@@ -104,11 +103,12 @@ const HealthDataTable: React.FC = () => {
         <div className="flex flex-row items-center justify-between">
           <CardTitle>ตารางข้อมูลสุขภาพนักเรียน</CardTitle>
           <HealthDataActions
-            healthData={healthData || []}
+            data={healthData || []}
             selectedGrade={selectedGrade}
             selectedMonth={selectedMonth}
-            currentAcademicYear={currentAcademicYear}
-            isLoading={isLoading}
+            selectedYear={currentAcademicYear}
+            onImport={() => {}}
+            onExport={() => {}}
           />
         </div>
         <div className="pt-4">
@@ -131,7 +131,7 @@ const HealthDataTable: React.FC = () => {
           isPending={updateMutation.isPending}
           selectedMonth={selectedMonth}
           selectedGrade={selectedGrade}
-          currentAcademicYear={currentAcademicYear}
+          selectedYear={currentAcademicYear}
           onCellClick={handleCellClick}
           onValueChange={setEditValue}
           onUpdate={handleUpdate}

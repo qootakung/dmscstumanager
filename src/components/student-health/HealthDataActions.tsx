@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, FileText, Printer } from 'lucide-react';
 import { StudentHealthDetails } from '@/types/student';
@@ -33,16 +33,27 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
 }) => {
   const [showTeacherDialog, setShowTeacherDialog] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [teachers] = useState<Teacher[]>(() => {
-    // Get teachers from storage and map to required format
-    const storedTeachers = getTeachers();
-    return storedTeachers.map(teacher => ({
-      id: teacher.id,
-      firstName: teacher.firstName,
-      lastName: teacher.lastName,
-      position: teacher.position,
-    }));
-  });
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+
+  useEffect(() => {
+    const loadTeachers = async () => {
+      try {
+        const storedTeachers = await getTeachers();
+        const mappedTeachers = storedTeachers.map(teacher => ({
+          id: teacher.id,
+          firstName: teacher.firstName,
+          lastName: teacher.lastName,
+          position: teacher.position,
+        }));
+        setTeachers(mappedTeachers);
+      } catch (error) {
+        console.error('Error loading teachers:', error);
+        setTeachers([]);
+      }
+    };
+
+    loadTeachers();
+  }, []);
 
   const handlePrintStatistics = () => {
     if (teachers.length === 0) {
