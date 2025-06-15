@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, AlertCircle, Printer, Eye } from 'lucide-react';
+import { BarChart3, TrendingUp, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, Printer, Eye } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import ImportTemplate from './student-analysis/ImportTemplate';
 import AnalysisReportPrintable from './student-analysis/AnalysisReportPrintable';
@@ -33,7 +33,7 @@ const StudentAnalysis: React.FC = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
-    content: () => reportRef.current,
+    contentRef: reportRef,
     documentTitle: `สรุปผลการวิเคราะห์ผู้เรียน-${academicYear || new Date().getFullYear() + 543}`,
     onBeforePrint: () => {
       console.log('เริ่มพิมพ์รายงาน...');
@@ -54,42 +54,7 @@ const StudentAnalysis: React.FC = () => {
         variant: "destructive",
       });
     },
-    pageStyle: `
-      @page {
-        size: A4;
-        margin: 15mm;
-      }
-      
-      @media print {
-        body { 
-          font-family: 'TH SarabunPSK', 'Sarabun', sans-serif !important;
-          -webkit-print-color-adjust: exact;
-          color-adjust: exact;
-        }
-        
-        .no-print { 
-          display: none !important; 
-        }
-        
-        table {
-          page-break-inside: auto;
-        }
-        
-        tr {
-          page-break-inside: avoid;
-          page-break-after: auto;
-        }
-        
-        thead {
-          display: table-header-group;
-        }
-        
-        tfoot {
-          display: table-footer-group;
-        }
-      }
-    `
-  } as any);
+  });
 
   const subjects = [
     'ภาษาไทย',
