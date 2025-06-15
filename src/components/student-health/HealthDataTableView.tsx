@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Table,
@@ -21,7 +20,7 @@ interface HealthDataTableViewProps {
   isPending: boolean;
   selectedMonth: string;
   selectedGrade: string;
-  currentAcademicYear: string;
+  selectedYear: string;
   onCellClick: (record: StudentHealthDetails, column: 'weight' | 'height') => void;
   onValueChange: (value: string) => void;
   onUpdate: () => void;
@@ -37,7 +36,7 @@ const HealthDataTableView: React.FC<HealthDataTableViewProps> = ({
   isPending,
   selectedMonth,
   selectedGrade,
-  currentAcademicYear,
+  selectedYear,
   onCellClick,
   onValueChange,
   onUpdate,
@@ -106,7 +105,7 @@ const HealthDataTableView: React.FC<HealthDataTableViewProps> = ({
                   ไม่พบข้อมูลสำหรับตัวกรองที่เลือก
                   <br />
                   <small className="text-muted-foreground">
-                    ปีการศึกษา: {currentAcademicYear} | เดือน: {selectedMonth} | ระดับชั้น: {selectedGrade}
+                    ปีการศึกษา: {selectedYear} | เดือน: {selectedMonth} | ระดับชั้น: {selectedGrade}
                   </small>
                 </TableCell>
               </TableRow>
