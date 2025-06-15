@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, AlertCircle, Printer } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, AlertCircle, Printer, Eye } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import ImportTemplate from './student-analysis/ImportTemplate';
 import AnalysisReportPrintable from './student-analysis/AnalysisReportPrintable';
@@ -28,6 +28,7 @@ const StudentAnalysis: React.FC = () => {
     poor: 0       // อ่อน (ต่ำกว่า 2)
   });
   const [academicYear, setAcademicYear] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
 
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -317,6 +318,7 @@ const StudentAnalysis: React.FC = () => {
               </TabsTrigger>
             </TabsList>
 
+            {/* Overview Tab */}
             <TabsContent value="overview" className="animate-fade-in">
               <div className="space-y-6">
                 {/* Statistics Cards */}
@@ -405,6 +407,7 @@ const StudentAnalysis: React.FC = () => {
               </div>
             </TabsContent>
 
+            {/* Analysis Tab */}
             <TabsContent value="analysis" className="animate-fade-in">
               <Card>
                 <CardHeader>
@@ -418,65 +421,152 @@ const StudentAnalysis: React.FC = () => {
                         </span>
                       )}
                     </CardTitle>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                    <div className="flex gap-2">
+                      {students.length > 0 && (
                         <Button 
                           variant="outline" 
-                          disabled={students.length === 0}
-                          className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                          onClick={() => setShowPreview(!showPreview)}
+                          className="bg-green-50 hover:bg-green-100 border-green-200"
                         >
-                          <Printer className="mr-2 h-4 w-4" />
-                          พิมพ์รายงาน
+                          <Eye className="mr-2 h-4 w-4" />
+                          {showPreview ? 'ซ่อนตัวอย่าง' : 'แสดงตัวอย่างรายงาน'}
                         </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <div className="grid gap-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium leading-none">พิมพ์รายงานสรุปผล</h4>
-                            <p className="text-sm text-muted-foreground">
-                              ระบุปีการศึกษาและกดยืนยันเพื่อพิมพ์รายงาน
-                            </p>
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="academicYear-print">ปีการศึกษา</Label>
-                            <Input
-                              id="academicYear-print"
-                              placeholder="เช่น 2567"
-                              value={academicYear}
-                              onChange={(e) => setAcademicYear(e.target.value)}
-                            />
-                          </div>
-                          <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700"
-                            onClick={() => {
-                              if (!academicYear.trim()) {
-                                toast({
-                                  title: "กรุณาระบุปีการศึกษา",
-                                  description: "โปรดป้อนปีการศึกษาก่อนพิมพ์รายงาน",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-                              if (students.length === 0) {
-                                toast({
-                                  title: "ไม่มีข้อมูลสำหรับพิมพ์",
-                                  description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-                              handlePrint();
-                            }}
+                      )}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            disabled={students.length === 0}
+                            className="bg-blue-50 hover:bg-blue-100 border-blue-200"
                           >
                             <Printer className="mr-2 h-4 w-4" />
-                            ยืนยันการพิมพ์
+                            พิมพ์รายงาน
                           </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="grid gap-4">
+                            <div className="space-y-2">
+                              <h4 className="font-medium leading-none">พิมพ์รายงานสรุปผล</h4>
+                              <p className="text-sm text-muted-foreground">
+                                ระบุปีการศึกษาและกดยืนยันเพื่อพิมพ์รายงาน
+                              </p>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="academicYear-print">ปีการศึกษา</Label>
+                              <Input
+                                id="academicYear-print"
+                                placeholder="เช่น 2567"
+                                value={academicYear}
+                                onChange={(e) => setAcademicYear(e.target.value)}
+                              />
+                            </div>
+                            <Button
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                              onClick={() => {
+                                if (!academicYear.trim()) {
+                                  toast({
+                                    title: "กรุณาระบุปีการศึกษา",
+                                    description: "โปรดป้อนปีการศึกษาก่อนพิมพ์รายงาน",
+                                    variant: "destructive"
+                                  });
+                                  return;
+                                }
+                                if (students.length === 0) {
+                                  toast({
+                                    title: "ไม่มีข้อมูลสำหรับพิมพ์",
+                                    description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
+                                    variant: "destructive"
+                                  });
+                                  return;
+                                }
+                                handlePrint();
+                              }}
+                            >
+                              <Printer className="mr-2 h-4 w-4" />
+                              ยืนยันการพิมพ์
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
+                  {/* Print Preview Section */}
+                  {showPreview && students.length > 0 && academicYear && (
+                    <div className="mb-6 border rounded-lg p-4 bg-gray-50">
+                      <h3 className="text-lg font-semibold mb-4 text-center">ตัวอย่างรายงาน</h3>
+                      <div className="bg-white p-6 rounded shadow-sm font-sarabun">
+                        <div className="text-center mb-4">
+                          <h2 className="text-xl font-bold">สรุปผลการวิเคราะห์ผู้เรียนรายบุคคล</h2>
+                          <p className="text-lg">ปีการศึกษา {academicYear} โรงเรียนบ้านดอนมูล</p>
+                        </div>
+                        
+                        {/* แสดงตัวอย่างเฉพาะชั้นเรียนแรก */}
+                        {(() => {
+                          const studentsByGrade = students.reduce((acc, student) => {
+                            const grade = student.grade || 'ไม่ระบุชั้น';
+                            if (!acc[grade]) {
+                              acc[grade] = [];
+                            }
+                            acc[grade].push(student);
+                            return acc;
+                          }, {} as { [key: string]: StudentScore[] });
+                          
+                          const firstGrade = Object.keys(studentsByGrade)[0];
+                          const firstGradeStudents = studentsByGrade[firstGrade] || [];
+                          
+                          return (
+                            <div>
+                              <div className="flex justify-between items-center mb-2">
+                                <h3 className="text-lg font-bold">ระดับชั้น {firstGrade}</h3>
+                                <p className="text-sm">จำนวน {firstGradeStudents.length} คน</p>
+                              </div>
+
+                              <table className="w-full border-collapse border border-black text-sm">
+                                <thead>
+                                  <tr className="bg-gray-200">
+                                    <th className="border border-black px-2 py-1 text-center font-medium">ลำดับ</th>
+                                    <th className="border border-black px-2 py-1 text-center font-medium">รหัสนักเรียน</th>
+                                    <th className="border border-black px-2 py-1 text-left font-medium">ชื่อ-นามสกุล</th>
+                                    <th className="border border-black px-2 py-1 text-center font-medium">คะแนนเฉลี่ย</th>
+                                    <th className="border border-black px-2 py-1 text-center font-medium">กลุ่ม</th>
+                                    <th className="border border-black px-2 py-1 text-center font-medium">จำนวนวิชาที่ประเมิน</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {firstGradeStudents.slice(0, 5).map((student, index) => (
+                                    <tr key={student.id}>
+                                      <td className="border border-black px-2 py-1 text-center">{index + 1}</td>
+                                      <td className="border border-black px-2 py-1 text-center">{student.studentId}</td>
+                                      <td className="border border-black px-2 py-1 text-left">{student.studentName}</td>
+                                      <td className="border border-black px-2 py-1 text-center">{student.averageScore.toFixed(2)}</td>
+                                      <td className="border border-black px-2 py-1 text-center">{student.group}</td>
+                                      <td className="border border-black px-2 py-1 text-center">{Object.keys(student.scores).length}</td>
+                                    </tr>
+                                  ))}
+                                  {firstGradeStudents.length > 5 && (
+                                    <tr>
+                                      <td colSpan={6} className="border border-black px-2 py-1 text-center text-gray-500">
+                                        ... และอีก {firstGradeStudents.length - 5} คน
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                              
+                              {Object.keys(studentsByGrade).length > 1 && (
+                                <p className="text-sm text-gray-600 mt-2 text-center">
+                                  * นี่เป็นตัวอย่างเฉพาะชั้น {firstGrade} รายงานจริงจะแสดงทุกชั้นเรียน
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
                   {filteredStudents.length > 0 ? (
                     <div className="space-y-4">
                       <Table>
@@ -527,6 +617,7 @@ const StudentAnalysis: React.FC = () => {
               </Card>
             </TabsContent>
 
+            {/* Import Tab */}
             <TabsContent value="import" className="animate-fade-in">
               <Card>
                 <CardHeader>
@@ -660,6 +751,7 @@ const StudentAnalysis: React.FC = () => {
               </Card>
             </TabsContent>
 
+            {/* Report Tab */}
             <TabsContent value="report" className="animate-fade-in">
               <Card>
                 <CardHeader>
