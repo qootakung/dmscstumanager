@@ -175,8 +175,8 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
       `}</style>
       
       <header className="text-center mb-4">
-        <h1 className="text-base font-bold">โดย โปรแกรมของสถานีวิจัยโภชนาการ มหาวิทยาลัยมหิดล</h1>
-        <h2 className="text-base font-bold">โรงเรียนบ้านดอนมูล</h2>
+        <h1 className="text-base font-bold">การแปลผลภาวะโภชนาการของเด็กนักเรียน</h1>
+        <h2 className="text-base font-bold">ระดับชั้น {grade} โรงเรียนบ้านดอนมูล</h2>
         <h3 className="text-base font-bold">อันดับขนาดร่างกายของเด็กวัยเรียนรายบุคคล</h3>
       </header>
 
