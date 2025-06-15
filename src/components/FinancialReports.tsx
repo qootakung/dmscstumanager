@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import useReactToPrint from 'react-to-print';
+import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PaymentTypeSelection from './Finance/form/PaymentTypeSelection';
 import AcademicInfoSection from './Finance/form/AcademicInfoSection';
