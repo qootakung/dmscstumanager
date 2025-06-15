@@ -1,0 +1,162 @@
+
+import React from 'react';
+import { StudentHealthDetails } from '@/types/student';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+interface HealthReportAdvancedProps {
+  data: StudentHealthDetails[];
+  grade: string;
+  month: string;
+  academicYear: string;
+}
+
+const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade, month, academicYear }) => {
+  // ฟังก์ชันคำนวณ BMI
+  const calculateBMI = (weight: number | null, height: number | null): number | null => {
+    if (!weight || !height) return null;
+    const heightInMeters = height / 100;
+    return weight / (heightInMeters * heightInMeters);
+  };
+
+  // ฟังก์ชันประเมิน BMI
+  const evaluateBMI = (bmi: number | null): string => {
+    if (!bmi) return '-';
+    if (bmi < 18.5) return 'น้ำหนักน้อย';
+    if (bmi < 23) return 'น้ำหนักปกติ';
+    if (bmi < 25) return 'น้ำหนักเกิน';
+    if (bmi < 30) return 'อ้วนระดับ 1';
+    return 'อ้วนระดับ 2';
+  };
+
+  // ฟังก์ชันประเมินสุขภาพตามอายุ (ตัวอย่าง)
+  const evaluateHealthByAge = (bmi: number | null, age: number): string => {
+    if (!bmi) return '-';
+    // เกณฑ์การประเมินสำหรับเด็ก (ตัวอย่าง)
+    if (age <= 12) {
+      if (bmi < 16) return 'น้ำหนักน้อยกว่าเกณฑ์';
+      if (bmi < 20) return 'น้ำหนักปกติ';
+      if (bmi < 22) return 'น้ำหนักเกินเกณฑ์';
+      return 'น้ำหนักเกินมากกว่าเกณฑ์';
+    } else {
+      // เกณฑ์สำหรับวัยรุ่น
+      if (bmi < 18.5) return 'น้ำหนักน้อยกว่าเกณฑ์';
+      if (bmi < 23) return 'น้ำหนักปกติ';
+      if (bmi < 25) return 'น้ำหนักเกินเกณฑ์';
+      return 'น้ำหนักเกินมากกว่าเกณฑ์';
+    }
+  };
+
+  return (
+    <div className="p-4 font-sarabun">
+      <style>{`
+        body { 
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 1cm;
+          }
+          body {
+            font-size: 8pt;
+          }
+          .p-4 {
+             padding: 0 !important;
+          }
+          header {
+            margin-bottom: 1rem !important;
+          }
+          h1, h2, h3 {
+            font-size: 10pt;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th, td {
+            border: 1px solid #000 !important;
+            padding: 2px 4px !important;
+            vertical-align: middle;
+            font-size: 8pt !important;
+          }
+          th {
+            background-color: #90EE90 !important;
+            text-align: center;
+            font-weight: bold;
+          }
+          td.text-center {
+            text-align: center;
+          }
+          .bmi-header {
+            background-color: #FFB6C1 !important;
+          }
+        }
+      `}</style>
+      
+      <header className="text-center mb-4">
+        <h1 className="text-base font-bold">โดย โปรแกรมของสถานีวิจัยโภชนาการ มหาวิทยาลัยมหิดล</h1>
+        <h2 className="text-base font-bold">โรงเรียนบ้านดอนมูล</h2>
+        <h3 className="text-base font-bold">อันดับขนาดร่างกายของเด็กวัยเรียนรายบุคคล</h3>
+      </header>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead rowSpan={2} className="w-[40px] text-center">ลำดับ</TableHead>
+            <TableHead rowSpan={2} className="w-[120px] text-center">ชื่อ-นามสกุล</TableHead>
+            <TableHead rowSpan={2} className="w-[60px] text-center">เพศ</TableHead>
+            <TableHead rowSpan={2} className="w-[60px] text-center">อายุ (ปี)</TableHead>
+            <TableHead rowSpan={2} className="w-[80px] text-center">น้ำหนัก (กิโลกรัม)</TableHead>
+            <TableHead rowSpan={2} className="w-[80px] text-center">ส่วนสูง (เซนติเมตร)</TableHead>
+            <TableHead className="text-center bmi-header" colSpan={3}>น้ำหนักตามอายุ</TableHead>
+            <TableHead className="text-center bmi-header" colSpan={2}>ส่วนสูงตามอายุ</TableHead>
+            <TableHead className="text-center bmi-header" colSpan={2}>น้ำหนักตามส่วนสูง</TableHead>
+          </TableRow>
+          <TableRow>
+            <TableHead className="text-center bmi-header">ดัชนีมวลกาย</TableHead>
+            <TableHead className="text-center bmi-header">ความหมาย</TableHead>
+            <TableHead className="text-center bmi-header">ประเมินผล</TableHead>
+            <TableHead className="text-center bmi-header">ความหมาย</TableHead>
+            <TableHead className="text-center bmi-header">ประเมินผล</TableHead>
+            <TableHead className="text-center bmi-header">ความหมาย</TableHead>
+            <TableHead className="text-center bmi-header">ประเมินผล</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((record, index) => {
+            const bmi = calculateBMI(record.weight_kg, record.height_cm);
+            const bmiEvaluation = evaluateBMI(bmi);
+            const healthEvaluation = evaluateHealthByAge(bmi, record.age_years);
+            
+            return (
+              <TableRow key={record.record_id}>
+                <TableCell className="text-center">{index + 1}</TableCell>
+                <TableCell>{record.full_name}</TableCell>
+                <TableCell className="text-center">-</TableCell>
+                <TableCell className="text-center">{record.age_years}</TableCell>
+                <TableCell className="text-center">{record.weight_kg?.toFixed(2) ?? '-'}</TableCell>
+                <TableCell className="text-center">{record.height_cm?.toFixed(2) ?? '-'}</TableCell>
+                <TableCell className="text-center">{bmi ? bmi.toFixed(2) : '-'}</TableCell>
+                <TableCell className="text-center">{bmiEvaluation}</TableCell>
+                <TableCell className="text-center">{healthEvaluation}</TableCell>
+                <TableCell className="text-center">-</TableCell>
+                <TableCell className="text-center">-</TableCell>
+                <TableCell className="text-center">-</TableCell>
+                <TableCell className="text-center">-</TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+
+      <div className="mt-4 text-sm">
+        <p><strong>หมายเหตุ:</strong></p>
+        <p>- ดัชนีมวลกาย (BMI) = น้ำหนัก (กก.) ÷ ส่วนสูง² (ม.)</p>
+        <p>- เกณฑ์การประเมิน: น้ำหนักน้อย (BMI &lt; 18.5), ปกติ (18.5-22.9), เกิน (23-24.9), อ้วน (≥ 25)</p>
+      </div>
+    </div>
+  );
+};
+
+export default HealthReportAdvanced;
