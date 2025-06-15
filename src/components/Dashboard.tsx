@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, GraduationCap, FileText, Activity } from 'lucide-react';
@@ -74,7 +73,7 @@ const Dashboard = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-800">
@@ -122,23 +121,6 @@ const Dashboard = () => {
             <div className="text-3xl font-bold text-orange-900">8</div>
             <p className="text-xs text-orange-700 font-medium">
               รายงานที่สร้างแล้ว
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-800">
-              ข้อมูลสุขภาพ
-            </CardTitle>
-            <div className="bg-purple-500 p-2 rounded-full">
-              <Activity className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-purple-900">{statistics.total}</div>
-            <p className="text-xs text-purple-700 font-medium">
-              ข้อมูลน้ำหนัก-ส่วนสูง
             </p>
           </CardContent>
         </Card>
