@@ -11,6 +11,7 @@ import Reports from '@/components/Reports';
 import TeacherReports from '@/components/TeacherReports';
 import AdminPanel from '@/components/AdminPanel';
 import StudentHealth from '@/components/StudentHealth';
+import StudentAnalysis from '@/components/StudentAnalysis';
 import { getCurrentUser, logout } from '@/utils/userStorage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
