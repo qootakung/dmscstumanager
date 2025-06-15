@@ -1,4 +1,3 @@
-
 import React from "react";
 import type { Student } from "@/types/student";
 import type { Teacher } from "@/types/teacher";
@@ -111,24 +110,32 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
       <div className="text-center w-1/3">
         <div>
           ลงชื่อ
-          <span className="inline-block border-b border-dotted min-w-[120px] mx-1">{voucherData.payerName || '..........................................'}</span>
+          <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
+            {voucherData.payerName ? voucherData.payerName : "..............................."}
+          </span>
           ผู้จ่ายเงิน
         </div>
         <div>
-          (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">{voucherData.payerName || '..........................................'}</span>)
+          (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
+            {voucherData.payerName ? voucherData.payerName : "..............................."}
+          </span>)
         </div>
       </div>
       <div className="text-center w-1/3">
         <div>
           ลงชื่อ
           <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : '..........................................'}
+            {voucherData.selectedTeacher
+              ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
+              : "..............................."}
           </span>
           ครูประจำชั้น
         </div>
         <div>
           (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : '..........................................'}
+            {voucherData.selectedTeacher
+              ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
+              : "..............................."}
           </span>)
         </div>
       </div>
@@ -138,12 +145,14 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
       <div className="my-2">
         ลงชื่อ
         <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-          {voucherData.principalName || '..........................................'}
+          {voucherData.principalName ? voucherData.principalName : "..............................."}
         </span>
         ผู้อำนวยการโรงเรียน
       </div>
       <div>
-        (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">{voucherData.principalName || '..........................................'}</span>)
+        (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
+          {voucherData.principalName ? voucherData.principalName : "..............................."}
+        </span>)
       </div>
     </div>
   </div>
