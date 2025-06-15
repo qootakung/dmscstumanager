@@ -9,8 +9,8 @@ import SchoolInfoSection from './Finance/form/SchoolInfoSection';
 import { Button } from '@/components/ui/button';
 import PrintPreviewDialog from './Finance/PrintPreviewDialog';
 import { useFinancialVoucher } from '@/hooks/useFinancialVoucher';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import PaymentDetailsSection from './Finance/form/PaymentDetailsSection';
+import StudentCountInfo from './Finance/form/StudentCountInfo';
 
 const FinancialReports = () => {
   const {
@@ -67,39 +67,17 @@ const FinancialReports = () => {
             onGradeChange={handleGradeChange}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-            <div>
-              <Label htmlFor="paymentDate">วันที่จ่ายเงิน</Label>
-              <Input
-                id="paymentDate"
-                value={voucherData.paymentDate}
-                onChange={(e) => setVoucherData(prev => ({ ...prev, paymentDate: e.target.value }))}
-                placeholder="เช่น 18 มิ.ย. 68"
-              />
-            </div>
-            <div>
-              <Label htmlFor="amountPerStudent">จำนวนเงิน (ต่อคน)</Label>
-              <Input
-                id="amountPerStudent"
-                type="number"
-                value={voucherData.amountPerStudent}
-                onChange={(e) => setVoucherData(prev => ({ ...prev, amountPerStudent: e.target.value }))}
-                placeholder="ระบุจำนวนเงิน"
-              />
-            </div>
-          </div>
+          <PaymentDetailsSection
+            paymentDate={voucherData.paymentDate}
+            amountPerStudent={voucherData.amountPerStudent}
+            onPaymentDateChange={(value) => setVoucherData(prev => ({ ...prev, paymentDate: value }))}
+            onAmountPerStudentChange={(value) => setVoucherData(prev => ({ ...prev, amountPerStudent: value }))}
+          />
 
-          {voucherData.students.length > 0 && (
-            <div className="p-4 bg-blue-50 rounded-md">
-              <p className="text-sm text-blue-700">
-                {voucherData.grade === "ทุกระดับชั้น" ? (
-                  <>จำนวนนักเรียนทั้งหมด: {voucherData.students.length} คน</>
-                ) : (
-                  <>จำนวนนักเรียนในชั้น {voucherData.grade}: {voucherData.students.length} คน</>
-                )}
-              </p>
-            </div>
-          )}
+          <StudentCountInfo 
+            grade={voucherData.grade}
+            studentCount={voucherData.students.length}
+          />
 
           <SignatureFields
             teachers={teachers}
