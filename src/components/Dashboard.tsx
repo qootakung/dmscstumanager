@@ -26,11 +26,27 @@ const Dashboard = () => {
     loadStatistics();
   }, []);
 
-  // Chart data preparations
-  const gradeChartData = Object.entries(statistics.byGrade).map(([grade, count]) => ({
+  // Beautiful color palette for grade chart
+  const gradeColors = [
+    '#FF6B6B', // Coral Red
+    '#4ECDC4', // Turquoise
+    '#45B7D1', // Sky Blue
+    '#96CEB4', // Mint Green
+    '#FFEAA7', // Sunny Yellow
+    '#DDA0DD', // Plum
+    '#98D8C8', // Mint
+    '#F7DC6F', // Light Yellow
+    '#BB8FCE', // Light Purple
+    '#85C1E9', // Light Blue
+    '#F8C471', // Peach
+    '#82E0AA'  // Light Green
+  ];
+
+  // Chart data preparations with beautiful colors
+  const gradeChartData = Object.entries(statistics.byGrade).map(([grade, count], index) => ({
     grade,
     count,
-    fill: `hsl(${Math.random() * 360}, 70%, 60%)`
+    fill: gradeColors[index % gradeColors.length]
   }));
 
   const genderChartData = [
@@ -122,7 +138,7 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Students by Grade Chart */}
+        {/* Students by Grade Chart with Beautiful Colors */}
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle className="text-school-primary">จำนวนนักเรียนแยกตามชั้น</CardTitle>
@@ -138,7 +154,11 @@ const Dashboard = () => {
                   <XAxis dataKey="grade" />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" className="fill-school-primary" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {gradeChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
