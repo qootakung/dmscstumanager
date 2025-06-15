@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import ImportTemplate from './student-analysis/ImportTemplate';
 
 interface StudentScore {
   id: string;
@@ -459,6 +460,9 @@ const StudentAnalysis: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Import Template Section */}
+                  <ImportTemplate />
+
                   {/* Upload Section */}
                   <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                     isUploading ? 'border-blue-300 bg-blue-50/50' : 'border-green-300 bg-green-50/50'
