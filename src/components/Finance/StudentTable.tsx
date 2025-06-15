@@ -9,7 +9,7 @@ interface StudentTableProps {
 const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
-  fontSize: "16px",
+  fontSize: "14px",
   marginBottom: "12px",
 };
 
@@ -42,13 +42,13 @@ const StudentTable: React.FC<StudentTableProps> = ({ students }) => {
       <table style={tableStyle}>
         <thead>
           <tr>
-            <th style={{ ...thStyle, width: "40px" }}>ที่</th>
+            <th style={{ ...thStyle, width: "30px" }}>ที่</th>
             <th style={thStyle}>ชื่อ - สกุลนักเรียน</th>
-            <th style={{ ...thStyle, width: "160px" }}>หมายเลขประจำตัว<br />ประชาชน 13 หลัก</th>
-            <th style={{ ...thStyle, width: "90px" }}>จำนวนเงิน<br />(บาท)</th>
-            <th style={{ ...thStyle, width: "90px" }}>วันที่รับเงิน</th>
-            <th style={{ ...thStyle, width: "120px" }}>ลายมือชื่อ<br />ผู้ปกครอง/<br />นักเรียน</th>
-            <th style={{ ...thStyle, width: "90px" }}>หมายเหตุ</th>
+            <th style={{ ...thStyle, width: "150px" }}>หมายเลขประจำตัว<br />ประชาชน 13 หลัก</th>
+            <th style={{ ...thStyle, width: "80px" }}>จำนวนเงิน<br />(บาท)</th>
+            <th style={{ ...thStyle, width: "80px" }}>วันที่รับเงิน</th>
+            <th style={{ ...thStyle, width: "100px" }}>ลายมือชื่อ<br />ผู้ปกครอง/<br />นักเรียน</th>
+            <th style={{ ...thStyle, width: "80px" }}>หมายเหตุ</th>
           </tr>
         </thead>
         <tbody>

@@ -29,9 +29,10 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
 
   return (
     <div style={{
-      fontFamily: "'Sarabun', Arial, sans-serif",
-      fontSize: "18px",
-      padding: "24px"
+      fontFamily: "'TH Sarabun', 'Sarabun', Arial, sans-serif",
+      fontSize: "14px",
+      padding: "24px",
+      color: "black"
     }}>
       <PrintHeader
         semester={voucherData.semester}

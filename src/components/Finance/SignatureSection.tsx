@@ -28,7 +28,7 @@ const containerStyle: React.CSSProperties = {
   justifyContent: 'space-between',
   alignItems: 'flex-start',
   gap: '12px',
-  margin: '48px 0 24px 0'
+  margin: '24px 0 12px 0'
 };
 
 const signatureBoxStyle: React.CSSProperties = {
@@ -40,7 +40,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
   teacherName,
   principalName,
 }) => (
-  <div style={{ fontSize: '16px', marginTop: '24px' }}>
+  <div style={{ marginTop: '24px' }}>
     <div style={containerStyle}>
       <div style={signatureBoxStyle}>
         <div>
@@ -71,7 +71,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
         </div>
       </div>
     </div>
-    <div style={{ textAlign: 'center', marginTop: '48px' }}>
+    <div style={{ textAlign: 'center', marginTop: '24px' }}>
       <div style={{ marginBottom: '8px' }}>ตรวจสอบแล้วถูกต้อง</div>
       <div>
         <span>ลงชื่อ</span>

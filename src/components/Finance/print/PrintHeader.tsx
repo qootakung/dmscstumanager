@@ -8,7 +8,7 @@ interface PrintHeaderProps {
 
 const PrintHeader: React.FC<PrintHeaderProps> = ({ semester, academicYear }) => (
   <>
-    <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "20px", marginBottom: "8px" }}>แบบหลักฐานการจ่ายเงิน</div>
+    <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", marginBottom: "8px" }}>แบบหลักฐานการจ่ายเงิน</div>
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginBottom: 6 }}>
       <span>ภาคเรียนที่</span>
       <span style={{
