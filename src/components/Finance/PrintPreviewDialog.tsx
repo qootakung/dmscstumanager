@@ -4,7 +4,7 @@ import { useReactToPrint } from 'react-to-print';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import PrintPreviewStatic from './PrintPreviewStatic';
-import type { PaymentVoucherData } from '../FinancialReports';
+import type { PaymentVoucherData } from '@/types/finance';
 import { Printer } from 'lucide-react';
 
 interface PrintPreviewDialogProps {
