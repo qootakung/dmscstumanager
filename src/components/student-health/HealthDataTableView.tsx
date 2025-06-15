@@ -62,56 +62,58 @@ const HealthDataTableView: React.FC<HealthDataTableViewProps> = ({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="w-full overflow-x-auto">
       {error && (
         <div className="text-red-600 p-4 border border-red-200 rounded-md mb-4">
           เกิดข้อผิดพลาดในการโหลดข้อมูล: {error.message}
         </div>
       )}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[120px]">รหัสนักเรียน</TableHead>
-            <TableHead>ชื่อ-นามสกุล</TableHead>
-            <TableHead className="w-[200px]">อายุ</TableHead>
-            <TableHead className="w-[150px]">น้ำหนัก (กก.)</TableHead>
-            <TableHead className="w-[150px]">ส่วนสูง (ซม.)</TableHead>
-            <TableHead className="w-[180px]">วันที่ชั่ง</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
-            Array.from({ length: 5 }).map((_, index) => (
-              <TableRow key={index}>
-                <TableCell colSpan={6}>
-                  <Skeleton className="h-8 w-full" />
+      <div className="min-w-full">
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-[120px]">รหัสนักเรียน</TableHead>
+              <TableHead className="min-w-[200px]">ชื่อ-นามสกุล</TableHead>
+              <TableHead className="min-w-[180px]">อายุ</TableHead>
+              <TableHead className="min-w-[130px]">น้ำหนัก (กก.)</TableHead>
+              <TableHead className="min-w-[130px]">ส่วนสูง (ซม.)</TableHead>
+              <TableHead className="min-w-[160px]">วันที่ชั่ง</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell colSpan={6}>
+                    <Skeleton className="h-8 w-full" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : healthData && healthData.length > 0 ? (
+              healthData.map((record) => (
+                <TableRow key={record.record_id}>
+                  <TableCell className="font-medium">{record.student_code}</TableCell>
+                  <TableCell>{record.full_name}</TableCell>
+                  <TableCell className="text-center">{`${record.age_years} ปี ${record.age_months} เดือน ${record.age_days} วัน`}</TableCell>
+                  <TableCell>{renderCell(record, 'weight')}</TableCell>
+                  <TableCell>{renderCell(record, 'height')}</TableCell>
+                  <TableCell className="text-center">{new Date(record.measurement_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center h-24">
+                  ไม่พบข้อมูลสำหรับตัวกรองที่เลือก
+                  <br />
+                  <small className="text-muted-foreground">
+                    ปีการศึกษา: {currentAcademicYear} | เดือน: {selectedMonth} | ระดับชั้น: {selectedGrade}
+                  </small>
                 </TableCell>
               </TableRow>
-            ))
-          ) : healthData && healthData.length > 0 ? (
-            healthData.map((record) => (
-              <TableRow key={record.record_id}>
-                <TableCell>{record.student_code}</TableCell>
-                <TableCell>{record.full_name}</TableCell>
-                <TableCell className="text-center">{`${record.age_years} ปี ${record.age_months} เดือน ${record.age_days} วัน`}</TableCell>
-                <TableCell>{renderCell(record, 'weight')}</TableCell>
-                <TableCell>{renderCell(record, 'height')}</TableCell>
-                <TableCell>{new Date(record.measurement_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center h-24">
-                ไม่พบข้อมูลสำหรับตัวกรองที่เลือก
-                <br />
-                <small className="text-muted-foreground">
-                  ปีการศึกษา: {currentAcademicYear} | เดือน: {selectedMonth} | ระดับชั้น: {selectedGrade}
-                </small>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
