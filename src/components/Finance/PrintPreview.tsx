@@ -71,11 +71,9 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
     >
       {/* ฟอร์มหัวข้อ */}
       <div className="mb-3 flex flex-col items-center">
-        <div className="relative flex flex-col items-center w-full">
-          {/* ชื่อฟอร์ม */}
-          <div className="font-bold tracking-wide text-lg text-blue-900 mb-2 mt-4">
-            แบบหลักฐานการจ่ายเงิน
-          </div>
+        {/* ชื่อฟอร์ม */}
+        <div className="font-bold tracking-wide text-lg text-blue-900 mb-2 mt-4">
+          แบบหลักฐานการจ่ายเงิน
         </div>
         {/* ภาคเรียนที่ / ปีการศึกษา */}
         <div className="flex items-center justify-center gap-2 mb-1">
@@ -95,6 +93,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
               key={option}
               label={option}
               checked={voucherData.paymentTypes.includes(option)}
+              size="large"
             />
           ))}
           {/* ช่อง "ค่าจัดการเรียนการสอน (ปัจจัยพื้นฐานสำหรับการรับนักเรียนยากจน)" แบบเหมือนช่องอื่น */}
@@ -104,6 +103,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
               label={paymentOptions[4]}
               checked={voucherData.paymentTypes.includes(paymentOptions[4])}
               className="col-span-2"
+              size="large"
             />
           )}
         </div>
