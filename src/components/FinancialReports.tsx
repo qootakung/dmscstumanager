@@ -56,6 +56,20 @@ const FinancialReports = () => {
     loadTeachers();
   }, []);
 
+  // เมื่อมีการโหลด/เปลี่ยนครู จะเซ็ต principalName อัตโนมัติ
+  useEffect(() => {
+    if (teachers.length > 0) {
+      const principal = teachers.find((t) => t.position === "ผู้อำนวยการโรงเรียน");
+      if (principal && !voucherData.principalName) {
+        setVoucherData(prev => ({
+          ...prev,
+          principalName: `${principal.firstName} ${principal.lastName}`
+        }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teachers]); // ไม่รวม voucherData.principalName เพื่อกันวนลูป
+
   const loadStudents = async () => {
     const studentData = await getStudents();
     setStudents(studentData);
@@ -64,6 +78,14 @@ const FinancialReports = () => {
   const loadTeachers = async () => {
     const teacherData = await getTeachers();
     setTeachers(teacherData);
+    // หลังโหลดจะเซ็ต director อัตโนมัติถ้ายังไม่ได้เซต
+    const principal = teacherData.find((t) => t.position === "ผู้อำนวยการโรงเรียน");
+    if (principal && !voucherData.principalName) {
+      setVoucherData(prev => ({
+        ...prev,
+        principalName: `${principal.firstName} ${principal.lastName}`
+      }));
+    }
   };
 
   const handlePaymentTypeChange = (paymentType: string, checked: boolean) => {
@@ -426,15 +448,35 @@ const FinancialReports = () => {
           {/* School Information */}
           <div>
             <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
-            <Input
-              id="principalName"
-              value={voucherData.principalName}
-              onChange={(e) => setVoucherData(prev => ({
-                ...prev,
-                principalName: e.target.value
-              }))}
-              placeholder="ชื่อผู้อำนวยการโรงเรียน"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                id="principalName"
+                value={voucherData.principalName}
+                onChange={(e) => setVoucherData(prev => ({
+                  ...prev,
+                  principalName: e.target.value
+                }))}
+                placeholder="ชื่อผู้อำนวยการโรงเรียน"
+              />
+              {/* ปุ่มเติมอัตโนมัติ หากอยากให้ user รีดึงชื่อใหม่ */}
+              <Button
+                type="button"
+                variant="outline"
+                className="shrink-0"
+                onClick={() => {
+                  const principal = teachers.find((t) => t.position === "ผู้อำนวยการโรงเรียน");
+                  if (principal) {
+                    setVoucherData(prev => ({
+                      ...prev,
+                      principalName: `${principal.firstName} ${principal.lastName}`
+                    }));
+                  }
+                }}
+                title="เติมชื่อผู้อำนวยการจากรายชื่อครู"
+              >
+                <User className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Print Button */}
