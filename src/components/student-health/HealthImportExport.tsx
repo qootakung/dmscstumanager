@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
+import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { getStudents } from '@/utils/studentStorage';
 import { upsertStudentHealthRecords } from '@/utils/healthStorage';
@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 const HealthImportExport: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ current: number, total: number } | null>(null);
   const [importResult, setImportResult] = useState<{ success: number, fail: number } | null>(null);
 
   const handleExport = async () => {
@@ -47,34 +48,66 @@ const HealthImportExport: React.FC = () => {
 
     setIsImporting(true);
     setImportResult(null);
-    await Swal.fire({
-      title: 'กำลังนำเข้าข้อมูล...',
-      text: 'ระบบกำลังประมวลผลไฟล์ Excel ของคุณ',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+    setImportProgress(null);
 
     try {
+      // Show loading dialog
+      Swal.fire({
+        title: 'กำลังประมวลผลไฟล์...',
+        text: 'กรุณารอสักครู่',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       const healthRecords = await importHealthDataFromExcel(file);
+      
       if (healthRecords && healthRecords.length > 0) {
+        // Update progress
+        setImportProgress({ current: 0, total: healthRecords.length });
+        
+        Swal.update({
+          title: 'กำลังบันทึกข้อมูล...',
+          text: `กำลังบันทึก 0 / ${healthRecords.length} รายการ`
+        });
+
         const result = await upsertStudentHealthRecords(healthRecords);
-        if (result) {
-            setImportResult({ success: result.length, fail: healthRecords.length - result.length });
-            Swal.fire('นำเข้าสำเร็จ!', `นำเข้าข้อมูลน้ำหนัก-ส่วนสูงสำเร็จ ${result.length} รายการ`, 'success');
+        
+        if (result && result.length > 0) {
+          setImportResult({ success: result.length, fail: healthRecords.length - result.length });
+          Swal.fire({
+            icon: 'success',
+            title: 'นำเข้าสำเร็จ!',
+            html: `
+              <div class="text-center">
+                <p class="text-green-600 mb-2">✓ นำเข้าสำเร็จ: ${result.length} รายการ</p>
+                ${healthRecords.length - result.length > 0 ? 
+                  `<p class="text-red-600">✗ ไม่สำเร็จ: ${healthRecords.length - result.length} รายการ</p>` : 
+                  ''
+                }
+              </div>
+            `,
+            confirmButtonText: 'ตกลง'
+          });
         } else {
-            setImportResult({ success: 0, fail: healthRecords.length });
-            Swal.fire('นำเข้าไม่สำเร็จ', 'ไม่สามารถบันทึกข้อมูลที่นำเข้าได้', 'error');
+          setImportResult({ success: 0, fail: healthRecords.length });
+          Swal.fire('นำเข้าไม่สำเร็จ', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาตรวจสอบรหัสนักเรียน', 'error');
         }
       } else {
         Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลที่สามารถนำเข้าได้ในไฟล์', 'warning');
       }
     } catch (error) {
       console.error(error);
-      Swal.fire('เกิดข้อผิดพลาด', 'รูปแบบไฟล์ไม่ถูกต้อง หรือเกิดปัญหาในการอ่านข้อมูล', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: error instanceof Error ? error.message : 'รูปแบบไฟล์ไม่ถูกต้อง หรือเกิดปัญหาในการอ่านข้อมูล',
+        confirmButtonText: 'ตกลง'
+      });
     } finally {
       setIsImporting(false);
+      setImportProgress(null);
     }
   }, []);
 
@@ -103,8 +136,17 @@ const HealthImportExport: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Button onClick={handleExport} disabled={isExporting} className="w-full">
-              <FileSpreadsheet className="w-4 h-4 mr-2" />
-              {isExporting ? 'กำลังส่งออก...' : 'ส่งออกเทมเพลต'}
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  กำลังส่งออก...
+                </>
+              ) : (
+                <>
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  ส่งออกเทมเพลต
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -122,16 +164,29 @@ const HealthImportExport: React.FC = () => {
           <CardContent>
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-                ${isDragActive ? 'border-school-primary bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+                ${isDragActive ? 'border-school-primary bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+                ${isImporting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <input {...getInputProps()} />
+              <input {...getInputProps()} disabled={isImporting} />
               {isImporting ? (
-                <p>กำลังประมวลผล...</p>
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 animate-spin text-school-primary" />
+                  <p>กำลังประมวลผล...</p>
+                  {importProgress && (
+                    <p className="text-sm text-gray-600">
+                      {importProgress.current} / {importProgress.total} รายการ
+                    </p>
+                  )}
+                </div>
               ) : isDragActive ? (
                 <p>วางไฟล์ที่นี่...</p>
               ) : (
-                <p>ลากไฟล์ .xlsx หรือ .xls มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+                <div className="flex flex-col items-center gap-2">
+                  <Upload className="w-8 h-8 text-gray-400" />
+                  <p>ลากไฟล์ .xlsx หรือ .xls มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+                  <p className="text-sm text-gray-500">รองรับเฉพาะไฟล์ Excel เท่านั้น</p>
+                </div>
               )}
             </div>
             {importResult && (

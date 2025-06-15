@@ -59,23 +59,58 @@ export const updateStudentHealthRecord = async (recordId: string, updates: { wei
 }
 
 export const upsertStudentHealthRecords = async (records: any[]) => {
-  // Add proper error handling for RLS policy issues
   try {
-    const { data, error } = await supabase.from('student_health_records').upsert(records, {
-      onConflict: 'student_id,measurement_date'
-    }).select();
+    console.log('Attempting to upsert', records.length, 'health records');
+    
+    // Process records in smaller batches to improve performance
+    const batchSize = 50;
+    const results = [];
+    
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      console.log(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(records.length/batchSize)}`);
+      
+      // Add created_at timestamp to each record
+      const recordsWithTimestamp = batch.map(record => ({
+        ...record,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
 
-    if (error) {
-      console.error('Error upserting student health records:', error);
-      // If it's an RLS policy error, provide more helpful error message
-      if (error.code === '42501') {
-        throw new Error('ไม่มีสิทธิ์ในการบันทึกข้อมูล กรุณาติดต่อผู้ดูแลระบบ');
+      const { data, error } = await supabase
+        .from('student_health_records')
+        .upsert(recordsWithTimestamp, {
+          onConflict: 'student_id,measurement_date,academic_year',
+          ignoreDuplicates: false
+        })
+        .select('id');
+
+      if (error) {
+        console.error('Error in batch upsert:', error);
+        // Try individual inserts for failed batch
+        for (const record of recordsWithTimestamp) {
+          try {
+            const { data: singleData } = await supabase
+              .from('student_health_records')
+              .upsert([record], {
+                onConflict: 'student_id,measurement_date,academic_year',
+                ignoreDuplicates: false
+              })
+              .select('id');
+            if (singleData) results.push(...singleData);
+          } catch (singleError) {
+            console.error('Failed to insert individual record:', record, singleError);
+          }
+        }
+      } else if (data) {
+        results.push(...data);
       }
-      throw error;
     }
-    return data;
+    
+    console.log('Successfully upserted', results.length, 'records');
+    return results;
   } catch (error) {
     console.error('Error in upsertStudentHealthRecords:', error);
-    throw error;
+    throw new Error('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
   }
 }
