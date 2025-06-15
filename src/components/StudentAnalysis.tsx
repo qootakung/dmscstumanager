@@ -33,19 +33,6 @@ import {
 import { getStudents } from '@/utils/storage';
 import type { Student } from '@/types/student';
 
-// ข้อมูลคะแนนตัวอย่าง (ในการใช้งานจริงจะดึงจากฐานข้อมูล)
-const mockScores = [
-  { studentId: '001', subject: 'คณิตศาสตร์', score: 85, grade: 'อ.1' },
-  { studentId: '002', subject: 'คณิตศาสตร์', score: 92, grade: 'อ.1' },
-  { studentId: '003', subject: 'คณิตศาสตร์', score: 67, grade: 'อ.1' },
-  { studentId: '001', subject: 'ภาษาไทย', score: 78, grade: 'อ.1' },
-  { studentId: '002', subject: 'ภาษาไทย', score: 88, grade: 'อ.1' },
-  { studentId: '003', subject: 'ภาษาไทย', score: 72, grade: 'อ.1' },
-  { studentId: '001', subject: 'วิทยาศาสตร์', score: 91, grade: 'อ.1' },
-  { studentId: '002', subject: 'วิทยาศาสตร์', score: 85, grade: 'อ.1' },
-  { studentId: '003', subject: 'วิทยาศาสตร์', score: 58, grade: 'อ.1' },
-];
-
 const subjects = ['คณิตศาสตร์', 'ภาษาไทย', 'วิทยาศาสตร์', 'สังคมศึกษา', 'ภาษาอังกฤษ'];
 
 const StudentAnalysis: React.FC = () => {
@@ -230,7 +217,7 @@ const StudentAnalysis: React.FC = () => {
           <div className="bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-100 text-sm font-medium">กลุ่มอ่อน (<70)</p>
+                <p className="text-red-100 text-sm font-medium">กลุ่มอ่อน (&lt;70)</p>
                 <p className="text-3xl font-bold">{analysisData.needsImprovement}</p>
                 <p className="text-red-100 text-xs">
                   {analysisData.total > 0 ? Math.round((analysisData.needsImprovement / analysisData.total) * 100) : 0}% ของทั้งหมด
@@ -362,7 +349,7 @@ const StudentAnalysis: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 max-h-96 overflow-y-auto">
-                      {analysisData.excellentStudents.map((student, index) => (
+                      {analysisData.excellentStudents.map((student) => (
                         <div key={student.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg mb-2">
                           <div>
                             <p className="font-medium text-gray-900">
@@ -387,7 +374,7 @@ const StudentAnalysis: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 max-h-96 overflow-y-auto">
-                      {analysisData.averageStudents.map((student, index) => (
+                      {analysisData.averageStudents.map((student) => (
                         <div key={student.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg mb-2">
                           <div>
                             <p className="font-medium text-gray-900">
@@ -412,7 +399,7 @@ const StudentAnalysis: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 max-h-96 overflow-y-auto">
-                      {analysisData.needsImprovementStudents.map((student, index) => (
+                      {analysisData.needsImprovementStudents.map((student) => (
                         <div key={student.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg mb-2">
                           <div>
                             <p className="font-medium text-gray-900">
