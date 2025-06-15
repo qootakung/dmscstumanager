@@ -19,57 +19,115 @@ interface PrintPreviewProps {
 }
 
 const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions }) => (
-  <div className="max-h-[70vh] overflow-y-auto bg-white shadow p-4 rounded text-sm" style={{fontFamily: 'Sarabun, Arial, sans-serif'}}>
-    <div className="header text-center mb-4">
-      <div className="form-title font-bold text-base mb-1">แบบหลักฐานการจ่ายเงิน</div>
+  <div
+    className="max-h-[70vh] overflow-y-auto bg-white shadow p-6 rounded text-base"
+    style={{ fontFamily: "Sarabun, Arial, sans-serif" }}
+  >
+    {/* ฟอร์มหัวข้อ */}
+    <div className="mb-3 flex flex-col items-center">
+      <div className="relative flex flex-col items-center w-full">
+        {/* กรอบส้มมุมขวาบน */}
+        <div className="absolute right-0 -top-5 w-44 h-8 rounded-lg bg-orange-200 border border-orange-400" />
+        {/* ชื่อฟอร์ม */}
+        <div className="font-bold tracking-wide text-lg text-blue-900 mb-2 mt-4">
+          แบบหลักฐานการจ่ายเงิน
+        </div>
+      </div>
+      {/* ภาคเรียนที่ / ปีการศึกษา */}
+      <div className="flex items-center justify-center gap-2 mb-1">
+        <span>ภาคเรียนที่</span>
+        <span className="inline-block border-b border-dotted w-20 text-center">
+          {voucherData.semester}
+        </span>
+        <span>ปีการศึกษา</span>
+        <span className="inline-block border-b border-dotted w-28 text-center">
+          {voucherData.academicYear}
+        </span>
+      </div>
+      {/* Checkbox 2 คอลัมน์ x 2 แถว */}
+      <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-2 mb-1 w-full max-w-2xl">
+        {paymentOptions.slice(0, 4).map((option, i) => (
+          <div className="flex items-center gap-2" key={option}>
+            <span
+              className={`inline-block border w-4 h-4 mr-1 align-middle ${
+                voucherData.paymentTypes.includes(option) ? "bg-black" : ""
+              }`}
+            />
+            <span>{option}</span>
+          </div>
+        ))}
+        {paymentOptions[4] && (
+          <div className="flex items-center gap-2 col-span-2">
+            <span
+              className={`inline-block border w-4 h-4 mr-1 align-middle ${
+                voucherData.paymentTypes.includes(paymentOptions[4]) ? "bg-black" : ""
+              }`}
+            />
+            <span>{paymentOptions[4]}</span>
+          </div>
+        )}
+      </div>
+      {/* เส้นคั่น --- */}
+      <div className="w-full border-b border-dashed border-black my-2"></div>
+    </div>
+    {/* ข้อมูลระดับชั้น */}
+    <div className="mb-2">
+      <div className="flex items-center gap-4 mb-1">
+        <div className="flex items-center mr-4">
+          <span>ระดับชั้น</span>
+          <span className="inline-block border w-4 h-4 mx-1 align-middle" />
+          <span>อนุบาลปีที่</span>
+          <span className="inline-block border-b border-dotted w-10 mx-1"></span>
+        </div>
+        <div className="flex items-center">
+          <span className="inline-block border w-4 h-4 mx-1 align-middle" />
+          <span>ประถมศึกษาปีที่</span>
+          <span className="inline-block border-b border-dotted w-10 mx-1"></span>
+        </div>
+      </div>
+      <div className="flex items-center gap-4 mb-1">
+        <div className="flex items-center mr-4">
+          <span className="inline-block border w-4 h-4 mx-1 align-middle" />
+          <span>มัธยมศึกษาปีที่</span>
+          <span className="inline-block border-b border-dotted w-10 mx-1"></span>
+        </div>
+        <div className="flex items-center">
+          <span className="inline-block border w-4 h-4 mx-1 align-middle" />
+          <span>ปวช. ที่จัดโดยสถานประกอบการ ปีที่</span>
+          <span className="inline-block border-b border-dotted w-10 mx-1"></span>
+        </div>
+      </div>
+      {/* จำนวนนักเรียน */}
+      <div className="mb-2">
+        <span>นักเรียนจำนวนทั้งสิ้น</span>
+        <span className="inline-block border-b border-dotted w-10 mx-1 text-center">{
+          voucherData.students.length
+        }</span>
+        <span>คน ได้รับเงินจากโรงเรียน</span>
+        <span className="inline-block border-b border-dotted w-20 mx-1 text-center">{
+          voucherData.students.length
+        }</span>
+        <span>บาท</span>
+      </div>
+      {/* ย่อข้อความและจัดเรียงเหมือนฟอร์ม */}
       <div>
-        ภาคเรียนที่&nbsp;
-        <span className="inline-block border-b border-dotted w-20 text-center">{voucherData.semester}</span>
-        &nbsp;ปีการศึกษา&nbsp;
-        <span className="inline-block border-b border-dotted w-28 text-center">{voucherData.academicYear}</span>
+        <span>
+          สังกัดสำนักงานเขตพื้นที่การศึกษา ประถมศึกษาจังหวัดเขต 2 <br />
+          ข้าพเจ้าขอรับรองว่าเงินที่ได้รับไปได้นำไปตามวัตถุประสงค์ของทางราชการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายินยอมชดใช้เงินคืนให้กับโรงเรียนต่อไป
+        </span>
       </div>
     </div>
-    <div className="mb-4">
-      {paymentOptions.map(option => (
-        <div className="flex items-center gap-2 mb-1" key={option}>
-          <span className={`inline-block border w-4 h-4 mr-1 align-middle ${voucherData.paymentTypes.includes(option) ? 'bg-black' : ''}`} />
-          {option}
-        </div>
-      ))}
-    </div>
-    <div className="mb-3">
-      <p>
-        ระดับชั้น <span className={`inline-block border w-4 h-4 mr-1 align-middle ${voucherData.paymentTypes.length > 0 ? 'bg-black' : ''}`} />
-        อนุบาลปีที่<span className="inline-block border-b border-dotted w-10 mx-1"></span>
-        <span className="inline-block border w-4 h-4 mr-1 align-middle" />
-        ประถมศึกษาปีที่<span className="inline-block border-b border-dotted w-10 mx-1"></span>
-      </p>
-      <p>
-        <span className="inline-block border w-4 h-4 mr-1 align-middle" />
-        มัธยมศึกษาปีที่<span className="inline-block border-b border-dotted w-10 mx-1"></span>
-        <span className="inline-block border w-4 h-4 mr-1 align-middle" />
-        ปวช. ที่สังเคยศตสหกรณ์ การปีที่<span className="inline-block border-b border-dotted w-10 mx-1"></span>
-      </p>
-      <p>
-        นักเรียนจำนวนทั้งสิ้น
-        <span className="inline-block border-b border-dotted w-10 mx-1 text-center">{voucherData.students.length}</span>
-        คน ได้รับเงินจากโรงเรียน
-        <span className="inline-block border-b border-dotted w-10 mx-1 text-center">{voucherData.students.length}</span>
-      </p>
-      <p>สังกัดสำนักงานเขตพื้นที่การศึกษา ประถมศึกษาจังหวัดเขต 2 ข้าพเจ้าขอรับรองว่าเงินเจ้านี้เงิน</p>
-      <p>ที่ได้รับไปตำลินมาครอบครัวผู้ประสบความเดือดร้อนทางการทำการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายอมยอมเคยใช้เงินคืน</p>
-      <p>ให้กับโรงเรียนต่อไป</p>
-    </div>
+    {/* ตารางข้อมูลนักเรียน */}
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-xs mb-4">
+      <table className="w-full border-collapse text-xs mb-3">
         <thead>
           <tr>
             <th className="border px-2 py-1">ที่</th>
             <th className="border px-2 py-1">ชื่อ - สกุลนักเรียน</th>
-            <th className="border px-2 py-1">หมายเลขประจำตัว<br/>ประชาชน 13 หลัก</th>
-            <th className="border px-2 py-1">จำนวนเงิน<br/>(บาท)</th>
+            <th className="border px-2 py-1">หมายเลขประจำตัว<br />ประชาชน 13 หลัก</th>
+            <th className="border px-2 py-1">จำนวนเงิน<br />(บาท)</th>
             <th className="border px-2 py-1">วันที่รับเงิน</th>
-            <th className="border px-2 py-1">ลายมือชื่อ<br/>ผู้ปกครอง/<br/>นักเรียน</th>
+            <th className="border px-2 py-1">ลายมือชื่อ<br />ผู้ปกครอง/<br />นักเรียน</th>
             <th className="border px-2 py-1">หมายเหตุ</th>
           </tr>
         </thead>
@@ -106,18 +164,19 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         </tbody>
       </table>
     </div>
-    <div className="flex justify-between items-start gap-3 my-4">
+    {/* ลายเซ็น */}
+    <div className="flex flex-row justify-between items-start gap-3 my-4">
       <div className="text-center w-1/3">
         <div>
           ลงชื่อ
           <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.payerName ? voucherData.payerName : "..............................."}
+            ...............................
           </span>
           ผู้จ่ายเงิน
         </div>
         <div>
           (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.payerName ? voucherData.payerName : "..............................."}
+            ...............................
           </span>)
         </div>
       </div>
@@ -125,33 +184,29 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         <div>
           ลงชื่อ
           <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.selectedTeacher
-              ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
-              : "..............................."}
+            ...............................
           </span>
           ครูประจำชั้น
         </div>
         <div>
           (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.selectedTeacher
-              ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
-              : "..............................."}
+            ...............................
           </span>)
         </div>
       </div>
     </div>
-    <div className="text-center mt-4">
+    <div className="text-center mt-2">
       <div>ตรวจสอบแล้วถูกต้อง</div>
       <div className="my-2">
         ลงชื่อ
         <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-          {voucherData.principalName ? voucherData.principalName : "..............................."}
+          ...............................
         </span>
         ผู้อำนวยการโรงเรียน
       </div>
       <div>
         (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-          {voucherData.principalName ? voucherData.principalName : "..............................."}
+          ...............................
         </span>)
       </div>
     </div>
