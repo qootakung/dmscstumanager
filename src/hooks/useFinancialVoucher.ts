@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { getStudents } from '@/utils/studentStorage';
 import { getTeachers } from '@/utils/teacherStorage';
@@ -21,7 +20,9 @@ export const useFinancialVoucher = () => {
     principalName: '',
     managerName: '',
     selectedTeacher: null,
-    payerName: ''
+    payerName: '',
+    amountPerStudent: '',
+    paymentDate: ''
   });
 
   const paymentOptions = [

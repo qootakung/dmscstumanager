@@ -13,4 +13,6 @@ export interface PaymentVoucherData {
   managerName: string;
   selectedTeacher: Teacher | null;
   payerName: string;
+  amountPerStudent: string;
+  paymentDate: string;
 }

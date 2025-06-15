@@ -21,6 +21,8 @@ interface PrintPreviewStaticProps {
     managerName: string;
     selectedTeacher: Teacher | null;
     payerName: string;
+    amountPerStudent: string;
+    paymentDate: string;
   };
   paymentOptions: string[];
 }
@@ -56,7 +58,11 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
 
       {/* ตารางนักเรียน */}
       <div style={{ marginBottom: 12 }}>
-        <StudentTable students={voucherData.students} />
+        <StudentTable 
+          students={voucherData.students} 
+          amountPerStudent={voucherData.amountPerStudent}
+          paymentDate={voucherData.paymentDate}
+        />
       </div>
 
       {/* ลายเซ็น */}

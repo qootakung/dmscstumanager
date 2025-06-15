@@ -4,6 +4,8 @@ import type { Student } from "@/types/student";
 
 interface StudentTableProps {
   students: Student[];
+  amountPerStudent: string;
+  paymentDate: string;
 }
 
 const tableStyle: React.CSSProperties = {
@@ -33,9 +35,26 @@ const centerCellStyle: React.CSSProperties = {
   textAlign: "center",
 };
 
-const StudentTable: React.FC<StudentTableProps> = ({ students }) => {
+const rightCellStyle: React.CSSProperties = {
+  ...cellStyle,
+  textAlign: "right",
+};
+
+const nameCellStyle: React.CSSProperties = {
+  ...cellStyle,
+  whiteSpace: 'nowrap',
+};
+
+const StudentTable: React.FC<StudentTableProps> = ({ students, amountPerStudent, paymentDate }) => {
   // Display at least 15 rows
   const emptyRowCount = Math.max(0, 15 - students.length);
+  const amount = parseFloat(amountPerStudent) || 0;
+  const totalAmount = amount * students.length;
+
+  const formatCurrency = (num: number) => {
+    if (num === 0) return '';
+    return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -55,10 +74,10 @@ const StudentTable: React.FC<StudentTableProps> = ({ students }) => {
           {students.map((student, index) => (
             <tr key={student.id || index}>
               <td style={centerCellStyle}>{index + 1}</td>
-              <td style={cellStyle}>{student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}</td>
+              <td style={nameCellStyle}>{student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}</td>
               <td style={centerCellStyle}>{student.citizenId || ''}</td>
-              <td style={cellStyle}></td>
-              <td style={cellStyle}></td>
+              <td style={rightCellStyle}>{formatCurrency(amount)}</td>
+              <td style={centerCellStyle}>{paymentDate}</td>
               <td style={cellStyle}></td>
               <td style={cellStyle}></td>
             </tr>
@@ -68,7 +87,7 @@ const StudentTable: React.FC<StudentTableProps> = ({ students }) => {
               <td style={centerCellStyle}>{students.length + idx + 1}</td>
               <td style={cellStyle}></td>
               <td style={cellStyle}></td>
-              <td style={cellStyle}></td>
+              <td style={rightCellStyle}></td>
               <td style={cellStyle}></td>
               <td style={cellStyle}></td>
               <td style={cellStyle}></td>
@@ -76,7 +95,7 @@ const StudentTable: React.FC<StudentTableProps> = ({ students }) => {
           ))}
           <tr>
             <td colSpan={3} style={{ ...thStyle, textAlign: 'center' }}>รวมทั้งสิ้น</td>
-            <td style={cellStyle}></td>
+            <td style={{...thStyle, textAlign: 'right'}}>{formatCurrency(totalAmount)}</td>
             <td style={cellStyle}></td>
             <td style={cellStyle}></td>
             <td style={cellStyle}></td>
