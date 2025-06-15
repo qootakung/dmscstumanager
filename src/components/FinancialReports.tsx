@@ -13,7 +13,7 @@ import { useFinancialVoucher } from '@/hooks/useFinancialVoucher';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Printer } from 'lucide-react';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const FinancialReports = () => {
   const {
@@ -68,14 +68,14 @@ const FinancialReports = () => {
         description: "สามารถนำเอกสารไปใช้งานต่อได้",
       });
     },
-    onPrintError: (error: any) => {
+    onPrintError: (errorLocation: string, error: Error) => {
       setIsPrinting(false);
       toast({
         title: "เกิดข้อผิดพลาดขณะพิมพ์",
-        description: "ไม่สามารถพิมพ์เอกสารได้ โปรดลองใหม่ หรือใช้เบราว์เซอร์อื่น",
+        description: `ไม่สามารถพิมพ์เอกสารได้ โปรดลองใหม่ (${error.message})`,
         variant: "destructive",
       });
-      console.error("Print Error:", error);
+      console.error("Print Error:", errorLocation, error);
     }
   });
 
