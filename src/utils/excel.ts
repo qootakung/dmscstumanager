@@ -26,15 +26,39 @@ export const exportStudentsForHealthImport = (students: Student[]) => {
     return (a.studentId || '').localeCompare(b.studentId || '', undefined, { numeric: true });
   });
 
-  const dataForExport = sortedStudents.map(student => ({
-    'รหัสนักเรียน': student.studentId,
-    'ชื่อ-นามสกุล': `${student.firstNameTh} ${student.lastNameTh}`,
-    'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': '',
-    'น้ำหนัก (กก.)': '',
-    'ส่วนสูง (ซม.)': '',
-  }));
+  // Add example row for reference
+  const exampleRow = {
+    'รหัสนักเรียน': 'ตัวอย่าง: ST001',
+    'ชื่อ-นามสกุล': 'ตัวอย่าง: เด็กชาย สมชาย ใจดี',
+    'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': '15/06/2568',
+    'น้ำหนัก (กก.)': '25.5',
+    'ส่วนสูง (ซม.)': '120.0',
+  };
+
+  const dataForExport = [
+    exampleRow,
+    ...sortedStudents.map(student => ({
+      'รหัสนักเรียน': student.studentId,
+      'ชื่อ-นามสกุล': `${student.firstNameTh} ${student.lastNameTh}`,
+      'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': '',
+      'น้ำหนัก (กก.)': '',
+      'ส่วนสูง (ซม.)': '',
+    }))
+  ];
   
   const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+  
+  // Style the example row differently
+  const range = XLSX.utils.decode_range(worksheet['!ref']!);
+  for (let col = range.s.c; col <= range.e.c; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: 1, c: col });
+    if (!worksheet[cellAddress]) continue;
+    worksheet[cellAddress].s = {
+      fill: { fgColor: { rgb: "FFFF00" } }, // Yellow background
+      font: { bold: true }
+    };
+  }
+  
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'ข้อมูลน้ำหนักส่วนสูง');
   XLSX.writeFile(workbook, `template-health-import.xlsx`);
@@ -157,9 +181,14 @@ export const importHealthDataFromExcel = (file: File): Promise<any[]> => {
 
         const currentAcademicYear = (new Date().getFullYear() + 543).toString();
 
-        const healthRecords = jsonData.map((row: any) => {
+        const healthRecords = jsonData.map((row: any, index: number) => {
+          // Skip the example row (first row after header)
+          if (index === 0 && row['รหัสนักเรียน']?.toString().includes('ตัวอย่าง')) {
+            return null;
+          }
+
           const studentId = row['รหัสนักเรียน']?.toString().trim();
-          if (!studentId) return null;
+          if (!studentId || studentId.includes('ตัวอย่าง')) return null;
 
           const studentUUID = studentMap.get(studentId);
           if (!studentUUID) {

@@ -7,6 +7,7 @@ import { useDropzone } from 'react-dropzone';
 import { getStudents } from '@/utils/studentStorage';
 import { upsertStudentHealthRecords } from '@/utils/healthStorage';
 import { exportStudentsForHealthImport, importHealthDataFromExcel } from '@/utils/excel';
+import HealthImportInstructions from './HealthImportInstructions';
 import Swal from 'sweetalert2';
 
 const HealthImportExport: React.FC = () => {
@@ -87,68 +88,72 @@ const HealthImportExport: React.FC = () => {
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Download className="w-6 h-6 text-school-primary" />
-            ส่งออกข้อมูลเพื่อนำเข้า
-          </CardTitle>
-          <CardDescription>
-            ส่งออกไฟล์ Excel ที่มีรายชื่อนักเรียนทั้งหมด
-            เพื่อกรอกข้อมูลน้ำหนักและส่วนสูง แล้วนำกลับเข้ามาในระบบ
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleExport} disabled={isExporting} className="w-full">
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
-            {isExporting ? 'กำลังส่งออก...' : 'ส่งออกเทมเพลต'}
-          </Button>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="w-6 h-6 text-school-primary" />
-            นำเข้าข้อมูลจาก Excel
-          </CardTitle>
-          <CardDescription>
-            นำเข้าไฟล์ Excel ที่กรอกข้อมูลน้ำหนักและส่วนสูงเรียบร้อยแล้ว
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-              ${isDragActive ? 'border-school-primary bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
-          >
-            <input {...getInputProps()} />
-            {isImporting ? (
-              <p>กำลังประมวลผล...</p>
-            ) : isDragActive ? (
-              <p>วางไฟล์ที่นี่...</p>
-            ) : (
-              <p>ลากไฟล์ .xlsx หรือ .xls มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="w-6 h-6 text-school-primary" />
+              ส่งออกข้อมูลเพื่อนำเข้า
+            </CardTitle>
+            <CardDescription>
+              ส่งออกไฟล์ Excel ที่มีรายชื่อนักเรียนทั้งหมด
+              เพื่อกรอกข้อมูลน้ำหนักและส่วนสูง แล้วนำกลับเข้ามาในระบบ
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleExport} disabled={isExporting} className="w-full">
+              <FileSpreadsheet className="w-4 h-4 mr-2" />
+              {isExporting ? 'กำลังส่งออก...' : 'ส่งออกเทมเพลต'}
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="w-6 h-6 text-school-primary" />
+              นำเข้าข้อมูลจาก Excel
+            </CardTitle>
+            <CardDescription>
+              นำเข้าไฟล์ Excel ที่กรอกข้อมูลน้ำหนักและส่วนสูงเรียบร้อยแล้ว
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+                ${isDragActive ? 'border-school-primary bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+            >
+              <input {...getInputProps()} />
+              {isImporting ? (
+                <p>กำลังประมวลผล...</p>
+              ) : isDragActive ? (
+                <p>วางไฟล์ที่นี่...</p>
+              ) : (
+                <p>ลากไฟล์ .xlsx หรือ .xls มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+              )}
+            </div>
+            {importResult && (
+               <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
+                  <p className="font-bold mb-2">ผลการนำเข้า:</p>
+                  <div className="flex items-center gap-2 text-green-600">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>สำเร็จ: {importResult.success} รายการ</span>
+                  </div>
+                  {importResult.fail > 0 && (
+                      <div className="flex items-center gap-2 text-red-600 mt-1">
+                          <XCircle className="w-4 h-4" />
+                          <span>ไม่สำเร็จ: {importResult.fail} รายการ (อาจเนื่องจากรหัสนักเรียนไม่ถูกต้อง)</span>
+                      </div>
+                  )}
+               </div>
             )}
-          </div>
-          {importResult && (
-             <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
-                <p className="font-bold mb-2">ผลการนำเข้า:</p>
-                <div className="flex items-center gap-2 text-green-600">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>สำเร็จ: {importResult.success} รายการ</span>
-                </div>
-                {importResult.fail > 0 && (
-                    <div className="flex items-center gap-2 text-red-600 mt-1">
-                        <XCircle className="w-4 h-4" />
-                        <span>ไม่สำเร็จ: {importResult.fail} รายการ (อาจเนื่องจากรหัสนักเรียนไม่ถูกต้อง)</span>
-                    </div>
-                )}
-             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <HealthImportInstructions />
     </div>
   );
 };
