@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StudentHealthDetails } from '@/types/student';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -62,10 +61,9 @@ const HealthAnalysisReport: React.FC<HealthAnalysisReportProps> = ({ data, grade
     const stats = {
       'อ้วน': { male: 0, female: 0 },
       'เริ่มอ้วน': { male: 0, female: 0 },
-      'ผอม': { male: 0, female: 0 },
       'สมส่วน': { male: 0, female: 0 },
       'ค่อนข้างผอม': { male: 0, female: 0 },
-      'ผอม': { male: 0, female: 0 }
+      'ผอมมาก': { male: 0, female: 0 }
     };
 
     data.forEach(record => {
@@ -75,8 +73,8 @@ const HealthAnalysisReport: React.FC<HealthAnalysisReportProps> = ({ data, grade
       if (evaluation === 'อ้วนมาก' || evaluation === 'อ้วน') stats['อ้วน'][gender]++;
       else if (evaluation === 'เกิน') stats['เริ่มอ้วน'][gender]++;
       else if (evaluation === 'ปกติ') stats['สมส่วน'][gender]++;
-      else if (evaluation === 'ผอม') stats['ผอม'][gender]++;
-      else if (evaluation === 'ผอมมาก') stats['ค่อนข้างผอม'][gender]++;
+      else if (evaluation === 'ผอม') stats['ค่อนข้างผอม'][gender]++;
+      else if (evaluation === 'ผอมมาก') stats['ผอมมาก'][gender]++;
     });
 
     return stats;
@@ -206,7 +204,7 @@ const HealthAnalysisReport: React.FC<HealthAnalysisReportProps> = ({ data, grade
       {renderStatsTable(
         "น้ำหนักตามเกณฑ์ส่วนสูง",
         weightForHeightStats,
-        ['อ้วน', 'เริ่มอ้วน', 'ผอม', 'สมส่วน', 'ค่อนข้างผอม', 'ผอม']
+        ['อ้วน', 'เริ่มอ้วน', 'สมส่วน', 'ค่อนข้างผอม', 'ผอมมาก']
       )}
 
       <div className="mt-8 text-right">
