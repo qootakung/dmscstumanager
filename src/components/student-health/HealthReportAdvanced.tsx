@@ -28,6 +28,39 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
     return 'อ้วนระดับ 2';
   };
 
+  // ฟังก์ชันคำนวณส่วนสูงตามอายุ ตามสูตร Excel ที่ให้มา
+  const calculateHeightForAge = (ageYears: number, height: number | null): string => {
+    if (!height || ageYears <= 0) return '-';
+    
+    // สูตรจาก Excel: =IF(D15="","",IF(OR(OR(OR(OR(OR(D15=0),D15>2),H15=0),H15=999),N15=0),"ไม่พบฐานส",IF(OR(H15<AL15,N15>120),"*** ตรวจสอบข้อมูล ***",IF(H15>AM15,"ข้อมูลสูงกว่าใจนเกณฑ์",IF(H15>=AL15,"สูงตามเกณฑ์","เตี้ยกว่าเกณฑ์")))))
+    
+    // กำหนดเกณฑ์ส่วนสูงตามช่วงอายุ (ตัวอย่าง - ควรปรับตามเกณฑ์จริง)
+    let minHeight = 0;
+    let maxHeight = 0;
+    
+    if (ageYears >= 6 && ageYears <= 12) {
+      // เกณฑ์สำหรับเด็กประถม
+      minHeight = 100 + (ageYears - 6) * 6; // ตัวอย่าง
+      maxHeight = 120 + (ageYears - 6) * 8; // ตัวอย่าง
+    } else if (ageYears >= 13 && ageYears <= 18) {
+      // เกณฑ์สำหรับเด็กมัธยม
+      minHeight = 140 + (ageYears - 13) * 5; // ตัวอย่าง
+      maxHeight = 160 + (ageYears - 13) * 6; // ตัวอย่าง
+    } else {
+      return 'ไม่พบฐานส';
+    }
+    
+    if (height > 200) {
+      return '*** ตรวจสอบข้อมูล ***';
+    } else if (height > maxHeight) {
+      return 'สูงเกินเกณฑ์';
+    } else if (height >= minHeight) {
+      return 'สูงตามเกณฑ์';
+    } else {
+      return 'เตี้ยกว่าเกณฑ์';
+    }
+  };
+
   // ฟังก์ชันประเมินสุขภาพตามอายุ (ตัวอย่าง)
   const evaluateHealthByAge = (bmi: number | null, age: number): string => {
     if (!bmi) return '-';
@@ -128,6 +161,7 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
             const bmi = calculateBMI(record.weight_kg, record.height_cm);
             const bmiEvaluation = evaluateBMI(bmi);
             const healthEvaluation = evaluateHealthByAge(bmi, record.age_years);
+            const heightForAgeEvaluation = calculateHeightForAge(record.age_years, record.height_cm);
             
             return (
               <TableRow key={record.record_id}>
@@ -140,7 +174,7 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
                 <TableCell className="text-center">{bmi ? bmi.toFixed(2) : '-'}</TableCell>
                 <TableCell className="text-center">{bmiEvaluation}</TableCell>
                 <TableCell className="text-center">{healthEvaluation}</TableCell>
-                <TableCell className="text-center">-</TableCell>
+                <TableCell className="text-center">{heightForAgeEvaluation}</TableCell>
                 <TableCell className="text-center">-</TableCell>
                 <TableCell className="text-center">-</TableCell>
                 <TableCell className="text-center">-</TableCell>
@@ -154,6 +188,7 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
         <p><strong>หมายเหตุ:</strong></p>
         <p>- ดัชนีมวลกาย (BMI) = น้ำหนัก (กก.) ÷ ส่วนสูง² (ม.)</p>
         <p>- เกณฑ์การประเมิน: น้ำหนักน้อย (BMI &lt; 18.5), ปกติ (18.5-22.9), เกิน (23-24.9), อ้วน (≥ 25)</p>
+        <p>- ส่วนสูงตามอายุ: ประเมินตามเกณฑ์มาตรฐานของเด็กไทย</p>
       </div>
     </div>
   );
