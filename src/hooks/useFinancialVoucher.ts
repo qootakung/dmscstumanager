@@ -9,7 +9,7 @@ export const useFinancialVoucher = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedGrade, setSelectedGrade] = useState('');
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  // isPreviewOpen state is removed as it's no longer needed.
   const [voucherData, setVoucherData] = useState<PaymentVoucherData>({
     paymentTypes: [],
     academicYear: '2567',
@@ -123,31 +123,16 @@ export const useFinancialVoucher = () => {
     }
   };
 
-  const handlePreview = () => {
-    if (voucherData.paymentTypes.length === 0) {
-      alert('กรุณาเลือกประเภทการจ่ายเงิน');
-      return;
-    }
-    if (!voucherData.grade) {
-      alert('กรุณาเลือกชั้นเรียน');
-      return;
-    }
-    setIsPreviewOpen(true);
-  };
-
   return {
     teachers,
     selectedGrade,
-    isPreviewOpen,
     voucherData,
     paymentOptions,
     grades,
     setVoucherData,
-    setIsPreviewOpen,
     handlePaymentTypeChange,
     handleGradeChange,
     handleTeacherSelect,
     handleAutoFillPrincipal,
-    handlePreview,
   };
 };
