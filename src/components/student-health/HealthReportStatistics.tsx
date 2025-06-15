@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StudentHealthDetails } from '@/types/student';
 
@@ -129,7 +128,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
         </thead>
         <tbody>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักมากกว่าเกณฑ์ (>+2 SD.)</td>
+            <td className="border border-black p-2">{'- น้ำหนักมากกว่าเกณฑ์ (>+2 SD.)'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{weightCategories['obese']?.total || 0}</td>
@@ -137,7 +136,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
             <td className="border border-black p-2 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักค่อนข้างมาก (>+1.5 SD. ถึง +2 SD.)</td>
+            <td className="border border-black p-2">{'- น้ำหนักค่อนข้างมาก (>+1.5 SD. ถึง +2 SD.)'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{weightCategories['overweight']?.total || 0}</td>
@@ -153,7 +152,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
             <td className="border border-black p-2 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักค่อนข้างน้อย (<-1.5 SD. ถึง -2 SD.)</td>
+            <td className="border border-black p-2">{'- น้ำหนักค่อนข้างน้อย (<-1.5 SD. ถึง -2 SD.)'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{weightCategories['underweight']?.total || 0}</td>
@@ -161,7 +160,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
             <td className="border border-black p-2 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- น้ำหนักน้อยกว่าเกณฑ์ (<-2 SD.) ** ส่งรายงาน **</td>
+            <td className="border border-black p-2">{'- น้ำหนักน้อยกว่าเกณฑ์ (<-2 SD.) ** ส่งรายงาน **'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{weightCategories['severely-underweight']?.total || 0}</td>
@@ -209,7 +208,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
         </thead>
         <tbody>
           <tr>
-            <td className="border border-black p-2">- สูงกว่าเกณฑ์ (>+2 SD.)</td>
+            <td className="border border-black p-2">{'- สูงกว่าเกณฑ์ (>+2 SD.)'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{heightCategories['very-tall']?.total || 0}</td>
@@ -217,7 +216,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
             <td className="border border-black p-2 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ค่อนข้างสูง (>+1.5 SD. ถึง +2 SD.)</td>
+            <td className="border border-black p-2">{'- ค่อนข้างสูง (>+1.5 SD. ถึง +2 SD.)'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{heightCategories['tall']?.total || 0}</td>
@@ -233,7 +232,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
             <td className="border border-black p-2 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- ค่อนข้างเตี้ย (<-1.5 SD. ถึง -2 SD.)</td>
+            <td className="border border-black p-2">{'- ค่อนข้างเตี้ย (<-1.5 SD. ถึง -2 SD.)'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{heightCategories['short']?.total || 0}</td>
@@ -241,7 +240,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({ data, g
             <td className="border border-black p-2 text-center"></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">- เตี้ย (<-2 SD.) ** ส่งรายงาน **</td>
+            <td className="border border-black p-2">{'- เตี้ย (<-2 SD.) ** ส่งรายงาน **'}</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">0</td>
             <td className="border border-black p-2 text-center">{heightCategories['very-short']?.total || 0}</td>
