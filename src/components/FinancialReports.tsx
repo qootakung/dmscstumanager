@@ -4,12 +4,13 @@ import { getStudents } from '@/utils/studentStorage';
 import { getTeachers } from '@/utils/teacherStorage';
 import type { Student } from '@/types/student';
 import type { Teacher } from '@/types/teacher';
-import PrintPreviewStatic from "./Finance/PrintPreviewStatic";
 import PaymentTypeSelection from './Finance/form/PaymentTypeSelection';
 import AcademicInfoSection from './Finance/form/AcademicInfoSection';
 import GradeSelection from './Finance/form/GradeSelection';
 import SignatureFields from './Finance/form/SignatureFields';
 import SchoolInfoSection from './Finance/form/SchoolInfoSection';
+import { Button } from '@/components/ui/button';
+import PrintPreviewDialog from './Finance/PrintPreviewDialog';
 
 export interface PaymentVoucherData {
   paymentTypes: string[];
@@ -28,6 +29,7 @@ const FinancialReports = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedGrade, setSelectedGrade] = useState('');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [voucherData, setVoucherData] = useState<PaymentVoucherData>({
     paymentTypes: [],
     academicYear: '2567',
@@ -132,6 +134,18 @@ const FinancialReports = () => {
     }
   };
 
+  const handlePreview = () => {
+    if (voucherData.paymentTypes.length === 0) {
+      alert('กรุณาเลือกประเภทการจ่ายเงิน');
+      return;
+    }
+    if (!voucherData.grade) {
+      alert('กรุณาเลือกชั้นเรียน');
+      return;
+    }
+    setIsPreviewOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -196,8 +210,18 @@ const FinancialReports = () => {
             onAutoFillPrincipal={handleAutoFillPrincipal}
           />
 
+          <div className="flex justify-end pt-6 mt-6 border-t">
+            <Button onClick={handlePreview}>ตัวอย่างก่อนพิมพ์</Button>
+          </div>
         </CardContent>
       </Card>
+      
+      <PrintPreviewDialog 
+        isOpen={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        voucherData={voucherData}
+        paymentOptions={paymentOptions}
+      />
     </div>
   );
 };
