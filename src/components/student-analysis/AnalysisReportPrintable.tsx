@@ -31,7 +31,7 @@ const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportP
   });
 
   return (
-    <div ref={ref} className="hidden print:block p-4" style={{ fontFamily: "'TH SarabunPSK', 'Sarabun', sans-serif", fontSize: '16px' }}>
+    <div ref={ref} className="hidden print:block p-4 font-sarabun">
       {sortedGrades.map((grade, pageIndex) => (
         <div key={grade} className={pageIndex < sortedGrades.length - 1 ? 'break-after-page' : ''}>
           <div className="text-center mb-4">
@@ -44,26 +44,26 @@ const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportP
               <p className="text-sm">จำนวน {studentsByGrade[grade].length} คน</p>
           </div>
 
-          <table className="w-full border-collapse border border-black">
+          <table className="w-full border-collapse border border-black text-sm">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-black px-2 py-1 text-center font-normal">ลำดับ</th>
-                <th className="border border-black px-2 py-1 text-center font-normal">รหัสนักเรียน</th>
-                <th className="border border-black px-2 py-1 text-center font-normal">ชื่อ-นามสกุล</th>
-                <th className="border border-black px-2 py-1 text-center font-normal">คะแนนเฉลี่ย</th>
-                <th className="border border-black px-2 py-1 text-center font-normal">กลุ่ม</th>
-                <th className="border border-black px-2 py-1 text-center font-normal">จำนวนวิชาที่ประเมิน</th>
+                <th className="border border-black px-2 py-1 text-center font-medium">ลำดับ</th>
+                <th className="border border-black px-2 py-1 text-center font-medium">รหัสนักเรียน</th>
+                <th className="border border-black px-2 py-1 text-left font-medium">ชื่อ-นามสกุล</th>
+                <th className="border border-black px-2 py-1 text-center font-medium">คะแนนเฉลี่ย</th>
+                <th className="border border-black px-2 py-1 text-center font-medium">กลุ่ม</th>
+                <th className="border border-black px-2 py-1 text-center font-medium">จำนวนวิชาที่ประเมิน</th>
               </tr>
             </thead>
-            <tbody style={{ fontWeight: 'normal' }}>
+            <tbody>
               {studentsByGrade[grade].map((student, index) => (
                 <tr key={student.id}>
-                  <td className="border border-black px-2 py-1 text-center font-normal">{index + 1}</td>
-                  <td className="border border-black px-2 py-1 text-center font-normal">{student.studentId}</td>
-                  <td className="border border-black px-2 py-1 text-left font-normal">{student.studentName}</td>
-                  <td className="border border-black px-2 py-1 text-center font-normal">{student.averageScore.toFixed(2)}</td>
-                  <td className="border border-black px-2 py-1 text-center font-normal">{student.group}</td>
-                  <td className="border border-black px-2 py-1 text-center font-normal">{Object.keys(student.scores).length}</td>
+                  <td className="border border-black px-2 py-1 text-center">{index + 1}</td>
+                  <td className="border border-black px-2 py-1 text-center">{student.studentId}</td>
+                  <td className="border border-black px-2 py-1 text-left">{student.studentName}</td>
+                  <td className="border border-black px-2 py-1 text-center">{student.averageScore.toFixed(2)}</td>
+                  <td className="border border-black px-2 py-1 text-center">{student.group}</td>
+                  <td className="border border-black px-2 py-1 text-center">{Object.keys(student.scores).length}</td>
                 </tr>
               ))}
             </tbody>
