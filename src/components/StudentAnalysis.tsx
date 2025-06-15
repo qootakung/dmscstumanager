@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, TrendingUp, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, Printer, Eye } from 'lucide-react';
+import { BarChart3, TrendingUp, FileText, Upload, BookOpen, Calculator, Target, CheckCircle, Printer, Eye } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import ImportTemplate from './student-analysis/ImportTemplate';
 import AnalysisReportPrintable from './student-analysis/AnalysisReportPrintable';
+import SubjectReportPrintable from './student-analysis/SubjectReportPrintable';
 import type { StudentScore } from '@/types/studentAnalysis';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
@@ -29,8 +31,10 @@ const StudentAnalysis: React.FC = () => {
   });
   const [academicYear, setAcademicYear] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const [showSubjectPreview, setShowSubjectPreview] = useState(false);
 
   const reportRef = useRef<HTMLDivElement>(null);
+  const subjectReportRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
     contentRef: reportRef,
@@ -44,6 +48,30 @@ const StudentAnalysis: React.FC = () => {
       toast({
         title: "พิมพ์รายงานสำเร็จ",
         description: "ส่งคำสั่งพิมพ์รายงานไปยังเครื่องพิมพ์เรียบร้อยแล้ว",
+      });
+    },
+    onPrintError: (errorLocation, error) => {
+      console.error('เกิดข้อผิดพลาดในการพิมพ์:', error);
+      toast({
+        title: "เกิดข้อผิดพลาดในการพิมพ์",
+        description: "กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubjectPrint = useReactToPrint({
+    contentRef: subjectReportRef,
+    documentTitle: `รายงานการวิเคราะห์ผู้เรียนรายวิชา-${selectedSubject}-${academicYear || new Date().getFullYear() + 543}`,
+    onBeforePrint: () => {
+      console.log('เริ่มพิมพ์รายงานรายวิชา...');
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      console.log('พิมพ์รายงานรายวิชาเสร็จสิ้น');
+      toast({
+        title: "พิมพ์รายงานสำเร็จ",
+        description: "ส่งคำสั่งพิมพ์รายงานรายวิชาไปยังเครื่องพิมพ์เรียบร้อยแล้ว",
       });
     },
     onPrintError: (errorLocation, error) => {
@@ -185,35 +213,25 @@ const StudentAnalysis: React.FC = () => {
     event.target.value = '';
   };
 
-  const exportReport = (format: 'pdf' | 'excel') => {
-    if (students.length === 0) {
-      toast({
-        title: "ไม่มีข้อมูลสำหรับส่งออก",
-        description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: `กำลังส่งออกรายงาน ${format.toUpperCase()}`,
-      description: "กรุณารอสักครู่...",
-    });
-
-    // จำลองการส่งออก
-    setTimeout(() => {
-      toast({
-        title: "ส่งออกรายงานสำเร็จ",
-        description: `รายงานการวิเคราะห์ผู้เรียน ${format.toUpperCase()} พร้อมใช้งาน`,
-      });
-    }, 2000);
-  };
-
   const filteredStudents = students.filter(student => {
     const gradeMatch = !selectedGrade || student.grade === selectedGrade;
     const subjectMatch = !selectedSubject || student.scores[selectedSubject] !== undefined;
     return gradeMatch && subjectMatch;
   });
+
+  // Calculate subject-specific analysis
+  const getSubjectAnalysis = (subject: string) => {
+    if (!subject) return { excellent: 0, average: 0, poor: 0 };
+    
+    const studentsWithSubject = students.filter(s => s.scores[subject] !== undefined);
+    return {
+      excellent: studentsWithSubject.filter(s => s.scores[subject] >= 4.0).length,
+      average: studentsWithSubject.filter(s => s.scores[subject] >= 2.0 && s.scores[subject] < 4.0).length,
+      poor: studentsWithSubject.filter(s => s.scores[subject] < 2.0).length
+    };
+  };
+
+  const subjectAnalysis = selectedSubject ? getSubjectAnalysis(selectedSubject) : { excellent: 0, average: 0, poor: 0 };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
@@ -296,7 +314,7 @@ const StudentAnalysis: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">{analysisData.excellent}</div>
+                      <div className="text-3xl font-bold">{selectedSubject ? subjectAnalysis.excellent : analysisData.excellent}</div>
                       <p className="text-green-100 text-sm">คะแนนเฉลี่ย 4.00</p>
                     </CardContent>
                   </Card>
@@ -309,7 +327,7 @@ const StudentAnalysis: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">{analysisData.average}</div>
+                      <div className="text-3xl font-bold">{selectedSubject ? subjectAnalysis.average : analysisData.average}</div>
                       <p className="text-orange-100 text-sm">คะแนนเฉลี่ย 2.0-3.99</p>
                     </CardContent>
                   </Card>
@@ -322,7 +340,7 @@ const StudentAnalysis: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">{analysisData.poor}</div>
+                      <div className="text-3xl font-bold">{selectedSubject ? subjectAnalysis.poor : analysisData.poor}</div>
                       <p className="text-pink-100 text-sm">คะแนนเฉลี่ยต่ำกว่า 2.0</p>
                     </CardContent>
                   </Card>
@@ -493,7 +511,7 @@ const StudentAnalysis: React.FC = () => {
                                   <tr className="bg-gray-200">
                                     <th className="border border-black px-2 py-1 text-center font-medium">ลำดับ</th>
                                     <th className="border border-black px-2 py-1 text-center font-medium">รหัสนักเรียน</th>
-                                    <th className="border border-black px-2 py-1 text-left font-medium">ชื่อ-นามสกุล</th>
+                                    <th className="border border-black px-2 py-1 text-center font-medium">ชื่อ-นามสกุล</th>
                                     <th className="border border-black px-2 py-1 text-center font-medium">คะแนนเฉลี่ย</th>
                                     <th className="border border-black px-2 py-1 text-center font-medium">กลุ่ม</th>
                                     <th className="border border-black px-2 py-1 text-center font-medium">จำนวนวิชาที่ประเมิน</th>
@@ -722,58 +740,142 @@ const StudentAnalysis: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-600" />
-                    ส่งออกรายงานการวิเคราะห์
+                    รายงานการวิเคราะห์ผู้เรียนรายวิชา
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button 
-                      variant="outline" 
-                      className="h-20 flex-col gap-2 border-orange-200 hover:bg-orange-50"
-                      onClick={() => exportReport('pdf')}
-                      disabled={students.length === 0}
-                    >
-                      <Download className="w-6 h-6 text-orange-600" />
-                      <span>ส่งออก PDF</span>
-                      <span className="text-xs text-gray-500">รายงานสำหรับพิมพ์</span>
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      className="h-20 flex-col gap-2 border-orange-200 hover:bg-orange-50"
-                      onClick={() => exportReport('excel')}
-                      disabled={students.length === 0}
-                    >
-                      <Download className="w-6 h-6 text-orange-600" />
-                      <span>ส่งออก Excel</span>
-                      <span className="text-xs text-gray-500">ข้อมูลสำหรับวิเคราะห์</span>
-                    </Button>
+                  {/* Subject Selection */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="report-subject">เลือกรายวิชาสำหรับรายงาน</Label>
+                      <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                        <SelectTrigger className="mt-2">
+                          <SelectValue placeholder="เลือกรายวิชา" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {subjects.map((subject) => (
+                            <SelectItem key={subject} value={subject}>
+                              {subject}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="report-academic-year">ปีการศึกษา</Label>
+                      <Input
+                        id="report-academic-year"
+                        placeholder="เช่น 2567"
+                        value={academicYear}
+                        onChange={(e) => setAcademicYear(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
                   </div>
 
-                  {students.length > 0 ? (
-                    <div className="text-center py-4 text-gray-600">
-                      <FileText className="w-12 h-12 mx-auto mb-4 text-orange-500" />
-                      <p className="text-lg mb-2">รายงานพร้อมส่งออก</p>
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="bg-green-50 p-3 rounded">
+                  {/* Subject Analysis Display */}
+                  {selectedSubject && students.length > 0 && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-green-50 p-4 rounded-lg text-center">
                           <div className="font-medium text-green-800">กลุ่มเก่ง</div>
-                          <div className="text-2xl font-bold text-green-600">{analysisData.excellent}</div>
+                          <div className="text-2xl font-bold text-green-600">{subjectAnalysis.excellent}</div>
+                          <div className="text-sm text-green-600">คะแนน 4.00</div>
                         </div>
-                        <div className="bg-yellow-50 p-3 rounded">
+                        <div className="bg-yellow-50 p-4 rounded-lg text-center">
                           <div className="font-medium text-yellow-800">กลุ่มปานกลาง</div>
-                          <div className="text-2xl font-bold text-yellow-600">{analysisData.average}</div>
+                          <div className="text-2xl font-bold text-yellow-600">{subjectAnalysis.average}</div>
+                          <div className="text-sm text-yellow-600">คะแนน 2.0-3.99</div>
                         </div>
-                        <div className="bg-red-50 p-3 rounded">
+                        <div className="bg-red-50 p-4 rounded-lg text-center">
                           <div className="font-medium text-red-800">กลุ่มอ่อน</div>
-                          <div className="text-2xl font-bold text-red-600">{analysisData.poor}</div>
+                          <div className="text-2xl font-bold text-red-600">{subjectAnalysis.poor}</div>
+                          <div className="text-sm text-red-600">คะแนนต่ำกว่า 2.0</div>
                         </div>
                       </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-4 justify-center">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowSubjectPreview(!showSubjectPreview)}
+                          className="bg-green-50 hover:bg-green-100 border-green-200"
+                          disabled={!selectedSubject || !academicYear}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          {showSubjectPreview ? 'ซ่อนตัวอย่าง' : 'แสดงตัวอย่างรายงาน'}
+                        </Button>
+                        
+                        <Button
+                          onClick={() => {
+                            if (!selectedSubject) {
+                              toast({
+                                title: "กรุณาเลือกรายวิชา",
+                                description: "โปรดเลือกรายวิชาก่อนพิมพ์รายงาน",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            if (!academicYear.trim()) {
+                              toast({
+                                title: "กรุณาระบุปีการศึกษา",
+                                description: "โปรดป้อนปีการศึกษาก่อนพิมพ์รายงาน",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            if (students.length === 0) {
+                              toast({
+                                title: "ไม่มีข้อมูลสำหรับพิมพ์",
+                                description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            handleSubjectPrint();
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700"
+                          disabled={!selectedSubject || !academicYear || students.length === 0}
+                        >
+                          <Printer className="mr-2 h-4 w-4" />
+                          พิมพ์รายงานรายวิชา
+                        </Button>
+                      </div>
+
+                      {/* Subject Report Preview */}
+                      {showSubjectPreview && selectedSubject && academicYear && (
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                          <h3 className="text-lg font-semibold mb-4 text-center">ตัวอย่างรายงานรายวิชา</h3>
+                          <div className="bg-white p-6 rounded shadow-sm font-sarabun text-base max-h-96 overflow-y-auto">
+                            <div className="text-center mb-6">
+                              <h2 className="text-xl font-bold mb-2">รายงานการวิเคราะห์ผู้เรียนรายวิชา</h2>
+                              <p className="text-lg mb-1">ปีการศึกษา {academicYear} โรงเรียนบ้านดอนมูล</p>
+                              <p className="text-lg mb-1">วิชา: {selectedSubject}</p>
+                            </div>
+                            
+                            <div className="text-center mb-4">
+                              <div className="inline-flex gap-6 text-sm">
+                                <span className="text-green-600">เก่ง: {subjectAnalysis.excellent} คน</span>
+                                <span className="text-yellow-600">ปานกลาง: {subjectAnalysis.average} คน</span>
+                                <span className="text-red-600">อ่อน: {subjectAnalysis.poor} คน</span>
+                              </div>
+                            </div>
+                            
+                            <p className="text-sm text-gray-600 text-center">
+                              * นี่เป็นตัวอย่างเฉพาะส่วนหัว รายงานจริงจะแสดงรายละเอียดนักเรียนทุกคนแบ่งตามกลุ่ม
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ) : (
+                  )}
+
+                  {students.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="text-lg mb-2">ยังไม่มีข้อมูลสำหรับรายงาน</p>
-                      <p className="text-sm">กรุณานำเข้าข้อมูลคะแนนก่อนส่งออกรายงาน</p>
+                      <p className="text-sm">กรุณานำเข้าข้อมูลคะแนนก่อนสร้างรายงาน</p>
                     </div>
                   )}
                 </CardContent>
@@ -783,8 +885,9 @@ const StudentAnalysis: React.FC = () => {
         </div>
       </div>
       
-      {/* Hidden printable component */}
+      {/* Hidden printable components */}
       <AnalysisReportPrintable ref={reportRef} students={students} academicYear={academicYear} />
+      <SubjectReportPrintable ref={subjectReportRef} students={students} selectedSubject={selectedSubject} academicYear={academicYear} />
     </div>
   );
 };
