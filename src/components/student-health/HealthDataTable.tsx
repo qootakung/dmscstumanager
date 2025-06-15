@@ -22,11 +22,19 @@ const HealthDataTable: React.FC = () => {
 
   const { data: healthData, isLoading, error } = useQuery({
     queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade],
-    queryFn: () => getStudentHealthDetails(
-      currentAcademicYear,
-      selectedMonth === 'all' ? undefined : parseInt(selectedMonth, 10),
-      selectedGrade === 'all' ? undefined : selectedGrade
-    ),
+    queryFn: () => {
+      // Convert 'all' to undefined for proper parameter passing
+      const monthFilter = selectedMonth === 'all' ? undefined : parseInt(selectedMonth, 10);
+      const gradeFilter = selectedGrade === 'all' ? undefined : selectedGrade;
+      
+      return getStudentHealthDetails(
+        currentAcademicYear,
+        monthFilter,
+        gradeFilter
+      );
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   console.log('Health data:', healthData);
@@ -40,8 +48,9 @@ const HealthDataTable: React.FC = () => {
       toast.success('อัปเดตข้อมูลสำเร็จ');
       queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade] });
     },
-    onError: () => {
-      toast.error('อัปเดตข้อมูลไม่สำเร็จ');
+    onError: (error: any) => {
+      console.error('Update error:', error);
+      toast.error('อัปเดตข้อมูลไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'));
     },
     onSettled: () => {
         setEditingCell(null);

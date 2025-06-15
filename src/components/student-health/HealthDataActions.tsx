@@ -51,11 +51,13 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
     console.log('Export Excel functionality to be implemented');
   };
 
+  const hasData = healthData && healthData.length > 0;
+
   return (
     <div className="flex items-center gap-2">
       <Button
         onClick={handleExportExcel}
-        disabled={isLoading || healthData.length === 0}
+        disabled={isLoading || !hasData}
         variant="outline"
         size="sm"
       >
@@ -65,7 +67,7 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
       
       <Button
         onClick={handleBasicPrint}
-        disabled={isLoading || healthData.length === 0}
+        disabled={isLoading || !hasData}
         variant="outline"
         size="sm"
       >
@@ -75,7 +77,7 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
 
       <Button
         onClick={handleAdvancedPrint}
-        disabled={isLoading || healthData.length === 0}
+        disabled={isLoading || !hasData}
         variant="outline"
         size="sm"
       >
@@ -83,28 +85,32 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
         พิมพ์รายงาน BMI
       </Button>
 
-      {/* Hidden components for printing */}
-      <div style={{ display: 'none' }}>
-        <div ref={basicReportRef}>
-          <HealthReportPrintable
-            data={healthData}
-            grade={getGradeName(selectedGrade)}
-            month={getMonthName(selectedMonth)}
-            academicYear={currentAcademicYear}
-          />
-        </div>
-      </div>
+      {/* Hidden components for printing - only render when we have data */}
+      {hasData && (
+        <>
+          <div style={{ display: 'none' }}>
+            <div ref={basicReportRef}>
+              <HealthReportPrintable
+                data={healthData}
+                grade={getGradeName(selectedGrade)}
+                month={getMonthName(selectedMonth)}
+                academicYear={currentAcademicYear}
+              />
+            </div>
+          </div>
 
-      <div style={{ display: 'none' }}>
-        <div ref={advancedReportRef}>
-          <HealthReportAdvanced
-            data={healthData}
-            grade={getGradeName(selectedGrade)}
-            month={getMonthName(selectedMonth)}
-            academicYear={currentAcademicYear}
-          />
-        </div>
-      </div>
+          <div style={{ display: 'none' }}>
+            <div ref={advancedReportRef}>
+              <HealthReportAdvanced
+                data={healthData}
+                grade={getGradeName(selectedGrade)}
+                month={getMonthName(selectedMonth)}
+                academicYear={currentAcademicYear}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

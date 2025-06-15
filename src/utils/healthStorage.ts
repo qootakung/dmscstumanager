@@ -24,10 +24,14 @@ export const getStudentHealthRecords = async (filters: { academicYear?: string, 
 export const getStudentHealthDetails = async (academicYear: string, month?: number, grade?: string) => {
   console.log('Fetching health details with params:', { academicYear, month, grade });
   
+  // Convert 'all' values to null properly
+  const monthParam = month === undefined ? null : month;
+  const gradeParam = grade === 'all' || grade === undefined ? null : grade;
+  
   const { data, error } = await supabase.rpc('get_student_health_details', {
     p_academic_year: academicYear,
-    p_month: month || null,
-    p_grade: grade || null,
+    p_month: monthParam,
+    p_grade: gradeParam,
   });
 
   if (error) {
@@ -55,13 +59,23 @@ export const updateStudentHealthRecord = async (recordId: string, updates: { wei
 }
 
 export const upsertStudentHealthRecords = async (records: any[]) => {
-  const { data, error } = await supabase.from('student_health_records').upsert(records, {
-    onConflict: 'student_id,measurement_date'
-  }).select();
+  // Add proper error handling for RLS policy issues
+  try {
+    const { data, error } = await supabase.from('student_health_records').upsert(records, {
+      onConflict: 'student_id,measurement_date'
+    }).select();
 
-  if (error) {
-    console.error('Error upserting student health records:', error);
-    return null;
+    if (error) {
+      console.error('Error upserting student health records:', error);
+      // If it's an RLS policy error, provide more helpful error message
+      if (error.code === '42501') {
+        throw new Error('ไม่มีสิทธิ์ในการบันทึกข้อมูล กรุณาติดต่อผู้ดูแลระบบ');
+      }
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error in upsertStudentHealthRecords:', error);
+    throw error;
   }
-  return data;
 }
