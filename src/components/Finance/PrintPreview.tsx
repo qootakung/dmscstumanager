@@ -1,8 +1,8 @@
-
 import React from "react";
 import { Check } from "lucide-react";
 import type { Student } from "@/types/student";
 import type { Teacher } from "@/types/teacher";
+import PaymentOptionCheckbox from "./PaymentOptionCheckbox";
 
 interface PrintPreviewProps {
   voucherData: {
@@ -47,29 +47,20 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
       {/* Checkbox 2 คอลัมน์ x 2 แถว + ช่องค่าจัดการเรียนการสอน */}
       <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-2 mb-1 w-full max-w-2xl">
         {paymentOptions.slice(0, 4).map((option, i) => (
-          <div className="flex items-center gap-2" key={option}>
-            <span
-              className="inline-block border-2 border-neutral-800 w-5 h-5 mr-1 align-middle flex items-center justify-center rounded"
-            >
-              {voucherData.paymentTypes.includes(option) && (
-                <Check className="w-4 h-4 text-green-600" strokeWidth={3}/>
-              )}
-            </span>
-            <span>{option}</span>
-          </div>
+          <PaymentOptionCheckbox
+            key={option}
+            label={option}
+            checked={voucherData.paymentTypes.includes(option)}
+          />
         ))}
         {/* ช่อง "ค่าจัดการเรียนการสอน (ปัจจัยพื้นฐานสำหรับการรับนักเรียนยากจน)" แบบเหมือนช่องอื่น */}
         {paymentOptions[4] && (
-          <div className="flex items-center gap-2 col-span-2">
-            <span
-              className="inline-block border-2 border-neutral-800 w-5 h-5 mr-1 align-middle flex items-center justify-center rounded"
-            >
-              {voucherData.paymentTypes.includes(paymentOptions[4]) && (
-                <Check className="w-4 h-4 text-green-600" strokeWidth={3}/>
-              )}
-            </span>
-            <span>{paymentOptions[4]}</span>
-          </div>
+          <PaymentOptionCheckbox
+            key={paymentOptions[4]}
+            label={paymentOptions[4]}
+            checked={voucherData.paymentTypes.includes(paymentOptions[4])}
+            className="col-span-2"
+          />
         )}
       </div>
       {/* เส้นคั่น --- */}
@@ -218,4 +209,3 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
 );
 
 export default PrintPreview;
-
