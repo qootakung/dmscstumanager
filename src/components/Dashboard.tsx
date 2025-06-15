@@ -1,230 +1,282 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, GraduationCap, FileText, Activity } from 'lucide-react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { getStudentStatistics } from '@/utils/statisticsStorage';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getStudentStatistics } from '@/utils/storage';
+import { getTeacherStatistics } from '@/utils/teacherStorage';
+import { Users, GraduationCap, Calendar, BookOpen, UserCheck, UserCog } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Skeleton } from "@/components/ui/skeleton";
 
-const Dashboard = () => {
-  const [statistics, setStatistics] = useState({
-    total: 0,
-    byGrade: {} as Record<string, number>,
-    byGender: { ชาย: 0, หญิง: 0 },
-    academicYears: [] as string[]
-  });
+type StudentStats = Awaited<ReturnType<typeof getStudentStatistics>>;
+type TeacherStats = Awaited<ReturnType<typeof getTeacherStatistics>>;
+
+const Dashboard: React.FC = () => {
+  const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
+  const [teacherStats, setTeacherStats] = useState<TeacherStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadStatistics = async () => {
+    const fetchStatistics = async () => {
       try {
-        const stats = await getStudentStatistics();
-        setStatistics(stats);
+        const [sStats, tStats] = await Promise.all([
+          getStudentStatistics(),
+          getTeacherStatistics(),
+        ]);
+        setStudentStats(sStats);
+        setTeacherStats(tStats);
       } catch (error) {
-        console.error('Error loading statistics:', error);
+        console.error("Error fetching dashboard statistics:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    loadStatistics();
+    fetchStatistics();
   }, []);
 
-  // Beautiful darker color palette for grade chart
-  const gradeColors = [
-    '#DC2626', // Deep Red
-    '#059669', // Deep Emerald
-    '#1D4ED8', // Deep Blue
-    '#7C2D12', // Deep Brown
-    '#A21CAF', // Deep Magenta
-    '#EA580C', // Deep Orange
-    '#0891B2', // Deep Cyan
-    '#65A30D', // Deep Lime
-    '#7C3AED', // Deep Violet
-    '#BE185D', // Deep Pink
-    '#CA8A04', // Deep Yellow
-    '#166534'  // Deep Green
-  ];
-
-  // Chart data preparations with beautiful colors
-  const gradeChartData = Object.entries(statistics.byGrade).map(([grade, count], index) => ({
+  if (loading || !studentStats || !teacherStats) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-[400px]" />
+          <Skeleton className="h-[400px]" />
+        </div>
+      </div>
+    );
+  }
+  
+  const gradeChartData = Object.entries(studentStats.byGrade).map(([grade, count]) => ({
     grade,
-    count,
-    fill: gradeColors[index % gradeColors.length]
+    students: count,
   }));
 
-  const genderChartData = [
-    { name: 'ชาย', value: statistics.byGender.ชาย, fill: '#1D4ED8' },
-    { name: 'หญิง', value: statistics.byGender.หญิง, fill: '#BE185D' }
+  const genderChartData = Object.entries(studentStats.byGender).map(([gender, count]) => ({
+    name: gender,
+    value: count,
+  }));
+
+  const positionChartData = Object.entries(teacherStats.byPosition).map(([position, count]) => ({
+    position: position.length > 15 ? position.substring(0, 15) + '...' : position,
+    teachers: count,
+  }));
+
+  // สีสันสำหรับกราฟแต่ละระดับชั้น
+  const gradeColors = [
+    '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+    '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1'
   ];
 
-  const chartConfig = {
-    students: {
-      label: "นักเรียน",
-    },
-    grade: {
-      label: "ชั้น",
-    }
-  };
+  const GENDER_COLORS = ['#22c55e', '#f59e0b'];
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-school-primary mb-4">
-          ยินดีต้อนรับสู่ระบบจัดการข้อมูลโรงเรียนบ้านดอนมูล
-        </h1>
-        <p className="text-gray-600 text-lg">
-          ระบบจัดการข้อมูลสารสนเทศโรงเรียนบ้านดอนมูล
-        </p>
+    <div className="p-6 space-y-6">
+      {/* Statistics Cards with vibrant colors */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">นักเรียนทั้งหมด</CardTitle>
+            <Users className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{studentStats.total}</div>
+            <p className="text-blue-100 text-sm">คน</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">นักเรียนชาย</CardTitle>
+            <UserCheck className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{studentStats.byGender.ชาย || 0}</div>
+            <p className="text-emerald-100 text-sm">ช = ชาย</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">นักเรียนหญิง</CardTitle>
+            <UserCheck className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{studentStats.byGender.หญิง || 0}</div>
+            <p className="text-orange-100 text-sm">ญ = หญิง</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ปีการศึกษา</CardTitle>
+            <Calendar className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{studentStats.academicYears.length}</div>
+            <p className="text-purple-100 text-sm">ปี</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ครูทั้งหมด</CardTitle>
+            <UserCog className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{teacherStats.total}</div>
+            <p className="text-teal-100 text-sm">คน</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-rose-500 to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ปีการศึกษาครู</CardTitle>
+            <GraduationCap className="h-6 w-6" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{teacherStats.academicYears.length}</div>
+            <p className="text-pink-100 text-sm">ปี</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-800">
-              นักเรียนทั้งหมด
-            </CardTitle>
-            <div className="bg-blue-500 p-2 rounded-full">
-              <Users className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-900">{statistics.total}</div>
-            <p className="text-xs text-blue-700 font-medium">
-              จำนวนนักเรียนในระบบ
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">
-              ครูทั้งหมด
-            </CardTitle>
-            <div className="bg-green-500 p-2 rounded-full">
-              <GraduationCap className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-900">12</div>
-            <p className="text-xs text-green-700 font-medium">
-              จำนวนครูในระบบ
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-100 to-orange-200 border-orange-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-800">
-              รายงาน
-            </CardTitle>
-            <div className="bg-orange-500 p-2 rounded-full">
-              <FileText className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-orange-900">8</div>
-            <p className="text-xs text-orange-700 font-medium">
-              รายงานที่สร้างแล้ว
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Section */}
+      {/* Charts with enhanced styling */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Students by Grade Chart with Beautiful Colors */}
-        <Card className="col-span-1 shadow-lg border-2 border-gray-100">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-            <CardTitle className="text-school-primary">จำนวนนักเรียนแยกตามชั้น</CardTitle>
-            <CardDescription>
-              การกระจายตัวของนักเรียนในแต่ละระดับชั้น
-            </CardDescription>
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-bold">จำนวนนักเรียนแยกตามระดับชั้น</CardTitle>
           </CardHeader>
-          <CardContent className="bg-white">
-            <ChartContainer config={chartConfig} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={gradeChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
-                  <XAxis dataKey="grade" tick={{ fill: '#4b5563' }} />
-                  <YAxis tick={{ fill: '#4b5563' }} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                    {gradeChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+          <CardContent className="p-6">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={gradeChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="grade" stroke="#64748b" fontSize={12} />
+                <YAxis stroke="#64748b" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1e293b', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                  }} 
+                />
+                <defs>
+                  <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.8}/>
+                  </linearGradient>
+                </defs>
+                <Bar 
+                  dataKey="students" 
+                  radius={[6, 6, 0, 0]}
+                  fill="url(#colorGradient)"
+                >
+                  {gradeChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={gradeColors[index % gradeColors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Gender Distribution Chart */}
-        <Card className="col-span-1 shadow-lg border-2 border-gray-100">
-          <CardHeader className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-t-lg">
-            <CardTitle className="text-school-primary">อัตราส่วนเพศของนักเรียน</CardTitle>
-            <CardDescription>
-              การแบ่งตามเพศของนักเรียนทั้งหมด
-            </CardDescription>
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-bold">สัดส่วนนักเรียนแยกตามเพศ</CardTitle>
           </CardHeader>
-          <CardContent className="bg-white">
-            <ChartContainer config={chartConfig} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={genderChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={90}
-                    fill="#8884d8"
-                    dataKey="value"
-                    stroke="#ffffff"
-                    strokeWidth={3}
-                  >
-                    {genderChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+          <CardContent className="p-6">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={genderChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value, percent }) => `${name === 'ชาย' ? 'ช' : 'ญ'}: ${value} คน (${(percent * 100).toFixed(1)}%)`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  stroke="#fff"
+                  strokeWidth={3}
+                >
+                  {genderChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={GENDER_COLORS[index % GENDER_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1e293b', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                  }} 
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      {/* Academic Years Trend */}
-      <Card className="shadow-lg border-2 border-gray-100">
-        <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-t-lg">
-          <CardTitle className="text-school-primary">แนวโน้มจำนวนนักเรียนตามปีการศึกษา</CardTitle>
-          <CardDescription>
-            การเปลี่ยนแปลงจำนวนนักเรียนในแต่ละปีการศึกษา
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="bg-white">
-          <ChartContainer config={chartConfig} className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={statistics.academicYears.map((year, index) => ({
-                  year,
-                  students: Math.floor(Math.random() * 100) + 50 // ข้อมูลตัวอย่าง
-                }))}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
-                <XAxis dataKey="year" tick={{ fill: '#4b5563' }} />
-                <YAxis tick={{ fill: '#4b5563' }} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="students" 
-                  stroke="#059669" 
-                  strokeWidth={4}
-                  dot={{ fill: "#059669", strokeWidth: 3, r: 6 }}
-                  activeDot={{ r: 8, fill: "#34d399" }}
+      {/* Teacher Position Chart */}
+      {teacherStats.total > 0 && (
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-bold">จำนวนครูแยกตามตำแหน่ง</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={positionChartData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis type="number" stroke="#64748b" fontSize={12} />
+                <YAxis dataKey="position" type="category" stroke="#64748b" fontSize={12} width={120} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1e293b', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                  }} 
                 />
-              </LineChart>
+                <Bar 
+                  dataKey="teachers" 
+                  radius={[0, 6, 6, 0]}
+                >
+                  {positionChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={gradeColors[index % gradeColors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Academic Years with enhanced styling */}
+      {studentStats.academicYears.length > 0 && (
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <CardHeader className="bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-t-lg">
+            <CardTitle className="text-lg font-bold">ปีการศึกษาที่มีข้อมูล</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex flex-wrap gap-3">
+              {studentStats.academicYears.map((year, index) => (
+                <span
+                  key={year}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-shadow"
+                  style={{
+                    background: `linear-gradient(135deg, ${gradeColors[index % gradeColors.length]}, ${gradeColors[(index + 1) % gradeColors.length]})`
+                  }}
+                >
+                  {year}
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

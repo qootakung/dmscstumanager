@@ -6,7 +6,6 @@ import { StudentHealthDetails } from '@/types/student';
 import { useReactToPrint } from 'react-to-print';
 import HealthReportPrintable from './HealthReportPrintable';
 import HealthReportAdvanced from './HealthReportAdvanced';
-import HealthAnalysisReport from './HealthAnalysisReport';
 
 interface HealthDataActionsProps {
   healthData: StudentHealthDetails[];
@@ -25,7 +24,6 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
 }) => {
   const basicReportRef = useRef<HTMLDivElement>(null);
   const advancedReportRef = useRef<HTMLDivElement>(null);
-  const analysisReportRef = useRef<HTMLDivElement>(null);
 
   const handleBasicPrint = useReactToPrint({
     contentRef: basicReportRef,
@@ -35,11 +33,6 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
   const handleAdvancedPrint = useReactToPrint({
     contentRef: advancedReportRef,
     documentTitle: `health-report-advanced-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
-  });
-
-  const handleAnalysisPrint = useReactToPrint({
-    contentRef: analysisReportRef,
-    documentTitle: `health-analysis-report-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
   });
 
   const getMonthName = (month: string) => {
@@ -92,16 +85,6 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
         พิมพ์รายงาน BMI
       </Button>
 
-      <Button
-        onClick={handleAnalysisPrint}
-        disabled={isLoading || !hasData}
-        variant="outline"
-        size="sm"
-      >
-        <Printer className="h-4 w-4 mr-2" />
-        พิมพ์อัตราความชุกโภชนาการ
-      </Button>
-
       {/* Hidden components for printing - only render when we have data */}
       {hasData && (
         <>
@@ -119,17 +102,6 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
           <div style={{ display: 'none' }}>
             <div ref={advancedReportRef}>
               <HealthReportAdvanced
-                data={healthData}
-                grade={getGradeName(selectedGrade)}
-                month={getMonthName(selectedMonth)}
-                academicYear={currentAcademicYear}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'none' }}>
-            <div ref={analysisReportRef}>
-              <HealthAnalysisReport
                 data={healthData}
                 grade={getGradeName(selectedGrade)}
                 month={getMonthName(selectedMonth)}
