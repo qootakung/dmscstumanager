@@ -60,54 +60,74 @@ export const updateStudentHealthRecord = async (recordId: string, updates: { wei
 
 export const upsertStudentHealthRecords = async (records: any[]) => {
   try {
-    console.log('Attempting to upsert', records.length, 'health records');
+    console.log('Attempting to process', records.length, 'health records');
     
-    // Process records in smaller batches to improve performance
-    const batchSize = 50;
+    // Process each record individually for better error handling
     const results = [];
+    const errors = [];
     
-    for (let i = 0; i < records.length; i += batchSize) {
-      const batch = records.slice(i, i + batchSize);
-      console.log(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(records.length/batchSize)}`);
-      
-      // Add created_at timestamp to each record
-      const recordsWithTimestamp = batch.map(record => ({
-        ...record,
+    for (let i = 0; i < records.length; i++) {
+      const record = {
+        ...records[i],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }));
-
-      const { data, error } = await supabase
-        .from('student_health_records')
-        .upsert(recordsWithTimestamp, {
-          onConflict: 'student_id,measurement_date,academic_year',
-          ignoreDuplicates: false
-        })
-        .select('id');
-
-      if (error) {
-        console.error('Error in batch upsert:', error);
-        // Try individual inserts for failed batch
-        for (const record of recordsWithTimestamp) {
-          try {
-            const { data: singleData } = await supabase
-              .from('student_health_records')
-              .upsert([record], {
-                onConflict: 'student_id,measurement_date,academic_year',
-                ignoreDuplicates: false
-              })
-              .select('id');
-            if (singleData) results.push(...singleData);
-          } catch (singleError) {
-            console.error('Failed to insert individual record:', record, singleError);
+      };
+      
+      try {
+        // First try to find existing record
+        const { data: existingRecord } = await supabase
+          .from('student_health_records')
+          .select('id')
+          .eq('student_id', record.student_id)
+          .eq('measurement_date', record.measurement_date)
+          .eq('academic_year', record.academic_year)
+          .maybeSingle();
+        
+        if (existingRecord) {
+          // Update existing record
+          const { data, error } = await supabase
+            .from('student_health_records')
+            .update({
+              weight_kg: record.weight_kg,
+              height_cm: record.height_cm,
+              updated_at: record.updated_at
+            })
+            .eq('id', existingRecord.id)
+            .select('id')
+            .single();
+          
+          if (error) {
+            console.error('Error updating record:', error);
+            errors.push(`Record ${i + 1}: ${error.message}`);
+          } else if (data) {
+            results.push(data);
+          }
+        } else {
+          // Insert new record
+          const { data, error } = await supabase
+            .from('student_health_records')
+            .insert([record])
+            .select('id')
+            .single();
+          
+          if (error) {
+            console.error('Error inserting record:', error);
+            errors.push(`Record ${i + 1}: ${error.message}`);
+          } else if (data) {
+            results.push(data);
           }
         }
-      } else if (data) {
-        results.push(...data);
+      } catch (singleError) {
+        console.error('Failed to process individual record:', record, singleError);
+        errors.push(`Record ${i + 1}: ${singleError instanceof Error ? singleError.message : 'Unknown error'}`);
       }
     }
     
-    console.log('Successfully upserted', results.length, 'records');
+    console.log('Successfully processed', results.length, 'records');
+    if (errors.length > 0) {
+      console.warn('Errors encountered:', errors);
+    }
+    
     return results;
   } catch (error) {
     console.error('Error in upsertStudentHealthRecords:', error);
