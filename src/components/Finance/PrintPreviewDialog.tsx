@@ -1,11 +1,12 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import PrintPreviewStatic from './PrintPreviewStatic';
 import type { PaymentVoucherData } from '@/types/finance';
 import { Printer } from 'lucide-react';
+import { toast } from "@/components/ui/use-toast";
 
 interface PrintPreviewDialogProps {
   isOpen: boolean;
@@ -16,10 +17,22 @@ interface PrintPreviewDialogProps {
 
 const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenChange, voucherData, paymentOptions }) => {
   const componentRef = useRef<HTMLDivElement>(null);
+  const [printing, setPrinting] = useState(false);
 
+  // Note: react-to-print type definition may not match, but 'content' property is actually required
+  // @ts-ignore
   const handlePrint = useReactToPrint({
-    // @ts-ignore - There appears to be a type definition mismatch in the environment.
-    content: () => componentRef.current,
+    // @ts-ignore
+    content: () => {
+      if (!componentRef.current) {
+        toast({
+          title: "ไม่พบเนื้อหาเอกสาร",
+          description: "เนื้อหาสำหรับพิมพ์ไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง",
+          variant: "destructive",
+        });
+      }
+      return componentRef.current;
+    },
     documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}_${voucherData.semester}`,
     pageStyle: `
       @page {
@@ -33,6 +46,26 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
         }
       }
     `,
+    onBeforeGetContent: () => {
+      setPrinting(true);
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      setPrinting(false);
+      toast({
+        title: "พิมพ์เอกสารสำเร็จ",
+        description: "สามารถนำเอกสารไปใช้งานต่อได้",
+      });
+    },
+    onPrintError: (error: any) => {
+      setPrinting(false);
+      toast({
+        title: "เกิดข้อผิดพลาดขณะพิมพ์",
+        description: "ไม่สามารถพิมพ์เอกสารได้ โปรดลองใหม่ หรือใช้เบราว์เซอร์อื่น",
+        variant: "destructive",
+      });
+      console.error("Print Error:", error);
+    }
   });
 
   if (!isOpen) {
@@ -52,11 +85,11 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
         </div>
         <DialogFooter className="p-4 border-t bg-background flex-row justify-end items-center space-x-2">
           <DialogClose asChild>
-            <Button variant="outline">ปิด</Button>
+            <Button variant="outline" disabled={printing}>ปิด</Button>
           </DialogClose>
-          <Button onClick={handlePrint}>
+          <Button onClick={handlePrint} disabled={printing}>
             <Printer className="mr-2 h-4 w-4" />
-            พิมพ์เอกสาร
+            {printing ? "กำลังพิมพ์..." : "พิมพ์เอกสาร"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -65,3 +98,4 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
 };
 
 export default PrintPreviewDialog;
+
