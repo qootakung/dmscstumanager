@@ -12,6 +12,7 @@ import type { Student } from '@/types/student';
 import type { Teacher } from '@/types/teacher';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import PrintPreview from "./Finance/PrintPreview";
+import PrintPreviewStatic from "./Finance/PrintPreviewStatic";
 
 interface PaymentVoucherData {
   paymentTypes: string[];
@@ -125,6 +126,7 @@ const FinancialReports = () => {
     }));
   };
 
+  // ปรับปรุง handlePrint ให้สร้าง div สำหรับ render ตัวอย่างแบบ Static
   const handlePrint = () => {
     if (voucherData.paymentTypes.length === 0) {
       alert('กรุณาเลือกประเภทการจ่ายเงิน');
@@ -135,161 +137,37 @@ const FinancialReports = () => {
       return;
     }
 
-    const printWindow = window.open('', '', 'height=800,width=1000');
-    if (!printWindow) return;
+    // สร้าง div สำหรับ render ตัวอย่างแบบ Static
+    const printContainer = document.createElement('div');
+    // ใช้ renderToStaticMarkup เพื่อแปลง React > HTML string
+    import('react-dom/server').then(({ renderToStaticMarkup }) => {
+      const { default: PrintPreviewStatic } = require('./Finance/PrintPreviewStatic');
+      // NOTE: ต้องประกาศ component ที่นี่อีกครั้งเนื่องจากใช้ dynamic import ใน Vite
+      const htmlString = renderToStaticMarkup(
+        <PrintPreviewStatic voucherData={voucherData} paymentOptions={paymentOptions} />
+      );
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>หลักฐานการจ่ายเงิน</title>
-          <style>
-            body { font-family: 'Sarabun', Arial, sans-serif; font-size: 14px; margin: 20px; line-height: 1.4; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .form-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-            .school-info { margin-bottom: 20px; }
-            .payment-types { margin-bottom: 20px; }
-            .checkbox-item { margin: 5px 0; }
-            .details { margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { border: 1px solid #000; padding: 8px; text-align: center; }
-            th { background-color: #f0f0f0; font-weight: bold; }
-            .signatures { display: flex; justify-content: space-between; margin-top: 30px; }
-            .signature { text-align: center; width: 30%; }
-            .signature-line { border-bottom: 1px dotted #000; margin-bottom: 5px; height: 20px; }
-            .dotted-line { border-bottom: 1px dotted #000; display: inline-block; min-width: 160px; }
-            .signature-bracket { display: block; margin-top: 4px; }
-            @media print {
-              body { margin: 0; }
-              .no-print { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="form-title">แบบหลักฐานการจ่ายเงิน</div>
-            <div>ภาคเรียนที่<span class="dotted-line" style="min-width:60px">${voucherData.semester}</span>ปีการศึกษา<span class="dotted-line" style="min-width:100px">${voucherData.academicYear}</span></div>
-          </div>
-
-          <div class="payment-types">
-            ${paymentOptions.map(option => `
-              <div class="checkbox-item">
-                <span class="checkbox ${voucherData.paymentTypes.includes(option) ? 'checked' : ''}"></span>
-                ${option}
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="details">
-            <p>
-              ระดับชั้น <span class="checkbox ${voucherData.paymentTypes.length > 0 ? 'checked' : ''}"></span> อนุบาลปีที่<span class="dotted-line"></span>
-              <span class="checkbox"></span> ประถมศึกษาปีที่<span class="dotted-line"></span>
-            </p>
-            <p>
-              <span class="checkbox"></span> มัธยมศึกษาปีที่<span class="dotted-line"></span>
-              <span class="checkbox"></span> ปวช. ที่สังเคยศตสหกรณ์ การปีที่<span class="dotted-line"></span>
-            </p>
-            <p>นักเรียนจำนวนทั้งสิ้น<span class="dotted-line">${voucherData.students.length}</span>คน ได้รับเงินจากโรงเรียน<span class="dotted-line">${voucherData.students.length}</span>นาย คนตอนฯ<span class="dotted-line"></span></p>
-            <p>สังกัดสำนักงานเขตพื้นที่การศึกษา ประถมศึกษาจังหวัดเขต 2 ข้าพเจ้าขอรับรองว่าเงินเจ้านี้เงิน</p>
-            <p>ที่ได้รับไปตำลินมาครอบครัวผู้ประสบความเดือดร้อนทางการทำการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายอมยอมเคยใช้เงินคืน</p>
-            <p>ให้กับโรงเรียนต่อไป</p>
-          </div>
-
-          <table>
-            <thead>
-              <tr>
-                <th>ที่</th>
-                <th>ชื่อ - สกุลนักเรียน</th>
-                <th>หมายเลขประจำตัว<br>ประชาชน 13 หลัก</th>
-                <th>จำนวนเงิน<br>(บาท)</th>
-                <th>วันที่รับเงิน</th>
-                <th>ลายมือชื่อ<br>ผู้ปกครอง/<br>นักเรียน</th>
-                <th>หมายเหตุ</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${voucherData.students.map((student, index) => `
-                <tr>
-                  <td>${index + 1}</td>
-                  <td>${student.titleTh || ''} ${student.firstNameTh} ${student.lastNameTh}</td>
-                  <td>${student.citizenId || ''}</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              `).join('')}
-              ${Array.from({ length: Math.max(0, 15 - voucherData.students.length) }, (_, index) => `
-                <tr>
-                  <td>${voucherData.students.length + index + 1}</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              `).join('')}
-              <tr>
-                <td colspan="3" style="text-align: center; font-weight: bold;">รวมทั้งสิ้น</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="signatures">
-            <div class="signature">
-              <div>
-                ลงชื่อ
-                <span class="dotted-line"></span>
-                ผู้จ่ายเงิน
-              </div>
-              <div class="signature-bracket">
-                (${
-                  voucherData.payerName || '..........................................'
-                })
-              </div>
-            </div>
-            <div class="signature">
-              <div>
-                ลงชื่อ
-                <span class="dotted-line"></span>
-                ครูประจำชั้น
-              </div>
-              <div class="signature-bracket">
-                (${
-                  voucherData.selectedTeacher
-                    ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
-                    : '..........................................'
-                })
-              </div>
-            </div>
-          </div>
-          <div style="text-align:center;margin-top:26px;">
-            <div>ตรวจสอบแล้วถูกต้อง</div>
-            <div style="margin-top: 10px;">
-              ลงชื่อ
-              <span class="dotted-line"></span>
-              ผู้อำนวยการโรงเรียน
-            </div>
-            <div class="signature-bracket">
-              (${
-                voucherData.principalName || '..........................................'
-              })
-            </div>
-          </div>
-        </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }, 1000);
+      const printWindow = window.open('', '', 'height=900,width=1200');
+      if (!printWindow) return;
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>หลักฐานการจ่ายเงิน</title>
+            <meta charset="utf-8" />
+            <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+          </head>
+          <body style="margin:0;padding:0;">
+            ${htmlString}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+      }, 700);
+    });
   };
 
   return (
