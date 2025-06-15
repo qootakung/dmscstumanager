@@ -1,7 +1,8 @@
-
 import React from "react";
 import type { Student } from "@/types/student";
 import type { Teacher } from "@/types/teacher";
+import StudentTable from "./StudentTable";
+import SignatureSection from "./SignatureSection";
 
 interface PrintPreviewStaticProps {
   voucherData: {
@@ -47,6 +48,7 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
       fontSize: "18px",
       padding: "24px"
     }}>
+      {/* ส่วนหัว */}
       <div className="text-center font-bold text-xl mb-2">แบบหลักฐานการจ่ายเงิน</div>
       <div className="flex justify-center items-center gap-2 mb-1" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginBottom: 6 }}>
         <span>ภาคเรียนที่</span>
@@ -353,9 +355,24 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
           ข้าพเจ้าขอรับรองว่าเงินที่ได้รับไปได้นำไปตามวัตถุประสงค์ของทางราชการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายินยอมชดใช้เงินคืนให้กับโรงเรียนต่อไป
         </span>
       </div>
+
+      {/* ตารางนักเรียน */}
+      <div style={{ marginBottom: 12 }}>
+        <StudentTable students={voucherData.students} />
+      </div>
+
+      {/* ลายเซ็น */}
+      <SignatureSection
+        payerName={voucherData.payerName}
+        teacherName={
+          voucherData.selectedTeacher
+            ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
+            : ""
+        }
+        principalName={voucherData.principalName}
+      />
     </div>
   );
 };
 
 export default PrintPreviewStatic;
-
