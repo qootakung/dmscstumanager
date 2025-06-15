@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, GraduationCap, FileText, Activity } from 'lucide-react';
@@ -26,20 +25,20 @@ const Dashboard = () => {
     loadStatistics();
   }, []);
 
-  // Beautiful color palette for grade chart
+  // Beautiful darker color palette for grade chart
   const gradeColors = [
-    '#FF6B6B', // Coral Red
-    '#4ECDC4', // Turquoise
-    '#45B7D1', // Sky Blue
-    '#96CEB4', // Mint Green
-    '#FFEAA7', // Sunny Yellow
-    '#DDA0DD', // Plum
-    '#98D8C8', // Mint
-    '#F7DC6F', // Light Yellow
-    '#BB8FCE', // Light Purple
-    '#85C1E9', // Light Blue
-    '#F8C471', // Peach
-    '#82E0AA'  // Light Green
+    '#DC2626', // Deep Red
+    '#059669', // Deep Emerald
+    '#1D4ED8', // Deep Blue
+    '#7C2D12', // Deep Brown
+    '#A21CAF', // Deep Magenta
+    '#EA580C', // Deep Orange
+    '#0891B2', // Deep Cyan
+    '#65A30D', // Deep Lime
+    '#7C3AED', // Deep Violet
+    '#BE185D', // Deep Pink
+    '#CA8A04', // Deep Yellow
+    '#166534'  // Deep Green
   ];
 
   // Chart data preparations with beautiful colors
@@ -50,8 +49,8 @@ const Dashboard = () => {
   }));
 
   const genderChartData = [
-    { name: 'ชาย', value: statistics.byGender.ชาย, fill: '#3b82f6' },
-    { name: 'หญิง', value: statistics.byGender.หญิง, fill: '#ec4899' }
+    { name: 'ชาย', value: statistics.byGender.ชาย, fill: '#1D4ED8' },
+    { name: 'หญิง', value: statistics.byGender.หญิง, fill: '#BE185D' }
   ];
 
   const chartConfig = {
