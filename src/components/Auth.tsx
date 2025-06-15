@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { login } from '@/utils/storage';
+import { login } from '@/utils/userStorage';
 import Swal from 'sweetalert2';
 
 interface AuthProps {
@@ -20,8 +20,12 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log('Attempting login with:', { username, password: '***' });
+
     try {
       const user = await login(username, password);
+      console.log('Login result:', user);
+      
       if (user) {
         await Swal.fire({
           title: 'เข้าสู่ระบบสำเร็จ!',
@@ -32,6 +36,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         });
         onLogin();
       } else {
+        console.log('Login failed: Invalid credentials');
         await Swal.fire({
           title: 'เข้าสู่ระบบไม่สำเร็จ!',
           text: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
@@ -97,6 +102,11 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
             </Button>
           </form>
+          <div className="mt-4 p-3 bg-gray-100 rounded text-sm text-gray-600">
+            <strong>ข้อมูลสำหรับทดสอบ:</strong><br />
+            ชื่อผู้ใช้: dmsc@<br />
+            รหัสผ่าน: donmoondmsc@
+          </div>
         </CardContent>
       </Card>
     </div>

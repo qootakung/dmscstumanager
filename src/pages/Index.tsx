@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,7 +11,7 @@ import Reports from '@/components/Reports';
 import TeacherReports from '@/components/TeacherReports';
 import AdminPanel from '@/components/AdminPanel';
 import StudentHealth from '@/components/StudentHealth';
-import { getCurrentUser, logout } from '@/utils/storage';
+import { getCurrentUser, logout } from '@/utils/userStorage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
 import {
@@ -28,6 +29,7 @@ const Index = () => {
 
   useEffect(() => {
     const user = getCurrentUser();
+    console.log('Current user on load:', user);
     if (user) {
       setCurrentUser(user);
     }
@@ -35,6 +37,7 @@ const Index = () => {
 
   const handleLogin = () => {
     const user = getCurrentUser();
+    console.log('User after login:', user);
     setCurrentUser(user);
   };
 
