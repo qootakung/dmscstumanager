@@ -198,12 +198,13 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
           }
           .signature-name {
             position: absolute;
-            top: 0;
+            top: 24px;
             left: 50%;
             transform: translateX(-50%);
             background: white;
             padding: 0 8px;
             font-size: 8pt;
+            line-height: 1.3;
           }
         }
       `}</style>
@@ -469,12 +470,12 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
             {teacher ? (
               <>
                 {teacher.firstName} {teacher.lastName}<br/>
-                {teacher.position}
+                ครู วิทยฐานะครูชำนาญการพิเศษ
               </>
             ) : (
               <>
                 นายธุปนนท์ ศรีสู่<br/>
-                ครูประจำชั้น ป.4
+                ครู วิทยฐานะครูชำนาญการพิเศษ
               </>
             )}
           </div>
