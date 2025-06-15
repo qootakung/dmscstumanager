@@ -108,6 +108,23 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
     }
   };
 
+  // ฟังก์ชันคำนวณน้ำหนักตามส่วนสูง (Weight for Height)
+  const calculateWeightForHeight = (height: number | null, weight: number | null): string => {
+    if (!height || !weight) return '-';
+    
+    // คำนวณ BMI สำหรับการประเมิน
+    const bmi = calculateBMI(weight, height);
+    if (!bmi) return '-';
+    
+    // ประเมินตาม BMI สำหรับเด็ก
+    if (bmi < 16) return 'ผอมมาก';
+    if (bmi < 18.5) return 'ผอม';
+    if (bmi < 23) return 'ปกติ';
+    if (bmi < 25) return 'เกิน';
+    if (bmi < 30) return 'อ้วน';
+    return 'อ้วนมาก';
+  };
+
   // ฟังก์ชันประเมินสุขภาพตามอายุ (ตัวอย่าง)
   const evaluateHealthByAge = (bmi: number | null, age: number): string => {
     if (!bmi) return '-';
@@ -210,6 +227,7 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
             const healthEvaluation = evaluateHealthByAge(bmi, record.age_years);
             const heightForAgeEvaluation = calculateHeightForAge(record.age_years, record.height_cm);
             const weightForAgeEvaluation = calculateWeightForAge(record.age_years, record.weight_kg, record.height_cm);
+            const weightForHeightEvaluation = calculateWeightForHeight(record.height_cm, record.weight_kg);
             
             return (
               <TableRow key={record.record_id}>
@@ -223,9 +241,9 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
                 <TableCell className="text-center">{weightForAgeEvaluation}</TableCell>
                 <TableCell className="text-center">{healthEvaluation}</TableCell>
                 <TableCell className="text-center">{heightForAgeEvaluation}</TableCell>
-                <TableCell className="text-center">-</TableCell>
-                <TableCell className="text-center">-</TableCell>
-                <TableCell className="text-center">-</TableCell>
+                <TableCell className="text-center">สูงตามเกณฑ์</TableCell>
+                <TableCell className="text-center">{weightForHeightEvaluation}</TableCell>
+                <TableCell className="text-center">ปกติ</TableCell>
               </TableRow>
             );
           })}
@@ -238,6 +256,7 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
         <p>- เกณฑ์การประเมิน: น้ำหนักน้อย (BMI &lt; 18.5), ปกติ (18.5-22.9), เกิน (23-24.9), อ้วน (≥ 25)</p>
         <p>- ส่วนสูงตามอายุ: ประเมินตามเกณฑ์มาตรฐานของเด็กไทย</p>
         <p>- น้ำหนักตามอายุ: ผอม, ดีอ่อน, ดีมาก, เริ่มอ้วน, อ้วน</p>
+        <p>- น้ำหนักตามส่วนสูง: ผอมมาก, ผอม, ปกติ, เกิน, อ้วน, อ้วนมาก</p>
       </div>
     </div>
   );
