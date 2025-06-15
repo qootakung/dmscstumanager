@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, GraduationCap, FileText, Activity } from 'lucide-react';
@@ -74,61 +75,69 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card className="bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-800">
               นักเรียนทั้งหมด
             </CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
+            <div className="bg-blue-500 p-2 rounded-full">
+              <Users className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-900">{statistics.total}</div>
-            <p className="text-xs text-blue-600">
+            <div className="text-3xl font-bold text-blue-900">{statistics.total}</div>
+            <p className="text-xs text-blue-700 font-medium">
               จำนวนนักเรียนในระบบ
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-green-800">
               ครูทั้งหมด
             </CardTitle>
-            <GraduationCap className="h-4 w-4 text-green-600" />
+            <div className="bg-green-500 p-2 rounded-full">
+              <GraduationCap className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-900">12</div>
-            <p className="text-xs text-green-600">
+            <div className="text-3xl font-bold text-green-900">12</div>
+            <p className="text-xs text-green-700 font-medium">
               จำนวนครูในระบบ
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+        <Card className="bg-gradient-to-br from-orange-100 to-orange-200 border-orange-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-orange-800">
               รายงาน
             </CardTitle>
-            <FileText className="h-4 w-4 text-orange-600" />
+            <div className="bg-orange-500 p-2 rounded-full">
+              <FileText className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-900">8</div>
-            <p className="text-xs text-orange-600">
+            <div className="text-3xl font-bold text-orange-900">8</div>
+            <p className="text-xs text-orange-700 font-medium">
               รายงานที่สร้างแล้ว
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <Card className="bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-purple-800">
               ข้อมูลสุขภาพ
             </CardTitle>
-            <Activity className="h-4 w-4 text-purple-600" />
+            <div className="bg-purple-500 p-2 rounded-full">
+              <Activity className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-900">{statistics.total}</div>
-            <p className="text-xs text-purple-600">
+            <div className="text-3xl font-bold text-purple-900">{statistics.total}</div>
+            <p className="text-xs text-purple-700 font-medium">
               ข้อมูลน้ำหนัก-ส่วนสูง
             </p>
           </CardContent>
@@ -138,22 +147,22 @@ const Dashboard = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Students by Grade Chart with Beautiful Colors */}
-        <Card className="col-span-1">
-          <CardHeader>
+        <Card className="col-span-1 shadow-lg border-2 border-gray-100">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
             <CardTitle className="text-school-primary">จำนวนนักเรียนแยกตามชั้น</CardTitle>
             <CardDescription>
               การกระจายตัวของนักเรียนในแต่ละระดับชั้น
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="bg-white">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={gradeChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="grade" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
+                  <XAxis dataKey="grade" tick={{ fill: '#4b5563' }} />
+                  <YAxis tick={{ fill: '#4b5563' }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                     {gradeChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
@@ -165,14 +174,14 @@ const Dashboard = () => {
         </Card>
 
         {/* Gender Distribution Chart */}
-        <Card className="col-span-1">
-          <CardHeader>
+        <Card className="col-span-1 shadow-lg border-2 border-gray-100">
+          <CardHeader className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-t-lg">
             <CardTitle className="text-school-primary">อัตราส่วนเพศของนักเรียน</CardTitle>
             <CardDescription>
               การแบ่งตามเพศของนักเรียนทั้งหมด
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="bg-white">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -182,9 +191,11 @@ const Dashboard = () => {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
+                    outerRadius={90}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="#ffffff"
+                    strokeWidth={3}
                   >
                     {genderChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -199,14 +210,14 @@ const Dashboard = () => {
       </div>
 
       {/* Academic Years Trend */}
-      <Card>
-        <CardHeader>
+      <Card className="shadow-lg border-2 border-gray-100">
+        <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-t-lg">
           <CardTitle className="text-school-primary">แนวโน้มจำนวนนักเรียนตามปีการศึกษา</CardTitle>
           <CardDescription>
             การเปลี่ยนแปลงจำนวนนักเรียนในแต่ละปีการศึกษา
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-white">
           <ChartContainer config={chartConfig} className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -215,16 +226,17 @@ const Dashboard = () => {
                   students: Math.floor(Math.random() * 100) + 50 // ข้อมูลตัวอย่าง
                 }))}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
+                <XAxis dataKey="year" tick={{ fill: '#4b5563' }} />
+                <YAxis tick={{ fill: '#4b5563' }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line 
                   type="monotone" 
                   dataKey="students" 
-                  stroke="hsl(var(--school-primary))" 
-                  strokeWidth={3}
-                  dot={{ fill: "hsl(var(--school-primary))", strokeWidth: 2, r: 4 }}
+                  stroke="#059669" 
+                  strokeWidth={4}
+                  dot={{ fill: "#059669", strokeWidth: 3, r: 6 }}
+                  activeDot={{ r: 8, fill: "#34d399" }}
                 />
               </LineChart>
             </ResponsiveContainer>
