@@ -1,4 +1,6 @@
+
 import React from "react";
+import { Check } from "lucide-react";
 import type { Student } from "@/types/student";
 import type { Teacher } from "@/types/teacher";
 
@@ -26,8 +28,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
     {/* ฟอร์มหัวข้อ */}
     <div className="mb-3 flex flex-col items-center">
       <div className="relative flex flex-col items-center w-full">
-        {/* กรอบส้มมุมขวาบน */}
-        <div className="absolute right-0 -top-5 w-44 h-8 rounded-lg bg-orange-200 border border-orange-400" />
+        {/* ลบกล่องส้มออก */}
         {/* ชื่อฟอร์ม */}
         <div className="font-bold tracking-wide text-lg text-blue-900 mb-2 mt-4">
           แบบหลักฐานการจ่ายเงิน
@@ -49,20 +50,24 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         {paymentOptions.slice(0, 4).map((option, i) => (
           <div className="flex items-center gap-2" key={option}>
             <span
-              className={`inline-block border w-4 h-4 mr-1 align-middle ${
-                voucherData.paymentTypes.includes(option) ? "bg-black" : ""
-              }`}
-            />
+              className="inline-block border w-4 h-4 mr-1 align-middle flex items-center justify-center"
+            >
+              {voucherData.paymentTypes.includes(option) && (
+                <Check className="w-3 h-3 text-black" />
+              )}
+            </span>
             <span>{option}</span>
           </div>
         ))}
         {paymentOptions[4] && (
           <div className="flex items-center gap-2 col-span-2">
             <span
-              className={`inline-block border w-4 h-4 mr-1 align-middle ${
-                voucherData.paymentTypes.includes(paymentOptions[4]) ? "bg-black" : ""
-              }`}
-            />
+              className="inline-block border w-4 h-4 mr-1 align-middle flex items-center justify-center"
+            >
+              {voucherData.paymentTypes.includes(paymentOptions[4]) && (
+                <Check className="w-3 h-3 text-black" />
+              )}
+            </span>
             <span>{paymentOptions[4]}</span>
           </div>
         )}
@@ -74,7 +79,6 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
     <div className="mb-2">
       <div className="flex items-center gap-4 mb-1">
         <div className="flex items-center mr-4">
-          <span>ระดับชั้น</span>
           <span className="inline-block border w-4 h-4 mx-1 align-middle" />
           <span>อนุบาลปีที่</span>
           <span className="inline-block border-b border-dotted w-10 mx-1"></span>
@@ -170,13 +174,13 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         <div>
           ลงชื่อ
           <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            ...............................
+            {voucherData.payerName || "..............................."}
           </span>
           ผู้จ่ายเงิน
         </div>
         <div>
           (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            ...............................
+            {voucherData.payerName || "..............................."}
           </span>)
         </div>
       </div>
@@ -184,13 +188,13 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         <div>
           ลงชื่อ
           <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            ...............................
+            {voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : "..............................."}
           </span>
           ครูประจำชั้น
         </div>
         <div>
           (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            ...............................
+            {voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : "..............................."}
           </span>)
         </div>
       </div>
@@ -200,13 +204,13 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
       <div className="my-2">
         ลงชื่อ
         <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-          ...............................
+          {voucherData.principalName || "..............................."}
         </span>
         ผู้อำนวยการโรงเรียน
       </div>
       <div>
         (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-          ...............................
+          {voucherData.principalName || "..............................."}
         </span>)
       </div>
     </div>
