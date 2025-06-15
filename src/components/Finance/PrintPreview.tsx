@@ -112,14 +112,28 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
       </div>
       {/* ข้อมูลระดับชั้น */}
       <div className="mb-2">
-        <div className="flex flex-col gap-1 mb-1 max-w-xs">
+        <div className="flex items-center gap-4 mb-1">
+          {/* อนุบาล */}
+          <div className="flex items-center mr-4">
+            <PaymentOptionCheckbox
+              checked={selectedLevel?.key === "อนุบาล"}
+              hideLabel
+              boldCheck
+              size="large"
+              className="mr-1"
+            />
+            <span>อนุบาลปีที่</span>
+            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
+              {selectedLevel?.key === "อนุบาล" ? selectedLevel.gradeNumber : ""}
+            </span>
+          </div>
           {/* ประถม */}
-          <div className="flex items-center mb-1">
+          <div className="flex items-center">
             <PaymentOptionCheckbox
               checked={selectedLevel?.key === "ประถม"}
               hideLabel
               boldCheck
-              size="default"
+              size="large"
               className="mr-1"
             />
             <span>ประถมศึกษาปีที่</span>
@@ -127,13 +141,29 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
               {selectedLevel?.key === "ประถม" ? selectedLevel.gradeNumber : ""}
             </span>
           </div>
+        </div>
+        <div className="flex items-center gap-4 mb-1">
+          {/* มัธยม */}
+          <div className="flex items-center mr-4">
+            <PaymentOptionCheckbox
+              checked={selectedLevel?.key === "มัธยม"}
+              hideLabel
+              boldCheck
+              size="large"
+              className="mr-1"
+            />
+            <span>มัธยมศึกษาปีที่</span>
+            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
+              {selectedLevel?.key === "มัธยม" ? selectedLevel.gradeNumber : ""}
+            </span>
+          </div>
           {/* ปวช */}
-          <div className="flex items-center mb-1">
+          <div className="flex items-center">
             <PaymentOptionCheckbox
               checked={selectedLevel?.key === "ปวช"}
               hideLabel
               boldCheck
-              size="default"
+              size="large"
               className="mr-1"
             />
             <span>ปวช. ที่จัดโดยสถานประกอบการ ปีที่</span>
