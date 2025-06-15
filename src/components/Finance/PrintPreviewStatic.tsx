@@ -49,8 +49,8 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
       padding: "24px"
     }}>
       {/* ส่วนหัว */}
-      <div className="text-center font-bold text-xl mb-2">แบบหลักฐานการจ่ายเงิน</div>
-      <div className="flex justify-center items-center gap-2 mb-1" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginBottom: 6 }}>
+      <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "20px", marginBottom: "8px" }}>แบบหลักฐานการจ่ายเงิน</div>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginBottom: 6 }}>
         <span>ภาคเรียนที่</span>
         <span style={{
           display: "inline-block",
@@ -58,7 +58,7 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
           width: 56,
           textAlign: "center"
         }}>{voucherData.semester}</span>
-        <span className="ml-4">ปีการศึกษา</span>
+        <span style={{ marginLeft: "16px" }}>ปีการศึกษา</span>
         <span style={{
           display: "inline-block",
           borderBottom: "1px dotted #000",
@@ -68,7 +68,7 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
       </div>
 
       {/* Checkbox rows */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2 mb-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 32, rowGap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 32, rowGap: 8, marginBottom: '8px' }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
             <span style={{

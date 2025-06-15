@@ -7,57 +7,81 @@ interface SignatureSectionProps {
   principalName: string;
 }
 
-const dottedLine = (
-  <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle" />
-);
+const signatureLineStyle: React.CSSProperties = {
+  display: 'inline-block',
+  borderBottom: '1px dotted black',
+  minWidth: '160px',
+  margin: '0 4px',
+  verticalAlign: 'middle'
+};
+
+const nameStyle: React.CSSProperties = {
+  display: 'inline-block',
+  minWidth: '180px',
+  margin: '0 4px',
+  textAlign: 'center'
+};
+
+const containerStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  alignItems: 'flex-start',
+  gap: '12px',
+  margin: '24px 0'
+};
+
+const signatureBoxStyle: React.CSSProperties = {
+  textAlign: 'center',
+};
 
 const SignatureSection: React.FC<SignatureSectionProps> = ({
   payerName,
   teacherName,
   principalName,
 }) => (
-  <div>
-    <div className="flex flex-row justify-between items-start gap-3 my-4">
-      <div className="text-center w-1/3">
+  <div style={{ fontSize: '16px' }}>
+    <div style={containerStyle}>
+      <div style={signatureBoxStyle}>
         <div>
           <span>ลงชื่อ</span>
-          {dottedLine}
+          <span style={signatureLineStyle}></span>
           <span>ผู้จ่ายเงิน</span>
         </div>
-        <div>
+        <div style={{ marginTop: '4px' }}>
           (
-          <span className="inline-block min-w-[120px] mx-1 text-center">
-            {payerName || "..............................."}
+          <span style={nameStyle}>
+            {payerName || "........................................"}
           </span>
           )
         </div>
       </div>
-      <div className="text-center w-1/3">
+      <div style={signatureBoxStyle}>
         <div>
           <span>ลงชื่อ</span>
-          {dottedLine}
+          <span style={signatureLineStyle}></span>
           <span>ครูประจำชั้น</span>
         </div>
-        <div>
+        <div style={{ marginTop: '4px' }}>
           (
-          <span className="inline-block min-w-[120px] mx-1 text-center">
-            {teacherName || "..............................."}
+          <span style={nameStyle}>
+            {teacherName || "........................................"}
           </span>
           )
         </div>
       </div>
     </div>
-    <div className="text-center mt-2">
+    <div style={{ textAlign: 'center', marginTop: '24px' }}>
       <div>ตรวจสอบแล้วถูกต้อง</div>
-      <div className="my-2">
+      <div style={{ margin: '8px 0' }}>
         <span>ลงชื่อ</span>
-        <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle"></span>
+        <span style={signatureLineStyle}></span>
         <span>ผู้อำนวยการโรงเรียน</span>
       </div>
-      <div>
+      <div style={{ marginTop: '4px' }}>
         (
-        <span className="inline-block min-w-[120px] mx-1 text-center">
-          {principalName || "..............................."}
+        <span style={nameStyle}>
+          {principalName || "........................................"}
         </span>
         )
       </div>
