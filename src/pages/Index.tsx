@@ -155,6 +155,15 @@ const Index = () => {
                           น้ำหนัก-ส่วนสูง
                         </Button>
                       </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Button 
+                          variant="ghost" 
+                          className="justify-start"
+                          onClick={() => setActiveTab('student-analysis')}
+                        >
+                          วิเคราะห์ผู้เรียน
+                        </Button>
+                      </NavigationMenuLink>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -211,6 +220,7 @@ const Index = () => {
           {activeTab === 'students' && <StudentManagement />}
           {activeTab === 'teachers' && <TeacherManagement />}
           {activeTab === 'student-health' && <StudentHealth />}
+          {activeTab === 'student-analysis' && <StudentAnalysis />}
           {activeTab === 'student-reports' && <Reports />}
           {activeTab === 'teacher-reports' && <TeacherReports />}
           {isAdmin && activeTab === 'admin' && <AdminPanel />}
