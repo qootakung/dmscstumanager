@@ -1,4 +1,3 @@
-
 import React from "react";
 import type { Student } from "@/types/student";
 import type { Teacher } from "@/types/teacher";
@@ -8,22 +7,10 @@ import PrintHeader from "./print/PrintHeader";
 import PrintPaymentTypes from "./print/PrintPaymentTypes";
 import PrintGradeLevel from "./print/PrintGradeLevel";
 import PrintStudentSummary from "./print/PrintStudentSummary";
+import type { PaymentVoucherData } from "@/types/finance";
 
 interface PrintPreviewStaticProps {
-  voucherData: {
-    paymentTypes: string[];
-    academicYear: string;
-    semester: string;
-    grade: string;
-    students: Student[];
-    schoolName: string;
-    principalName: string;
-    managerName: string;
-    selectedTeacher: Teacher | null;
-    payerName: string;
-    amountPerStudent: string;
-    paymentDate: string;
-  };
+  voucherData: PaymentVoucherData;
   paymentOptions: string[];
 }
 
