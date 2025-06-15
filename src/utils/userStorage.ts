@@ -75,39 +75,43 @@ export const setCurrentUser = (user: User | null): void => {
 };
 
 export const login = async (username: string, password: string): Promise<User | null> => {
-  // For now, we'll bypass RLS for login by using the service role temporarily
-  // This is a workaround since we're using custom auth instead of Supabase Auth
+  console.log('Attempting to login with username:', username);
   
-  // First, try to find the user (this might fail due to RLS)
-  let { data, error } = await supabase
-    .from('app_users')
-    .select('*')
-    .eq('username', username)
-    .eq('password', password)
-    .single();
-  
-  // If RLS blocks us, we need to temporarily disable it for login
-  if (error && error.code === 'PGRST116') {
-    // User not found or RLS blocked access
-    console.log('Login failed: Invalid credentials or RLS blocked access');
+  try {
+    const { data, error } = await supabase
+      .from('app_users')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .single();
+
+    if (error) {
+      console.error('Login error:', error);
+      setCurrentUser(null);
+      return null;
+    }
+
+    if (!data) {
+      console.log('No user found with provided credentials');
+      setCurrentUser(null);
+      return null;
+    }
+
+    const { created_at, ...rest } = data;
+    const user = {
+      ...rest,
+      role: rest.role as 'admin' | 'user',
+      createdAt: created_at
+    };
+    
+    console.log('Login successful for user:', user.username);
+    setCurrentUser(user);
+    return user;
+  } catch (error) {
+    console.error('Unexpected login error:', error);
     setCurrentUser(null);
     return null;
   }
-
-  if (error || !data) {
-    console.error('Login error:', error);
-    setCurrentUser(null);
-    return null;
-  }
-
-  const { created_at, ...rest } = data;
-  const user = {
-    ...rest,
-    role: rest.role as 'admin' | 'user',
-    createdAt: created_at
-  };
-  setCurrentUser(user);
-  return user;
 };
 
 export const logout = (): void => {

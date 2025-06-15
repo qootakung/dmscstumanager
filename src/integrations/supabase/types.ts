@@ -241,6 +241,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_student_health_details: {
         Args: { p_academic_year: string; p_month?: number; p_grade?: string }
         Returns: {
