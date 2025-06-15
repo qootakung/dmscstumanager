@@ -85,7 +85,7 @@ const StudentAnalysis: React.FC = () => {
       return {
         id: `${index + 1}`,
         studentId: row['รหัสนักเรียน'] || `STD${(index + 1).toString().padStart(3, '0')}`,
-        studentName: row['ชื่อ-นามสกุล'] || `นักเรียนคนที่ ${index + 1}`,
+        studentName: row['ชื่อ'] || `นักเรียนคนที่ ${index + 1}`,
         grade: row['ชั้นเรียน'] || selectedGrade || 'ป.4',
         scores,
         totalScore,
@@ -122,7 +122,7 @@ const StudentAnalysis: React.FC = () => {
         const mockData = [
           {
             'รหัสนักเรียน': 'STD001',
-            'ชื่อ-นามสกุล': 'เด็กหญิงพิชญา ชายอ่อน',
+            'ชื่อ': 'พิชญา',
             'ชั้นเรียน': 'ป.4',
             'ภาษาไทย': 4.0,
             'คณิตศาสตร์': 4.0,
@@ -136,7 +136,7 @@ const StudentAnalysis: React.FC = () => {
           },
           {
             'รหัสนักเรียน': 'STD002',
-            'ชื่อ-นามสกุล': 'เด็กหญิงจิดาภา แผลงพึ่ง',
+            'ชื่อ': 'จิดาภา',
             'ชั้นเรียน': 'ป.4',
             'ภาษาไทย': 3.5,
             'คณิตศาสตร์': 3.0,
@@ -150,7 +150,7 @@ const StudentAnalysis: React.FC = () => {
           },
           {
             'รหัสนักเรียน': 'STD003',
-            'ชื่อ-นามสกุล': 'เด็กชายกิจเรียน ประจิปปนจจะ',
+            'ชื่อ': 'กิจเรียน',
             'ชั้นเรียน': 'ป.4',
             'ภาษาไทย': 1.5,
             'คณิตศาสตร์': 1.0,
@@ -407,7 +407,7 @@ const StudentAnalysis: React.FC = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead>รหัสนักเรียน</TableHead>
-                            <TableHead>ชื่อ-นามสกุล</TableHead>
+                            <TableHead>ชื่อ</TableHead>
                             <TableHead>ชั้นเรียน</TableHead>
                             <TableHead>คะแนนเฉลี่ย</TableHead>
                             <TableHead>กลุ่ม</TableHead>
@@ -555,7 +555,7 @@ const StudentAnalysis: React.FC = () => {
                       <CardContent className="text-sm text-gray-600">
                         <ul className="space-y-1">
                           <li>• คอลัมน์ที่ 1: รหัสนักเรียน</li>
-                          <li>• คอลัมน์ที่ 2: ชื่อ-นามสกุล</li>
+                          <li>• คอลัมน์ที่ 2: ชื่อ</li>
                           <li>• คอลัมน์ที่ 3: ชั้นเรียน</li>
                           <li>• คอลัมน์ต่อไป: คะแนนรายวิชา (ตามชื่อวิชา)</li>
                           <li>• ใช้คะแนน 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0</li>
