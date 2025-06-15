@@ -1,6 +1,11 @@
+
 import React from 'react';
 import { StudentHealthDetails } from '@/types/student';
 import { Teacher } from '@/types/teacher';
+import { useHealthStatistics } from './hooks/useHealthStatistics';
+import HealthStatisticsTable from './components/HealthStatisticsTable';
+import SignatureSection from './components/SignatureSection';
+import ReportHeader from './components/ReportHeader';
 
 interface HealthReportStatisticsProps {
   data: StudentHealthDetails[];
@@ -17,103 +22,59 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
   academicYear,
   teacher 
 }) => {
-  // Calculate BMI and categorize by weight status
-  const calculateBMI = (weight: number | null, height: number | null) => {
-    if (!weight || !height) return null;
-    return weight / Math.pow(height / 100, 2);
+  const {
+    weightCategories,
+    heightCategories,
+    weightForHeightCategories,
+    genderTotals,
+    totalStudents
+  } = useHealthStatistics(data);
+
+  // Category definitions
+  const weightCategoryLabels = [
+    { key: 'obese', label: '- น้ำหนักมากกว่าเกณฑ์', sdRange: '>+2 SD.' },
+    { key: 'overweight', label: '- น้ำหนักค่อนข้างมาก', sdRange: '>+1.5 SD. ถึง +2 SD.' },
+    { key: 'normal', label: '- น้ำหนักตามเกณฑ์', sdRange: '-1.5 SD. ถึง +1.5 SD.' },
+    { key: 'underweight', label: '- น้ำหนักค่อนข้างน้อย', sdRange: '<-1.5 SD. ถึง -2 SD.' },
+    { key: 'severely-underweight', label: '- น้ำหนักน้อยกว่าเกณฑ์', sdRange: '<-2 SD.', highlight: false },
+    { key: 'measured', label: 'จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง', highlight: true },
+    { key: 'incomplete', label: 'จำนวนนักเรียนที่ข้อมูลไม่ครบ', highlight: false },
+    { key: 'total', label: 'จำนวนนักเรียนทั้งหมด', highlight: true }
+  ];
+
+  const heightCategoryLabels = [
+    { key: 'very-tall', label: '- สูงกว่าเกณฑ์', sdRange: '>+2 SD.' },
+    { key: 'tall', label: '- ค่อนข้างสูง', sdRange: '>+1.5 SD. ถึง +2 SD.' },
+    { key: 'normal', label: '- ส่วนสูงตามเกณฑ์', sdRange: '-1.5 SD. ถึง +1.5 SD.' },
+    { key: 'short', label: '- ค่อนข้างเตี้ย', sdRange: '<-1.5 SD. ถึง -2 SD.' },
+    { key: 'very-short', label: '- เตี้ย', sdRange: '<-2 SD.', highlight: false },
+    { key: 'measured', label: 'จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง', highlight: true },
+    { key: 'incomplete', label: 'จำนวนนักเรียนที่ข้อมูลไม่ครบ', highlight: false },
+    { key: 'total', label: 'จำนวนนักเรียนทั้งหมด', highlight: true }
+  ];
+
+  const weightForHeightCategoryLabels = [
+    { key: 'obese', label: '- อ้วน', sdRange: '>+3 SD.' },
+    { key: 'overweight', label: '- เกินเกณฑ์', sdRange: '>+2 SD. ถึง +3 SD.' },
+    { key: 'normal', label: '- ปกติ', sdRange: '+1.5 SD. ถึง +2 SD.' },
+    { key: 'proportional', label: '- สมส่วน', sdRange: '-1.5 SD. ถึง +1.5 SD.' },
+    { key: 'thin', label: '- ค่อนข้างผอม', sdRange: '<-1.5 SD. ถึง -2 SD.' },
+    { key: 'very-thin', label: '- ผอม', sdRange: '<-2 SD.' },
+    { key: 'measured', label: 'จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง', highlight: true },
+    { key: 'incomplete', label: 'จำนวนนักเรียนที่ข้อมูลไม่ครบ', highlight: false },
+    { key: 'total', label: 'จำนวนนักเรียนทั้งหมด', highlight: true }
+  ];
+
+  // Add special handling for measured, incomplete, and total rows
+  const getAdjustedCategories = (categories: any, genderTotals: any) => {
+    return {
+      ...categories,
+      'measured': genderTotals,
+      'incomplete': { male: 0, female: 0, total: 0 },
+      'total': genderTotals,
+      'proportional': { male: 0, female: 0, total: 0 } // For weight-for-height proportional category
+    };
   };
-
-  // WHO BMI-for-age Z-score categories for children
-  const getBMICategory = (bmi: number | null) => {
-    if (!bmi) return 'no-data';
-    
-    if (bmi >= 30) return 'obese'; // >+2 SD
-    if (bmi >= 25) return 'overweight'; // >+1.5 SD to +2 SD
-    if (bmi >= 18.5) return 'normal'; // -1.5 SD to +1.5 SD
-    if (bmi >= 16) return 'underweight'; // <-1.5 SD to -2 SD
-    return 'severely-underweight'; // <-2 SD
-  };
-
-  // Height-for-age categories (simplified)
-  const getHeightCategory = (height: number | null, age: number) => {
-    if (!height) return 'no-data';
-    
-    // Simplified height categories based on age (would need proper growth charts)
-    const expectedHeight = 100 + (age * 6); // Very simplified formula
-    
-    if (height > expectedHeight + 15) return 'very-tall'; // >+2 SD
-    if (height > expectedHeight + 8) return 'tall'; // >+1.5 SD to +2 SD
-    if (height >= expectedHeight - 8) return 'normal'; // -1.5 SD to +1.5 SD
-    if (height >= expectedHeight - 15) return 'short'; // <-1.5 SD to -2 SD
-    return 'very-short'; // <-2 SD
-  };
-
-  // Weight-for-height categories (BMI-based but for weight-for-height)
-  const getWeightForHeightCategory = (weight: number | null, height: number | null) => {
-    const bmi = calculateBMI(weight, height);
-    if (!bmi) return 'no-data';
-    
-    if (bmi >= 27) return 'obese'; // โรคอ้วน
-    if (bmi >= 23) return 'overweight'; // เกินเกณฑ์
-    if (bmi >= 18.5) return 'normal'; // สมส่วน
-    if (bmi >= 16) return 'thin'; // ค่อนข้างผอม
-    return 'very-thin'; // ผอม
-  };
-
-  // Count students by categories with gender separation
-  const countByCategory = (categoryFn: (item: StudentHealthDetails) => string) => {
-    const categories: { [key: string]: { male: number, female: number, total: number } } = {};
-    
-    data.forEach(student => {
-      const category = categoryFn(student);
-      if (!categories[category]) {
-        categories[category] = { male: 0, female: 0, total: 0 };
-      }
-      
-      // Extract gender from full_name (เด็กชาย/เด็กหญิง)
-      const isMale = student.full_name.includes('เด็กชาย');
-      const isFemale = student.full_name.includes('เด็กหญิง');
-      
-      if (isMale) {
-        categories[category].male++;
-      } else if (isFemale) {
-        categories[category].female++;
-      }
-      categories[category].total++;
-    });
-    
-    return categories;
-  };
-
-  // Calculate gender totals
-  const genderTotals = data.reduce((acc, student) => {
-    const isMale = student.full_name.includes('เด็กชาย');
-    const isFemale = student.full_name.includes('เด็กหญิง');
-    
-    if (isMale) acc.male++;
-    if (isFemale) acc.female++;
-    acc.total++;
-    
-    return acc;
-  }, { male: 0, female: 0, total: 0 });
-
-  const weightCategories = countByCategory((student) => {
-    const bmi = calculateBMI(student.weight_kg, student.height_cm);
-    return getBMICategory(bmi);
-  });
-
-  const heightCategories = countByCategory((student) => {
-    return getHeightCategory(student.height_cm, student.age_years);
-  });
-
-  const weightForHeightCategories = countByCategory((student) => {
-    return getWeightForHeightCategory(student.weight_kg, student.height_cm);
-  });
-
-  const totalStudents = data.length;
-  const getPercentage = (count: number) => totalStudents > 0 ? ((count / totalStudents) * 100).toFixed(2) : '0.00';
-
-  const getCategoryCount = (categories: any, category: string) => categories[category] || { male: 0, female: 0, total: 0 };
 
   return (
     <div className="p-2 font-sarabun text-xs">
@@ -125,7 +86,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
         @media print {
           @page {
             size: A4;
-            margin: 0.4cm 0.8cm 0.6cm 1.2cm;
+            margin: 0.4cm 0.6cm 0.6cm 1.0cm;
           }
           body {
             font-size: 8pt;
@@ -176,19 +137,19 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
             margin: 3px 0;
           }
           .category-col {
-            width: 30% !important;
+            width: 26% !important;
           }
           .gender-col {
-            width: 14% !important;
+            width: 12% !important;
           }
           .total-col {
-            width: 14% !important;
+            width: 12% !important;
           }
           .percent-col {
-            width: 14% !important;
+            width: 12% !important;
           }
           .coverage-col {
-            width: 14% !important;
+            width: 12% !important;
           }
           .signature-dots {
             position: relative;
@@ -209,278 +170,39 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
         }
       `}</style>
       
-      <header className="text-center mb-3 header-section">
-        <h1 className="text-sm font-bold">อัตราความชุกของปัญหาโภชนาการ</h1>
-        <h2 className="text-sm font-bold">โรงเรียนบ้านดอนมูล</h2>
-        <p className="text-xs mt-1">ชั้น {grade} เดือน {month} ปีการศึกษา {academicYear}</p>
-      </header>
+      <ReportHeader grade={grade} month={month} academicYear={academicYear} />
 
       {/* น้ำหนักตามเกณฑ์อายุ */}
-      <table className="w-full border-collapse border border-black mb-2 text-xs">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-black p-1 category-col" rowSpan={2}>น้ำหนักตามเกณฑ์อายุ</th>
-            <th className="border border-black p-1 gender-col">ชาย<br/>(คน)</th>
-            <th className="border border-black p-1 gender-col">หญิง<br/>(คน)</th>
-            <th className="border border-black p-1 total-col">รวม<br/>(คน)</th>
-            <th className="border border-black p-1 percent-col">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-1 coverage-col">ความ<br/>ครอบคลุม<br/>(%)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="border border-black p-1">- น้ำหนักมากกว่าเกณฑ์ ({'>+2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'obese').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'obese').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'obese').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'obese').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- น้ำหนักค่อนข้างมาก ({'>+1.5 SD. ถึง +2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'overweight').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'overweight').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'overweight').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'overweight').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- น้ำหนักตามเกณฑ์ (-1.5 SD. ถึง +1.5 SD.)</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'normal').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'normal').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'normal').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'normal').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- น้ำหนักค่อนข้างน้อย ({'<-1.5 SD. ถึง -2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'underweight').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'underweight').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'underweight').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'underweight').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- น้ำหนักน้อยกว่าเกณฑ์ ({'<-2 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'severely-underweight').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'severely-underweight').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightCategories, 'severely-underweight').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightCategories, 'severely-underweight').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr className="highlight-row">
-            <td className="border border-black p-1 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-1 text-center"></td>
-            <td className="border border-black p-1 text-center font-bold">100.00</td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0.00</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr className="highlight-row">
-            <td className="border border-black p-1 font-bold">จำนวนนักเรียนทั้งหมด</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-1 text-center"></td>
-            <td className="border border-black p-1 text-center font-bold">100.00</td>
-          </tr>
-        </tbody>
-      </table>
+      <HealthStatisticsTable
+        title="น้ำหนักตามเกณฑ์อายุ"
+        data={data}
+        categories={getAdjustedCategories(weightCategories, genderTotals)}
+        categoryLabels={weightCategoryLabels}
+        genderTotals={genderTotals}
+        totalStudents={totalStudents}
+      />
 
       {/* ส่วนสูงตามเกณฑ์อายุ */}
-      <table className="w-full border-collapse border border-black mb-2 text-xs">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-black p-1 category-col" rowSpan={2}>ส่วนสูงตามเกณฑ์อายุ</th>
-            <th className="border border-black p-1 gender-col">ชาย<br/>(คน)</th>
-            <th className="border border-black p-1 gender-col">หญิง<br/>(คน)</th>
-            <th className="border border-black p-1 total-col">รวม<br/>(คน)</th>
-            <th className="border border-black p-1 percent-col">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-1 coverage-col">ความ<br/>ครอบคลุม<br/>(%)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="border border-black p-1">- สูงกว่าเกณฑ์ ({'>+2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-tall').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-tall').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-tall').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'very-tall').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- ค่อนข้างสูง ({'>+1.5 SD. ถึง +2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'tall').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'tall').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'tall').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'tall').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- ส่วนสูงตามเกณฑ์ (-1.5 SD. ถึง +1.5 SD.)</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'normal').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'normal').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'normal').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'normal').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- ค่อนข้างเตี้ย ({'<-1.5 SD. ถึง -2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'short').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'short').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'short').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'short').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- เตี้ย ({'<-2 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-short').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-short').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(heightCategories, 'very-short').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(heightCategories, 'very-short').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr className="highlight-row">
-            <td className="border border-black p-1 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-1 text-center"></td>
-            <td className="border border-black p-1 text-center font-bold">100.00</td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0.00</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr className="highlight-row">
-            <td className="border border-black p-1 font-bold">จำนวนนักเรียนทั้งหมด</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-1 text-center"></td>
-            <td className="border border-black p-1 text-center font-bold">100.00</td>
-          </tr>
-        </tbody>
-      </table>
+      <HealthStatisticsTable
+        title="ส่วนสูงตามเกณฑ์อายุ"
+        data={data}
+        categories={getAdjustedCategories(heightCategories, genderTotals)}
+        categoryLabels={heightCategoryLabels}
+        genderTotals={genderTotals}
+        totalStudents={totalStudents}
+      />
 
       {/* น้ำหนักตามเกณฑ์ส่วนสูง */}
-      <table className="w-full border-collapse border border-black mb-2 text-xs">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-black p-1 category-col" rowSpan={2}>น้ำหนักตามเกณฑ์ส่วนสูง</th>
-            <th className="border border-black p-1 gender-col">ชาย<br/>(คน)</th>
-            <th className="border border-black p-1 gender-col">หญิง<br/>(คน)</th>
-            <th className="border border-black p-1 total-col">รวม<br/>(คน)</th>
-            <th className="border border-black p-1 percent-col">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-1 coverage-col">ความ<br/>ครอบคลุม<br/>(%)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="border border-black p-1">- อ้วน ({'>+3 SD.'}) * รวมกัน *</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'obese').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'obese').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'obese').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'obese').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- เกินเกณฑ์ ({'>+2 SD. ถึง +3 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'overweight').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'overweight').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- ปกติ ({'+1.5 SD. ถึง +2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'normal').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'normal').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'normal').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'normal').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- สมส่วน (-1.5 SD. ถึง +1.5 SD.)</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0.00</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- ค่อนข้างผอม ({'<-1.5 SD. ถึง -2 SD.'})</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'thin').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'thin').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'thin').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'thin').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">- ผอม ({'<-2 SD.'}) ** ส่งรายงาน **</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').male}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').female}</td>
-            <td className="border border-black p-1 text-center">{getCategoryCount(weightForHeightCategories, 'very-thin').total}</td>
-            <td className="border border-black p-1 text-center">{getPercentage(getCategoryCount(weightForHeightCategories, 'very-thin').total)}</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr className="highlight-row">
-            <td className="border border-black p-1 font-bold">จำนวนนักเรียนที่ ชั่ง นน./วัดส่วนสูง</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-1 text-center"></td>
-            <td className="border border-black p-1 text-center font-bold">100.00</td>
-          </tr>
-          <tr>
-            <td className="border border-black p-1">จำนวนนักเรียนที่ข้อมูลไม่ครบ</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0</td>
-            <td className="border border-black p-1 text-center">0.00</td>
-            <td className="border border-black p-1 text-center"></td>
-          </tr>
-          <tr className="highlight-row">
-            <td className="border border-black p-1 font-bold">จำนวนนักเรียนทั้งหมด</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.male}</td>
-            <td className="border border-black p-1 text-center font-bold">{genderTotals.female}</td>
-            <td className="border border-black p-1 text-center font-bold">{totalStudents}</td>
-            <td className="border border-black p-1 text-center"></td>
-            <td className="border border-black p-1 text-center font-bold">100.00</td>
-          </tr>
-        </tbody>
-      </table>
+      <HealthStatisticsTable
+        title="น้ำหนักตามเกณฑ์ส่วนสูง"
+        data={data}
+        categories={getAdjustedCategories(weightForHeightCategories, genderTotals)}
+        categoryLabels={weightForHeightCategoryLabels}
+        genderTotals={genderTotals}
+        totalStudents={totalStudents}
+      />
 
-      <div className="text-right mt-4 signature-section">
-        <div className="signature-dots">
-          (...............................................)<br/>
-          <div className="signature-name">
-            {teacher ? (
-              <>
-                {teacher.firstName} {teacher.lastName}<br/>
-                ครู วิทยฐานะครูชำนาญการพิเศษ
-              </>
-            ) : (
-              <>
-                นายธุปนนท์ ศรีสู่<br/>
-                ครู วิทยฐานะครูชำนาญการพิเศษ
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      <SignatureSection teacher={teacher} />
     </div>
   );
 };
