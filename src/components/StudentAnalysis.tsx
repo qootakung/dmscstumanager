@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +40,17 @@ const StudentAnalysis: React.FC = () => {
     'สุขศึกษาและพลศึกษา',
     'ศิลปะ',
     'การงานอาชีพ',
-    'ภาษาอังกฤษ'
+    'ภาษาอังกฤษ',
+    'ภาษาไทยเพื่อการสื่อสาร',
+    'ภาษาอังกฤษเพื่อการสื่อสาร',
+    'คณิตศาสตรเพิ่มเติม',
+    'วิทยาศาสตร์กายภาพ',
+    'วิทยาศาสตร์ชีวภาพ',
+    'วิทยาศาสตร์โลกและอวกาศ',
+    'ปฐมพยาบาล',
+    'หน้าที่พลเมือง',
+    'จริยธรรม',
+    'ลูกเสือ-เนตรนารี'
   ];
 
   const grades = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
