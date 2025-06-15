@@ -49,7 +49,8 @@ const FinancialReports = () => {
     'ค่าอุปกรณ์การเรียน (เพิ่มเติม)'
   ];
 
-  const grades = ['อนุบาล 1', 'อนุบาล 2', 'อนุบาล 3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+  // เพิ่ม "ทุกระดับชั้น" เป็นตัวเลือกแรก
+  const grades = ['ทุกระดับชั้น', 'อนุบาล 1', 'อนุบาล 2', 'อนุบาล 3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
 
   useEffect(() => {
     loadStudents();
@@ -99,7 +100,12 @@ const FinancialReports = () => {
 
   const handleGradeChange = (grade: string) => {
     setSelectedGrade(grade);
-    const gradeStudents = students.filter(student => student.grade === grade);
+    let gradeStudents: Student[];
+    if (grade === "ทุกระดับชั้น") {
+      gradeStudents = students;
+    } else {
+      gradeStudents = students.filter(student => student.grade === grade);
+    }
     setVoucherData(prev => ({
       ...prev,
       grade,
@@ -406,7 +412,11 @@ const FinancialReports = () => {
           {voucherData.students.length > 0 && (
             <div className="p-4 bg-blue-50 rounded-md">
               <p className="text-sm text-blue-700">
-                จำนวนนักเรียนในชั้น {voucherData.grade}: {voucherData.students.length} คน
+                {voucherData.grade === "ทุกระดับชั้น" ? (
+                  <>จำนวนนักเรียนทั้งหมด: {voucherData.students.length} คน</>
+                ) : (
+                  <>จำนวนนักเรียนในชั้น {voucherData.grade}: {voucherData.students.length} คน</>
+                )}
               </p>
             </div>
           )}
