@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
+import ReactToPrint, { PrintContextConsumer } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PaymentTypeSelection from './Finance/form/PaymentTypeSelection';
 import AcademicInfoSection from './Finance/form/AcademicInfoSection';
@@ -29,17 +29,6 @@ const FinancialReports = () => {
   } = useFinancialVoucher();
 
   const printRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}-${voucherData.semester}`,
-  });
-
-  const handlePrintClick = () => {
-    if (handlePreview()) {
-      handlePrint();
-    }
-  };
 
   return (
     <div className="space-y-6 pb-8">
@@ -106,7 +95,22 @@ const FinancialReports = () => {
           />
 
           <div className="flex justify-end pt-6 mt-6 border-t">
-            <Button onClick={handlePrintClick}>พิมพ์เอกสาร</Button>
+            <ReactToPrint
+              content={() => printRef.current}
+              documentTitle={`หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}-${voucherData.semester}`}
+            >
+              <PrintContextConsumer>
+                {({ handlePrint }) => (
+                  <Button onClick={() => {
+                    if (handlePreview()) {
+                      handlePrint();
+                    }
+                  }}>
+                    พิมพ์เอกสาร
+                  </Button>
+                )}
+              </PrintContextConsumer>
+            </ReactToPrint>
           </div>
         </CardContent>
       </Card>
