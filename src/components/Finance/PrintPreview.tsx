@@ -4,6 +4,8 @@ import type { Student } from "@/types/student";
 import type { Teacher } from "@/types/teacher";
 import PaymentOptionCheckbox from "./PaymentOptionCheckbox";
 import SignatureSection from "./SignatureSection";
+import GradeLevelRow from "./GradeLevelRow";
+import StudentTable from "./StudentTable";
 
 interface PrintPreviewProps {
   voucherData: {
@@ -28,26 +30,10 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
   // ปรับ logic เลือกช่องกรอก/เช็คถูกอัตโนมัติ
   // Map ห้องเรียนกับชื่อ label
   const levels = [
-    {
-      key: "อนุบาล",
-      label: "อนุบาลปีที่",
-      grades: ["อนุบาล 1", "อนุบาล 2", "อนุบาล 3"],
-    },
-    {
-      key: "ประถม",
-      label: "ประถมศึกษาปีที่",
-      grades: ["ป.1", "ป.2", "ป.3", "ป.4", "ป.5", "ป.6"],
-    },
-    {
-      key: "มัธยม",
-      label: "มัธยมศึกษาปีที่",
-      grades: ["ม.1", "ม.2", "ม.3"],
-    },
-    {
-      key: "ปวช",
-      label: "ปวช. ที่จัดโดยสถานประกอบการ ปีที่",
-      grades: ["ปวช.1", "ปวช.2", "ปวช.3"],
-    },
+    { key: "อนุบาล", label: "อนุบาลปีที่", grades: ["อนุบาล 1", "อนุบาล 2", "อนุบาล 3"] },
+    { key: "ประถม", label: "ประถมศึกษาปีที่", grades: ["ป.1", "ป.2", "ป.3", "ป.4", "ป.5", "ป.6"] },
+    { key: "มัธยม", label: "มัธยมศึกษาปีที่", grades: ["ม.1", "ม.2", "ม.3"] },
+    { key: "ปวช", label: "ปวช. ที่จัดโดยสถานประกอบการ ปีที่", grades: ["ปวช.1", "ปวช.2", "ปวช.3"] },
   ];
   // คำนวณ level และชั้นปีที่เลือก
   const findLevelMatch = () => {
@@ -111,130 +97,25 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         <div className="w-full border-b border-dashed border-black my-2"></div>
       </div>
       {/* ข้อมูลระดับชั้น */}
+      <GradeLevelRow selectedLevel={selectedLevel} studentsCount={voucherData.students.length} />
+
+      {/* จำนวนนักเรียน */}
       <div className="mb-2">
-        <div className="flex items-center gap-4 mb-1">
-          {/* อนุบาล */}
-          <div className="flex items-center mr-4">
-            <PaymentOptionCheckbox
-              checked={selectedLevel?.key === "อนุบาล"}
-              hideLabel
-              boldCheck
-              size="large"
-              className="mr-1"
-            />
-            <span>อนุบาลปีที่</span>
-            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
-              {selectedLevel?.key === "อนุบาล" ? selectedLevel.gradeNumber : ""}
-            </span>
-          </div>
-          {/* ประถม */}
-          <div className="flex items-center">
-            <PaymentOptionCheckbox
-              checked={selectedLevel?.key === "ประถม"}
-              hideLabel
-              boldCheck
-              size="large"
-              className="mr-1"
-            />
-            <span>ประถมศึกษาปีที่</span>
-            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
-              {selectedLevel?.key === "ประถม" ? selectedLevel.gradeNumber : ""}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 mb-1">
-          {/* มัธยม */}
-          <div className="flex items-center mr-4">
-            <PaymentOptionCheckbox
-              checked={selectedLevel?.key === "มัธยม"}
-              hideLabel
-              boldCheck
-              size="large"
-              className="mr-1"
-            />
-            <span>มัธยมศึกษาปีที่</span>
-            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
-              {selectedLevel?.key === "มัธยม" ? selectedLevel.gradeNumber : ""}
-            </span>
-          </div>
-          {/* ปวช */}
-          <div className="flex items-center">
-            <PaymentOptionCheckbox
-              checked={selectedLevel?.key === "ปวช"}
-              hideLabel
-              boldCheck
-              size="large"
-              className="mr-1"
-            />
-            <span>ปวช. ที่จัดโดยสถานประกอบการ ปีที่</span>
-            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
-              {selectedLevel?.key === "ปวช" ? selectedLevel.gradeNumber : ""}
-            </span>
-          </div>
-        </div>
-        {/* จำนวนนักเรียน */}
-        <div className="mb-2">
-          <span>นักเรียนจำนวนทั้งสิ้น</span>
-          <span className="inline-block border-b border-dotted w-10 mx-1 text-center">
-            {voucherData.students.length}
-          </span>
-          <span>คน ได้รับเงินจากโรงเรียนบ้านดอนมูล</span>
-        </div>
-        {/* แก้ไขข้อความสังกัด */}
-        <div>
-          <span>
-            สังกัดสำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูนเขต 2 <br />
-            ข้าพเจ้าขอรับรองว่าเงินที่ได้รับไปได้นำไปตามวัตถุประสงค์ของทางราชการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายินยอมชดใช้เงินคืนให้กับโรงเรียนต่อไป
-          </span>
-        </div>
+        <span>นักเรียนจำนวนทั้งสิ้น</span>
+        <span className="inline-block border-b border-dotted w-10 mx-1 text-center">
+          {voucherData.students.length}
+        </span>
+        <span>คน ได้รับเงินจากโรงเรียนบ้านดอนมูล</span>
+      </div>
+      {/* แก้ไขข้อความสังกัด */}
+      <div>
+        <span>
+          สังกัดสำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูนเขต 2 <br />
+          ข้าพเจ้าขอรับรองว่าเงินที่ได้รับไปได้นำไปตามวัตถุประสงค์ของทางราชการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายินยอมชดใช้เงินคืนให้กับโรงเรียนต่อไป
+        </span>
       </div>
       {/* ตารางข้อมูลนักเรียน */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-xs mb-3">
-          <thead>
-            <tr>
-              <th className="border px-2 py-1">ที่</th>
-              <th className="border px-2 py-1">ชื่อ - สกุลนักเรียน</th>
-              <th className="border px-2 py-1">หมายเลขประจำตัว<br />ประชาชน 13 หลัก</th>
-              <th className="border px-2 py-1">จำนวนเงิน<br />(บาท)</th>
-              <th className="border px-2 py-1">วันที่รับเงิน</th>
-              <th className="border px-2 py-1">ลายมือชื่อ<br />ผู้ปกครอง/<br />นักเรียน</th>
-              <th className="border px-2 py-1">หมายเหตุ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {voucherData.students.map((student, index) => (
-              <tr key={student.id || index}>
-                <td className="border px-2 py-1">{index + 1}</td>
-                <td className="border px-2 py-1">{student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}</td>
-                <td className="border px-2 py-1">{student.citizenId || ''}</td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-              </tr>
-            ))}
-            {[...Array(Math.max(0, 15 - voucherData.students.length))].map((_, idx) => (
-              <tr key={`empty-${idx}`}>
-                <td className="border px-2 py-1">{voucherData.students.length + idx + 1}</td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-                <td className="border px-2 py-1"></td>
-              </tr>
-            ))}
-            <tr>
-              <td colSpan={3} className="border px-2 py-1 font-bold text-center">รวมทั้งสิ้น</td>
-              <td className="border px-2 py-1"></td>
-              <td className="border px-2 py-1"></td>
-              <td className="border px-2 py-1"></td>
-              <td className="border px-2 py-1"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <StudentTable students={voucherData.students} />
       {/* ลายเซ็นแบบใหม่ */}
       <SignatureSection
         payerName={voucherData.payerName}
