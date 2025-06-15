@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import { getStudents } from '@/utils/studentStorage';
 import { getTeachers } from '@/utils/teacherStorage';
 import type { Student } from '@/types/student';
 import type { Teacher } from '@/types/teacher';
-import TeacherSelectionDialog from '@/components/student-health/TeacherSelectionDialog';
 
 interface PaymentVoucherData {
   paymentTypes: string[];
@@ -30,7 +28,6 @@ const FinancialReports = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedGrade, setSelectedGrade] = useState('');
-  const [showTeacherDialog, setShowTeacherDialog] = useState(false);
   const [voucherData, setVoucherData] = useState<PaymentVoucherData>({
     paymentTypes: [],
     academicYear: '2567',
@@ -88,7 +85,9 @@ const FinancialReports = () => {
     }));
   };
 
-  const handleTeacherSelect = (teacher: Teacher) => {
+  // ปรับปรุง handleTeacherSelect ให้รับแค่ teacherId (เพราะจะใช้ dropdown ธรรมดา)
+  const handleTeacherSelect = (teacherId: string) => {
+    const teacher = teachers.find(t => t.id === teacherId) || null;
     setVoucherData(prev => ({
       ...prev,
       selectedTeacher: teacher
@@ -406,20 +405,21 @@ const FinancialReports = () => {
             </div>
             <div>
               <Label htmlFor="teacher">ครูประจำชั้น</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : ''}
-                  placeholder="เลือกครูประจำชั้น"
-                  readOnly
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowTeacherDialog(true)}
-                >
-                  <User className="w-4 h-4" />
-                </Button>
-              </div>
+              <Select
+                value={voucherData.selectedTeacher ? voucherData.selectedTeacher.id : ''}
+                onValueChange={handleTeacherSelect}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกครูประจำชั้น" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.firstName} {teacher.lastName} - {teacher.position}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -446,13 +446,6 @@ const FinancialReports = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Teacher Selection Dialog */}
-      <TeacherSelectionDialog
-        open={showTeacherDialog}
-        onOpenChange={setShowTeacherDialog}
-        onConfirm={handleTeacherSelect}
-      />
     </div>
   );
 };
