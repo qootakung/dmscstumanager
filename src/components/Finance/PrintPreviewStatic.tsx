@@ -1,6 +1,5 @@
+
 import React from "react";
-import type { Student } from "@/types/student";
-import type { Teacher } from "@/types/teacher";
 import StudentTable from "./StudentTable";
 import SignatureSection from "./SignatureSection";
 import PrintHeader from "./print/PrintHeader";
@@ -14,10 +13,10 @@ interface PrintPreviewStaticProps {
   paymentOptions: string[];
 }
 
-const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticProps) => {
+const PrintPreviewStatic = React.forwardRef<HTMLDivElement, PrintPreviewStaticProps>(({ voucherData, paymentOptions }, ref) => {
 
   return (
-    <div style={{
+    <div ref={ref} style={{
       fontFamily: "'TH Sarabun', 'Sarabun', Arial, sans-serif",
       fontSize: "14px",
       padding: "24px",
@@ -64,6 +63,8 @@ const PrintPreviewStatic = ({ voucherData, paymentOptions }: PrintPreviewStaticP
       />
     </div>
   );
-};
+});
+
+PrintPreviewStatic.displayName = "PrintPreviewStatic";
 
 export default PrintPreviewStatic;

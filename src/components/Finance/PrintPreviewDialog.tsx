@@ -45,8 +45,8 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
           <DialogTitle>ตัวอย่างก่อนพิมพ์</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-auto bg-gray-100 p-8">
-            <div ref={componentRef} className="p-6 bg-white shadow-lg mx-auto">
-                 <PrintPreviewStatic voucherData={voucherData} paymentOptions={paymentOptions} />
+            <div className="p-6 bg-white shadow-lg mx-auto">
+                 <PrintPreviewStatic ref={componentRef} voucherData={voucherData} paymentOptions={paymentOptions} />
             </div>
         </div>
         <DialogFooter className="p-4 border-t bg-background flex-row justify-end items-center space-x-2">
