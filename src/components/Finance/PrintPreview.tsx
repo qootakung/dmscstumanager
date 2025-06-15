@@ -159,50 +159,52 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         </tbody>
       </table>
     </div>
-    {/* ลายเซ็น */}
+    {/* ลายเซ็นแบบใหม่ */}
     <div className="flex flex-row justify-between items-start gap-3 my-4">
       <div className="text-center w-1/3">
         <div>
-          ลงชื่อ
-          <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.payerName || "..............................."}
-          </span>
-          ผู้จ่ายเงิน
+          <span>ลงชื่อ</span>
+          <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle"></span>
+          <span>ผู้จ่ายเงิน</span>
         </div>
         <div>
-          (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
+          (
+          <span className="inline-block min-w-[120px] mx-1 text-center">
             {voucherData.payerName || "..............................."}
-          </span>)
+          </span>
+          )
         </div>
       </div>
       <div className="text-center w-1/3">
         <div>
-          ลงชื่อ
-          <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : "..............................."}
-          </span>
-          ครูประจำชั้น
+          <span>ลงชื่อ</span>
+          <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle"></span>
+          <span>ครูประจำชั้น</span>
         </div>
         <div>
-          (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-            {voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : "..............................."}
-          </span>)
+          (
+          <span className="inline-block min-w-[120px] mx-1 text-center">
+            {voucherData.selectedTeacher
+              ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
+              : "..............................."}
+          </span>
+          )
         </div>
       </div>
     </div>
     <div className="text-center mt-2">
       <div>ตรวจสอบแล้วถูกต้อง</div>
       <div className="my-2">
-        ลงชื่อ
-        <span className="inline-block border-b border-dotted min-w-[120px] mx-1">
-          {voucherData.principalName || "..............................."}
-        </span>
-        ผู้อำนวยการโรงเรียน
+        <span>ลงชื่อ</span>
+        <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle"></span>
+        <span>ผู้อำนวยการโรงเรียน</span>
       </div>
       <div>
-        (<span className="inline-block border-b border-dotted min-w-[120px] mx-1">
+        (
+        <span className="inline-block min-w-[120px] mx-1 text-center">
           {voucherData.principalName || "..............................."}
-        </span>)
+        </span>
+        )
       </div>
     </div>
   </div>
