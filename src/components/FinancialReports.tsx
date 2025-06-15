@@ -1,20 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Printer, User } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import { getTeachers } from '@/utils/teacherStorage';
 import type { Student } from '@/types/student';
 import type { Teacher } from '@/types/teacher';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import PrintPreview from "./Finance/PrintPreview";
 import PrintPreviewStatic from "./Finance/PrintPreviewStatic";
+import PaymentTypeSelection from './Finance/form/PaymentTypeSelection';
+import AcademicInfoSection from './Finance/form/AcademicInfoSection';
+import GradeSelection from './Finance/form/GradeSelection';
+import SignatureFields from './Finance/form/SignatureFields';
+import SchoolInfoSection from './Finance/form/SchoolInfoSection';
+import ActionButtons from './Finance/form/ActionButtons';
+import PreviewDialog from './Finance/form/PreviewDialog';
 
-interface PaymentVoucherData {
+export interface PaymentVoucherData {
   paymentTypes: string[];
   academicYear: string;
   semester: string;
@@ -125,6 +125,21 @@ const FinancialReports = () => {
       selectedTeacher: teacher
     }));
   };
+  
+  const handleAutoFillPrincipal = () => {
+    const principal = teachers.find((t) => t.position === "ผู้อำนวยการโรงเรียน");
+    if (principal) {
+      setVoucherData(prev => ({
+        ...prev,
+        principalName: `${principal.firstName} ${principal.lastName}`
+      }));
+    }
+  };
+
+  const handlePrintFromPreview = () => {
+    setPreviewOpen(false);
+    setTimeout(() => handlePrint(), 200);
+  };
 
   // ปรับปรุง handlePrint ให้เรียกใช้งาน PrintPreviewStatic แบบ import ปกติ
   const handlePrint = () => {
@@ -186,76 +201,25 @@ const FinancialReports = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Payment Types Selection */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">ประเภทการจ่ายเงิน</Label>
-            <div className="space-y-2">
-              {paymentOptions.map((option) => (
-                <div key={option} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={option}
-                    checked={voucherData.paymentTypes.includes(option)}
-                    onCheckedChange={(checked) => 
-                      handlePaymentTypeChange(option, checked as boolean)
-                    }
-                  />
-                  <Label htmlFor={option} className="text-sm">{option}</Label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <PaymentTypeSelection
+            paymentOptions={paymentOptions}
+            selectedPaymentTypes={voucherData.paymentTypes}
+            onPaymentTypeChange={handlePaymentTypeChange}
+          />
+          
+          <AcademicInfoSection
+            academicYear={voucherData.academicYear}
+            semester={voucherData.semester}
+            onAcademicYearChange={(value) => setVoucherData(prev => ({ ...prev, academicYear: value }))}
+            onSemesterChange={(value) => setVoucherData(prev => ({ ...prev, semester: value }))}
+          />
 
-          {/* Academic Year and Semester */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="academicYear">ปีการศึกษา</Label>
-              <Input
-                id="academicYear"
-                value={voucherData.academicYear}
-                onChange={(e) => setVoucherData(prev => ({
-                  ...prev,
-                  academicYear: e.target.value
-                }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="semester">ภาคเรียนที่</Label>
-              <Select
-                value={voucherData.semester}
-                onValueChange={(value) => setVoucherData(prev => ({
-                  ...prev,
-                  semester: value
-                }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <GradeSelection
+            grades={grades}
+            selectedGrade={selectedGrade}
+            onGradeChange={handleGradeChange}
+          />
 
-          {/* Grade Selection */}
-          <div>
-            <Label htmlFor="grade">เลือกชั้นเรียน</Label>
-            <Select value={selectedGrade} onValueChange={handleGradeChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="เลือกชั้นเรียน" />
-              </SelectTrigger>
-              <SelectContent>
-                {grades.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
-                    {grade}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Student Count Display */}
           {voucherData.students.length > 0 && (
             <div className="p-4 bg-blue-50 rounded-md">
               <p className="text-sm text-blue-700">
@@ -268,139 +232,34 @@ const FinancialReports = () => {
             </div>
           )}
 
-          {/* Signature Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="payerName">ชื่อผู้จ่ายเงิน</Label>
-              {/* เปลี่ยน dropdown ให้แสดงแค่ชื่อ-นามสกุล */}
-              <Select
-                value={voucherData.payerName}
-                onValueChange={(value) =>
-                  setVoucherData((prev) => ({
-                    ...prev,
-                    payerName: value
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder="เลือกผู้จ่ายเงิน"
-                    {...(voucherData.payerName
-                      ? {
-                          children: voucherData.payerName
-                        }
-                      : {})}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {teachers.map((teacher) => (
-                    <SelectItem
-                      key={teacher.id}
-                      value={`${teacher.firstName} ${teacher.lastName}`}
-                    >
-                      {teacher.firstName} {teacher.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="teacher">ครูประจำชั้น</Label>
-              <Select
-                value={voucherData.selectedTeacher ? voucherData.selectedTeacher.id : ''}
-                onValueChange={handleTeacherSelect}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder="เลือกครูประจำชั้น"
-                    {...(voucherData.selectedTeacher
-                      ? {
-                          children: `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
-                        }
-                      : {})}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {teachers.map((teacher) => (
-                    <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.firstName} {teacher.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <SignatureFields
+            teachers={teachers}
+            payerName={voucherData.payerName}
+            selectedTeacher={voucherData.selectedTeacher}
+            onPayerNameChange={(value) => setVoucherData(prev => ({ ...prev, payerName: value }))}
+            onTeacherChange={handleTeacherSelect}
+          />
 
-          {/* School Information */}
-          <div>
-            <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="principalName"
-                value={voucherData.principalName}
-                onChange={(e) => setVoucherData(prev => ({
-                  ...prev,
-                  principalName: e.target.value
-                }))}
-                placeholder="ชื่อผู้อำนวยการโรงเรียน"
-              />
-              {/* ปุ่มเติมอัตโนมัติ หากอยากให้ user รีดึงชื่อใหม่ */}
-              <Button
-                type="button"
-                variant="outline"
-                className="shrink-0"
-                onClick={() => {
-                  const principal = teachers.find((t) => t.position === "ผู้อำนวยการโรงเรียน");
-                  if (principal) {
-                    setVoucherData(prev => ({
-                      ...prev,
-                      principalName: `${principal.firstName} ${principal.lastName}`
-                    }));
-                  }
-                }}
-                title="เติมชื่อผู้อำนวยการจากรายชื่อครู"
-              >
-                <User className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+          <SchoolInfoSection
+            principalName={voucherData.principalName}
+            onPrincipalNameChange={(value) => setVoucherData(prev => ({ ...prev, principalName: value }))}
+            onAutoFillPrincipal={handleAutoFillPrincipal}
+          />
 
-          {/* Print Button */}
-          <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => setPreviewOpen(true)} className="flex items-center gap-2">
-              👁️ ดูตัวอย่าง
-            </Button>
-            <Button onClick={handlePrint} className="flex items-center gap-2">
-              <Printer className="w-4 h-4" />
-              พิมพ์หลักฐานการจ่ายเงิน
-            </Button>
-          </div>
+          <ActionButtons
+            onPreview={() => setPreviewOpen(true)}
+            onPrint={handlePrint}
+          />
         </CardContent>
       </Card>
 
-      {/* Dialog สำหรับ preview */}
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>ตัวอย่างใบหลักฐานการจ่ายเงิน</DialogTitle>
-          </DialogHeader>
-          <PrintPreview voucherData={voucherData} paymentOptions={paymentOptions} />
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                setPreviewOpen(false);
-                setTimeout(() => handlePrint(), 200);
-              }}
-              className="bg-green-600 text-white"
-            >
-              พิมพ์จากตัวอย่างนี้
-            </Button>
-            <Button variant="outline" onClick={() => setPreviewOpen(false)}>
-              ปิด
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PreviewDialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        voucherData={voucherData}
+        paymentOptions={paymentOptions}
+        onPrintFromPreview={handlePrintFromPreview}
+      />
     </div>
   );
 };
