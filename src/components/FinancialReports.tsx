@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getStudents } from '@/utils/studentStorage';
@@ -12,7 +11,6 @@ import GradeSelection from './Finance/form/GradeSelection';
 import SignatureFields from './Finance/form/SignatureFields';
 import SchoolInfoSection from './Finance/form/SchoolInfoSection';
 import ActionButtons from './Finance/form/ActionButtons';
-import PreviewDialog from './Finance/form/PreviewDialog';
 
 export interface PaymentVoucherData {
   paymentTypes: string[];
@@ -43,7 +41,6 @@ const FinancialReports = () => {
     selectedTeacher: null,
     payerName: ''
   });
-  const [previewOpen, setPreviewOpen] = useState(false);
 
   const paymentOptions = [
     'ค่าอุปกรณ์การเรียน',
@@ -134,11 +131,6 @@ const FinancialReports = () => {
         principalName: `${principal.firstName} ${principal.lastName}`
       }));
     }
-  };
-
-  const handlePrintFromPreview = () => {
-    setPreviewOpen(false);
-    setTimeout(() => handlePrint(), 200);
   };
 
   // ปรับปรุง handlePrint ให้เรียกใช้งาน PrintPreviewStatic แบบ import ปกติ
@@ -247,19 +239,10 @@ const FinancialReports = () => {
           />
 
           <ActionButtons
-            onPreview={() => setPreviewOpen(true)}
             onPrint={handlePrint}
           />
         </CardContent>
       </Card>
-
-      <PreviewDialog
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        voucherData={voucherData}
-        paymentOptions={paymentOptions}
-        onPrintFromPreview={handlePrintFromPreview}
-      />
     </div>
   );
 };
