@@ -18,21 +18,25 @@ export const getStudentHealthRecords = async (filters: { academicYear?: string, 
     console.error('Error fetching student health records:', error);
     return [];
   }
-  return data;
+  return data || [];
 }
 
 export const getStudentHealthDetails = async (academicYear: string, month?: number, grade?: string) => {
+  console.log('Fetching health details with params:', { academicYear, month, grade });
+  
   const { data, error } = await supabase.rpc('get_student_health_details', {
     p_academic_year: academicYear,
     p_month: month || null,
     p_grade: grade || null,
-  } as any); // Using 'as any' to bypass a temporary type mismatch after migration.
+  });
 
   if (error) {
     console.error('Error fetching student health details:', error);
     return [];
   }
-  return data as any[]; // Type assertion to avoid breaking changes for now.
+  
+  console.log('Health details fetched:', data);
+  return data || [];
 };
 
 export const updateStudentHealthRecord = async (recordId: string, updates: { weight_kg?: number | null, height_cm?: number | null }) => {

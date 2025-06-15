@@ -31,7 +31,9 @@ const HealthDataTable: React.FC = () => {
   const [editingCell, setEditingCell] = useState<{ recordId: string; column: 'weight' | 'height' } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
 
-  const { data: healthData, isLoading } = useQuery({
+  console.log('Current filters:', { currentAcademicYear, selectedMonth, selectedGrade });
+
+  const { data: healthData, isLoading, error } = useQuery({
     queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade],
     queryFn: () => getStudentHealthDetails(
       currentAcademicYear,
@@ -39,6 +41,10 @@ const HealthDataTable: React.FC = () => {
       selectedGrade === 'all' ? undefined : selectedGrade
     ),
   });
+
+  console.log('Health data:', healthData);
+  console.log('Is loading:', isLoading);
+  console.log('Error:', error);
 
   const updateMutation = useMutation({
     mutationFn: ({ recordId, updates }: { recordId: string, updates: { weight_kg?: number | null, height_cm?: number | null } }) => 
@@ -203,6 +209,11 @@ const HealthDataTable: React.FC = () => {
         </div>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className="text-red-600 p-4 border border-red-200 rounded-md mb-4">
+            เกิดข้อผิดพลาดในการโหลดข้อมูล: {error.message}
+          </div>
+        )}
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -239,6 +250,10 @@ const HealthDataTable: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-24">
                     ไม่พบข้อมูลสำหรับตัวกรองที่เลือก
+                    <br />
+                    <small className="text-muted-foreground">
+                      ปีการศึกษา: {currentAcademicYear} | เดือน: {selectedMonth} | ระดับชั้น: {selectedGrade}
+                    </small>
                   </TableCell>
                 </TableRow>
               )}
