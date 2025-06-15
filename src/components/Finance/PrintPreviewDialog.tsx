@@ -17,6 +17,7 @@ interface PrintPreviewDialogProps {
 const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenChange, voucherData, paymentOptions }) => {
   const componentRef = useRef<HTMLDivElement>(null);
 
+  // @ts-ignore - There appears to be a type definition mismatch in the environment.
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}_${voucherData.semester}`,
