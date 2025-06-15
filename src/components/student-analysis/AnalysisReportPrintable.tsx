@@ -31,7 +31,7 @@ const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportP
   });
 
   return (
-    <div ref={ref} className="hidden print:block p-4" style={{ fontFamily: "'TH SarabunPSK', 'Sarabun', sans-serif" }}>
+    <div ref={ref} className="hidden print:block p-4" style={{ fontFamily: "'TH SarabunPSK', 'Sarabun', sans-serif", fontSize: '16px' }}>
       {sortedGrades.map((grade, pageIndex) => (
         <div key={grade} className={pageIndex < sortedGrades.length - 1 ? 'break-after-page' : ''}>
           <div className="text-center mb-4">
@@ -44,7 +44,7 @@ const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportP
               <p className="text-sm">จำนวน {studentsByGrade[grade].length} คน</p>
           </div>
 
-          <table className="w-full border-collapse border border-black text-sm">
+          <table className="w-full border-collapse border border-black">
             <thead>
               <tr className="bg-gray-200">
                 <th className="border border-black px-2 py-1 text-center font-normal">ลำดับ</th>
