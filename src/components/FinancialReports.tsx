@@ -558,7 +558,7 @@ const FinancialReports = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="payerName">ชื่อผู้จ่ายเงิน</Label>
-              {/* เปลี่ยนจาก Input เป็น Select */}
+              {/* เปลี่ยน dropdown ให้แสดงแค่ชื่อ-นามสกุล */}
               <Select
                 value={voucherData.payerName}
                 onValueChange={(value) =>
@@ -569,7 +569,15 @@ const FinancialReports = () => {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="เลือกผู้จ่ายเงิน" />
+                  <SelectValue
+                    placeholder="เลือกผู้จ่ายเงิน"
+                    // ให้แสดงแต่ชื่อ-นามสกุล ใน dropdown value
+                    {...(voucherData.payerName
+                      ? {
+                          children: voucherData.payerName
+                        }
+                      : {})}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {teachers.map((teacher) => (
@@ -577,7 +585,7 @@ const FinancialReports = () => {
                       key={teacher.id}
                       value={`${teacher.firstName} ${teacher.lastName}`}
                     >
-                      {teacher.firstName} {teacher.lastName} - {teacher.position}
+                      {teacher.firstName} {teacher.lastName}
                     </SelectItem>
                   ))}
                 </SelectContent>
