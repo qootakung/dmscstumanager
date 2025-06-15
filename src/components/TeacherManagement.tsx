@@ -6,7 +6,7 @@ import { format, isValid } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, Users, UserPlus, GraduationCap, BookOpen, TrendingUp, Award } from 'lucide-react';
 import { getTeachers, addTeacher, updateTeacher, deleteTeacher } from '@/utils/teacherStorage';
 import { downloadTeacherTemplate, importTeachersFromExcel } from '@/utils/teacherExcel';
 import type { Teacher } from '@/types/teacher';
@@ -224,63 +224,184 @@ const TeacherManagement: React.FC = () => {
     }
   };
 
+  // Calculate statistics
+  const totalTeachers = teachers.length;
+  const positionStats = teachers.reduce((acc, teacher) => {
+    acc[teacher.position] = (acc[teacher.position] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-school-primary mb-2">
-          จัดการข้อมูลครู
-        </h2>
-        <p className="text-muted-foreground">
-          เพิ่ม แก้ไข และจัดการข้อมูลครูทั้งหมด
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Beautiful Header */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 opacity-10 rounded-3xl"></div>
+          <div className="relative text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl mb-6 animate-pulse">
+              <Users className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              จัดการข้อมูลครู
+            </h1>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <BookOpen className="w-6 h-6 text-green-500" />
+              <p className="text-xl text-slate-700 font-medium">
+                เพิ่ม แก้ไข และจัดการข้อมูลครูทั้งหมด
+              </p>
+              <GraduationCap className="w-6 h-6 text-blue-500" />
+            </div>
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-100 to-blue-100 rounded-full border border-green-200">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+              <span className="text-sm font-semibold text-green-700">ระบบพร้อมใช้งาน</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 transform hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-emerald-100 text-sm font-medium">ครูทั้งหมด</p>
+                  <p className="text-3xl font-bold">{totalTeachers}</p>
+                  <p className="text-emerald-100 text-xs">คน</p>
+                </div>
+                <Users className="w-12 h-12 text-emerald-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 transform hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">จำนวนตำแหน่ง</p>
+                  <p className="text-3xl font-bold">{Object.keys(positionStats).length}</p>
+                  <p className="text-blue-100 text-xs">ตำแหน่งงาน</p>
+                </div>
+                <Award className="w-12 h-12 text-blue-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 transform hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">ปีการศึกษา</p>
+                  <p className="text-3xl font-bold">2568</p>
+                  <p className="text-purple-100 text-xs">ปีปัจจุบัน</p>
+                </div>
+                <GraduationCap className="w-12 h-12 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 transform hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm font-medium">อัตราการเติบโต</p>
+                  <p className="text-3xl font-bold">+8%</p>
+                  <p className="text-orange-100 text-xs">เทียบปีที่แล้ว</p>
+                </div>
+                <TrendingUp className="w-12 h-12 text-orange-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Import Card */}
+        <Card className="shadow-2xl border-0 rounded-3xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 text-white p-6">
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <Upload className="w-6 h-6" />
+              </div>
+              นำเข้าข้อมูลครู
+            </CardTitle>
+            <p className="text-green-100 mt-2">
+              ดาวน์โหลดแม่แบบและนำเข้าข้อมูลครูจากไฟล์ Excel
+            </p>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                onClick={downloadTeacherTemplate} 
+                variant="outline" 
+                className="bg-gradient-to-r from-green-500 to-blue-500 text-white border-0 hover:from-green-600 hover:to-blue-600 shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                ดาวน์โหลดไฟล์ตัวอย่าง
+              </Button>
+              <Button 
+                onClick={() => fileInputRef.current?.click()} 
+                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                นำเข้าจาก Excel
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileImport}
+                className="hidden"
+                accept=".xlsx, .xls"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Enhanced Tabs */}
+        <div className="bg-white/90 backdrop-blur-sm shadow-2xl border-0 rounded-3xl overflow-hidden">
+          <div className="bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 p-6">
+            <h2 className="text-2xl font-bold text-white mb-2">เครื่องมือจัดการ</h2>
+            <p className="text-green-100">เลือกเมนูที่ต้องการใช้งาน</p>
+          </div>
+
+          <div className="p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-2 border border-green-100">
+                <TabsTrigger 
+                  value="form" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-blue-500 data-[state=active]:text-white rounded-xl transition-all duration-300 flex items-center gap-2"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  เพิ่ม/แก้ไขข้อมูล
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="list" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-blue-500 data-[state=active]:text-white rounded-xl transition-all duration-300 flex items-center gap-2"
+                >
+                  <Users className="w-4 h-4" />
+                  รายชื่อครู
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="form" className="mt-6">
+                <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 border border-green-100">
+                  <TeacherForm
+                    form={form}
+                    isEditing={isEditing}
+                    onSubmit={handleSubmit}
+                    onCancel={resetForm}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="list" className="mt-6">
+                <TeacherList
+                  teachers={teachers}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">นำเข้าข้อมูลครู</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <Button onClick={downloadTeacherTemplate} variant="outline" className="font-sarabun">
-            <Download className="mr-2 h-4 w-4" />
-            ดาวน์โหลดไฟล์ตัวอย่าง
-          </Button>
-          <Button onClick={() => fileInputRef.current?.click()} className="font-sarabun">
-            <Upload className="mr-2 h-4 w-4" />
-            นำเข้าจาก Excel
-          </Button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileImport}
-            className="hidden"
-            accept=".xlsx, .xls"
-          />
-        </CardContent>
-      </Card>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="form">เพิ่ม/แก้ไขข้อมูล</TabsTrigger>
-          <TabsTrigger value="list">รายชื่อครู</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="form" className="mt-6">
-          <TeacherForm
-            form={form}
-            isEditing={isEditing}
-            onSubmit={handleSubmit}
-            onCancel={resetForm}
-          />
-        </TabsContent>
-
-        <TabsContent value="list" className="mt-6">
-          <TeacherList
-            teachers={teachers}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
