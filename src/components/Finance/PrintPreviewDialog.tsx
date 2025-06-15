@@ -39,27 +39,34 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 sm:max-w-4xl">
-        <DialogHeader className="p-6 pb-2 border-b">
-          <DialogTitle>ตัวอย่างก่อนพิมพ์</DialogTitle>
-        </DialogHeader>
-        <div className="flex-1 overflow-auto bg-gray-100 p-8">
-            <div className="p-6 bg-white shadow-lg mx-auto">
-                 <PrintPreviewStatic ref={componentRef} voucherData={voucherData} paymentOptions={paymentOptions} />
-            </div>
-        </div>
-        <DialogFooter className="p-4 border-t bg-background flex-row justify-end items-center space-x-2">
-          <DialogClose asChild>
-            <Button variant="outline">ปิด</Button>
-          </DialogClose>
-          <Button onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
-            พิมพ์เอกสาร
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      {/* Hidden component for printing */}
+      <div style={{ display: 'none' }}>
+        <PrintPreviewStatic ref={componentRef} voucherData={voucherData} paymentOptions={paymentOptions} />
+      </div>
+
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 sm:max-w-4xl">
+          <DialogHeader className="p-6 pb-2 border-b">
+            <DialogTitle>ตัวอย่างก่อนพิมพ์</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto bg-gray-100 p-8">
+              <div className="p-6 bg-white shadow-lg mx-auto">
+                   <PrintPreviewStatic voucherData={voucherData} paymentOptions={paymentOptions} />
+              </div>
+          </div>
+          <DialogFooter className="p-4 border-t bg-background flex-row justify-end items-center space-x-2">
+            <DialogClose asChild>
+              <Button variant="outline">ปิด</Button>
+            </DialogClose>
+            <Button onClick={handlePrint}>
+              <Printer className="mr-2 h-4 w-4" />
+              พิมพ์เอกสาร
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
