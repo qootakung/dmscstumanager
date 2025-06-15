@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Check } from "lucide-react";
 
@@ -19,15 +18,15 @@ const PaymentOptionCheckbox: React.FC<PaymentOptionCheckboxProps> = ({
   boldCheck = false,
   size = "default"
 }) => {
-  // For level checkboxes: larger, bold, centered
+  // ปรับขนาดให้เล็กลงกว่าเดิมประมาณ 2px
   const boxSize =
     size === "large"
-      ? "w-6 h-6"
-      : "w-5 h-5";
+      ? "w-5 h-5"   // เดิม w-6 h-6, ลดลง
+      : "w-4 h-4";  // เดิม w-5 h-5, ลดลง
   const checkSize =
     size === "large"
-      ? "w-5 h-5"
-      : "w-4 h-4";
+      ? "w-4 h-4"   // เดิม w-5 h-5, ลดลง
+      : "w-3 h-3";  // เดิม w-4 h-4, ลดลง
 
   // Custom style for more bold check
   // hideLabel for just showing the box with check
@@ -45,7 +44,7 @@ const PaymentOptionCheckbox: React.FC<PaymentOptionCheckboxProps> = ({
         {checked && (
           <Check
             className={`${checkSize} text-green-600`}
-            strokeWidth={boldCheck ? 4 : 3}
+            strokeWidth={boldCheck ? 3.5 : 2.5}
           />
         )}
       </span>
