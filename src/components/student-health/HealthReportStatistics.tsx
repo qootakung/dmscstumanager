@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StudentHealthDetails } from '@/types/student';
 import { Teacher } from '@/types/teacher';
@@ -125,7 +124,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
             background-color: #e6f3ff !important;
           }
           .signature-section {
-            margin-top: 12px;
+            margin-top: 20px;
             font-size: 8pt;
             line-height: 1.4;
           }
@@ -159,7 +158,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
           }
           .signature-name {
             position: absolute;
-            top: 24px;
+            top: 48px;
             left: 50%;
             transform: translateX(-50%);
             background: white;

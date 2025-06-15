@@ -15,12 +15,16 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({ teacher }) => {
           {teacher ? (
             <>
               {teacher.firstName} {teacher.lastName}<br/>
-              ครู วิทยฐานะครูชำนาญการพิเศษ
+              <div style={{ marginTop: '24px' }}>
+                ตำแหน่งครู วิทยฐานะครูชำนาญการพิเศษ
+              </div>
             </>
           ) : (
             <>
               นายธุปนนท์ ศรีสู่<br/>
-              ครู วิทยฐานะครูชำนาญการพิเศษ
+              <div style={{ marginTop: '24px' }}>
+                ตำแหน่งครู วิทยฐานะครูชำนาญการพิเศษ
+              </div>
             </>
           )}
         </div>
