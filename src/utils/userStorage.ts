@@ -6,18 +6,6 @@ const CURRENT_USER_KEY = 'dmsc_current_user';
 
 // User management
 export const getUsers = async (): Promise<User[]> => {
-  // Set the current user context for RLS
-  const currentUser = getCurrentUser();
-  if (currentUser) {
-    await supabase.rpc('set_config', {
-      setting: 'custom.current_user',
-      value: currentUser.username,
-      is_local: false
-    }).catch(() => {
-      // Ignore if function doesn't exist, we'll handle it differently
-    });
-  }
-
   let { data: users, error } = await supabase.from('app_users').select('*');
 
   if (error) {
