@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import type { Student } from "@/types/student";
 import type { Teacher } from "@/types/teacher";
 import PaymentOptionCheckbox from "./PaymentOptionCheckbox";
+import SignatureSection from "./SignatureSection";
 
 interface PrintPreviewProps {
   voucherData: {
@@ -160,53 +161,16 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
       </table>
     </div>
     {/* ลายเซ็นแบบใหม่ */}
-    <div className="flex flex-row justify-between items-start gap-3 my-4">
-      <div className="text-center w-1/3">
-        <div>
-          <span>ลงชื่อ</span>
-          <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle"></span>
-          <span>ผู้จ่ายเงิน</span>
-        </div>
-        <div>
-          (
-          <span className="inline-block min-w-[120px] mx-1 text-center">
-            {voucherData.payerName || "..............................."}
-          </span>
-          )
-        </div>
-      </div>
-      <div className="text-center w-1/3">
-        <div>
-          <span>ลงชื่อ</span>
-          <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle"></span>
-          <span>ครูประจำชั้น</span>
-        </div>
-        <div>
-          (
-          <span className="inline-block min-w-[120px] mx-1 text-center">
-            {voucherData.selectedTeacher
-              ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
-              : "..............................."}
-          </span>
-          )
-        </div>
-      </div>
-    </div>
-    <div className="text-center mt-2">
-      <div>ตรวจสอบแล้วถูกต้อง</div>
-      <div className="my-2">
-        <span>ลงชื่อ</span>
-        <span className="inline-block border-b border-dotted min-w-[160px] mx-1 align-middle"></span>
-        <span>ผู้อำนวยการโรงเรียน</span>
-      </div>
-      <div>
-        (
-        <span className="inline-block min-w-[120px] mx-1 text-center">
-          {voucherData.principalName || "..............................."}
-        </span>
-        )
-      </div>
-    </div>
+    <SignatureSection
+      payerName={voucherData.payerName}
+      teacherName={
+        voucherData.selectedTeacher
+          ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}`
+          : ""
+      }
+      principalName={voucherData.principalName}
+    />
+
   </div>
 );
 
