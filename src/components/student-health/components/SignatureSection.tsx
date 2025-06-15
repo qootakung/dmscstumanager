@@ -10,9 +10,9 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({ teacher }) => {
   return (
     <div className="text-right mt-4 signature-section">
       <div className="signature-dots">
-        (...............................................)<br/>
+        ( นายธุปนนท์ ศรีสู่ )<br/>
         <div className="signature-name">
-          <div style={{ marginTop: '24px' }}>
+          <div style={{ marginTop: '8px' }}>
             ตำแหน่งครู วิทยฐานะครูชำนาญการพิเศษ
           </div>
         </div>
