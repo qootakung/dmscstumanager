@@ -126,7 +126,7 @@ const FinancialReports = () => {
     }));
   };
 
-  // ปรับปรุง handlePrint ให้สร้าง div สำหรับ render ตัวอย่างแบบ Static
+  // ปรับปรุง handlePrint ให้เรียกใช้งาน PrintPreviewStatic แบบ import ปกติ
   const handlePrint = () => {
     if (voucherData.paymentTypes.length === 0) {
       alert('กรุณาเลือกประเภทการจ่ายเงิน');
@@ -137,12 +137,9 @@ const FinancialReports = () => {
       return;
     }
 
-    // สร้าง div สำหรับ render ตัวอย่างแบบ Static
-    const printContainer = document.createElement('div');
     // ใช้ renderToStaticMarkup เพื่อแปลง React > HTML string
     import('react-dom/server').then(({ renderToStaticMarkup }) => {
-      const { default: PrintPreviewStatic } = require('./Finance/PrintPreviewStatic');
-      // NOTE: ต้องประกาศ component ที่นี่อีกครั้งเนื่องจากใช้ dynamic import ใน Vite
+      // ไม่ต้อง require อีกต่อไป
       const htmlString = renderToStaticMarkup(
         <PrintPreviewStatic voucherData={voucherData} paymentOptions={paymentOptions} />
       );
