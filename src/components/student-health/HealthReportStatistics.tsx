@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StudentHealthDetails } from '@/types/student';
 import { Teacher } from '@/types/teacher';
@@ -126,7 +125,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
         @media print {
           @page {
             size: A4;
-            margin: 0.6cm;
+            margin: 0.4cm 0.8cm 0.6cm 1.5cm;
           }
           body {
             font-size: 8pt;
@@ -148,13 +147,13 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
           }
           th, td {
             border: 1px solid #000 !important;
-            padding: 4px 5px !important;
+            padding: 3px 4px !important;
             vertical-align: middle;
             line-height: 1.4;
           }
           th {
             background-color: #f2f2f2 !important;
-            text-align: center;
+            text-align: center !important;
             font-weight: bold;
             line-height: 1.3;
           }
@@ -176,6 +175,21 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
           .header-section p {
             margin: 3px 0;
           }
+          .category-col {
+            width: 35% !important;
+          }
+          .gender-col {
+            width: 13% !important;
+          }
+          .total-col {
+            width: 13% !important;
+          }
+          .percent-col {
+            width: 13% !important;
+          }
+          .coverage-col {
+            width: 13% !important;
+          }
         }
       `}</style>
       
@@ -189,12 +203,12 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
       <table className="w-full border-collapse border border-black mb-2 text-xs">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-black p-1" rowSpan={2}>น้ำหนักตามเกณฑ์อายุ</th>
-            <th className="border border-black p-1">ชาย<br/>(คน)</th>
-            <th className="border border-black p-1">หญิง<br/>(คน)</th>
-            <th className="border border-black p-1">รวม<br/>(คน)</th>
-            <th className="border border-black p-1">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-1">ความ<br/>ครอบคลุม<br/>(%)</th>
+            <th className="border border-black p-1 category-col" rowSpan={2}>น้ำหนักตามเกณฑ์อายุ</th>
+            <th className="border border-black p-1 gender-col">ชาย<br/>(คน)</th>
+            <th className="border border-black p-1 gender-col">หญิง<br/>(คน)</th>
+            <th className="border border-black p-1 total-col">รวม<br/>(คน)</th>
+            <th className="border border-black p-1 percent-col">ภาวะโภชนาการ<br/>(%)</th>
+            <th className="border border-black p-1 coverage-col">ความ<br/>ครอบคลุม<br/>(%)</th>
           </tr>
         </thead>
         <tbody>
@@ -269,12 +283,12 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
       <table className="w-full border-collapse border border-black mb-2 text-xs">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-black p-1" rowSpan={2}>ส่วนสูงตามเกณฑ์อายุ</th>
-            <th className="border border-black p-1">ชาย<br/>(คน)</th>
-            <th className="border border-black p-1">หญิง<br/>(คน)</th>
-            <th className="border border-black p-1">รวม<br/>(คน)</th>
-            <th className="border border-black p-1">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-1">ความ<br/>ครอบคลุม<br/>(%)</th>
+            <th className="border border-black p-1 category-col" rowSpan={2}>ส่วนสูงตามเกณฑ์อายุ</th>
+            <th className="border border-black p-1 gender-col">ชาย<br/>(คน)</th>
+            <th className="border border-black p-1 gender-col">หญิง<br/>(คน)</th>
+            <th className="border border-black p-1 total-col">รวม<br/>(คน)</th>
+            <th className="border border-black p-1 percent-col">ภาวะโภชนาการ<br/>(%)</th>
+            <th className="border border-black p-1 coverage-col">ความ<br/>ครอบคลุม<br/>(%)</th>
           </tr>
         </thead>
         <tbody>
@@ -349,12 +363,12 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
       <table className="w-full border-collapse border border-black mb-2 text-xs">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-black p-1" rowSpan={2}>น้ำหนักตามเกณฑ์ส่วนสูง</th>
-            <th className="border border-black p-1">ชาย<br/>(คน)</th>
-            <th className="border border-black p-1">หญิง<br/>(คน)</th>
-            <th className="border border-black p-1">รวม<br/>(คน)</th>
-            <th className="border border-black p-1">ภาวะโภชนาการ<br/>(%)</th>
-            <th className="border border-black p-1">ความ<br/>ครอบคลุม<br/>(%)</th>
+            <th className="border border-black p-1 category-col" rowSpan={2}>น้ำหนักตามเกณฑ์ส่วนสูง</th>
+            <th className="border border-black p-1 gender-col">ชาย<br/>(คน)</th>
+            <th className="border border-black p-1 gender-col">หญิง<br/>(คน)</th>
+            <th className="border border-black p-1 total-col">รวม<br/>(คน)</th>
+            <th className="border border-black p-1 percent-col">ภาวะโภชนาการ<br/>(%)</th>
+            <th className="border border-black p-1 coverage-col">ความ<br/>ครอบคลุม<br/>(%)</th>
           </tr>
         </thead>
         <tbody>
