@@ -100,9 +100,8 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
           {voucherData.students.length}
         </span>
         <span>คน ได้รับเงินจากโรงเรียนบ้านดอนมูล</span>
-        <span className="inline-block border-b border-dotted w-20 mx-1 text-center">
-          {voucherData.students.length}
-        </span>
+        {/* <span className="inline-block border-b border-dotted w-20 mx-1 text-center">{voucherData.students.length}</span> */}
+        {/* ลบเลขหลังบ้านดอนมูลออก */}
       </div>
       {/* แก้ไขข้อความสังกัด */}
       <div>
