@@ -71,7 +71,7 @@ const StudentAnalysis: React.FC = () => {
 
       // จำลองการอ่านคะแนนจากหลายคอลัมน์
       subjects.forEach(subject => {
-        if (row[subject] !== undefined && row[subject] !== null) {
+        if (row[subject] !== undefined && row[subject] !== null && row[subject] !== '') {
           const score = parseFloat(row[subject]) || 0;
           scores[subject] = score;
           totalScore += score;
@@ -117,90 +117,49 @@ const StudentAnalysis: React.FC = () => {
         description: "กรุณารอสักครู่...",
       });
 
-      // จำลองการประมวลผลข้อมูล
-      setTimeout(() => {
-        const mockData = [
-          {
-            'รหัสนักเรียน': 'P4001',
-            'ชื่อ-นามสกุล': 'รัตนาวดี มั่งคั่ง',
-            'ชั้นเรียน': 'ป.4',
-            'ภาษาไทย': 4.0,
-            'คณิตศาสตร์': 4.0,
-            'วิทยาศาสตร์และเทคโนโลยี': 3.0,
-            'สังคมศึกษา ศาสนาและวัฒนธรรม': 4.0,
-            'ประวัติศาสตร์': 3.5,
-            'สุขศึกษาและพลศึกษา': 4.0,
-            'ศิลปะ': 3.0,
-            'การงานอาชีพ': 3.5,
-            'ภาษาอังกฤษ': 4.0,
-            'การป้องกันการทุจริต': 4.0,
-            'ภาษาอังกฤษเพื่อการสื่อสาร': 3.5,
-            'วิทยาศาสตร์พลังสิบ': 3.0
-          },
-          {
-            'รหัสนักเรียน': 'P4002',
-            'ชื่อ-นามสกุล': 'วรรณพร สุขใส',
-            'ชั้นเรียน': 'ป.4',
-            'ภาษาไทย': 3.5,
-            'คณิตศาสตร์': 3.0,
-            'วิทยาศาสตร์และเทคโนโลยี': 2.5,
-            'สังคมศึกษา ศาสนาและวัฒนธรรม': 3.0,
-            'ประวัติศาสตร์': 2.5,
-            'สุขศึกษาและพลศึกษา': 3.5,
-            'ศิลปะ': 3.0,
-            'การงานอาชีพ': 2.5,
-            'ภาษาอังกฤษ': 3.0,
-            'การป้องกันการทุจริต': 3.0,
-            'ภาษาอังกฤษเพื่อการสื่อสาร': 2.5,
-            'วิทยาศาสตร์พลังสิบ': 2.0
-          },
-          {
-            'รหัสนักเรียน': 'P4003',
-            'ชื่อ-นามสกุล': 'สิรภพ แสงสว่าง',
-            'ชั้นเรียน': 'ป.4',
-            'ภาษาไทย': 1.5,
-            'คณิตศาสตร์': 1.0,
-            'วิทยาศาสตร์และเทคโนโลยี': 1.5,
-            'สังคมศึกษา ศาสนาและวัฒนธรรม': 2.0,
-            'ประวัติศาสตร์': 1.0,
-            'สุขศึกษาและพลศึกษา': 2.5,
-            'ศิลปะ': 2.0,
-            'การงานอาชีพ': 1.5,
-            'ภาษาอังกฤษ': 1.0,
-            'การป้องกันการทุจริต': 1.5,
-            'ภาษาอังกฤษเพื่อการสื่อสาร': 1.0,
-            'วิทยาศาสตร์พลังสิบ': 1.0
-          }
-        ];
+      // อ่านไฟล์ Excel จริง
+      const XLSX = await import('xlsx');
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        const processedStudents = processExcelData(mockData);
-        setStudents(processedStudents);
+      console.log('Excel data:', jsonData);
 
-        const analysisResult = {
-          excellent: processedStudents.filter(s => s.group === 'เก่ง').length,
-          average: processedStudents.filter(s => s.group === 'ปานกลาง').length,
-          poor: processedStudents.filter(s => s.group === 'อ่อน').length
-        };
-        setAnalysisData(analysisResult);
+      if (jsonData.length === 0) {
+        throw new Error('ไฟล์ Excel ไม่มีข้อมูล');
+      }
 
-        setImportProgress({
-          total: mockData.length,
-          processed: mockData.length,
-          errors: []
-        });
+      // ประมวลผลข้อมูลจริงจากไฟล์
+      const processedStudents = processExcelData(jsonData);
+      setStudents(processedStudents);
 
-        toast({
-          title: "นำเข้าข้อมูลสำเร็จ",
-          description: `ประมวลผลข้อมูลนักเรียน ${mockData.length} คน พร้อมวิเคราะห์แบ่งกลุ่มเรียบร้อย`,
-        });
+      const analysisResult = {
+        excellent: processedStudents.filter(s => s.group === 'เก่ง').length,
+        average: processedStudents.filter(s => s.group === 'ปานกลาง').length,
+        poor: processedStudents.filter(s => s.group === 'อ่อน').length
+      };
+      setAnalysisData(analysisResult);
 
-        setIsUploading(false);
-      }, 3000);
+      setImportProgress({
+        total: jsonData.length,
+        processed: jsonData.length,
+        errors: []
+      });
+
+      toast({
+        title: "นำเข้าข้อมูลสำเร็จ",
+        description: `ประมวลผลข้อมูลนักเรียน ${processedStudents.length} คน พร้อมวิเคราะห์แบ่งกลุ่มเรียบร้อย`,
+      });
+
+      setIsUploading(false);
 
     } catch (error) {
+      console.error('Excel processing error:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถอ่านไฟล์ Excel ได้ กรุณาตรวจสอบรูปแบบไฟล์",
+        description: error instanceof Error ? error.message : "ไม่สามารถอ่านไฟล์ Excel ได้ กรุณาตรวจสอบรูปแบบไฟล์",
         variant: "destructive",
       });
       setIsUploading(false);
