@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,9 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Printer } from 'lucide-react';
+import { Printer, User } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
+import { getTeachers } from '@/utils/teacherStorage';
 import type { Student } from '@/types/student';
+import type { Teacher } from '@/types/teacher';
+import TeacherSelectionDialog from '@/components/student-health/TeacherSelectionDialog';
 
 interface PaymentVoucherData {
   paymentTypes: string[];
@@ -18,11 +22,15 @@ interface PaymentVoucherData {
   schoolName: string;
   principalName: string;
   managerName: string;
+  selectedTeacher: Teacher | null;
+  payerName: string;
 }
 
 const FinancialReports = () => {
   const [students, setStudents] = useState<Student[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedGrade, setSelectedGrade] = useState('');
+  const [showTeacherDialog, setShowTeacherDialog] = useState(false);
   const [voucherData, setVoucherData] = useState<PaymentVoucherData>({
     paymentTypes: [],
     academicYear: '2567',
@@ -31,7 +39,9 @@ const FinancialReports = () => {
     students: [],
     schoolName: 'โรงเรียนบ้านดอนมูล',
     principalName: '',
-    managerName: ''
+    managerName: '',
+    selectedTeacher: null,
+    payerName: ''
   });
 
   const paymentOptions = [
@@ -46,11 +56,17 @@ const FinancialReports = () => {
 
   useEffect(() => {
     loadStudents();
+    loadTeachers();
   }, []);
 
   const loadStudents = async () => {
     const studentData = await getStudents();
     setStudents(studentData);
+  };
+
+  const loadTeachers = async () => {
+    const teacherData = await getTeachers();
+    setTeachers(teacherData);
   };
 
   const handlePaymentTypeChange = (paymentType: string, checked: boolean) => {
@@ -69,6 +85,13 @@ const FinancialReports = () => {
       ...prev,
       grade,
       students: gradeStudents
+    }));
+  };
+
+  const handleTeacherSelect = (teacher: Teacher) => {
+    setVoucherData(prev => ({
+      ...prev,
+      selectedTeacher: teacher
     }));
   };
 
@@ -243,20 +266,20 @@ const FinancialReports = () => {
 
           <div class="signatures">
             <div class="signature">
-              <div>ลงชื่อ<span class="dotted-line"></span>ผู้จ่ายเงิน</div>
-              <div>(<span class="dotted-line"></span>)</div>
+              <div>ลงชื่อ<span class="dotted-line">${voucherData.payerName || '..........................................'}</span>ผู้จ่ายเงิน</div>
+              <div>(<span class="dotted-line">${voucherData.payerName || '..........................................'}</span>)</div>
             </div>
             <div class="signature">
-              <div>ลงชื่อ<span class="dotted-line"></span>ผู้รับรองเงิน</div>
-              <div>(<span class="dotted-line"></span>)</div>
+              <div>ลงชื่อ<span class="dotted-line">${voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : '..........................................'}</span>ครูประจำชั้น</div>
+              <div>(<span class="dotted-line">${voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : '..........................................'}</span>)</div>
             </div>
           </div>
 
           <div style="text-align: center; margin-top: 30px;">
             <div>ตรวจสอบแล้วถูกต้อง</div>
             <br>
-            <div>ลงชื่อ<span class="dotted-line"></span>ผู้อำนวยการโรงเรียน</div>
-            <div>(<span class="dotted-line"></span>)</div>
+            <div>ลงชื่อ<span class="dotted-line">${voucherData.principalName || '..........................................'}</span>ผู้อำนวยการโรงเรียน</div>
+            <div>(<span class="dotted-line">${voucherData.principalName || '..........................................'}</span>)</div>
           </div>
         </body>
       </html>
@@ -367,32 +390,51 @@ const FinancialReports = () => {
             </div>
           )}
 
-          {/* School Information */}
+          {/* Signature Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
+              <Label htmlFor="payerName">ชื่อผู้จ่ายเงิน</Label>
               <Input
-                id="principalName"
-                value={voucherData.principalName}
+                id="payerName"
+                value={voucherData.payerName}
                 onChange={(e) => setVoucherData(prev => ({
                   ...prev,
-                  principalName: e.target.value
+                  payerName: e.target.value
                 }))}
-                placeholder="ชื่อผู้อำนวยการโรงเรียน"
+                placeholder="ชื่อผู้จ่ายเงิน"
               />
             </div>
             <div>
-              <Label htmlFor="managerName">ชื่อผู้จัดการ</Label>
-              <Input
-                id="managerName"
-                value={voucherData.managerName}
-                onChange={(e) => setVoucherData(prev => ({
-                  ...prev,
-                  managerName: e.target.value
-                }))}
-                placeholder="ชื่อผู้จัดการ"
-              />
+              <Label htmlFor="teacher">ครูประจำชั้น</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={voucherData.selectedTeacher ? `${voucherData.selectedTeacher.firstName} ${voucherData.selectedTeacher.lastName}` : ''}
+                  placeholder="เลือกครูประจำชั้น"
+                  readOnly
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowTeacherDialog(true)}
+                >
+                  <User className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
+          </div>
+
+          {/* School Information */}
+          <div>
+            <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
+            <Input
+              id="principalName"
+              value={voucherData.principalName}
+              onChange={(e) => setVoucherData(prev => ({
+                ...prev,
+                principalName: e.target.value
+              }))}
+              placeholder="ชื่อผู้อำนวยการโรงเรียน"
+            />
           </div>
 
           {/* Print Button */}
@@ -404,6 +446,13 @@ const FinancialReports = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Teacher Selection Dialog */}
+      <TeacherSelectionDialog
+        open={showTeacherDialog}
+        onOpenChange={setShowTeacherDialog}
+        onConfirm={handleTeacherSelect}
+      />
     </div>
   );
 };
