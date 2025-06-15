@@ -22,24 +22,39 @@ const HealthImportExport: React.FC = () => {
 
   const handleExport = async () => {
     setIsExporting(true);
-    await Swal.fire({
-        title: 'กำลังเตรียมข้อมูล...',
-        text: 'กำลังดึงรายชื่อนักเรียนเพื่อสร้างไฟล์ Excel',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+    
+    // Use a shorter, less intrusive loading message
+    const loadingToast = Swal.fire({
+      title: 'กำลังเตรียมข้อมูล...',
+      allowOutsideClick: true,
+      showConfirmButton: false,
+      timer: 10000, // Auto close after 10 seconds
+      didOpen: () => {
+        Swal.showLoading();
+      }
     });
+
     try {
       const students = await getStudents();
       if (students.length === 0) {
+        Swal.close();
         Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลนักเรียนในระบบ', 'warning');
         return;
       }
       exportStudentsForHealthImport(students);
       Swal.close();
+      
+      // Quick success message
+      Swal.fire({
+        icon: 'success',
+        title: 'ส่งออกสำเร็จ!',
+        text: 'ไฟล์ถูกดาวน์โหลดแล้ว',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error(error);
+      Swal.close();
       Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถส่งออกข้อมูลได้', 'error');
     } finally {
       setIsExporting(false);
@@ -53,18 +68,38 @@ const HealthImportExport: React.FC = () => {
     setIsImporting(true);
     setImportResult(null);
 
+    // Use a simpler loading state with timeout
+    let loadingTimeout: NodeJS.Timeout;
+    
     try {
-      // Show loading dialog
-      Swal.fire({
+      // Show loading with auto-close after 15 seconds
+      const loadingPromise = Swal.fire({
         title: 'กำลังประมวลผลไฟล์...',
-        text: 'กรุณารอสักครู่',
+        html: 'กรุณารอสักครู่ หรือกด ESC เพื่อยกเลิก',
+        allowEscapeKey: true,
         allowOutsideClick: false,
+        showConfirmButton: false,
         didOpen: () => {
           Swal.showLoading();
+          // Auto close after 15 seconds to prevent hanging
+          loadingTimeout = setTimeout(() => {
+            Swal.close();
+          }, 15000);
         }
       });
 
-      const importData = await importHealthDataFromExcel(file);
+      // Process import with timeout handling
+      const importPromise = importHealthDataFromExcel(file);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('การประมวลผลใช้เวลานานเกินไป')), 20000);
+      });
+
+      const importData = await Promise.race([importPromise, timeoutPromise]) as any;
+      
+      // Clear timeout and close loading
+      if (loadingTimeout) clearTimeout(loadingTimeout);
+      Swal.close();
+      
       console.log('Import data result:', importData);
       
       if (importData.errors.length > 0) {
@@ -78,7 +113,8 @@ const HealthImportExport: React.FC = () => {
             <div class="text-left max-h-96 overflow-y-auto">
               <p class="mb-4"><strong>กรุณาตรวจสอบและแก้ไขข้อมูลต่อไปนี้:</strong></p>
               <ul class="text-sm space-y-1">
-                ${importData.errors.map(error => `<li class="text-red-600">• ${error}</li>`).join('')}
+                ${importData.errors.slice(0, 10).map((error: string) => `<li class="text-red-600">• ${error}</li>`).join('')}
+                ${importData.errors.length > 10 ? `<li class="text-gray-600">... และอีก ${importData.errors.length - 10} รายการ</li>` : ''}
               </ul>
               ${importData.validRecords > 0 ? 
                 `<p class="mt-4 text-green-600">✓ ข้อมูลที่ถูกต้อง: ${importData.validRecords} รายการ</p>` : 
@@ -104,9 +140,16 @@ const HealthImportExport: React.FC = () => {
       }
       
       if (importData.healthRecords && importData.healthRecords.length > 0) {
-        Swal.update({
+        // Show quick saving message
+        Swal.fire({
           title: 'กำลังบันทึกข้อมูล...',
-          text: `กำลังบันทึก ${importData.healthRecords.length} รายการ`
+          text: `กำลังบันทึก ${importData.healthRecords.length} รายการ`,
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          timer: 5000,
+          didOpen: () => {
+            Swal.showLoading();
+          }
         });
 
         const result = await upsertStudentHealthRecords(importData.healthRecords);
@@ -133,21 +176,40 @@ const HealthImportExport: React.FC = () => {
                 }
               </div>
             `,
-            confirmButtonText: 'ตกลง'
+            timer: 3000,
+            showConfirmButton: false
           });
         } else {
           setImportResult({ success: 0, fail: importData.healthRecords.length });
-          Swal.fire('นำเข้าไม่สำเร็จ', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
+          Swal.fire({
+            icon: 'error',
+            title: 'นำเข้าไม่สำเร็จ', 
+            text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+            timer: 3000,
+            showConfirmButton: false
+          });
         }
       } else {
-        Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลที่สามารถนำเข้าได้ในไฟล์', 'warning');
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีข้อมูล', 
+          text: 'ไม่พบข้อมูลที่สามารถนำเข้าได้ในไฟล์',
+          timer: 3000,
+          showConfirmButton: false
+        });
       }
     } catch (error) {
       console.error('Import error:', error);
+      if (loadingTimeout) clearTimeout(loadingTimeout);
+      Swal.close();
+      
+      const errorMessage = error instanceof Error ? error.message : 'รูปแบบไฟล์ไม่ถูกต้อง หรือเกิดปัญหาในการอ่านข้อมูล';
       Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด',
-        text: error instanceof Error ? error.message : 'รูปแบบไฟล์ไม่ถูกต้อง หรือเกิดปัญหาในการอ่านข้อมูล',
+        text: errorMessage,
+        timer: 5000,
+        showConfirmButton: true,
         confirmButtonText: 'ตกลง'
       });
     } finally {
@@ -216,7 +278,7 @@ const HealthImportExport: React.FC = () => {
               {isImporting ? (
                 <div className="flex flex-col items-center gap-2">
                   <Loader2 className="w-8 h-8 animate-spin text-school-primary" />
-                  <p>กำลังประมวลผล...</p>
+                  <p>กำลังประมวลผล... (กด ESC เพื่อยกเลิก)</p>
                 </div>
               ) : isDragActive ? (
                 <p>วางไฟล์ที่นี่...</p>
