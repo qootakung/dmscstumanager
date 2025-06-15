@@ -12,21 +12,9 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({ teacher }) => {
       <div className="signature-dots">
         (...............................................)<br/>
         <div className="signature-name">
-          {teacher ? (
-            <>
-              {teacher.firstName} {teacher.lastName}<br/>
-              <div style={{ marginTop: '24px' }}>
-                ตำแหน่งครู วิทยฐานะครูชำนาญการพิเศษ
-              </div>
-            </>
-          ) : (
-            <>
-              นายธุปนนท์ ศรีสู่<br/>
-              <div style={{ marginTop: '24px' }}>
-                ตำแหน่งครู วิทยฐานะครูชำนาญการพิเศษ
-              </div>
-            </>
-          )}
+          <div style={{ marginTop: '24px' }}>
+            ตำแหน่งครู วิทยฐานะครูชำนาญการพิเศษ
+          </div>
         </div>
       </div>
     </div>
