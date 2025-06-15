@@ -10,14 +10,14 @@ interface SignatureSectionProps {
 const signatureLineStyle: React.CSSProperties = {
   display: 'inline-block',
   borderBottom: '1px dotted black',
-  minWidth: '160px',
-  margin: '0 4px',
+  width: '200px',
+  margin: '0 8px',
   verticalAlign: 'middle'
 };
 
 const nameStyle: React.CSSProperties = {
   display: 'inline-block',
-  minWidth: '180px',
+  width: '240px',
   margin: '0 4px',
   textAlign: 'center'
 };
@@ -25,10 +25,10 @@ const nameStyle: React.CSSProperties = {
 const containerStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'row',
-  justifyContent: 'space-around',
+  justifyContent: 'space-between',
   alignItems: 'flex-start',
   gap: '12px',
-  margin: '24px 0'
+  margin: '48px 0 24px 0'
 };
 
 const signatureBoxStyle: React.CSSProperties = {
@@ -40,7 +40,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
   teacherName,
   principalName,
 }) => (
-  <div style={{ fontSize: '16px' }}>
+  <div style={{ fontSize: '16px', marginTop: '24px' }}>
     <div style={containerStyle}>
       <div style={signatureBoxStyle}>
         <div>
@@ -48,7 +48,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
           <span style={signatureLineStyle}></span>
           <span>ผู้จ่ายเงิน</span>
         </div>
-        <div style={{ marginTop: '4px' }}>
+        <div style={{ marginTop: '8px' }}>
           (
           <span style={nameStyle}>
             {payerName || "........................................"}
@@ -62,7 +62,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
           <span style={signatureLineStyle}></span>
           <span>ครูประจำชั้น</span>
         </div>
-        <div style={{ marginTop: '4px' }}>
+        <div style={{ marginTop: '8px' }}>
           (
           <span style={nameStyle}>
             {teacherName || "........................................"}
@@ -71,14 +71,14 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
         </div>
       </div>
     </div>
-    <div style={{ textAlign: 'center', marginTop: '24px' }}>
-      <div>ตรวจสอบแล้วถูกต้อง</div>
-      <div style={{ margin: '8px 0' }}>
+    <div style={{ textAlign: 'center', marginTop: '48px' }}>
+      <div style={{ marginBottom: '8px' }}>ตรวจสอบแล้วถูกต้อง</div>
+      <div>
         <span>ลงชื่อ</span>
         <span style={signatureLineStyle}></span>
         <span>ผู้อำนวยการโรงเรียน</span>
       </div>
-      <div style={{ marginTop: '4px' }}>
+      <div style={{ marginTop: '8px' }}>
         (
         <span style={nameStyle}>
           {principalName || "........................................"}

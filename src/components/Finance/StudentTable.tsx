@@ -25,6 +25,7 @@ const thStyle: React.CSSProperties = {
   textAlign: "center",
   fontWeight: "bold",
   verticalAlign: "middle",
+  backgroundColor: "#f0f0f0",
 };
 
 const centerCellStyle: React.CSSProperties = {

@@ -18,10 +18,6 @@ const PrintPaymentTypes: React.FC<PrintPaymentTypesProps> = ({ paymentTypes, pay
         label="ค่าจัดการเรียนการสอน (ปัจจัยพื้นฐานสำหรับการรับนักเรียนยากจน)" 
         checked={paymentTypes.includes(paymentOptions[2])} 
       />
-      <PrintCheckbox 
-        label="ค่าอุปกรณ์การเรียน (เพิ่มเติม)" 
-        checked={paymentTypes.includes(paymentOptions[4])} 
-      />
     </div>
     <div>
       <PrintCheckbox 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const levels = [
@@ -54,33 +53,32 @@ const PrintGradeLevel: React.FC<PrintGradeLevelProps> = ({ grade }) => {
   const selectedLevel = getSelectedLevel(grade);
 
   return (
-    <div style={{
-      display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 48, marginBottom: 10
-    }}>
-      <div>
-        <GradeLevelRow
-          label="อนุบาลปีที่"
-          checked={!!(selectedLevel && selectedLevel.key === "อนุบาล")}
-          gradeNumber={selectedLevel?.gradeNumber || ""}
-        />
-        <GradeLevelRow
-          label="มัธยมศึกษาปีที่"
-          checked={!!(selectedLevel && selectedLevel.key === "มัธยม")}
-          gradeNumber={selectedLevel?.gradeNumber || ""}
-        />
-      </div>
-      <div>
-        <GradeLevelRow
-          label="ประถมศึกษาปีที่"
-          checked={!!(selectedLevel && selectedLevel.key === "ประถม")}
-          gradeNumber={selectedLevel?.gradeNumber || ""}
-        />
-        <GradeLevelRow
-          label="ปวช. ที่จัดโดยสถานประกอบการ ปีที่"
-          checked={!!(selectedLevel && selectedLevel.key === "ปวช")}
-          gradeNumber={selectedLevel?.gradeNumber || ""}
-        />
-      </div>
+    <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 10 }}>
+        <span style={{ marginRight: 16, paddingTop: '4px' }}>ระดับชั้น</span>
+        <div style={{
+            display: "grid", gridTemplateColumns: "auto auto", columnGap: 24, rowGap: 4, flexGrow: 1
+        }}>
+            <GradeLevelRow
+            label="อนุบาลปีที่"
+            checked={!!(selectedLevel && selectedLevel.key === "อนุบาล")}
+            gradeNumber={selectedLevel?.gradeNumber || ""}
+            />
+            <GradeLevelRow
+            label="ประถมศึกษาปีที่"
+            checked={!!(selectedLevel && selectedLevel.key === "ประถม")}
+            gradeNumber={selectedLevel?.gradeNumber || ""}
+            />
+            <GradeLevelRow
+            label="มัธยมศึกษาปีที่"
+            checked={!!(selectedLevel && selectedLevel.key === "มัธยม")}
+            gradeNumber={selectedLevel?.gradeNumber || ""}
+            />
+            <GradeLevelRow
+            label="ปวช. ที่จัดโดยสถานประกอบการ ปีที่"
+            checked={!!(selectedLevel && selectedLevel.key === "ปวช")}
+            gradeNumber={selectedLevel?.gradeNumber || ""}
+            />
+        </div>
     </div>
   );
 };

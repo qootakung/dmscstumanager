@@ -14,14 +14,14 @@ const PrintHeader: React.FC<PrintHeaderProps> = ({ semester, academicYear }) => 
       <span style={{
         display: "inline-block",
         borderBottom: "1px dotted #000",
-        width: 56,
+        width: 150,
         textAlign: "center"
       }}>{semester}</span>
       <span style={{ marginLeft: "16px" }}>ปีการศึกษา</span>
       <span style={{
         display: "inline-block",
         borderBottom: "1px dotted #000",
-        width: 80,
+        width: 150,
         textAlign: "center"
       }}>{academicYear}</span>
     </div>
