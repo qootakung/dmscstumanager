@@ -41,22 +41,26 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
     {
       key: "มัธยม",
       label: "มัธยมศึกษาปีที่",
-      grades: ["ม.1", "ม.2", "ม.3"], // ถ้ามี
+      grades: ["ม.1", "ม.2", "ม.3"],
     },
     {
       key: "ปวช",
       label: "ปวช. ที่จัดโดยสถานประกอบการ ปีที่",
-      grades: ["ปวช.1", "ปวช.2", "ปวช.3"], // ถ้ามี
+      grades: ["ปวช.1", "ปวช.2", "ปวช.3"],
     },
   ];
   // คำนวณ level และชั้นปีที่เลือก
   const findLevelMatch = () => {
     for (const level of levels) {
       if (level.grades.includes(selectedGrade)) {
-        return { ...level, selected: selectedGrade };
+        // ตัดเฉพาะตัวเลขท้ายชื่อ เช่น ป.4 => "4", อนุบาล 2 => "2"
+        let gradeNumber = "";
+        const match = selectedGrade.match(/(\d+)$/);
+        if (match) gradeNumber = match[1];
+        return { ...level, selectedGrade, gradeNumber };
       }
     }
-    return { key: "อื่นๆ", label: selectedGrade, grades: [] };
+    return null;
   };
   const selectedLevel = findLevelMatch();
 
@@ -112,21 +116,25 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
           {/* อนุบาล */}
           <div className="flex items-center mr-4">
             <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel.key === "อนุบาล" && <span className="text-green-600 text-base font-bold">✔</span>}
+              {selectedLevel?.key === "อนุบาล" && (
+                <span className="text-green-600 text-base font-bold">✔</span>
+              )}
             </span>
             <span>อนุบาลปีที่</span>
-            <span className={`inline-block border-b border-dotted w-20 mx-1 text-center`}>
-              {selectedLevel.key === "อนุบาล" ? selectedLevel.selected : ""}
+            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
+              {selectedLevel?.key === "อนุบาล" ? selectedLevel.gradeNumber : ""}
             </span>
           </div>
           {/* ประถม */}
           <div className="flex items-center">
             <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel.key === "ประถม" && <span className="text-green-600 text-base font-bold">✔</span>}
+              {selectedLevel?.key === "ประถม" && (
+                <span className="text-green-600 text-base font-bold">✔</span>
+              )}
             </span>
             <span>ประถมศึกษาปีที่</span>
-            <span className={`inline-block border-b border-dotted w-20 mx-1 text-center`}>
-              {selectedLevel.key === "ประถม" ? selectedLevel.selected : ""}
+            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
+              {selectedLevel?.key === "ประถม" ? selectedLevel.gradeNumber : ""}
             </span>
           </div>
         </div>
@@ -134,21 +142,25 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
           {/* มัธยม */}
           <div className="flex items-center mr-4">
             <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel.key === "มัธยม" && <span className="text-green-600 text-base font-bold">✔</span>}
+              {selectedLevel?.key === "มัธยม" && (
+                <span className="text-green-600 text-base font-bold">✔</span>
+              )}
             </span>
             <span>มัธยมศึกษาปีที่</span>
-            <span className={`inline-block border-b border-dotted w-20 mx-1 text-center`}>
-              {selectedLevel.key === "มัธยม" ? selectedLevel.selected : ""}
+            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
+              {selectedLevel?.key === "มัธยม" ? selectedLevel.gradeNumber : ""}
             </span>
           </div>
           {/* ปวช */}
           <div className="flex items-center">
             <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel.key === "ปวช" && <span className="text-green-600 text-base font-bold">✔</span>}
+              {selectedLevel?.key === "ปวช" && (
+                <span className="text-green-600 text-base font-bold">✔</span>
+              )}
             </span>
             <span>ปวช. ที่จัดโดยสถานประกอบการ ปีที่</span>
-            <span className={`inline-block border-b border-dotted w-20 mx-1 text-center`}>
-              {selectedLevel.key === "ปวช" ? selectedLevel.selected : ""}
+            <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
+              {selectedLevel?.key === "ปวช" ? selectedLevel.gradeNumber : ""}
             </span>
           </div>
         </div>
