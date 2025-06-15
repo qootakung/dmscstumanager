@@ -46,7 +46,8 @@ const HealthReportPrintable: React.FC<HealthReportPrintableProps> = ({ data, gra
           }
           th {
             background-color: #f2f2f2 !important;
-            text-align: center;
+            text-align: center !important;
+            font-weight: bold;
           }
           td.text-center {
             text-align: center;
@@ -61,13 +62,13 @@ const HealthReportPrintable: React.FC<HealthReportPrintableProps> = ({ data, gra
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[40px]">ที่</TableHead>
-            <TableHead className="w-[90px]">รหัสนักเรียน</TableHead>
-            <TableHead>ชื่อ-นามสกุล</TableHead>
-            <TableHead className="w-[150px]">อายุ</TableHead>
-            <TableHead className="w-[90px]">น้ำหนัก (กก.)</TableHead>
-            <TableHead className="w-[90px]">ส่วนสูง (ซม.)</TableHead>
-            <TableHead className="w-[120px]">วันที่ชั่ง</TableHead>
+            <TableHead className="w-[40px] text-center">ที่</TableHead>
+            <TableHead className="w-[90px] text-center">รหัสนักเรียน</TableHead>
+            <TableHead className="text-center">ชื่อ-นามสกุล</TableHead>
+            <TableHead className="w-[150px] text-center">อายุ</TableHead>
+            <TableHead className="w-[90px] text-center">น้ำหนัก (กก.)</TableHead>
+            <TableHead className="w-[90px] text-center">ส่วนสูง (ซม.)</TableHead>
+            <TableHead className="w-[120px] text-center">วันที่ชั่ง</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

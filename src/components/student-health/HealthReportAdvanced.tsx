@@ -179,7 +179,7 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
           }
           th {
             background-color: #90EE90 !important;
-            text-align: center;
+            text-align: center !important;
             font-weight: bold;
           }
           td.text-center {
@@ -187,6 +187,7 @@ const HealthReportAdvanced: React.FC<HealthReportAdvancedProps> = ({ data, grade
           }
           .bmi-header {
             background-color: #FFB6C1 !important;
+            text-align: center !important;
           }
         }
       `}</style>
