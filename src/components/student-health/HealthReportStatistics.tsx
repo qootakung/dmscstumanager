@@ -125,7 +125,7 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
         @media print {
           @page {
             size: A4;
-            margin: 0.4cm 0.8cm 0.6cm 1.5cm;
+            margin: 0.4cm 0.8cm 0.6cm 1.2cm;
           }
           body {
             font-size: 8pt;
@@ -176,19 +176,34 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
             margin: 3px 0;
           }
           .category-col {
-            width: 35% !important;
+            width: 30% !important;
           }
           .gender-col {
-            width: 13% !important;
+            width: 14% !important;
           }
           .total-col {
-            width: 13% !important;
+            width: 14% !important;
           }
           .percent-col {
-            width: 13% !important;
+            width: 14% !important;
           }
           .coverage-col {
-            width: 13% !important;
+            width: 14% !important;
+          }
+          .signature-dots {
+            position: relative;
+            display: inline-block;
+            width: 250px;
+            text-align: center;
+          }
+          .signature-name {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 8px;
+            font-size: 8pt;
           }
         }
       `}</style>
@@ -448,18 +463,22 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
       </table>
 
       <div className="text-right mt-4 signature-section">
-        <p className="text-xs">(...............................................)</p>
-        {teacher ? (
-          <>
-            <p className="text-xs">{teacher.firstName} {teacher.lastName}</p>
-            <p className="text-xs">{teacher.position}</p>
-          </>
-        ) : (
-          <>
-            <p className="text-xs">นายธุปนนท์ ศรีสู่</p>
-            <p className="text-xs">ครูประจำชั้น ป.4</p>
-          </>
-        )}
+        <div className="signature-dots">
+          (...............................................)<br/>
+          <div className="signature-name">
+            {teacher ? (
+              <>
+                {teacher.firstName} {teacher.lastName}<br/>
+                {teacher.position}
+              </>
+            ) : (
+              <>
+                นายธุปนนท์ ศรีสู่<br/>
+                ครูประจำชั้น ป.4
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
