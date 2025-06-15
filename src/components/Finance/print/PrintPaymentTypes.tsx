@@ -8,25 +8,21 @@ interface PrintPaymentTypesProps {
 }
 
 const PrintPaymentTypes: React.FC<PrintPaymentTypesProps> = ({ paymentTypes, paymentOptions }) => {
-  const [
-    equipment,      // ค่าอุปกรณ์การเรียน
-    uniform,        // ค่าเครื่องแบบนักเรียน
-    teachingSupport,// ค่าจัดการเรียนการสอน
-    uniformExtra,   // ค่าเครื่องแบบนักเรียน (เพิ่มเติม)
-    equipmentExtra  // ค่าอุปกรณ์การเรียน (เพิ่มเติม)
-  ] = paymentOptions;
+  const optionsInGrid = paymentOptions.slice(0, 4);
+  const lastOption = paymentOptions.length > 4 ? paymentOptions[4] : null;
 
   return (
     <div style={{ marginBottom: '8px' }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 32, rowGap: 8 }}>
-        <PrintCheckbox label={equipment} checked={paymentTypes.includes(equipment)} />
-        <PrintCheckbox label={uniform} checked={paymentTypes.includes(uniform)} />
-        <PrintCheckbox label={equipmentExtra} checked={paymentTypes.includes(equipmentExtra)} />
-        <PrintCheckbox label={uniformExtra} checked={paymentTypes.includes(uniformExtra)} />
+        {optionsInGrid.map(option => (
+          <PrintCheckbox key={option} label={option} checked={paymentTypes.includes(option)} />
+        ))}
       </div>
-      <div style={{ marginTop: 8 }}>
-        <PrintCheckbox label={teachingSupport} checked={paymentTypes.includes(teachingSupport)} />
-      </div>
+      {lastOption && (
+        <div style={{ marginTop: 8 }}>
+          <PrintCheckbox label={lastOption} checked={paymentTypes.includes(lastOption)} />
+        </div>
+      )}
     </div>
   );
 };

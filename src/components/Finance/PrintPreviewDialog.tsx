@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -32,7 +31,7 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
         }
       }
     `,
-  } as any);
+  });
 
   if (!isOpen) {
     return null;

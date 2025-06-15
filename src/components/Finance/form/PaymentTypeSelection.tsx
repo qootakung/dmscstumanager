@@ -22,9 +22,11 @@ const PaymentTypeSelection: React.FC<PaymentTypeSelectionProps> = ({
           <Checkbox
             id={option}
             checked={selectedPaymentTypes.includes(option)}
-            onCheckedChange={(checked) =>
-              onPaymentTypeChange(option, checked as boolean)
-            }
+            onCheckedChange={(checked) => {
+              if (typeof checked === 'boolean') {
+                onPaymentTypeChange(option, checked);
+              }
+            }}
           />
           <Label htmlFor={option} className="text-sm">{option}</Label>
         </div>

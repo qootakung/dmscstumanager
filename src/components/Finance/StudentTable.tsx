@@ -53,7 +53,7 @@ const StudentTable: React.FC<StudentTableProps> = ({ students, amountPerStudent,
 
   const formatCurrency = (num: number) => {
     if (num === 0) return '';
-    return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return num.toLocaleString('th-TH', { maximumFractionDigits: 2 });
   };
 
   return (
