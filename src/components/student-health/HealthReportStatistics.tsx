@@ -126,34 +126,37 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
         @media print {
           @page {
             size: A4;
-            margin: 0.8cm;
+            margin: 0.6cm;
           }
           body {
-            font-size: 7pt;
+            font-size: 8pt;
           }
           .p-2 {
              padding: 0 !important;
           }
           h1, h2, h3 {
-            font-size: 9pt;
-            margin-bottom: 4px;
+            font-size: 10pt;
+            margin-bottom: 6px;
+            line-height: 1.3;
           }
           table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
-            font-size: 7pt;
+            margin-bottom: 8px;
+            font-size: 8pt;
+            line-height: 1.4;
           }
           th, td {
             border: 1px solid #000 !important;
-            padding: 2px 3px !important;
+            padding: 4px 5px !important;
             vertical-align: middle;
-            line-height: 1.1;
+            line-height: 1.4;
           }
           th {
             background-color: #f2f2f2 !important;
             text-align: center;
             font-weight: bold;
+            line-height: 1.3;
           }
           td.text-center {
             text-align: center;
@@ -162,13 +165,21 @@ const HealthReportStatistics: React.FC<HealthReportStatisticsProps> = ({
             background-color: #e6f3ff !important;
           }
           .signature-section {
-            margin-top: 8px;
-            font-size: 7pt;
+            margin-top: 12px;
+            font-size: 8pt;
+            line-height: 1.4;
+          }
+          .header-section {
+            margin-bottom: 8px;
+            line-height: 1.4;
+          }
+          .header-section p {
+            margin: 3px 0;
           }
         }
       `}</style>
       
-      <header className="text-center mb-3">
+      <header className="text-center mb-3 header-section">
         <h1 className="text-sm font-bold">อัตราความชุกของปัญหาโภชนาการ</h1>
         <h2 className="text-sm font-bold">โรงเรียนบ้านดอนมูล</h2>
         <p className="text-xs mt-1">ชั้น {grade} เดือน {month} ปีการศึกษา {academicYear}</p>
