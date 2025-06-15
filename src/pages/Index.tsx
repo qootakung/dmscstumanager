@@ -207,7 +207,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <div className="w-full">
-          {activeTab === 'dashboard' && <Dashboard onLogout={handleLogout} userRole={currentUser.role} />}
+          {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'students' && <StudentManagement />}
           {activeTab === 'teachers' && <TeacherManagement />}
           {activeTab === 'student-health' && <StudentHealth />}
