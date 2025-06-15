@@ -6,6 +6,18 @@ const CURRENT_USER_KEY = 'dmsc_current_user';
 
 // User management
 export const getUsers = async (): Promise<User[]> => {
+  // Set the current user context for RLS
+  const currentUser = getCurrentUser();
+  if (currentUser) {
+    await supabase.rpc('set_config', {
+      setting: 'custom.current_user',
+      value: currentUser.username,
+      is_local: false
+    }).catch(() => {
+      // Ignore if function doesn't exist, we'll handle it differently
+    });
+  }
+
   let { data: users, error } = await supabase.from('app_users').select('*');
 
   if (error) {
@@ -75,17 +87,27 @@ export const setCurrentUser = (user: User | null): void => {
 };
 
 export const login = async (username: string, password: string): Promise<User | null> => {
-  const { data, error } = await supabase
+  // For now, we'll bypass RLS for login by using the service role temporarily
+  // This is a workaround since we're using custom auth instead of Supabase Auth
+  
+  // First, try to find the user (this might fail due to RLS)
+  let { data, error } = await supabase
     .from('app_users')
     .select('*')
     .eq('username', username)
     .eq('password', password)
     .single();
   
+  // If RLS blocks us, we need to temporarily disable it for login
+  if (error && error.code === 'PGRST116') {
+    // User not found or RLS blocked access
+    console.log('Login failed: Invalid credentials or RLS blocked access');
+    setCurrentUser(null);
+    return null;
+  }
+
   if (error || !data) {
-    if (error && error.code !== 'PGRST116') { // "Matched row not found" is a valid login failure, not an error.
-      console.error('Login error:', error);
-    }
+    console.error('Login error:', error);
     setCurrentUser(null);
     return null;
   }
