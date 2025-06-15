@@ -10,7 +10,6 @@ import AcademicInfoSection from './Finance/form/AcademicInfoSection';
 import GradeSelection from './Finance/form/GradeSelection';
 import SignatureFields from './Finance/form/SignatureFields';
 import SchoolInfoSection from './Finance/form/SchoolInfoSection';
-import ActionButtons from './Finance/form/ActionButtons';
 
 export interface PaymentVoucherData {
   paymentTypes: string[];
@@ -133,47 +132,6 @@ const FinancialReports = () => {
     }
   };
 
-  // ปรับปรุง handlePrint ให้เรียกใช้งาน PrintPreviewStatic แบบ import ปกติ
-  const handlePrint = () => {
-    if (voucherData.paymentTypes.length === 0) {
-      alert('กรุณาเลือกประเภทการจ่ายเงิน');
-      return;
-    }
-    if (!voucherData.grade) {
-      alert('กรุณาเลือกชั้นเรียน');
-      return;
-    }
-
-    // ใช้ renderToStaticMarkup เพื่อแปลง React > HTML string
-    import('react-dom/server').then(({ renderToStaticMarkup }) => {
-      // ไม่ต้อง require อีกต่อไป
-      const htmlString = renderToStaticMarkup(
-        <PrintPreviewStatic voucherData={voucherData} paymentOptions={paymentOptions} />
-      );
-
-      const printWindow = window.open('', '', 'height=900,width=1200');
-      if (!printWindow) return;
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>หลักฐานการจ่ายเงิน</title>
-            <meta charset="utf-8" />
-            <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-          </head>
-          <body style="margin:0;padding:0;">
-            ${htmlString}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-      }, 700);
-    });
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -238,9 +196,6 @@ const FinancialReports = () => {
             onAutoFillPrincipal={handleAutoFillPrincipal}
           />
 
-          <ActionButtons
-            onPrint={handlePrint}
-          />
         </CardContent>
       </Card>
     </div>
