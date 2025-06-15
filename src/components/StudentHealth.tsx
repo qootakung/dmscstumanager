@@ -3,7 +3,6 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import HealthImportExport from './student-health/HealthImportExport';
 import HealthDataTable from './student-health/HealthDataTable';
-import HealthDebug from './student-health/HealthDebug';
 
 const StudentHealth: React.FC = () => {
   return (
@@ -18,10 +17,9 @@ const StudentHealth: React.FC = () => {
       </div>
 
       <Tabs defaultValue="data-table" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="data-table">ข้อมูลสุขภาพนักเรียน</TabsTrigger>
           <TabsTrigger value="import-export">นำเข้า / ส่งออกข้อมูล</TabsTrigger>
-          <TabsTrigger value="debug">Debug</TabsTrigger>
         </TabsList>
 
         <TabsContent value="data-table" className="mt-6">
@@ -29,9 +27,6 @@ const StudentHealth: React.FC = () => {
         </TabsContent>
         <TabsContent value="import-export" className="mt-6">
           <HealthImportExport />
-        </TabsContent>
-        <TabsContent value="debug" className="mt-6">
-          <HealthDebug />
         </TabsContent>
       </Tabs>
     </div>
