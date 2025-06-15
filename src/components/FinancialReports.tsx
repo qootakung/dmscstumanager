@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PaymentTypeSelection from './Finance/form/PaymentTypeSelection';
 import AcademicInfoSection from './Finance/form/AcademicInfoSection';
@@ -7,7 +8,7 @@ import GradeSelection from './Finance/form/GradeSelection';
 import SignatureFields from './Finance/form/SignatureFields';
 import SchoolInfoSection from './Finance/form/SchoolInfoSection';
 import { Button } from '@/components/ui/button';
-import PrintPreviewDialog from './Finance/PrintPreviewDialog';
+import PrintPreviewStatic from './Finance/PrintPreviewStatic';
 import { useFinancialVoucher } from '@/hooks/useFinancialVoucher';
 import PaymentDetailsSection from './Finance/form/PaymentDetailsSection';
 import StudentCountInfo from './Finance/form/StudentCountInfo';
@@ -16,12 +17,10 @@ const FinancialReports = () => {
   const {
     teachers,
     selectedGrade,
-    isPreviewOpen,
     voucherData,
     paymentOptions,
     grades,
     setVoucherData,
-    setIsPreviewOpen,
     handlePaymentTypeChange,
     handleGradeChange,
     handleTeacherSelect,
@@ -29,8 +28,21 @@ const FinancialReports = () => {
     handlePreview,
   } = useFinancialVoucher();
 
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}-${voucherData.semester}`,
+  });
+
+  const handlePrintClick = () => {
+    if (handlePreview()) {
+      handlePrint();
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">รายงานการเงิน</h2>
@@ -94,17 +106,26 @@ const FinancialReports = () => {
           />
 
           <div className="flex justify-end pt-6 mt-6 border-t">
-            <Button onClick={handlePreview}>ตัวอย่างก่อนพิมพ์</Button>
+            <Button onClick={handlePrintClick}>พิมพ์เอกสาร</Button>
           </div>
         </CardContent>
       </Card>
       
-      <PrintPreviewDialog 
-        isOpen={isPreviewOpen}
-        onOpenChange={setIsPreviewOpen}
-        voucherData={voucherData}
-        paymentOptions={paymentOptions}
-      />
+      {selectedGrade && voucherData.students.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>ตัวอย่างเอกสาร</CardTitle>
+            <CardDescription>
+              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์ (เนื้อหานี้จะไม่ถูกพิมพ์)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 border rounded-md bg-white">
+              <PrintPreviewStatic ref={printRef} voucherData={voucherData} paymentOptions={paymentOptions} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

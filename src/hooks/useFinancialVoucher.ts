@@ -1,4 +1,6 @@
+
 import { useState, useEffect } from 'react';
+import { useToast } from "@/hooks/use-toast";
 import { getStudents } from '@/utils/studentStorage';
 import { getTeachers } from '@/utils/teacherStorage';
 import type { Student } from '@/types/student';
@@ -6,10 +8,10 @@ import type { Teacher } from '@/types/teacher';
 import type { PaymentVoucherData } from '@/types/finance';
 
 export const useFinancialVoucher = () => {
+  const { toast } = useToast();
   const [students, setStudents] = useState<Student[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedGrade, setSelectedGrade] = useState('');
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [voucherData, setVoucherData] = useState<PaymentVoucherData>({
     paymentTypes: [],
     academicYear: '2567',
@@ -125,25 +127,47 @@ export const useFinancialVoucher = () => {
 
   const handlePreview = () => {
     if (voucherData.paymentTypes.length === 0) {
-      alert('กรุณาเลือกประเภทการจ่ายเงิน');
-      return;
+      toast({
+        title: "ข้อมูลไม่ครบถ้วน",
+        description: "กรุณาเลือกประเภทการจ่ายเงินอย่างน้อย 1 รายการ",
+        variant: "destructive",
+      });
+      return false;
     }
     if (!voucherData.grade) {
-      alert('กรุณาเลือกชั้นเรียน');
-      return;
+      toast({
+        title: "ข้อมูลไม่ครบถ้วน",
+        description: "กรุณาเลือกชั้นเรียน",
+        variant: "destructive",
+      });
+      return false;
     }
-    setIsPreviewOpen(true);
+    if (!voucherData.paymentDate) {
+        toast({
+          title: "ข้อมูลไม่ครบถ้วน",
+          description: "กรุณาระบุวันที่จ่ายเงิน",
+          variant: "destructive",
+        });
+        return false;
+    }
+    if (!voucherData.amountPerStudent || parseFloat(voucherData.amountPerStudent) <= 0) {
+        toast({
+          title: "ข้อมูลไม่ครบถ้วน",
+          description: "กรุณาระบุจำนวนเงิน (ต่อคน) ให้ถูกต้อง",
+          variant: "destructive",
+        });
+        return false;
+    }
+    return true;
   };
 
   return {
     teachers,
     selectedGrade,
-    isPreviewOpen,
     voucherData,
     paymentOptions,
     grades,
     setVoucherData,
-    setIsPreviewOpen,
     handlePaymentTypeChange,
     handleGradeChange,
     handleTeacherSelect,
