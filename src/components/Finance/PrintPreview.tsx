@@ -115,11 +115,13 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         <div className="flex items-center gap-4 mb-1">
           {/* อนุบาล */}
           <div className="flex items-center mr-4">
-            <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel?.key === "อนุบาล" && (
-                <span className="text-green-600 text-base font-bold">✔</span>
-              )}
-            </span>
+            <PaymentOptionCheckbox
+              checked={selectedLevel?.key === "อนุบาล"}
+              hideLabel
+              boldCheck
+              size="large"
+              className="mr-1"
+            />
             <span>อนุบาลปีที่</span>
             <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
               {selectedLevel?.key === "อนุบาล" ? selectedLevel.gradeNumber : ""}
@@ -127,11 +129,13 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
           </div>
           {/* ประถม */}
           <div className="flex items-center">
-            <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel?.key === "ประถม" && (
-                <span className="text-green-600 text-base font-bold">✔</span>
-              )}
-            </span>
+            <PaymentOptionCheckbox
+              checked={selectedLevel?.key === "ประถม"}
+              hideLabel
+              boldCheck
+              size="large"
+              className="mr-1"
+            />
             <span>ประถมศึกษาปีที่</span>
             <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
               {selectedLevel?.key === "ประถม" ? selectedLevel.gradeNumber : ""}
@@ -141,11 +145,13 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         <div className="flex items-center gap-4 mb-1">
           {/* มัธยม */}
           <div className="flex items-center mr-4">
-            <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel?.key === "มัธยม" && (
-                <span className="text-green-600 text-base font-bold">✔</span>
-              )}
-            </span>
+            <PaymentOptionCheckbox
+              checked={selectedLevel?.key === "มัธยม"}
+              hideLabel
+              boldCheck
+              size="large"
+              className="mr-1"
+            />
             <span>มัธยมศึกษาปีที่</span>
             <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
               {selectedLevel?.key === "มัธยม" ? selectedLevel.gradeNumber : ""}
@@ -153,11 +159,13 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
           </div>
           {/* ปวช */}
           <div className="flex items-center">
-            <span className={`inline-block border w-4 h-4 mx-1 align-middle text-center`}>
-              {selectedLevel?.key === "ปวช" && (
-                <span className="text-green-600 text-base font-bold">✔</span>
-              )}
-            </span>
+            <PaymentOptionCheckbox
+              checked={selectedLevel?.key === "ปวช"}
+              hideLabel
+              boldCheck
+              size="large"
+              className="mr-1"
+            />
             <span>ปวช. ที่จัดโดยสถานประกอบการ ปีที่</span>
             <span className="inline-block border-b border-dotted w-12 mx-1 text-center">
               {selectedLevel?.key === "ปวช" ? selectedLevel.gradeNumber : ""}
