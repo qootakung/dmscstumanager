@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface StudentScore {
@@ -20,11 +21,19 @@ interface StudentScore {
   group: 'เก่ง' | 'ปานกลาง' | 'อ่อน';
 }
 
+interface ImportProgress {
+  total: number;
+  processed: number;
+  errors: string[];
+}
+
 const StudentAnalysis: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [students, setStudents] = useState<StudentScore[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
   const [analysisData, setAnalysisData] = useState({
     excellent: 0, // เก่ง (4.00)
     average: 0,   // ปานกลาง (2-3.5)
@@ -55,86 +64,179 @@ const StudentAnalysis: React.FC = () => {
 
   const grades = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const analyzeStudentGroup = (averageScore: number): 'เก่ง' | 'ปานกลาง' | 'อ่อน' => {
+    if (averageScore >= 4.0) return 'เก่ง';
+    if (averageScore >= 2.0) return 'ปานกลาง';
+    return 'อ่อน';
+  };
+
+  const processExcelData = (mockData: any[]): StudentScore[] => {
+    return mockData.map((row, index) => {
+      const scores: { [subject: string]: number } = {};
+      let totalScore = 0;
+      let subjectCount = 0;
+
+      // จำลองการอ่านคะแนนจากหลายคอลัมน์
+      subjects.forEach(subject => {
+        if (row[subject] !== undefined && row[subject] !== null) {
+          const score = parseFloat(row[subject]) || 0;
+          scores[subject] = score;
+          totalScore += score;
+          subjectCount++;
+        }
+      });
+
+      const averageScore = subjectCount > 0 ? totalScore / subjectCount : 0;
+      const group = analyzeStudentGroup(averageScore);
+
+      return {
+        id: `${index + 1}`,
+        studentId: row['รหัสนักเรียน'] || `STD${(index + 1).toString().padStart(3, '0')}`,
+        studentName: row['ชื่อ-นามสกุล'] || `นักเรียนคนที่ ${index + 1}`,
+        grade: row['ชั้นเรียน'] || selectedGrade || 'ป.4',
+        scores,
+        totalScore,
+        averageScore,
+        group
+      };
+    });
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // จำลองการอัปโหลดไฟล์
+    if (!file) return;
+
+    if (!file.name.match(/\.(xlsx|xls)$/)) {
+      toast({
+        title: "ไฟล์ไม่ถูกต้อง",
+        description: "กรุณาเลือกไฟล์ Excel (.xlsx หรือ .xls)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    setImportProgress({ total: 0, processed: 0, errors: [] });
+
+    try {
       toast({
         title: "กำลังประมวลผลข้อมูล",
         description: "กรุณารอสักครู่...",
       });
-      
-      // จำลองข้อมูลตัวอย่าง
+
+      // จำลองการประมวลผลข้อมูล
       setTimeout(() => {
-        const mockData: StudentScore[] = [
+        const mockData = [
           {
-            id: '1',
-            studentId: '123001',
-            studentName: 'เด็กหญิงพิชญา ชายอ่อน',
-            grade: 'ป.4',
-            scores: {
-              'ภาษาไทย': 4.0,
-              'คณิตศาสตร์': 4.0,
-              'วิทยาศาสตร์': 3.0,
-              'สังคมศึกษา': 4.0
-            },
-            totalScore: 15.0,
-            averageScore: 3.75,
-            group: 'เก่ง'
+            'รหัสนักเรียน': 'STD001',
+            'ชื่อ-นามสกุล': 'เด็กหญิงพิชญา ชายอ่อน',
+            'ชั้นเรียน': 'ป.4',
+            'ภาษาไทย': 4.0,
+            'คณิตศาสตร์': 4.0,
+            'วิทยาศาสตร์': 3.0,
+            'สังคมศึกษา ศาสนาและวัฒนธรรม': 4.0,
+            'ประวัติศาสตร์': 3.5,
+            'สุขศึกษาและพลศึกษา': 4.0,
+            'ศิลปะ': 3.0,
+            'การงานอาชีพ': 3.5,
+            'ภาษาอังกฤษ': 4.0
           },
           {
-            id: '2',
-            studentId: '123002',
-            studentName: 'เด็กหญิงจิดาภา แผลงพึ่ง',
-            grade: 'ป.4',
-            scores: {
-              'ภาษาไทย': 3.5,
-              'คณิตศาสตร์': 3.0,
-              'วิทยาศาสตร์': 2.5,
-              'สังคมศึกษา': 3.0
-            },
-            totalScore: 12.0,
-            averageScore: 3.0,
-            group: 'ปานกลาง'
+            'รหัสนักเรียน': 'STD002',
+            'ชื่อ-นามสกุล': 'เด็กหญิงจิดาภา แผลงพึ่ง',
+            'ชั้นเรียน': 'ป.4',
+            'ภาษาไทย': 3.5,
+            'คณิตศาสตร์': 3.0,
+            'วิทยาศาสตร์': 2.5,
+            'สังคมศึกษา ศาสนาและวัฒนธรรม': 3.0,
+            'ประวัติศาสตร์': 2.5,
+            'สุขศึกษาและพลศึกษา': 3.5,
+            'ศิลปะ': 3.0,
+            'การงานอาชีพ': 2.5,
+            'ภาษาอังกฤษ': 3.0
           },
           {
-            id: '3',
-            studentId: '123003',
-            studentName: 'เด็กชายกิจเรียน ประจิปปนจจะ',
-            grade: 'ป.4',
-            scores: {
-              'ภาษาไทย': 4.0,
-              'คณิตศาสตร์': 4.0,
-              'วิทยาศาสตร์': 2.5,
-              'สังคมศึกษา': 3.0
-            },
-            totalScore: 13.5,
-            averageScore: 3.38,
-            group: 'ปานกลาง'
+            'รหัสนักเรียน': 'STD003',
+            'ชื่อ-นามสกุล': 'เด็กชายกิจเรียน ประจิปปนจจะ',
+            'ชั้นเรียน': 'ป.4',
+            'ภาษาไทย': 1.5,
+            'คณิตศาสตร์': 1.0,
+            'วิทยาศาสตร์': 1.5,
+            'สังคมศึกษา ศาสนาและวัฒนธรรม': 2.0,
+            'ประวัติศาสตร์': 1.0,
+            'สุขศึกษาและพลศึกษา': 2.5,
+            'ศิลปะ': 2.0,
+            'การงานอาชีพ': 1.5,
+            'ภาษาอังกฤษ': 1.0
           }
         ];
-        
-        setStudents(mockData);
-        setAnalysisData({
-          excellent: mockData.filter(s => s.group === 'เก่ง').length,
-          average: mockData.filter(s => s.group === 'ปานกลาง').length,
-          poor: mockData.filter(s => s.group === 'อ่อน').length
+
+        const processedStudents = processExcelData(mockData);
+        setStudents(processedStudents);
+
+        const analysisResult = {
+          excellent: processedStudents.filter(s => s.group === 'เก่ง').length,
+          average: processedStudents.filter(s => s.group === 'ปานกลาง').length,
+          poor: processedStudents.filter(s => s.group === 'อ่อน').length
+        };
+        setAnalysisData(analysisResult);
+
+        setImportProgress({
+          total: mockData.length,
+          processed: mockData.length,
+          errors: []
         });
-        
+
         toast({
           title: "นำเข้าข้อมูลสำเร็จ",
-          description: `ประมวลผลข้อมูลนักเรียน ${mockData.length} คน`,
+          description: `ประมวลผลข้อมูลนักเรียน ${mockData.length} คน พร้อมวิเคราะห์แบ่งกลุ่มเรียบร้อย`,
         });
-      }, 2000);
+
+        setIsUploading(false);
+      }, 3000);
+
+    } catch (error) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอ่านไฟล์ Excel ได้ กรุณาตรวจสอบรูปแบบไฟล์",
+        variant: "destructive",
+      });
+      setIsUploading(false);
     }
+
+    // เคลียร์ค่าไฟล์
+    event.target.value = '';
   };
 
   const exportReport = (format: 'pdf' | 'excel') => {
+    if (students.length === 0) {
+      toast({
+        title: "ไม่มีข้อมูลสำหรับส่งออก",
+        description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: `กำลังส่งออกรายงาน ${format.toUpperCase()}`,
       description: "กรุณารอสักครู่...",
     });
+
+    // จำลองการส่งออก
+    setTimeout(() => {
+      toast({
+        title: "ส่งออกรายงานสำเร็จ",
+        description: `รายงานการวิเคราะห์ผู้เรียน ${format.toUpperCase()} พร้อมใช้งาน`,
+      });
+    }, 2000);
   };
+
+  const filteredStudents = students.filter(student => {
+    const gradeMatch = !selectedGrade || student.grade === selectedGrade;
+    const subjectMatch = !selectedSubject || student.scores[selectedSubject] !== undefined;
+    return gradeMatch && subjectMatch;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
@@ -147,12 +249,12 @@ const StudentAnalysis: React.FC = () => {
               <BarChart3 className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-              วิเคราะห์ผู้เรียน
+              วิเคราะห์ผู้เรียนรายวิชา
             </h2>
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-2xl">📊</span>
               <p className="text-lg text-slate-600 font-medium">
-                วิเคราะห์ผลการเรียนรายวิชา แบ่งกลุ่มตามระดับผลการเรียน
+                นำเข้าคะแนนหลายวิชา วิเคราะห์แบ่งกลุ่มอัตโนมัติ และสร้างรายงาน
               </p>
               <span className="text-2xl">🎯</span>
             </div>
@@ -217,7 +319,7 @@ const StudentAnalysis: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold">{analysisData.excellent}</div>
-                      <p className="text-green-100 text-sm">คะแนน 4.00</p>
+                      <p className="text-green-100 text-sm">คะแนนเฉลี่ย 4.00</p>
                     </CardContent>
                   </Card>
 
@@ -230,7 +332,7 @@ const StudentAnalysis: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold">{analysisData.average}</div>
-                      <p className="text-orange-100 text-sm">คะแนน 2.0-3.5</p>
+                      <p className="text-orange-100 text-sm">คะแนนเฉลี่ย 2.0-3.99</p>
                     </CardContent>
                   </Card>
 
@@ -243,7 +345,7 @@ const StudentAnalysis: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold">{analysisData.poor}</div>
-                      <p className="text-pink-100 text-sm">คะแนนต่ำกว่า 2.0</p>
+                      <p className="text-pink-100 text-sm">คะแนนเฉลี่ยต่ำกว่า 2.0</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -297,11 +399,16 @@ const StudentAnalysis: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-blue-600" />
-                    รายละเอียดการวิเคราะห์
+                    รายละเอียดการวิเคราะห์ผู้เรียน
+                    {filteredStudents.length > 0 && (
+                      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        {filteredStudents.length} คน
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {students.length > 0 ? (
+                  {filteredStudents.length > 0 ? (
                     <div className="space-y-4">
                       <Table>
                         <TableHeader>
@@ -311,23 +418,29 @@ const StudentAnalysis: React.FC = () => {
                             <TableHead>ชั้นเรียน</TableHead>
                             <TableHead>คะแนนเฉลี่ย</TableHead>
                             <TableHead>กลุ่ม</TableHead>
+                            <TableHead>จำนวนวิชา</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {students.map((student) => (
+                          {filteredStudents.map((student) => (
                             <TableRow key={student.id}>
-                              <TableCell>{student.studentId}</TableCell>
+                              <TableCell className="font-medium">{student.studentId}</TableCell>
                               <TableCell>{student.studentName}</TableCell>
                               <TableCell>{student.grade}</TableCell>
-                              <TableCell>{student.averageScore.toFixed(2)}</TableCell>
+                              <TableCell className="font-mono">
+                                {student.averageScore.toFixed(2)}
+                              </TableCell>
                               <TableCell>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                                   student.group === 'เก่ง' ? 'bg-green-100 text-green-800' :
                                   student.group === 'ปานกลาง' ? 'bg-yellow-100 text-yellow-800' :
                                   'bg-red-100 text-red-800'
                                 }`}>
                                   {student.group}
                                 </span>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {Object.keys(student.scores).length}
                               </TableCell>
                             </TableRow>
                           ))}
@@ -350,57 +463,123 @@ const StudentAnalysis: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Upload className="w-5 h-5 text-green-600" />
-                    นำเข้าข้อมูลคะแนน
+                    นำเข้าข้อมูลคะแนนหลายวิชา
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="border-2 border-dashed border-green-300 rounded-lg p-8 text-center bg-green-50/50">
-                    <Upload className="w-12 h-12 mx-auto mb-4 text-green-500" />
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                      อัปโหลดไฟล์ Excel คะแนนนักเรียน
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      รองรับไฟล์ .xlsx และ .xls ตามรูปแบบที่กำหนด
-                    </p>
-                    <Input
-                      type="file"
-                      accept=".xlsx,.xls"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="score-upload"
-                    />
-                    <Button asChild className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
-                      <label htmlFor="score-upload" className="cursor-pointer">
-                        <Upload className="w-4 h-4 mr-2" />
-                        เลือกไฟล์
-                      </label>
-                    </Button>
+                  {/* Upload Section */}
+                  <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                    isUploading ? 'border-blue-300 bg-blue-50/50' : 'border-green-300 bg-green-50/50'
+                  }`}>
+                    {isUploading ? (
+                      <div className="space-y-4">
+                        <div className="w-12 h-12 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <h3 className="text-lg font-semibold text-blue-700">
+                          กำลังประมวลผลข้อมูล...
+                        </h3>
+                        <p className="text-blue-600">
+                          กรุณารอสักครู่ ระบบกำลังวิเคราะห์ข้อมูลคะแนน
+                        </p>
+                        {importProgress && (
+                          <div className="text-sm text-blue-600">
+                            ประมวลผลแล้ว {importProgress.processed} จาก {importProgress.total} คน
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-12 h-12 mx-auto text-green-500 mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                          อัปโหลดไฟล์ Excel คะแนนนักเรียน
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          รองรับไฟล์ .xlsx และ .xls ตามรูปแบบที่กำหนด
+                        </p>
+                        <Input
+                          type="file"
+                          accept=".xlsx,.xls"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          id="score-upload"
+                          disabled={isUploading}
+                        />
+                        <Button 
+                          asChild 
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                          disabled={isUploading}
+                        >
+                          <label htmlFor="score-upload" className="cursor-pointer">
+                            <Upload className="w-4 h-4 mr-2" />
+                            เลือกไฟล์
+                          </label>
+                        </Button>
+                      </>
+                    )}
                   </div>
 
+                  {/* Import Results */}
+                  {importProgress && importProgress.processed > 0 && (
+                    <Card className="border-green-200 bg-green-50/50">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <h3 className="font-medium text-green-800">ผลการนำเข้าข้อมูล</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="text-green-700">
+                            <span className="font-medium">ประมวลผลสำเร็จ:</span> {importProgress.processed} คน
+                          </div>
+                          <div className="text-green-700">
+                            <span className="font-medium">จำนวนวิชาที่พบ:</span> {students.length > 0 ? Object.keys(students[0].scores).length : 0} วิชา
+                          </div>
+                        </div>
+                        {importProgress.errors.length > 0 && (
+                          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+                            <h4 className="font-medium text-red-800 mb-2">ข้อผิดพลาด:</h4>
+                            <ul className="text-sm text-red-700 space-y-1">
+                              {importProgress.errors.map((error, index) => (
+                                <li key={index}>• {error}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Instructions */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="border-green-200">
+                    <Card className="border-blue-200">
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-sm">รูปแบบไฟล์ที่ต้องการ</CardTitle>
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          รูปแบบไฟล์ที่ต้องการ
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="text-sm text-gray-600">
                         <ul className="space-y-1">
                           <li>• คอลัมน์ที่ 1: รหัสนักเรียน</li>
                           <li>• คอลัมน์ที่ 2: ชื่อ-นามสกุล</li>
                           <li>• คอลัมน์ที่ 3: ชั้นเรียน</li>
-                          <li>• คอลัมน์ต่อไป: คะแนนรายวิชา</li>
+                          <li>• คอลัมน์ต่อไป: คะแนนรายวิชา (ตามชื่อวิชา)</li>
+                          <li>• ใช้คะแนน 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0</li>
                         </ul>
                       </CardContent>
                     </Card>
 
                     <Card className="border-green-200">
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-sm">เกณฑ์การแบ่งกลุ่ม</CardTitle>
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Target className="w-4 h-4 text-green-600" />
+                          เกณฑ์การแบ่งกลุ่ม
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="text-sm text-gray-600">
                         <ul className="space-y-1">
-                          <li>• <span className="font-medium text-green-600">กลุ่มเก่ง:</span> คะแนน 4.00</li>
-                          <li>• <span className="font-medium text-yellow-600">กลุ่มปานกลาง:</span> คะแนน 2.0-3.5</li>
-                          <li>• <span className="font-medium text-red-600">กลุ่มอ่อน:</span> คะแนนต่ำกว่า 2.0</li>
+                          <li>• <span className="font-medium text-green-600">กลุ่มเก่ง:</span> คะแนนเฉลี่ย 4.00</li>
+                          <li>• <span className="font-medium text-yellow-600">กลุ่มปานกลาง:</span> คะแนนเฉลี่ย 2.0-3.99</li>
+                          <li>• <span className="font-medium text-red-600">กลุ่มอ่อน:</span> คะแนนเฉลี่ยต่ำกว่า 2.0</li>
+                          <li>• ระบบจะวิเคราะห์อัตโนมัติจากทุกวิชา</li>
                         </ul>
                       </CardContent>
                     </Card>
@@ -414,7 +593,7 @@ const StudentAnalysis: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-600" />
-                    ส่งออกรายงานการวิเคราะห์
+                    ส่งออกรายงานการวิเคราะห์ผู้เรียน
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -427,6 +606,7 @@ const StudentAnalysis: React.FC = () => {
                     >
                       <Download className="w-6 h-6 text-orange-600" />
                       <span>ส่งออก PDF</span>
+                      <span className="text-xs text-gray-500">รายงานสำหรับพิมพ์</span>
                     </Button>
                     
                     <Button 
@@ -437,6 +617,7 @@ const StudentAnalysis: React.FC = () => {
                     >
                       <Download className="w-6 h-6 text-orange-600" />
                       <span>ส่งออก Excel</span>
+                      <span className="text-xs text-gray-500">ข้อมูลสำหรับวิเคราะห์</span>
                     </Button>
                   </div>
 
@@ -444,7 +625,20 @@ const StudentAnalysis: React.FC = () => {
                     <div className="text-center py-4 text-gray-600">
                       <FileText className="w-12 h-12 mx-auto mb-4 text-orange-500" />
                       <p className="text-lg mb-2">รายงานพร้อมส่งออก</p>
-                      <p className="text-sm">มีข้อมูลการวิเคราะห์ {students.length} คน</p>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="bg-green-50 p-3 rounded">
+                          <div className="font-medium text-green-800">กลุ่มเก่ง</div>
+                          <div className="text-2xl font-bold text-green-600">{analysisData.excellent}</div>
+                        </div>
+                        <div className="bg-yellow-50 p-3 rounded">
+                          <div className="font-medium text-yellow-800">กลุ่มปานกลาง</div>
+                          <div className="text-2xl font-bold text-yellow-600">{analysisData.average}</div>
+                        </div>
+                        <div className="bg-red-50 p-3 rounded">
+                          <div className="font-medium text-red-800">กลุ่มอ่อน</div>
+                          <div className="text-2xl font-bold text-red-600">{analysisData.poor}</div>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
