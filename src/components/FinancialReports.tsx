@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -214,7 +213,7 @@ const FinancialReports = () => {
                 <tr>
                   <td>${index + 1}</td>
                   <td>${student.titleTh || ''} ${student.firstNameTh} ${student.lastNameTh}</td>
-                  <td>${student.nationalId || ''}</td>
+                  <td>${student.citizenId || ''}</td>
                   <td></td>
                   <td></td>
                   <td></td>
