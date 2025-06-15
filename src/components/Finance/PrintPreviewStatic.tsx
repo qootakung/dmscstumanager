@@ -13,10 +13,10 @@ interface PrintPreviewStaticProps {
   paymentOptions: string[];
 }
 
-const PrintPreviewStatic = React.forwardRef<HTMLDivElement, PrintPreviewStaticProps>(({ voucherData, paymentOptions }, ref) => {
+const PrintPreviewStatic: React.FC<PrintPreviewStaticProps> = ({ voucherData, paymentOptions }) => {
 
   return (
-    <div ref={ref} style={{
+    <div style={{
       fontFamily: "'TH Sarabun', 'Sarabun', Arial, sans-serif",
       fontSize: "14px",
       padding: "24px",
@@ -63,8 +63,6 @@ const PrintPreviewStatic = React.forwardRef<HTMLDivElement, PrintPreviewStaticPr
       />
     </div>
   );
-});
-
-PrintPreviewStatic.displayName = "PrintPreviewStatic";
+};
 
 export default PrintPreviewStatic;
