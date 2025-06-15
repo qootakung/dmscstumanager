@@ -6,20 +6,10 @@ import PaymentOptionCheckbox from "./PaymentOptionCheckbox";
 import SignatureSection from "./SignatureSection";
 import GradeLevelRow from "./GradeLevelRow";
 import StudentTable from "./StudentTable";
+import type { PaymentVoucherData } from "@/types/finance";
 
 interface PrintPreviewProps {
-  voucherData: {
-    paymentTypes: string[];
-    academicYear: string;
-    semester: string;
-    grade: string;
-    students: Student[];
-    schoolName: string;
-    principalName: string;
-    managerName: string;
-    selectedTeacher: Teacher | null;
-    payerName: string;
-  };
+  voucherData: PaymentVoucherData;
   paymentOptions: string[];
 }
 
@@ -115,7 +105,11 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         </span>
       </div>
       {/* ตารางข้อมูลนักเรียน */}
-      <StudentTable students={voucherData.students} />
+      <StudentTable
+        students={voucherData.students}
+        amountPerStudent={voucherData.amountPerStudent}
+        paymentDate={voucherData.paymentDate}
+      />
       {/* ลายเซ็นแบบใหม่ */}
       <SignatureSection
         payerName={voucherData.payerName}
