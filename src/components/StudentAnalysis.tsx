@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,26 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, AlertCircle } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, FileText, Upload, Download, BookOpen, Calculator, Target, CheckCircle, AlertCircle, Printer } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import ImportTemplate from './student-analysis/ImportTemplate';
+import AnalysisReportPrintable from './student-analysis/AnalysisReportPrintable';
+import type { StudentScore } from '@/types/studentAnalysis';
 
-interface StudentScore {
-  id: string;
-  studentId: string;
-  studentName: string;
-  grade: string;
-  scores: { [subject: string]: number };
-  totalScore: number;
-  averageScore: number;
-  group: 'เก่ง' | 'ปานกลาง' | 'อ่อน';
-}
-
-interface ImportProgress {
-  total: number;
-  processed: number;
-  errors: string[];
-}
 
 const StudentAnalysis: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -33,11 +21,24 @@ const StudentAnalysis: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [students, setStudents] = useState<StudentScore[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
+  const [importProgress, setImportProgress] = useState<{ total: number; processed: number; errors: string[]; } | null>(null);
   const [analysisData, setAnalysisData] = useState({
     excellent: 0, // เก่ง (4.00)
     average: 0,   // ปานกลาง (2-3.5)
     poor: 0       // อ่อน (ต่ำกว่า 2)
+  });
+  const [academicYear, setAcademicYear] = useState('');
+
+  const reportRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    content: () => reportRef.current,
+    documentTitle: `สรุปผลการวิเคราะห์ผู้เรียน-${academicYear || new Date().getFullYear() + 543}`,
+    onAfterPrint: () => {
+      toast({
+        title: "พิมพ์รายงาน",
+        description: "ส่งคำสั่งพิมพ์รายงานเรียบร้อยแล้ว",
+      });
+    },
   });
 
   const subjects = [
@@ -557,7 +558,7 @@ const StudentAnalysis: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-600" />
-                    ส่งออกรายงานการวิเคราะห์ผู้เรียน
+                    ส่งออกและพิมพ์รายงานการวิเคราะห์
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -611,12 +612,58 @@ const StudentAnalysis: React.FC = () => {
                       <p className="text-sm">กรุณานำเข้าข้อมูลคะแนนก่อนส่งออกรายงาน</p>
                     </div>
                   )}
+
+                  {/* Print Section */}
+                  <div className="mt-6 border-t pt-6">
+                    <h3 className="text-lg font-medium text-purple-700 mb-4 text-center">พิมพ์รายงานสรุปผล</h3>
+                    <div className="space-y-4 max-w-md mx-auto">
+                      <div className="space-y-2">
+                        <Label htmlFor="academicYear" className="text-purple-800">ปีการศึกษา</Label>
+                        <Input
+                          id="academicYear"
+                          placeholder="เช่น 2567"
+                          value={academicYear}
+                          onChange={(e) => setAcademicYear(e.target.value)}
+                          className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full h-20 flex-col gap-2 border-purple-200 hover:bg-purple-50 text-purple-700 hover:text-purple-800"
+                        onClick={() => {
+                          if (!academicYear.trim()) {
+                            toast({
+                              title: "กรุณาระบุปีการศึกษา",
+                              description: "โปรดป้อนปีการศึกษาก่อนพิมพ์รายงาน",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+                          if (students.length === 0) {
+                            toast({
+                              title: "ไม่มีข้อมูลสำหรับพิมพ์",
+                              description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+                          handlePrint();
+                        }}
+                        disabled={students.length === 0}
+                      >
+                        <Printer className="w-6 h-6 text-purple-600" />
+                        <span className="font-semibold">พิมพ์รายงาน</span>
+                        <span className="text-xs text-gray-500">สรุปผลการวิเคราะห์รายบุคคล</span>
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
         </div>
       </div>
+      <AnalysisReportPrintable ref={reportRef} students={students} academicYear={academicYear} />
     </div>
   );
 };
