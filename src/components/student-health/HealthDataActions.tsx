@@ -1,134 +1,145 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, Printer } from 'lucide-react';
+import { Download, FileSpreadsheet, Printer } from 'lucide-react';
 import { StudentHealthDetails } from '@/types/student';
+import { useReactToPrint } from 'react-to-print';
+import HealthReportPrintable from './HealthReportPrintable';
+import HealthReportAdvanced from './HealthReportAdvanced';
 import HealthReportStatistics from './HealthReportStatistics';
-import TeacherSelectionDialog from './TeacherSelectionDialog';
-import { getTeachers } from '@/utils/teacherStorage';
 
 interface HealthDataActionsProps {
-  data: StudentHealthDetails[];
-  onImport: () => void;
-  onExport: () => void;
+  healthData: StudentHealthDetails[];
   selectedGrade: string;
   selectedMonth: string;
-  selectedYear: string;
-}
-
-interface Teacher {
-  id: string;
-  firstName: string;
-  lastName: string;
-  position: string;
+  currentAcademicYear: string;
+  isLoading: boolean;
 }
 
 const HealthDataActions: React.FC<HealthDataActionsProps> = ({
-  data,
-  onImport,
-  onExport,
+  healthData,
   selectedGrade,
   selectedMonth,
-  selectedYear,
+  currentAcademicYear,
+  isLoading
 }) => {
-  const [showTeacherDialog, setShowTeacherDialog] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const basicReportRef = useRef<HTMLDivElement>(null);
+  const advancedReportRef = useRef<HTMLDivElement>(null);
+  const statisticsReportRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const loadTeachers = async () => {
-      try {
-        const storedTeachers = await getTeachers();
-        const mappedTeachers = storedTeachers.map(teacher => ({
-          id: teacher.id,
-          firstName: teacher.firstName,
-          lastName: teacher.lastName,
-          position: teacher.position,
-        }));
-        setTeachers(mappedTeachers);
-      } catch (error) {
-        console.error('Error loading teachers:', error);
-        setTeachers([]);
-      }
-    };
+  const handleBasicPrint = useReactToPrint({
+    contentRef: basicReportRef,
+    documentTitle: `health-report-basic-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
+  });
 
-    loadTeachers();
-  }, []);
+  const handleAdvancedPrint = useReactToPrint({
+    contentRef: advancedReportRef,
+    documentTitle: `health-report-advanced-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
+  });
 
-  const handlePrintStatistics = () => {
-    if (teachers.length === 0) {
-      // If no teachers available, print with default teacher info
-      printStatisticsReport();
-      return;
-    }
-    
-    // Show teacher selection dialog
-    setShowTeacherDialog(true);
+  const handleStatisticsPrint = useReactToPrint({
+    contentRef: statisticsReportRef,
+    documentTitle: `health-report-statistics-${selectedGrade}-${selectedMonth}-${currentAcademicYear}`,
+  });
+
+  const getMonthName = (month: string) => {
+    if (month === 'all') return 'ทุกเดือน';
+    const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+    return monthNames[parseInt(month) - 1] || month;
   };
 
-  const printStatisticsReport = () => {
-    const printWindow = window.open('', '', 'height=800,width=1000');
-    if (!printWindow) {
-      alert('กรุณาอนุญาต pop-ups เพื่อพิมพ์รายงาน');
-      return;
-    }
-
-    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
-    styles.forEach(style => {
-      printWindow.document.head.appendChild(style.cloneNode(true));
-    });
-
-    printWindow.document.title = 'รายงานสถิติสุขภาพนักเรียน';
-    const printRootEl = printWindow.document.createElement('div');
-    printWindow.document.body.appendChild(printRootEl);
-    
-    // Create React root and render the statistics component
-    import('react-dom/client').then(({ createRoot }) => {
-      const root = createRoot(printRootEl);
-      root.render(
-        React.createElement(HealthReportStatistics, {
-          data: data,
-          grade: selectedGrade,
-          month: selectedMonth,
-          academicYear: selectedYear,
-          selectedTeacher: selectedTeacher,
-        })
-      );
-
-      setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-      }, 1000);
-    });
+  const getGradeName = (grade: string) => {
+    return grade === 'all' ? 'ทุกระดับชั้น' : grade;
   };
+
+  const handleExportExcel = () => {
+    // TODO: Implement Excel export functionality
+    console.log('Export Excel functionality to be implemented');
+  };
+
+  const hasData = healthData && healthData.length > 0;
 
   return (
-    <>
-      <div className="flex flex-wrap gap-2 mb-4">
-        <Button onClick={onImport} variant="outline" size="sm">
-          <Download className="w-4 h-4 mr-2" />
-          นำเข้าข้อมูล
-        </Button>
-        <Button onClick={onExport} variant="outline" size="sm">
-          <FileText className="w-4 h-4 mr-2" />
-          ส่งออกข้อมูล
-        </Button>
-        <Button onClick={handlePrintStatistics} variant="outline" size="sm">
-          <Printer className="w-4 h-4 mr-2" />
-          พิมพ์รายงานสถิติ
-        </Button>
-      </div>
+    <div className="flex items-center gap-2 flex-wrap">
+      <Button
+        onClick={handleExportExcel}
+        disabled={isLoading || !hasData}
+        variant="outline"
+        size="sm"
+      >
+        <FileSpreadsheet className="h-4 w-4 mr-2" />
+        ส่งออก Excel
+      </Button>
+      
+      <Button
+        onClick={handleBasicPrint}
+        disabled={isLoading || !hasData}
+        variant="outline"
+        size="sm"
+      >
+        <Printer className="h-4 w-4 mr-2" />
+        พิมพ์รายงานพื้นฐาน
+      </Button>
 
-      <TeacherSelectionDialog
-        open={showTeacherDialog}
-        onOpenChange={setShowTeacherDialog}
-        teachers={teachers}
-        selectedTeacher={selectedTeacher}
-        onTeacherSelect={setSelectedTeacher}
-        onPrint={printStatisticsReport}
-      />
-    </>
+      <Button
+        onClick={handleAdvancedPrint}
+        disabled={isLoading || !hasData}
+        variant="outline"
+        size="sm"
+      >
+        <Printer className="h-4 w-4 mr-2" />
+        พิมพ์รายงาน BMI
+      </Button>
+
+      <Button
+        onClick={handleStatisticsPrint}
+        disabled={isLoading || !hasData}
+        variant="outline"
+        size="sm"
+      >
+        <Printer className="h-4 w-4 mr-2" />
+        พิมพ์รายงานสถิติ
+      </Button>
+
+      {/* Hidden components for printing - only render when we have data */}
+      {hasData && (
+        <>
+          <div style={{ display: 'none' }}>
+            <div ref={basicReportRef}>
+              <HealthReportPrintable
+                data={healthData}
+                grade={getGradeName(selectedGrade)}
+                month={getMonthName(selectedMonth)}
+                academicYear={currentAcademicYear}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'none' }}>
+            <div ref={advancedReportRef}>
+              <HealthReportAdvanced
+                data={healthData}
+                grade={getGradeName(selectedGrade)}
+                month={getMonthName(selectedMonth)}
+                academicYear={currentAcademicYear}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'none' }}>
+            <div ref={statisticsReportRef}>
+              <HealthReportStatistics
+                data={healthData}
+                grade={getGradeName(selectedGrade)}
+                month={getMonthName(selectedMonth)}
+                academicYear={currentAcademicYear}
+              />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 
