@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,15 +30,64 @@ const StudentAnalysis: React.FC = () => {
   const [academicYear, setAcademicYear] = useState('');
 
   const reportRef = useRef<HTMLDivElement>(null);
+
   const handlePrint = useReactToPrint({
     content: () => reportRef.current,
     documentTitle: `สรุปผลการวิเคราะห์ผู้เรียน-${academicYear || new Date().getFullYear() + 543}`,
+    onBeforePrint: () => {
+      console.log('เริ่มพิมพ์รายงาน...');
+      return Promise.resolve();
+    },
     onAfterPrint: () => {
+      console.log('พิมพ์รายงานเสร็จสิ้น');
       toast({
-        title: "พิมพ์รายงาน",
-        description: "ส่งคำสั่งพิมพ์รายงานเรียบร้อยแล้ว",
+        title: "พิมพ์รายงานสำเร็จ",
+        description: "ส่งคำสั่งพิมพ์รายงานไปยังเครื่องพิมพ์เรียบร้อยแล้ว",
       });
     },
+    onPrintError: (errorLocation, error) => {
+      console.error('เกิดข้อผิดพลาดในการพิมพ์:', error);
+      toast({
+        title: "เกิดข้อผิดพลาดในการพิมพ์",
+        description: "กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    },
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+      
+      @media print {
+        body { 
+          font-family: 'TH SarabunPSK', 'Sarabun', sans-serif !important;
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        
+        .no-print { 
+          display: none !important; 
+        }
+        
+        table {
+          page-break-inside: auto;
+        }
+        
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+        
+        thead {
+          display: table-header-group;
+        }
+        
+        tfoot {
+          display: table-footer-group;
+        }
+      }
+    `
   } as any);
 
   const subjects = [
@@ -372,7 +420,11 @@ const StudentAnalysis: React.FC = () => {
                     </CardTitle>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" disabled={students.length === 0}>
+                        <Button 
+                          variant="outline" 
+                          disabled={students.length === 0}
+                          className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                        >
                           <Printer className="mr-2 h-4 w-4" />
                           พิมพ์รายงาน
                         </Button>
@@ -382,7 +434,7 @@ const StudentAnalysis: React.FC = () => {
                           <div className="space-y-2">
                             <h4 className="font-medium leading-none">พิมพ์รายงานสรุปผล</h4>
                             <p className="text-sm text-muted-foreground">
-                              ระบุปีการศึกษาและกดพิมพ์เพื่อสร้างรายงาน
+                              ระบุปีการศึกษาและกดยืนยันเพื่อพิมพ์รายงาน
                             </p>
                           </div>
                           <div className="grid gap-2">
@@ -395,7 +447,7 @@ const StudentAnalysis: React.FC = () => {
                             />
                           </div>
                           <Button
-                            className="w-full"
+                            className="w-full bg-blue-600 hover:bg-blue-700"
                             onClick={() => {
                               if (!academicYear.trim()) {
                                 toast({
@@ -405,7 +457,7 @@ const StudentAnalysis: React.FC = () => {
                                 });
                                 return;
                               }
-                               if (students.length === 0) {
+                              if (students.length === 0) {
                                 toast({
                                   title: "ไม่มีข้อมูลสำหรับพิมพ์",
                                   description: "กรุณานำเข้าข้อมูลคะแนนก่อน",
@@ -613,7 +665,7 @@ const StudentAnalysis: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-600" />
-                    ส่งออกและพิมพ์รายงานการวิเคราะห์
+                    ส่งออกรายงานการวิเคราะห์
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -667,14 +719,14 @@ const StudentAnalysis: React.FC = () => {
                       <p className="text-sm">กรุณานำเข้าข้อมูลคะแนนก่อนส่งออกรายงาน</p>
                     </div>
                   )}
-
-                  {/* Print Section Removed */}
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
         </div>
       </div>
+      
+      {/* Hidden printable component */}
       <AnalysisReportPrintable ref={reportRef} students={students} academicYear={academicYear} />
     </div>
   );
