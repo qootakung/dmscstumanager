@@ -32,7 +32,7 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
         }
       }
     `,
-  });
+  } as any);
 
   if (!isOpen) {
     return null;
