@@ -222,7 +222,7 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Teacher Position Chart with improved display */}
+      {/* Teacher Position Chart with improved display - จัดซ้าย */}
       {teacherStats.total > 0 && (
         <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
           <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
@@ -230,10 +230,18 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="p-6">
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={positionChartData} layout="vertical" margin={{ left: 200 }}>
+              <BarChart data={positionChartData} layout="vertical" margin={{ left: 250, right: 20, top: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" stroke="#64748b" fontSize={12} domain={[0, 10]} />
-                <YAxis dataKey="position" type="category" stroke="#64748b" fontSize={11} width={190} />
+                <YAxis 
+                  dataKey="position" 
+                  type="category" 
+                  stroke="#64748b" 
+                  fontSize={12} 
+                  width={240}
+                  textAnchor="start"
+                  tick={{ textAnchor: 'start' }}
+                />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: '#1e293b', 

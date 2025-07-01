@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,9 +42,14 @@ const FinancialReports = () => {
         body {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
+          color: black !important;
         }
         * {
           visibility: visible !important;
+          color: black !important;
+        }
+        .no-print {
+          display: none !important;
         }
       }
     `
@@ -51,7 +57,10 @@ const FinancialReports = () => {
 
   const handlePrintClick = () => {
     if (handlePreview()) {
-      handlePrint();
+      // เพิ่มความล่าช้าเล็กน้อยเพื่อให้แน่ใจว่าเนื้อหาโหลดเสร็จ
+      setTimeout(() => {
+        handlePrint();
+      }, 100);
     }
   };
 
@@ -120,23 +129,27 @@ const FinancialReports = () => {
           />
 
           <div className="flex justify-end pt-6 mt-6 border-t">
-            <Button onClick={handlePrintClick}>
+            <Button 
+              onClick={handlePrintClick}
+              className="bg-green-600 hover:bg-green-700"
+            >
               พิมพ์เอกสาร
             </Button>
           </div>
         </CardContent>
       </Card>
       
+      {/* แสดงตัวอย่างเอกสารเสมอ เมื่อมีข้อมูลนักเรียน */}
       {selectedGrade && voucherData.students.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>ตัวอย่างเอกสาร</CardTitle>
             <CardDescription>
-              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์ (เนื้อหานี้จะไม่ถูกพิมพ์)
+              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์ (ส่วนนี้จะไม่แสดงในการพิมพ์จริง)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="p-4 border rounded-md bg-white">
+            <div className="p-4 border rounded-md bg-white shadow-sm">
               <PrintPreviewStatic ref={printRef} voucherData={voucherData} paymentOptions={paymentOptions} />
             </div>
           </CardContent>
