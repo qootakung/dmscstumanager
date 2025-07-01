@@ -222,25 +222,41 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Teacher Position Chart with improved display - จัดซ้าย */}
+      {/* Teacher Position Chart with improved display - จัดซ้าย และแก้ไขการทับซ้อน */}
       {teacherStats.total > 0 && (
         <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
           <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
             <CardTitle className="text-lg font-bold">จำนวนครูแยกตามตำแหน่ง</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={positionChartData} layout="vertical" margin={{ left: 250, right: 20, top: 20, bottom: 20 }}>
+            <ResponsiveContainer width="100%" height={500}>
+              <BarChart 
+                data={positionChartData} 
+                layout="vertical" 
+                margin={{ left: 300, right: 30, top: 20, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis type="number" stroke="#64748b" fontSize={12} domain={[0, 10]} />
+                <XAxis 
+                  type="number" 
+                  stroke="#64748b" 
+                  fontSize={12} 
+                  domain={[0, 10]} 
+                />
                 <YAxis 
                   dataKey="position" 
                   type="category" 
                   stroke="#64748b" 
-                  fontSize={12} 
-                  width={240}
+                  fontSize={11}
+                  width={290}
                   textAnchor="start"
-                  tick={{ textAnchor: 'start' }}
+                  tick={{ 
+                    textAnchor: 'start',
+                    fontSize: 11,
+                    dy: 0
+                  }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
                 />
                 <Tooltip 
                   contentStyle={{ 
