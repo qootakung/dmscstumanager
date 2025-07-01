@@ -31,7 +31,7 @@ const FinancialReports = () => {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}-${voucherData.semester}`,
   });
 
