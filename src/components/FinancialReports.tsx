@@ -33,6 +33,29 @@ const FinancialReports = () => {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}-${voucherData.semester}`,
+    onBeforeGetContent: () => {
+      return new Promise((resolve) => {
+        // Ensure content is ready before printing
+        setTimeout(() => {
+          resolve(undefined);
+        }, 100);
+      });
+    },
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 20mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        * {
+          visibility: visible !important;
+        }
+      }
+    `
   });
 
   const handlePrintClick = () => {

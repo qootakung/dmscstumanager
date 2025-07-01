@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getStudentStatistics } from '@/utils/storage';
@@ -56,9 +57,11 @@ const Dashboard: React.FC = () => {
     value: count,
   }));
 
+  // Enhanced position chart data with full position names and count range 0-10
   const positionChartData = Object.entries(teacherStats.byPosition).map(([position, count]) => ({
-    position: position.length > 15 ? position.substring(0, 15) + '...' : position,
-    teachers: count,
+    position: position, // Show full position name
+    teachers: Math.min(count, 10), // Cap at 10 for better chart display
+    fullPosition: position // Keep full name for tooltip
   }));
 
   // สีสันสำหรับกราฟแต่ละระดับชั้น
@@ -219,18 +222,18 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Teacher Position Chart */}
+      {/* Teacher Position Chart with improved display */}
       {teacherStats.total > 0 && (
         <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
           <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
             <CardTitle className="text-lg font-bold">จำนวนครูแยกตามตำแหน่ง</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={positionChartData} layout="vertical">
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={positionChartData} layout="vertical" margin={{ left: 200 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis type="number" stroke="#64748b" fontSize={12} />
-                <YAxis dataKey="position" type="category" stroke="#64748b" fontSize={12} width={120} />
+                <XAxis type="number" stroke="#64748b" fontSize={12} domain={[0, 10]} />
+                <YAxis dataKey="position" type="category" stroke="#64748b" fontSize={11} width={190} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: '#1e293b', 
@@ -238,7 +241,11 @@ const Dashboard: React.FC = () => {
                     border: 'none', 
                     borderRadius: '8px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                  }} 
+                  }}
+                  formatter={(value, name, props) => [
+                    `${value} คน`,
+                    props.payload.fullPosition
+                  ]}
                 />
                 <Bar 
                   dataKey="teachers" 
