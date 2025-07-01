@@ -33,34 +33,11 @@ const FinancialReports = () => {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}-${voucherData.semester}`,
-    pageStyle: `
-      @page {
-        size: A4;
-        margin: 20mm;
-      }
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color: black !important;
-        }
-        * {
-          visibility: visible !important;
-          color: black !important;
-        }
-        .no-print {
-          display: none !important;
-        }
-      }
-    `
   });
 
   const handlePrintClick = () => {
     if (handlePreview()) {
-      // เพิ่มความล่าช้าเล็กน้อยเพื่อให้แน่ใจว่าเนื้อหาโหลดเสร็จ
-      setTimeout(() => {
-        handlePrint();
-      }, 100);
+      handlePrint();
     }
   };
 
@@ -129,27 +106,23 @@ const FinancialReports = () => {
           />
 
           <div className="flex justify-end pt-6 mt-6 border-t">
-            <Button 
-              onClick={handlePrintClick}
-              className="bg-green-600 hover:bg-green-700"
-            >
+            <Button onClick={handlePrintClick}>
               พิมพ์เอกสาร
             </Button>
           </div>
         </CardContent>
       </Card>
       
-      {/* แสดงตัวอย่างเอกสารเสมอ เมื่อมีข้อมูลนักเรียน */}
       {selectedGrade && voucherData.students.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>ตัวอย่างเอกสาร</CardTitle>
             <CardDescription>
-              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์ (ส่วนนี้จะไม่แสดงในการพิมพ์จริง)
+              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์ (เนื้อหานี้จะไม่ถูกพิมพ์)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="p-4 border rounded-md bg-white shadow-sm">
+            <div className="p-4 border rounded-md bg-white">
               <PrintPreviewStatic ref={printRef} voucherData={voucherData} paymentOptions={paymentOptions} />
             </div>
           </CardContent>
