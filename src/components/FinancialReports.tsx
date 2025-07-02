@@ -12,6 +12,8 @@ import PrintPreviewStatic from './Finance/PrintPreviewStatic';
 import { useFinancialVoucher } from '@/hooks/useFinancialVoucher';
 import PaymentDetailsSection from './Finance/form/PaymentDetailsSection';
 import StudentCountInfo from './Finance/form/StudentCountInfo';
+import { Printer } from 'lucide-react';
+import { toast } from "@/components/ui/use-toast";
 
 const FinancialReports = () => {
   const {
@@ -33,6 +35,42 @@ const FinancialReports = () => {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}-${voucherData.semester}`,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 1.5cm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        table, th, td {
+          border: 1px solid #d1d5db !important;
+          border-collapse: collapse !important;
+        }
+        th {
+          background-color: #f3f4f6 !important;
+        }
+      }
+    `,
+    onBeforeGetContent: () => {
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      toast({
+        title: "พิมพ์เอกสารสำเร็จ",
+        description: "สามารถนำเอกสารไปใช้งานต่อได้",
+      });
+    },
+    onPrintError: (error: any) => {
+      toast({
+        title: "เกิดข้อผิดพลาดขณะพิมพ์",
+        description: "ไม่สามารถพิมพ์เอกสารได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+      console.error("Print Error:", error);
+    }
   });
 
   const handlePrintClick = () => {
@@ -106,7 +144,8 @@ const FinancialReports = () => {
           />
 
           <div className="flex justify-end pt-6 mt-6 border-t">
-            <Button onClick={handlePrintClick}>
+            <Button onClick={handlePrintClick} className="flex items-center gap-2">
+              <Printer className="w-4 h-4" />
               พิมพ์เอกสาร
             </Button>
           </div>
@@ -118,7 +157,7 @@ const FinancialReports = () => {
           <CardHeader>
             <CardTitle>ตัวอย่างเอกสาร</CardTitle>
             <CardDescription>
-              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์ (เนื้อหานี้จะไม่ถูกพิมพ์)
+              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์
             </CardDescription>
           </CardHeader>
           <CardContent>

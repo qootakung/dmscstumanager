@@ -102,11 +102,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
             </Button>
           </form>
-          <div className="mt-4 p-3 bg-gray-100 rounded text-sm text-gray-600">
-            <strong>ข้อมูลสำหรับทดสอบ:</strong><br />
-            ชื่อผู้ใช้: dmsc@<br />
-            รหัสผ่าน: donmoondmsc@
-          </div>
         </CardContent>
       </Card>
     </div>
