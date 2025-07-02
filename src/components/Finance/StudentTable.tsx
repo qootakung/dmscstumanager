@@ -1,4 +1,3 @@
-
 import React from "react";
 import type { Student } from "@/types/student";
 
@@ -13,13 +12,13 @@ interface StudentTableProps {
 const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
-  fontSize: "15px", // Increased from 11px
+  fontSize: "15px",
   marginBottom: "12px",
 };
 
 const cellStyle: React.CSSProperties = {
-  border: "1px solid black",
-  padding: "4px 6px", // Slightly increased padding
+  border: "1px solid #000000",
+  padding: "4px 6px",
   textAlign: "left",
   verticalAlign: "top",
   lineHeight: "1.3",
@@ -31,32 +30,37 @@ const thStyle: React.CSSProperties = {
   fontWeight: "bold",
   verticalAlign: "middle",
   backgroundColor: "#f0f0f0",
-  fontSize: "14px", // Increased from 10px
-  padding: "4px 6px", // Increased padding
+  fontSize: "14px",
+  padding: "4px 6px",
+  border: "1px solid #000000",
 };
 
 const centerCellStyle: React.CSSProperties = {
   ...cellStyle,
   textAlign: "center",
+  border: "1px solid #000000",
 };
 
 const rightCellStyle: React.CSSProperties = {
   ...cellStyle,
   textAlign: "right",
+  border: "1px solid #000000",
 };
 
 const nameCellStyle: React.CSSProperties = {
   ...cellStyle,
   whiteSpace: 'nowrap',
-  fontSize: "14px", // Increased from 10px
+  fontSize: "14px",
+  border: "1px solid #000000",
 };
 
 const totalRowStyle: React.CSSProperties = {
   ...thStyle,
-  fontSize: "15px", // Set to 15px as requested
+  fontSize: "15px",
   fontWeight: "bold",
-  height: "32px", // Make row height match other rows
+  height: "32px",
   lineHeight: "1.2",
+  border: "1px solid #000000",
 };
 
 const StudentTable: React.FC<StudentTableProps> = ({ 
@@ -66,15 +70,12 @@ const StudentTable: React.FC<StudentTableProps> = ({
   isFirstPage = true,
   startIndex = 0
 }) => {
-  // Show up to 15 students per page
   const studentsPerPage = 15;
   const pageStudents = students.slice(startIndex, startIndex + studentsPerPage);
   
-  // Calculate empty rows needed to fill up to 15 rows
   const emptyRowCount = Math.max(0, studentsPerPage - pageStudents.length);
   const amount = parseFloat(amountPerStudent) || 0;
   
-  // Calculate total for current page only
   const pageTotal = amount * pageStudents.length;
 
   const formatCurrency = (num: number) => {
@@ -88,11 +89,11 @@ const StudentTable: React.FC<StudentTableProps> = ({
         <thead>
           <tr>
             <th style={{ ...thStyle, width: "25px" }}>ที่</th>
-            <th style={{ ...thStyle, width: "120px" }}>ชื่อ - สกุลนักเรียน</th>
+            <th style={{ ...thStyle, width: "100px" }}>ชื่อ - สกุลนักเรียน</th>
             <th style={{ ...thStyle, width: "120px" }}>เลขประจำตัว<br />ประชาชน</th>
             <th style={{ ...thStyle, width: "70px" }}>จำนวนเงิน<br />(บาท)</th>
-            <th style={{ ...thStyle, width: "100px" }}>วันที่รับเงิน</th>
-            <th style={{ ...thStyle, width: "120px" }}>ลายมือชื่อ<br />ผู้ปกครอง</th>
+            <th style={{ ...thStyle, width: "110px" }}>วันที่รับเงิน</th>
+            <th style={{ ...thStyle, width: "140px" }}>ลายมือชื่อ<br />ผู้ปกครอง</th>
             <th style={{ ...thStyle, width: "60px" }}>หมายเหตุ</th>
           </tr>
         </thead>

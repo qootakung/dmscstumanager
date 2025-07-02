@@ -19,7 +19,6 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
   const componentRef = useRef<HTMLDivElement>(null);
   const [printing, setPrinting] = useState(false);
 
-  // Note: react-to-print type definition may not match, but 'content' property is actually required
   // @ts-ignore
   const handlePrint = useReactToPrint({
     // @ts-ignore
@@ -43,6 +42,32 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
         body {
           -webkit-print-color-adjust: exact !important;
           color-adjust: exact !important;
+          font-family: 'TH Sarabun', 'Sarabun', Arial, sans-serif !important;
+          font-size: 15px !important;
+        }
+        table, th, td {
+          border: 1px solid #000000 !important;
+          border-collapse: collapse !important;
+          font-size: 15px !important;
+        }
+        th {
+          background-color: #f3f4f6 !important;
+          font-size: 14px !important;
+          font-weight: bold !important;
+        }
+        /* Ensure consistent font sizes */
+        * {
+          font-size: inherit !important;
+        }
+        /* Header styling */
+        div[style*="18px"] {
+          font-size: 18px !important;
+        }
+        div[style*="15px"] {
+          font-size: 15px !important;
+        }
+        div[style*="14px"] {
+          font-size: 14px !important;
         }
       }
     `,
@@ -98,4 +123,3 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
 };
 
 export default PrintPreviewDialog;
-

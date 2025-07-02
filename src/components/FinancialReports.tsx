@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,19 +45,35 @@ const FinancialReports = () => {
         body {
           -webkit-print-color-adjust: exact !important;
           color-adjust: exact !important;
-          font-size: 12px;
+          font-family: 'TH Sarabun', 'Sarabun', Arial, sans-serif !important;
+          font-size: 15px !important;
         }
         table, th, td {
-          border: 1px solid #d1d5db !important;
+          border: 1px solid #000000 !important;
           border-collapse: collapse !important;
-          font-size: 11px;
+          font-size: 15px !important;
         }
         th {
           background-color: #f3f4f6 !important;
-          font-size: 10px;
+          font-size: 14px !important;
+          font-weight: bold !important;
         }
         .page-break {
           page-break-before: always;
+        }
+        /* Ensure consistent font sizes */
+        * {
+          font-size: inherit !important;
+        }
+        /* Header styling */
+        div[style*="18px"] {
+          font-size: 18px !important;
+        }
+        div[style*="15px"] {
+          font-size: 15px !important;
+        }
+        div[style*="14px"] {
+          font-size: 14px !important;
         }
       }
     `,
