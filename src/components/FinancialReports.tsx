@@ -54,9 +54,6 @@ const FinancialReports = () => {
         }
       }
     `,
-    onBeforeGetContent: () => {
-      return Promise.resolve();
-    },
     onAfterPrint: () => {
       toast({
         title: "พิมพ์เอกสารสำเร็จ",
