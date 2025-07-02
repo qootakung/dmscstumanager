@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PaymentTypeSelection from './Finance/form/PaymentTypeSelection';
@@ -12,8 +12,9 @@ import PrintPreviewStatic from './Finance/PrintPreviewStatic';
 import { useFinancialVoucher } from '@/hooks/useFinancialVoucher';
 import PaymentDetailsSection from './Finance/form/PaymentDetailsSection';
 import StudentCountInfo from './Finance/form/StudentCountInfo';
-import { Printer } from 'lucide-react';
+import { Printer, Eye } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import PrintPreviewDialog from './Finance/PrintPreviewDialog';
 
 const FinancialReports = () => {
   const {
@@ -31,6 +32,7 @@ const FinancialReports = () => {
   } = useFinancialVoucher();
 
   const printRef = useRef<HTMLDivElement>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -38,19 +40,25 @@ const FinancialReports = () => {
     pageStyle: `
       @page {
         size: A4;
-        margin: 1.5cm;
+        margin: 1cm;
       }
       @media print {
         body {
           -webkit-print-color-adjust: exact !important;
           color-adjust: exact !important;
+          font-size: 12px;
         }
         table, th, td {
           border: 1px solid #d1d5db !important;
           border-collapse: collapse !important;
+          font-size: 11px;
         }
         th {
           background-color: #f3f4f6 !important;
+          font-size: 10px;
+        }
+        .page-break {
+          page-break-before: always;
         }
       }
     `,
@@ -73,6 +81,12 @@ const FinancialReports = () => {
   const handlePrintClick = () => {
     if (handlePreview()) {
       handlePrint();
+    }
+  };
+
+  const handlePreviewClick = () => {
+    if (handlePreview()) {
+      setShowPreview(true);
     }
   };
 
@@ -140,7 +154,15 @@ const FinancialReports = () => {
             onAutoFillPrincipal={handleAutoFillPrincipal}
           />
 
-          <div className="flex justify-end pt-6 mt-6 border-t">
+          <div className="flex justify-end gap-3 pt-6 mt-6 border-t">
+            <Button 
+              onClick={handlePreviewClick} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              ดูตัวอย่างก่อนพิมพ์
+            </Button>
             <Button onClick={handlePrintClick} className="flex items-center gap-2">
               <Printer className="w-4 h-4" />
               พิมพ์เอกสาร
@@ -149,21 +171,18 @@ const FinancialReports = () => {
         </CardContent>
       </Card>
       
-      {selectedGrade && voucherData.students.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>ตัวอย่างเอกสาร</CardTitle>
-            <CardDescription>
-              นี่คือตัวอย่างเอกสารที่จะถูกพิมพ์
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 border rounded-md bg-white">
-              <PrintPreviewStatic ref={printRef} voucherData={voucherData} paymentOptions={paymentOptions} />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Hidden print component */}
+      <div style={{ display: 'none' }}>
+        <PrintPreviewStatic ref={printRef} voucherData={voucherData} paymentOptions={paymentOptions} />
+      </div>
+
+      {/* Preview Dialog */}
+      <PrintPreviewDialog
+        isOpen={showPreview}
+        onOpenChange={setShowPreview}
+        voucherData={voucherData}
+        paymentOptions={paymentOptions}
+      />
     </div>
   );
 };
