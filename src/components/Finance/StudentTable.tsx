@@ -80,11 +80,11 @@ const StudentTable: React.FC<StudentTableProps> = ({
         <thead>
           <tr>
             <th style={{ ...thStyle, width: "25px" }}>ที่</th>
-            <th style={thStyle}>ชื่อ - สกุลนักเรียน</th>
+            <th style={{ ...thStyle, width: "140px" }}>ชื่อ - สกุลนักเรียน</th>
             <th style={{ ...thStyle, width: "120px" }}>เลขประจำตัว<br />ประชาชน</th>
             <th style={{ ...thStyle, width: "70px" }}>จำนวนเงิน<br />(บาท)</th>
-            <th style={{ ...thStyle, width: "70px" }}>วันที่รับเงิน</th>
-            <th style={{ ...thStyle, width: "80px" }}>ลายมือชื่อ<br />ผู้ปกครอง</th>
+            <th style={{ ...thStyle, width: "90px" }}>วันที่รับเงิน</th>
+            <th style={{ ...thStyle, width: "100px" }}>ลายมือชื่อ<br />ผู้ปกครอง</th>
             <th style={{ ...thStyle, width: "60px" }}>หมายเหตุ</th>
           </tr>
         </thead>

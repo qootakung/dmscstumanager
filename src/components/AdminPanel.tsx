@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle } from 'lucide-react';
 import { getUsers, addUser, clearAllStudents, getCurrentUser } from '@/utils/storage';
+import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
 
@@ -73,6 +75,79 @@ const AdminPanel: React.FC = () => {
         icon: 'error',
         confirmButtonText: 'ตกลง'
       });
+    }
+  };
+
+  const handleDeleteUser = async (user: User) => {
+    // Only allow the main admin (dmsc@) to delete users
+    if (currentUser?.username !== 'dmsc@') {
+      await Swal.fire({
+        title: 'ไม่มีสิทธิ์!',
+        text: 'เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถลบผู้ใช้ได้',
+        icon: 'error',
+        confirmButtonText: 'ตกลง'
+      });
+      return;
+    }
+
+    // Prevent deleting the main admin account
+    if (user.username === 'dmsc@') {
+      await Swal.fire({
+        title: 'ไม่สามารถลบได้!',
+        text: 'ไม่สามารถลบบัญชีผู้ดูแลระบบหลักได้',
+        icon: 'error',
+        confirmButtonText: 'ตกลง'
+      });
+      return;
+    }
+
+    // Prevent deleting your own account
+    if (user.id === currentUser?.id) {
+      await Swal.fire({
+        title: 'ไม่สามารถลบได้!',
+        text: 'ไม่สามารถลบบัญชีของตัวเองได้',
+        icon: 'error',
+        confirmButtonText: 'ตกลง'
+      });
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: 'ลบผู้ใช้?',
+      text: `คุณต้องการลบผู้ใช้ "${user.username}" หรือไม่?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ลบ',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#ef4444',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const { error } = await supabase
+          .from('app_users')
+          .delete()
+          .eq('id', user.id);
+
+        if (error) throw error;
+
+        await Swal.fire({
+          title: 'ลบผู้ใช้สำเร็จ!',
+          text: `ลบผู้ใช้ "${user.username}" แล้ว`,
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        await loadUsers();
+      } catch (error) {
+        await Swal.fire({
+          title: 'เกิดข้อผิดพลาด!',
+          text: 'ไม่สามารถลบผู้ใช้ได้',
+          icon: 'error',
+          confirmButtonText: 'ตกลง'
+        });
+      }
     }
   };
 
@@ -334,6 +409,16 @@ const AdminPanel: React.FC = () => {
                                 <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-blue-500 text-white text-xs rounded-full font-medium">
                                   คุณ
                                 </span>
+                              )}
+                              {isMainAdmin && user.username !== 'dmsc@' && user.id !== currentUser?.id && (
+                                <Button
+                                  onClick={() => handleDeleteUser(user)}
+                                  variant="destructive"
+                                  size="sm"
+                                  className="ml-2 px-3 py-1 h-auto"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
                               )}
                             </div>
                           </div>

@@ -61,6 +61,20 @@ export const addUser = async (userData: Omit<User, 'id' | 'createdAt'>): Promise
   };
 };
 
+export const deleteUser = async (userId: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('app_users')
+    .delete()
+    .eq('id', userId);
+  
+  if (error) {
+    console.error('Error deleting user:', error);
+    return false;
+  }
+  
+  return true;
+};
+
 export const getCurrentUser = (): User | null => {
   const data = localStorage.getItem(CURRENT_USER_KEY);
   return data ? JSON.parse(data) : null;
