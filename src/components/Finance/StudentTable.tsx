@@ -13,16 +13,16 @@ interface StudentTableProps {
 const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
-  fontSize: "11px",
+  fontSize: "15px", // Increased from 11px
   marginBottom: "12px",
 };
 
 const cellStyle: React.CSSProperties = {
   border: "1px solid black",
-  padding: "3px 6px",
+  padding: "4px 6px", // Slightly increased padding
   textAlign: "left",
   verticalAlign: "top",
-  lineHeight: "1.2",
+  lineHeight: "1.3",
 };
 
 const thStyle: React.CSSProperties = {
@@ -31,8 +31,8 @@ const thStyle: React.CSSProperties = {
   fontWeight: "bold",
   verticalAlign: "middle",
   backgroundColor: "#f0f0f0",
-  fontSize: "10px",
-  padding: "2px 4px",
+  fontSize: "14px", // Increased from 10px
+  padding: "4px 6px", // Increased padding
 };
 
 const centerCellStyle: React.CSSProperties = {
@@ -48,7 +48,15 @@ const rightCellStyle: React.CSSProperties = {
 const nameCellStyle: React.CSSProperties = {
   ...cellStyle,
   whiteSpace: 'nowrap',
-  fontSize: "10px",
+  fontSize: "14px", // Increased from 10px
+};
+
+const totalRowStyle: React.CSSProperties = {
+  ...thStyle,
+  fontSize: "15px", // Set to 15px as requested
+  fontWeight: "bold",
+  height: "32px", // Make row height match other rows
+  lineHeight: "1.2",
 };
 
 const StudentTable: React.FC<StudentTableProps> = ({ 
@@ -80,17 +88,17 @@ const StudentTable: React.FC<StudentTableProps> = ({
         <thead>
           <tr>
             <th style={{ ...thStyle, width: "25px" }}>ที่</th>
-            <th style={{ ...thStyle, width: "140px" }}>ชื่อ - สกุลนักเรียน</th>
+            <th style={{ ...thStyle, width: "120px" }}>ชื่อ - สกุลนักเรียน</th>
             <th style={{ ...thStyle, width: "120px" }}>เลขประจำตัว<br />ประชาชน</th>
             <th style={{ ...thStyle, width: "70px" }}>จำนวนเงิน<br />(บาท)</th>
-            <th style={{ ...thStyle, width: "90px" }}>วันที่รับเงิน</th>
-            <th style={{ ...thStyle, width: "100px" }}>ลายมือชื่อ<br />ผู้ปกครอง</th>
+            <th style={{ ...thStyle, width: "100px" }}>วันที่รับเงิน</th>
+            <th style={{ ...thStyle, width: "120px" }}>ลายมือชื่อ<br />ผู้ปกครอง</th>
             <th style={{ ...thStyle, width: "60px" }}>หมายเหตุ</th>
           </tr>
         </thead>
         <tbody>
           {pageStudents.map((student, index) => (
-            <tr key={student.id || index} style={{ height: '28px' }}>
+            <tr key={student.id || index} style={{ height: '32px' }}>
               <td style={centerCellStyle}>{startIndex + index + 1}</td>
               <td style={nameCellStyle}>
                 {student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}
@@ -103,7 +111,7 @@ const StudentTable: React.FC<StudentTableProps> = ({
             </tr>
           ))}
           {[...Array(emptyRowCount)].map((_, idx) => (
-            <tr key={`empty-${idx}`} style={{ height: '28px' }}>
+            <tr key={`empty-${idx}`} style={{ height: '32px' }}>
               <td style={centerCellStyle}>{startIndex + pageStudents.length + idx + 1}</td>
               <td style={cellStyle}></td>
               <td style={cellStyle}></td>
@@ -114,10 +122,10 @@ const StudentTable: React.FC<StudentTableProps> = ({
             </tr>
           ))}
           <tr>
-            <td colSpan={3} style={{ ...thStyle, textAlign: 'center' }}>
+            <td colSpan={3} style={{ ...totalRowStyle, textAlign: 'center' }}>
               {isFirstPage && students.length <= studentsPerPage ? 'รวมทั้งสิ้น' : 'รวมหน้านี้'}
             </td>
-            <td style={{...thStyle, textAlign: 'right'}}>{formatCurrency(pageTotal)}</td>
+            <td style={{...totalRowStyle, textAlign: 'right'}}>{formatCurrency(pageTotal)}</td>
             <td style={cellStyle}></td>
             <td style={cellStyle}></td>
             <td style={cellStyle}></td>

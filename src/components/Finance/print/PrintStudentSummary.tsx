@@ -8,7 +8,7 @@ interface PrintStudentSummaryProps {
 
 const PrintStudentSummary: React.FC<PrintStudentSummaryProps> = ({ studentCount, schoolName }) => (
     <>
-        <div style={{ marginBottom: 6, lineHeight: '1.8' }}>
+        <div style={{ marginBottom: 8, lineHeight: '1.6', fontSize: '15px' }}>
             <span>นักเรียนจำนวนทั้งสิ้น</span>
             <span style={{
                 display: "inline-block",
@@ -28,7 +28,7 @@ const PrintStudentSummary: React.FC<PrintStudentSummaryProps> = ({ studentCount,
                 padding: '0 5px',
             }}>{schoolName}</span>
         </div>
-        <div style={{ marginBottom: 10, lineHeight: '1.6' }}>
+        <div style={{ marginBottom: 12, lineHeight: '1.4', fontSize: '14px' }}>
             <span>
                 สังกัดสำนักงานเขตพื้นที่การศึกษา ประถมศึกษาลำพูนเขต 2 ข้าพเจ้าขอรับรองว่าจะนำเงิน
                 ที่ได้รับไปดำเนินการตามวัตถุประสงค์ของทางราชการ หากไม่ดำเนินการดังกล่าวข้าพเจ้ายินยอมชดใช้เงินคืน
