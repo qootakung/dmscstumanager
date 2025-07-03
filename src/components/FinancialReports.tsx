@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +12,11 @@ import PrintPreviewStatic from './Finance/PrintPreviewStatic';
 import { useFinancialVoucher } from '@/hooks/useFinancialVoucher';
 import PaymentDetailsSection from './Finance/form/PaymentDetailsSection';
 import StudentCountInfo from './Finance/form/StudentCountInfo';
-import { Printer, Eye } from 'lucide-react';
+import { Printer, Eye, UserPlus } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import PrintPreviewDialog from './Finance/PrintPreviewDialog';
+import StudentSelectionDialog from './Finance/StudentSelectionDialog';
+import type { Student } from '@/types/student';
 
 const FinancialReports = () => {
   const {
@@ -32,6 +35,7 @@ const FinancialReports = () => {
 
   const printRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showStudentSelection, setShowStudentSelection] = useState(false);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -105,6 +109,84 @@ const FinancialReports = () => {
     }
   };
 
+  const handleStudentsSelected = (selectedStudents: Student[]) => {
+    setVoucherData(prev => ({
+      ...prev,
+      students: selectedStudents,
+      // Update grade based on selected students if "ค่าจัดการเรียนการสอน" is selected
+      grade: prev.paymentTypes.includes('ค่าจัดการเรียนการสอน (ปัจจัยพื้นฐานสำหรับการรับนักเรียนยากจน)') 
+        ? getGradeDisplayFromStudents(selectedStudents)
+        : prev.grade
+    }));
+    
+    toast({
+      title: "เลือกนักเรียนสำเร็จ",
+      description: `เลือกนักเรียนแล้ว ${selectedStudents.length} คน`,
+    });
+  };
+
+  // Function to generate grade display from selected students
+  const getGradeDisplayFromStudents = (students: Student[]): string => {
+    if (students.length === 0) return '';
+    
+    const gradeGroups: { [key: string]: string[] } = {};
+    
+    students.forEach(student => {
+      if (student.grade) {
+        if (student.grade.startsWith('อนุบาล')) {
+          if (!gradeGroups['อนุบาล']) gradeGroups['อนุบาล'] = [];
+          const number = student.grade.replace('อนุบาล ', '');
+          if (!gradeGroups['อนุบาล'].includes(number)) {
+            gradeGroups['อนุบาล'].push(number);
+          }
+        } else if (student.grade.startsWith('ป.')) {
+          if (!gradeGroups['ประถม']) gradeGroups['ประถม'] = [];
+          const number = student.grade.replace('ป.', '');
+          if (!gradeGroups['ประถม'].includes(number)) {
+            gradeGroups['ประถม'].push(number);
+          }
+        } else if (student.grade.startsWith('ม.')) {
+          if (!gradeGroups['มัธยม']) gradeGroups['มัธยม'] = [];
+          const number = student.grade.replace('ม.', '');
+          if (!gradeGroups['มัธยม'].includes(number)) {
+            gradeGroups['มัธยม'].push(number);
+          }
+        }
+      }
+    });
+
+    const gradeTexts: string[] = [];
+    
+    if (gradeGroups['อนุบาล']) {
+      gradeGroups['อนุบาล'].sort();
+      gradeTexts.push(`อนุบาลปีที่ ${gradeGroups['อนุบาล'].join(',')}`);
+    }
+    
+    if (gradeGroups['ประถม']) {
+      gradeGroups['ประถม'].sort();
+      gradeTexts.push(`ประถมศึกษาปีที่ ${gradeGroups['ประถม'].join(',')}`);
+    }
+    
+    if (gradeGroups['มัธยม']) {
+      gradeGroups['มัธยม'].sort();
+      gradeTexts.push(`มัธยมศึกษาปีที่ ${gradeGroups['มัธยม'].join(',')}`);
+    }
+
+    return gradeTexts.join(', ');
+  };
+
+  const handlePaymentTypeChangeWrapper = (paymentTypes: string[]) => {
+    handlePaymentTypeChange(paymentTypes);
+    
+    // If "ค่าจัดการเรียนการสอน" is selected, update grade display
+    if (paymentTypes.includes('ค่าจัดการเรียนการสอน (ปัจจัยพื้นฐานสำหรับการรับนักเรียนยากจน)')) {
+      const gradeDisplay = getGradeDisplayFromStudents(voucherData.students);
+      if (gradeDisplay) {
+        setVoucherData(prev => ({ ...prev, grade: gradeDisplay }));
+      }
+    }
+  };
+
   return (
     <div className="space-y-6 pb-8">
       <div className="flex justify-between items-center">
@@ -127,7 +209,7 @@ const FinancialReports = () => {
           <PaymentTypeSelection
             paymentOptions={paymentOptions}
             selectedPaymentTypes={voucherData.paymentTypes}
-            onPaymentTypeChange={handlePaymentTypeChange}
+            onPaymentTypeChange={handlePaymentTypeChangeWrapper}
           />
           
           <AcademicInfoSection
@@ -154,6 +236,51 @@ const FinancialReports = () => {
             grade={voucherData.grade}
             studentCount={voucherData.students.length}
           />
+
+          {/* Student Selection Button */}
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-lg font-medium">รายชื่อนักเรียน</h3>
+                <p className="text-sm text-gray-600">
+                  {voucherData.students.length > 0 
+                    ? `เลือกนักเรียนแล้ว ${voucherData.students.length} คน`
+                    : 'ยังไม่ได้เลือกนักเรียน'
+                  }
+                </p>
+              </div>
+              <Button 
+                onClick={() => setShowStudentSelection(true)}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                เลือกนักเรียนเพิ่มเติม
+              </Button>
+            </div>
+            
+            {voucherData.students.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
+                <div className="grid gap-2">
+                  {voucherData.students.slice(0, 10).map((student, index) => (
+                    <div key={student.id} className="flex justify-between items-center text-sm">
+                      <span>
+                        {index + 1}. {student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}
+                      </span>
+                      <span className="text-gray-500">
+                        {student.grade} ({student.academicYear})
+                      </span>
+                    </div>
+                  ))}
+                  {voucherData.students.length > 10 && (
+                    <div className="text-sm text-gray-500 text-center pt-2">
+                      และอีก {voucherData.students.length - 10} คน
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           <SignatureFields
             teachers={teachers}
@@ -197,6 +324,15 @@ const FinancialReports = () => {
         onOpenChange={setShowPreview}
         voucherData={voucherData}
         paymentOptions={paymentOptions}
+      />
+
+      {/* Student Selection Dialog */}
+      <StudentSelectionDialog
+        isOpen={showStudentSelection}
+        onOpenChange={setShowStudentSelection}
+        onStudentsSelected={handleStudentsSelected}
+        selectedStudents={voucherData.students}
+        selectedGrade={selectedGrade}
       />
     </div>
   );
