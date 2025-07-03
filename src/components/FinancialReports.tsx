@@ -176,7 +176,7 @@ const FinancialReports = () => {
   };
 
   const handlePaymentTypeChangeWrapper = (paymentTypes: string[]) => {
-    handlePaymentTypeChange(paymentTypes);
+    setVoucherData(prev => ({ ...prev, paymentTypes }));
     
     // If "ค่าจัดการเรียนการสอน" is selected, update grade display
     if (paymentTypes.includes('ค่าจัดการเรียนการสอน (ปัจจัยพื้นฐานสำหรับการรับนักเรียนยากจน)')) {

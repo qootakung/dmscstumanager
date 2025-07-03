@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Users, UserPlus } from 'lucide-react';
 import type { Student } from '@/types/student';
-import { getAllStudents } from '@/utils/storage';
+import { getStudents } from '@/utils/storage';
 
 interface StudentSelectionDialogProps {
   isOpen: boolean;
@@ -40,7 +39,7 @@ const StudentSelectionDialog: React.FC<StudentSelectionDialogProps> = ({
   useEffect(() => {
     const loadStudents = async () => {
       try {
-        const students = await getAllStudents();
+        const students = await getStudents();
         setAllStudents(students);
       } catch (error) {
         console.error("Error loading students:", error);
