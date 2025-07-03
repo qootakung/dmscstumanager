@@ -23,12 +23,17 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
           <h3 className="text-lg font-bold">
             {reportOptions.customColumn1}
           </h3>
+        ) : reportOptions.reportType === '2' ? (
+          <>
+            <h3 className="text-lg font-bold">
+              แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้
+            </h3>
+            <p className="text-base">โรงเรียนบ้านดอนมูล</p>
+          </>
         ) : (
           <h3 className="text-lg font-bold">
             {reportOptions.reportType === '1'
               ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล'
-              : reportOptions.reportType === '2'
-              ? 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'
               : 'แบบลงทะเบียนโรงเรียนบ้านดอนมูล'
             }
           </h3>
@@ -38,9 +43,8 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
           <p className="text-sm">{reportOptions.customColumn2}</p>
         )}
         
-        <p className="text-sm">ปีการศึกษา {reportOptions.academicYear}</p>
         <p className="text-sm">
-          {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`}
+          {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา {reportOptions.academicYear}
         </p>
       </div>
 
@@ -51,7 +55,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
       </div>
 
       <div className="overflow-auto max-h-96">
-        <table className="w-full border-collapse border-2 border-black text-sm">
+        <table className="w-full border-collapse border border-black text-sm">
           <thead>
             <tr className="bg-gray-100">
               {allColumns.map((column, index) => (

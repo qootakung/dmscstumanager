@@ -33,18 +33,21 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     if (mainHeader.length === 0) {
       mainHeader.push(['แบบลงทะเบียนโรงเรียนบ้านดอนมูล']);
     }
-    mainHeader.push([`ปีการศึกษา ${reportOptions.academicYear}`]);
-    mainHeader.push([reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`]);
+    mainHeader.push([`${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา ${reportOptions.academicYear}`]);
+  } else if (reportOptions.reportType === '2') {
+    // For meeting registration form, use new text
+    mainHeader = [
+      ['แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'],
+      ['โรงเรียนบ้านดอนมูล'],
+      [`${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา ${reportOptions.academicYear}`]
+    ];
   } else {
     // For other report types, use standard headers
-    const reportTitle = reportOptions.reportType === '1' 
-      ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' 
-      : 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล';
+    const reportTitle = 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล';
       
     mainHeader = [
       [reportTitle],
-      [`ปีการศึกษา ${reportOptions.academicYear}`],
-      [reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`]
+      [`${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา ${reportOptions.academicYear}`]
     ];
   }
   

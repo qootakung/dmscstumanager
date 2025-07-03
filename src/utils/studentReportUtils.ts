@@ -49,7 +49,7 @@ export const getReportTitle = (reportOptions: ReportOptions) => {
     case '1':
       return 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล';
     case '2':
-      return 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล';
+      return 'แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้';
     case '3':
       return 'แบบลงทะเบียนโรงเรียนบ้านดอนมูล';
     default:

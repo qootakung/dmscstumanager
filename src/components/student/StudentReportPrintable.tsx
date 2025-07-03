@@ -20,7 +20,7 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
     const tableStyle: React.CSSProperties = {
       width: '100%',
       borderCollapse: 'collapse',
-      border: '2px solid #000',
+      border: '1px solid #000',
       fontSize: '14px',
       fontFamily: 'TH Sarabun, Sarabun, Arial, sans-serif'
     };
@@ -91,6 +91,22 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
             }}>
               {reportOptions.customColumn1}
             </h1>
+          ) : reportOptions.reportType === '2' ? (
+            <>
+              <h1 style={{ 
+                fontSize: '18px', 
+                fontWeight: 'bold', 
+                margin: '0 0 8px 0'
+              }}>
+                แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้
+              </h1>
+              <p style={{ 
+                fontSize: '15px', 
+                margin: '0 0 8px 0'
+              }}>
+                โรงเรียนบ้านดอนมูล
+              </p>
+            </>
           ) : (
             <h1 style={{ 
               fontSize: '18px', 
@@ -103,7 +119,7 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
           
           {reportOptions.reportType === '3' && reportOptions.customColumn2?.trim() && (
             <p style={{ 
-              fontSize: '16px', 
+              fontSize: '15px', 
               margin: '0 0 8px 0'
             }}>
               {reportOptions.customColumn2}
@@ -112,15 +128,9 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
           
           <p style={{ 
             fontSize: '16px', 
-            margin: '0 0 4px 0'
-          }}>
-            ปีการศึกษา {reportOptions.academicYear}
-          </p>
-          <p style={{ 
-            fontSize: '16px', 
             margin: '0'
           }}>
-            {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`}
+            {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา {reportOptions.academicYear}
           </p>
         </div>
 
