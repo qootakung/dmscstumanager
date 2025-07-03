@@ -19,12 +19,25 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
   return (
     <div className="mt-6 border rounded-lg p-4 bg-white">
       <div className="text-center mb-2 font-sarabun">
-        <h3 className="text-lg font-bold">
-          {reportOptions.reportType === '1'
-            ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล'
-            : 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'
-          }
-        </h3>
+        {reportOptions.reportType === '3' && reportOptions.customColumn1?.trim() ? (
+          <h3 className="text-lg font-bold">
+            {reportOptions.customColumn1}
+          </h3>
+        ) : (
+          <h3 className="text-lg font-bold">
+            {reportOptions.reportType === '1'
+              ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล'
+              : reportOptions.reportType === '2'
+              ? 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'
+              : 'แบบลงทะเบียนโรงเรียนบ้านดอนมูล'
+            }
+          </h3>
+        )}
+        
+        {reportOptions.reportType === '3' && reportOptions.customColumn2?.trim() && (
+          <p className="text-sm">{reportOptions.customColumn2}</p>
+        )}
+        
         <p className="text-sm">ปีการศึกษา {reportOptions.academicYear}</p>
         <p className="text-sm">
           {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`}
@@ -38,11 +51,11 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
       </div>
 
       <div className="overflow-auto max-h-96">
-        <table className="w-full border-collapse border border-gray-300 text-sm">
+        <table className="w-full border-collapse border-2 border-black text-sm">
           <thead>
             <tr className="bg-gray-100">
               {allColumns.map((column, index) => (
-                <th key={index} className="border border-gray-300 px-2 py-1 text-center font-medium">
+                <th key={index} className="border border-black px-2 py-1 text-center font-medium">
                   {column}
                 </th>
               ))}
@@ -51,41 +64,45 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
           <tbody>
             {students.map((student, index) => (
               <tr key={student.id}>
-                <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
-                <td className="border border-gray-300 px-2 py-1 text-center">{student.studentId}</td>
-                <td className="border border-gray-300 px-2 py-1">{(student.titleTh || '')}{student.firstNameTh} {student.lastNameTh}</td>
+                <td className="border border-black px-2 py-1 text-center">{index + 1}</td>
+                <td className="border border-black px-2 py-1 text-center">{student.studentId}</td>
+                <td className="border border-black px-2 py-1">{(student.titleTh || '')}{student.firstNameTh} {student.lastNameTh}</td>
                 
-                {/* Additional fields */}
-                {reportOptions.additionalFields.gender && (
-                  <td className="border border-gray-300 px-2 py-1 text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
-                )}
-                {reportOptions.additionalFields.citizenId && (
-                  <td className="border border-gray-300 px-2 py-1 text-center">{student.citizenId}</td>
-                )}
-                {reportOptions.additionalFields.signature && (
-                  <td className="border border-gray-300 px-2 py-1"></td>
-                )}
-                {reportOptions.additionalFields.guardianSignature && (
-                  <td className="border border-gray-300 px-2 py-1"></td>
-                )}
-                {reportOptions.additionalFields.timeIn && (
-                  <td className="border border-gray-300 px-2 py-1"></td>
-                )}
-                {reportOptions.additionalFields.timeOut && (
-                  <td className="border border-gray-300 px-2 py-1"></td>
-                )}
-                {reportOptions.additionalFields.phone && (
-                  <td className="border border-gray-300 px-2 py-1 text-center">{student.guardianPhone}</td>
-                )}
+                {/* Additional fields for non-type-3 reports */}
+                {reportOptions.reportType !== '3' && (
+                  <>
+                    {reportOptions.additionalFields.gender && (
+                      <td className="border border-black px-2 py-1 text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
+                    )}
+                    {reportOptions.additionalFields.citizenId && (
+                      <td className="border border-black px-2 py-1 text-center">{student.citizenId}</td>
+                    )}
+                    {reportOptions.additionalFields.signature && (
+                      <td className="border border-black px-2 py-1"></td>
+                    )}
+                    {reportOptions.additionalFields.guardianSignature && (
+                      <td className="border border-black px-2 py-1"></td>
+                    )}
+                    {reportOptions.additionalFields.timeIn && (
+                      <td className="border border-black px-2 py-1"></td>
+                    )}
+                    {reportOptions.additionalFields.timeOut && (
+                      <td className="border border-black px-2 py-1"></td>
+                    )}
+                    {reportOptions.additionalFields.phone && (
+                      <td className="border border-black px-2 py-1 text-center">{student.guardianPhone}</td>
+                    )}
 
-                {/* Custom empty columns */}
-                {Array.from({ length: reportOptions.customColumns || 0 }).map((_, colIndex) => (
-                  <td key={`custom-${colIndex}`} className="border border-gray-300 px-2 py-1"></td>
-                ))}
+                    {/* Custom empty columns */}
+                    {Array.from({ length: reportOptions.customColumns || 0 }).map((_, colIndex) => (
+                      <td key={`custom-${colIndex}`} className="border border-black px-2 py-1"></td>
+                    ))}
 
-                {/* Note column at the end */}
-                {reportOptions.additionalFields.note && (
-                  <td className="border border-gray-300 px-2 py-1"></td>
+                    {/* Note column at the end */}
+                    {reportOptions.additionalFields.note && (
+                      <td className="border border-black px-2 py-1"></td>
+                    )}
+                  </>
                 )}
               </tr>
             ))}

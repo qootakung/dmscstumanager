@@ -49,23 +49,23 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
         {reportOptions.reportType === '3' && (
           <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
             <Label className="text-base font-medium">ข้อมูลเพิ่มเติมสำหรับแบบลงทะเบียนอื่นๆ</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="customColumn1">หัวข้อคอลัมน์ที่ 1</Label>
+                <Label htmlFor="customColumn1">หัวข้อบรรทัดที่ 1</Label>
                 <Input
                   id="customColumn1"
                   value={reportOptions.customColumn1 || ''}
                   onChange={(e) => onOptionChange('customColumn1', e.target.value)}
-                  placeholder="เช่น ลายมือชื่อ"
+                  placeholder="เช่น แบบลงทะเบียนโครงการมะระดับชาติมหิธรกาง"
                 />
               </div>
               <div>
-                <Label htmlFor="customColumn2">หัวข้อคอลัมน์ที่ 2</Label>
+                <Label htmlFor="customColumn2">หัวข้อบรรทัดที่ 2</Label>
                 <Input
                   id="customColumn2"
                   value={reportOptions.customColumn2 || ''}
                   onChange={(e) => onOptionChange('customColumn2', e.target.value)}
-                  placeholder="เช่น หมายเหตุ"
+                  placeholder="เช่น กิจกรรม ส่งเสริมความเป็นเลิศทางวิชาการ"
                 />
               </div>
             </div>

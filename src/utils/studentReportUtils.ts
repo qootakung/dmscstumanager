@@ -14,16 +14,9 @@ export const sortGrades = (grades: string[]): string[] => {
 export const getReportColumns = (reportOptions: ReportOptions) => {
   const baseColumns = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ - นามสกุล'];
   
-  // For "Other Registration Form" type, use custom columns
+  // For "Other Registration Form" type, only show basic columns
   if (reportOptions.reportType === '3') {
-    const customColumns = [];
-    if (reportOptions.customColumn1?.trim()) {
-      customColumns.push(reportOptions.customColumn1.trim());
-    }
-    if (reportOptions.customColumn2?.trim()) {
-      customColumns.push(reportOptions.customColumn2.trim());
-    }
-    return [...baseColumns, ...customColumns];
+    return baseColumns;
   }
   
   // For other report types, use existing logic

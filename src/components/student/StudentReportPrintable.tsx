@@ -20,7 +20,7 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
     const tableStyle: React.CSSProperties = {
       width: '100%',
       borderCollapse: 'collapse',
-      border: '1px solid #000',
+      border: '2px solid #000',
       fontSize: '14px',
       fontFamily: 'TH Sarabun, Sarabun, Arial, sans-serif'
     };
@@ -53,11 +53,8 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
       ];
 
       if (reportOptions.reportType === '3') {
-        // For "Other Registration Form", add empty cells for custom columns
-        const customCells = [];
-        if (reportOptions.customColumn1?.trim()) customCells.push('');
-        if (reportOptions.customColumn2?.trim()) customCells.push('');
-        return [...baseData, ...customCells];
+        // For "Other Registration Form", only show basic columns
+        return baseData;
       }
 
       // For other report types, use existing logic
@@ -86,13 +83,33 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
       }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <h1 style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold', 
-            margin: '0 0 8px 0'
-          }}>
-            {reportTitle}
-          </h1>
+          {reportOptions.reportType === '3' && reportOptions.customColumn1?.trim() ? (
+            <h1 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              margin: '0 0 8px 0'
+            }}>
+              {reportOptions.customColumn1}
+            </h1>
+          ) : (
+            <h1 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              margin: '0 0 8px 0'
+            }}>
+              {reportTitle}
+            </h1>
+          )}
+          
+          {reportOptions.reportType === '3' && reportOptions.customColumn2?.trim() && (
+            <p style={{ 
+              fontSize: '16px', 
+              margin: '0 0 8px 0'
+            }}>
+              {reportOptions.customColumn2}
+            </p>
+          )}
+          
           <p style={{ 
             fontSize: '16px', 
             margin: '0 0 4px 0'

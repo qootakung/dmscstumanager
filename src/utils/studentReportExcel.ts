@@ -19,37 +19,61 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   const ws = XLSX.utils.aoa_to_sheet([]);
   
   // Report Headers
-  const reportTitle = reportOptions.reportType === '1' 
-    ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' 
-    : reportOptions.reportType === '2'
-    ? 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'
-    : 'แบบลงทะเบียนโรงเรียนบ้านดอนมูล';
-    
-  const mainHeader = [
-    [reportTitle],
-    [`ปีการศึกษา ${reportOptions.academicYear}`],
-    [reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`]
-  ];
+  let mainHeader: string[][];
+  
+  if (reportOptions.reportType === '3') {
+    // For "Other Registration Form", use custom headers if provided
+    mainHeader = [];
+    if (reportOptions.customColumn1?.trim()) {
+      mainHeader.push([reportOptions.customColumn1]);
+    }
+    if (reportOptions.customColumn2?.trim()) {
+      mainHeader.push([reportOptions.customColumn2]);
+    }
+    if (mainHeader.length === 0) {
+      mainHeader.push(['แบบลงทะเบียนโรงเรียนบ้านดอนมูล']);
+    }
+    mainHeader.push([`ปีการศึกษา ${reportOptions.academicYear}`]);
+    mainHeader.push([reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`]);
+  } else {
+    // For other report types, use standard headers
+    const reportTitle = reportOptions.reportType === '1' 
+      ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' 
+      : 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล';
+      
+    mainHeader = [
+      [reportTitle],
+      [`ปีการศึกษา ${reportOptions.academicYear}`],
+      [reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`]
+    ];
+  }
+  
   XLSX.utils.sheet_add_aoa(ws, mainHeader, { origin: 'A1' });
-  if(ws['A1']) ws['A1'].s = titleStyle;
-  if(ws['A2']) ws['A2'].s = subtitleStyle;
-  if(ws['A3']) ws['A3'].s = subtitleStyle;
+  
+  // Apply styles to headers
+  mainHeader.forEach((_, rowIndex) => {
+    const cellRef = XLSX.utils.encode_cell({c: 0, r: rowIndex});
+    if (ws[cellRef]) {
+      ws[cellRef].s = rowIndex === 0 ? titleStyle : subtitleStyle;
+    }
+  });
   
   // Summary
   const maleCount = filteredStudents.filter(s => s.gender === 'ชาย').length;
   const femaleCount = filteredStudents.filter(s => s.gender === 'หญิง').length;
   const totalCount = filteredStudents.length;
   const summaryData = [[`จำนวนเพศชาย ${maleCount} คน`, `เพศหญิง ${femaleCount} คน`, `รวม ${totalCount} คน`]];
-  XLSX.utils.sheet_add_aoa(ws, summaryData, { origin: 'A5' });
-  if(ws['A5']) ws['A5'].s = summaryStyle;
-  if(ws['B5']) ws['B5'].s = summaryStyle;
-  if(ws['C5']) ws['C5'].s = summaryStyle;
+  const summaryRow = mainHeader.length + 2;
+  XLSX.utils.sheet_add_aoa(ws, summaryData, { origin: `A${summaryRow}` });
+  if(ws[`A${summaryRow}`]) ws[`A${summaryRow}`].s = summaryStyle;
+  if(ws[`B${summaryRow}`]) ws[`B${summaryRow}`].s = summaryStyle;
+  if(ws[`C${summaryRow}`]) ws[`C${summaryRow}`].s = summaryStyle;
 
   // Table Columns
   const allColumns = getReportColumns(reportOptions);
 
   // Table Header
-  const tableHeaderRow = 7;
+  const tableHeaderRow = summaryRow + 2;
   XLSX.utils.sheet_add_aoa(ws, [allColumns], { origin: `A${tableHeaderRow}` });
   allColumns.forEach((_, colIndex) => {
       const cellRef = XLSX.utils.encode_cell({c: colIndex, r: tableHeaderRow - 1});
@@ -65,9 +89,7 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     ];
 
     if (reportOptions.reportType === '3') {
-      // For "Other Registration Form", add empty cells for custom columns
-      if (reportOptions.customColumn1?.trim()) baseRow.push('');
-      if (reportOptions.customColumn2?.trim()) baseRow.push('');
+      // For "Other Registration Form", only show basic data
       return baseRow;
     }
 
@@ -101,23 +123,19 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     });
   });
 
-  // Merges
-  ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: allColumns.length - 1 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: allColumns.length - 1 } },
-    { s: { r: 2, c: 0 }, e: { r: 2, c: allColumns.length - 1 } },
-  ];
+  // Merges for headers
+  const merges = [];
+  mainHeader.forEach((_, rowIndex) => {
+    merges.push({ s: { r: rowIndex, c: 0 }, e: { r: rowIndex, c: allColumns.length - 1 } });
+  });
+  ws['!merges'] = merges;
   
   // Column Widths
   const colWidths = [
     { wch: 8 }, { wch: 15 }, { wch: 30 },
   ];
   
-  if (reportOptions.reportType === '3') {
-    // For custom columns, use wider width
-    if (reportOptions.customColumn1?.trim()) colWidths.push({ wch: 25 });
-    if (reportOptions.customColumn2?.trim()) colWidths.push({ wch: 25 });
-  } else {
+  if (reportOptions.reportType !== '3') {
     // For other report types, use existing logic
     if (reportOptions.additionalFields.gender) colWidths.push({ wch: 8 });
     if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 20 });
@@ -135,9 +153,7 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   ws['!cols'] = colWidths;
 
   // Set row heights for headers
-  ws['!rows'] = [
-      { hpt: 24 }, { hpt: 18 }, { hpt: 18 }
-  ];
+  ws['!rows'] = Array(mainHeader.length).fill({ hpt: 20 });
   
   // Generate file
   const wb = XLSX.utils.book_new();
