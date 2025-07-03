@@ -56,10 +56,53 @@ const Dashboard: React.FC = () => {
     value: count,
   }));
 
-  const positionChartData = Object.entries(teacherStats.byPosition).map(([position, count]) => ({
-    position: position.length > 15 ? position.substring(0, 15) + '...' : position,
-    teachers: count,
-  }));
+  // Enhanced position chart data with full names and abbreviations
+  const positionChartData = Object.entries(teacherStats.byPosition).map(([position, count]) => {
+    let displayPosition = position;
+    let fullPosition = position;
+    
+    // Create better abbreviations and maintain full names
+    switch (position) {
+      case 'ครู วิทยฐานะครูชำนาญการ':
+        displayPosition = 'ครูชำนาญการ';
+        break;
+      case 'ครู วิทยฐานะครูชำนาญการพิเศษ':
+        displayPosition = 'ครูชำนาญการพิเศษ';
+        break;
+      case 'ครู วิทยฐานะครูเชี่ยวชาญ':
+        displayPosition = 'ครูเชี่ยวชาญ';
+        break;
+      case 'ครู วิทยฐานะครูเชี่ยวชาญพิเศษ':
+        displayPosition = 'ครูเชี่ยวชาญพิเศษ';
+        break;
+      case 'ครู ยังไม่มีวิทยฐานะ':
+        displayPosition = 'ครู (ไม่มีวิทยฐานะ)';
+        break;
+      case 'ผู้อำนวยการโรงเรียน':
+        displayPosition = 'ผู้อำนวยการ';
+        break;
+      case 'เจ้าหน้าที่ธุรการ':
+        displayPosition = 'เจ้าหน้าที่ธุรการ';
+        break;
+      case 'นักการภารโรง':
+        displayPosition = 'ภารโรง';
+        break;
+      case 'ครูอัตราจ้าง':
+        displayPosition = 'ครูอัตราจ้าง';
+        break;
+      default:
+        // For other positions, truncate if too long
+        if (position.length > 20) {
+          displayPosition = position.substring(0, 18) + '...';
+        }
+    }
+    
+    return {
+      position: displayPosition,
+      fullPosition: fullPosition,
+      teachers: count,
+    };
+  });
 
   // สีสันสำหรับกราฟแต่ละระดับชั้น
   const gradeColors = [
@@ -68,6 +111,20 @@ const Dashboard: React.FC = () => {
   ];
 
   const GENDER_COLORS = ['#22c55e', '#f59e0b'];
+
+  // Custom tooltip for teacher positions
+  const CustomTeacherTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-slate-800 text-white p-3 rounded-lg shadow-lg border-none max-w-xs">
+          <p className="font-medium text-sm mb-1">{data.fullPosition}</p>
+          <p className="text-orange-200 text-sm">จำนวน: {data.teachers} คน</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -219,27 +276,27 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Teacher Position Chart */}
+      {/* Enhanced Teacher Position Chart */}
       {teacherStats.total > 0 && (
         <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
           <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
-            <CardTitle className="text-lg font-bold">จำนวนครูแยกตามตำแหน่ง</CardTitle>
+            <CardTitle className="text-lg font-bold">จำนวนครูแยกตามตำแหน่งและวิทยฐานะ</CardTitle>
+            <p className="text-orange-100 text-sm mt-1">เลื่อนเมาส์เพื่อดูชื่อตำแหน่งแบบเต็ม</p>
           </CardHeader>
           <CardContent className="p-6">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={positionChartData} layout="vertical">
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={positionChartData} layout="vertical" margin={{ left: 20, right: 20, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis type="number" stroke="#64748b" fontSize={12} />
-                <YAxis dataKey="position" type="category" stroke="#64748b" fontSize={12} width={120} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1e293b', 
-                    color: 'white', 
-                    border: 'none', 
-                    borderRadius: '8px',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                  }} 
+                <XAxis type="number" stroke="#64748b" fontSize={11} />
+                <YAxis 
+                  dataKey="position" 
+                  type="category" 
+                  stroke="#64748b" 
+                  fontSize={11} 
+                  width={140}
+                  tick={{ fontSize: 11 }}
                 />
+                <Tooltip content={<CustomTeacherTooltip />} />
                 <Bar 
                   dataKey="teachers" 
                   radius={[0, 6, 6, 0]}
