@@ -13,6 +13,20 @@ export const sortGrades = (grades: string[]): string[] => {
 
 export const getReportColumns = (reportOptions: ReportOptions) => {
   const baseColumns = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ - นามสกุล'];
+  
+  // For "Other Registration Form" type, use custom columns
+  if (reportOptions.reportType === '3') {
+    const customColumns = [];
+    if (reportOptions.customColumn1?.trim()) {
+      customColumns.push(reportOptions.customColumn1.trim());
+    }
+    if (reportOptions.customColumn2?.trim()) {
+      customColumns.push(reportOptions.customColumn2.trim());
+    }
+    return [...baseColumns, ...customColumns];
+  }
+  
+  // For other report types, use existing logic
   const additionalColumns = [];
   if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
   if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
@@ -35,4 +49,17 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
   }
 
   return [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
+};
+
+export const getReportTitle = (reportOptions: ReportOptions) => {
+  switch (reportOptions.reportType) {
+    case '1':
+      return 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล';
+    case '2':
+      return 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล';
+    case '3':
+      return 'แบบลงทะเบียนโรงเรียนบ้านดอนมูล';
+    default:
+      return 'รายงานนักเรียนโรงเรียนบ้านดอนมูล';
+  }
 };

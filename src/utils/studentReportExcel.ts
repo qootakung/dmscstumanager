@@ -19,8 +19,14 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   const ws = XLSX.utils.aoa_to_sheet([]);
   
   // Report Headers
+  const reportTitle = reportOptions.reportType === '1' 
+    ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' 
+    : reportOptions.reportType === '2'
+    ? 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'
+    : 'แบบลงทะเบียนโรงเรียนบ้านดอนมูล';
+    
   const mainHeader = [
-    [reportOptions.reportType === '1' ? 'รายชื่อนักเรียนโรงเรียนบ้านดอนมูล' : 'แบบลงทะเบียนการประชุมนักเรียนโรงเรียนบ้านดอนมูล'],
+    [reportTitle],
     [`ปีการศึกษา ${reportOptions.academicYear}`],
     [reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`]
   ];
@@ -52,21 +58,30 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   
   // Table Data
   const tableData = filteredStudents.map((student, index) => {
-    const row: (string | number)[] = [
+    const baseRow: (string | number)[] = [
       index + 1,
       student.studentId,
       `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`,
     ];
-    if (reportOptions.additionalFields.gender) row.push(student.gender === 'ชาย' ? 'ช' : 'ญ');
-    if (reportOptions.additionalFields.citizenId) row.push(student.citizenId);
-    if (reportOptions.additionalFields.signature) row.push('');
-    if (reportOptions.additionalFields.guardianSignature) row.push('');
-    if (reportOptions.additionalFields.timeIn) row.push('');
-    if (reportOptions.additionalFields.timeOut) row.push('');
-    if (reportOptions.additionalFields.phone) row.push(student.guardianPhone || '');
-    for (let i = 0; i < (reportOptions.customColumns || 0); i++) { row.push(''); }
-    if (reportOptions.additionalFields.note) row.push('');
-    return row;
+
+    if (reportOptions.reportType === '3') {
+      // For "Other Registration Form", add empty cells for custom columns
+      if (reportOptions.customColumn1?.trim()) baseRow.push('');
+      if (reportOptions.customColumn2?.trim()) baseRow.push('');
+      return baseRow;
+    }
+
+    // For other report types, use existing logic
+    if (reportOptions.additionalFields.gender) baseRow.push(student.gender === 'ชาย' ? 'ช' : 'ญ');
+    if (reportOptions.additionalFields.citizenId) baseRow.push(student.citizenId);
+    if (reportOptions.additionalFields.signature) baseRow.push('');
+    if (reportOptions.additionalFields.guardianSignature) baseRow.push('');
+    if (reportOptions.additionalFields.timeIn) baseRow.push('');
+    if (reportOptions.additionalFields.timeOut) baseRow.push('');
+    if (reportOptions.additionalFields.phone) baseRow.push(student.guardianPhone || '');
+    for (let i = 0; i < (reportOptions.customColumns || 0); i++) { baseRow.push(''); }
+    if (reportOptions.additionalFields.note) baseRow.push('');
+    return baseRow;
   });
 
   const tableDataStartRow = tableHeaderRow + 1;
@@ -97,17 +112,26 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   const colWidths = [
     { wch: 8 }, { wch: 15 }, { wch: 30 },
   ];
-  if (reportOptions.additionalFields.gender) colWidths.push({ wch: 8 });
-  if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.signature) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
-  if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
-  if (reportOptions.additionalFields.phone) colWidths.push({ wch: 15 });
-  for (let i = 0; i < (reportOptions.customColumns || 0); i++) {
-    colWidths.push({ wch: 20 });
+  
+  if (reportOptions.reportType === '3') {
+    // For custom columns, use wider width
+    if (reportOptions.customColumn1?.trim()) colWidths.push({ wch: 25 });
+    if (reportOptions.customColumn2?.trim()) colWidths.push({ wch: 25 });
+  } else {
+    // For other report types, use existing logic
+    if (reportOptions.additionalFields.gender) colWidths.push({ wch: 8 });
+    if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 20 });
+    if (reportOptions.additionalFields.signature) colWidths.push({ wch: 20 });
+    if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 20 });
+    if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
+    if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
+    if (reportOptions.additionalFields.phone) colWidths.push({ wch: 15 });
+    for (let i = 0; i < (reportOptions.customColumns || 0); i++) {
+      colWidths.push({ wch: 20 });
+    }
+    if (reportOptions.additionalFields.note) colWidths.push({ wch: 30 });
   }
-  if (reportOptions.additionalFields.note) colWidths.push({ wch: 30 });
+  
   ws['!cols'] = colWidths;
 
   // Set row heights for headers

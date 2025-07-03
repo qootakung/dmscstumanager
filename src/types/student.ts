@@ -49,7 +49,7 @@ export interface User {
 }
 
 export interface ReportOptions {
-  reportType: '1' | '2';
+  reportType: '1' | '2' | '3';
   classLevel: string;
   academicYear: string;
   additionalFields: {
@@ -62,7 +62,9 @@ export interface ReportOptions {
     phone: boolean;
     note: boolean;
   };
-  customColumns?: number;
+  customColumns: number;
+  customColumn1?: string;
+  customColumn2?: string;
 }
 
 export interface StudentHealthRecord {
