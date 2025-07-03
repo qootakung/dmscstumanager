@@ -14,7 +14,7 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
     const reportTitle = getReportTitle(reportOptions);
 
     const maleCount = students.filter(s => s.gender === 'ชาย').length;
-    const femaleCount = students.filter(s => s.gender === 'หญิng').length;
+    const femaleCount = students.filter(s => s.gender === 'หญิง').length;
     const totalCount = students.length;
 
     const tableStyle: React.CSSProperties = {

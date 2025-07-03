@@ -83,8 +83,8 @@ const Reports: React.FC = () => {
               </div>
               <ReportOptionsForm
                 reportOptions={reportOptions}
-                handleOptionChange={handleOptionChange}
-                handleAdditionalFieldChange={handleAdditionalFieldChange}
+                onOptionChange={handleOptionChange}
+                onAdditionalFieldChange={handleAdditionalFieldChange}
                 classLevels={classLevels}
                 academicYears={academicYears}
               />
