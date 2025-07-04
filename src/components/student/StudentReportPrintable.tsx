@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns, getReportTitle } from '@/utils/studentReportUtils';
@@ -89,7 +90,7 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
                 fontWeight: 'bold', 
                 margin: '0 0 8px 0'
               }}>
-                {reportOptions.customColumn1?.trim() || 'แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'}
+                แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้
               </h1>
               <p style={{ 
                 fontSize: '15px', 
@@ -97,6 +98,14 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
               }}>
                 โรงเรียนบ้านดอนมูล
               </p>
+              {reportOptions.customColumn1?.trim() && (
+                <p style={{ 
+                  fontSize: '15px', 
+                  margin: '0 0 8px 0'
+                }}>
+                  {reportOptions.customColumn1}
+                </p>
+              )}
               {reportOptions.customColumn2?.trim() && (
                 <p style={{ 
                   fontSize: '15px', 
@@ -136,7 +145,7 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
             fontSize: '16px', 
             margin: '0'
           }}>
-            ระดับชั้น {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : reportOptions.classLevel} ปีการศึกษา {reportOptions.academicYear}
+            {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา {reportOptions.academicYear}
           </p>
         </div>
 

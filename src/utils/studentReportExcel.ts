@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from "@/components/ui/use-toast";
@@ -21,24 +22,27 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   let mainHeader: string[][];
   
   if (reportOptions.reportType === '3') {
-    // For "Other Registration Form", use the custom input or default text
+    // For "Other Registration Form", use the new title
     mainHeader = [
-      [reportOptions.customColumn1?.trim() || 'แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'],
+      ['แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'],
       ['โรงเรียนบ้านดอนมูล']
     ];
     
-    // Add second custom header if provided
+    // Add custom headers if provided
+    if (reportOptions.customColumn1?.trim()) {
+      mainHeader.push([reportOptions.customColumn1]);
+    }
     if (reportOptions.customColumn2?.trim()) {
       mainHeader.push([reportOptions.customColumn2]);
     }
     
-    mainHeader.push([`ระดับชั้น ${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : reportOptions.classLevel} ปีการศึกษา ${reportOptions.academicYear}`]);
+    mainHeader.push([`${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา ${reportOptions.academicYear}`]);
   } else if (reportOptions.reportType === '2') {
     // For meeting registration form, use new text
     mainHeader = [
       ['แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'],
       ['โรงเรียนบ้านดอนมูล'],
-      [`ระดับชั้น ${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : reportOptions.classLevel} ปีการศึกษา ${reportOptions.academicYear}`]
+      [`${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา ${reportOptions.academicYear}`]
     ];
   } else {
     // For other report types, use standard headers
@@ -46,7 +50,7 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
       
     mainHeader = [
       [reportTitle],
-      [`ระดับชั้น ${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : reportOptions.classLevel} ปีการศึกษา ${reportOptions.academicYear}`]
+      [`${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา ${reportOptions.academicYear}`]
     ];
   }
   
