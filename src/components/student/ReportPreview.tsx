@@ -21,12 +21,9 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
         {reportOptions.reportType === '3' ? (
           <>
             <h3 className="text-lg font-bold">
-              แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้
+              {reportOptions.customColumn1?.trim() || 'แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'}
             </h3>
             <p className="text-base">โรงเรียนบ้านดอนมูล</p>
-            {reportOptions.customColumn1?.trim() && (
-              <p className="text-sm">{reportOptions.customColumn1}</p>
-            )}
             {reportOptions.customColumn2?.trim() && (
               <p className="text-sm">{reportOptions.customColumn2}</p>
             )}
@@ -45,7 +42,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
         )}
         
         <p className="text-sm">
-          {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา {reportOptions.academicYear}
+          ระดับชั้น {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : reportOptions.classLevel} ปีการศึกษา {reportOptions.academicYear}
         </p>
       </div>
 
