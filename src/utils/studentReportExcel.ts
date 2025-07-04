@@ -22,17 +22,20 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   let mainHeader: string[][];
   
   if (reportOptions.reportType === '3') {
-    // For "Other Registration Form", use custom headers if provided
-    mainHeader = [];
+    // For "Other Registration Form", use the new title
+    mainHeader = [
+      ['แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'],
+      ['โรงเรียนบ้านดอนมูล']
+    ];
+    
+    // Add custom headers if provided
     if (reportOptions.customColumn1?.trim()) {
       mainHeader.push([reportOptions.customColumn1]);
     }
     if (reportOptions.customColumn2?.trim()) {
       mainHeader.push([reportOptions.customColumn2]);
     }
-    if (mainHeader.length === 0) {
-      mainHeader.push(['แบบลงทะเบียนโรงเรียนบ้านดอนมูล']);
-    }
+    
     mainHeader.push([`${reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา ${reportOptions.academicYear}`]);
   } else if (reportOptions.reportType === '2') {
     // For meeting registration form, use new text
@@ -92,8 +95,8 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     ];
 
     if (reportOptions.reportType === '3') {
-      // For "Other Registration Form", only show basic data
-      return baseRow;
+      // For type 3, add the four fixed columns: signature, time in, time out, notes
+      return [...baseRow, '', '', '', ''];
     }
 
     // For other report types, use existing logic
@@ -138,7 +141,13 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     { wch: 8 }, { wch: 15 }, { wch: 30 },
   ];
   
-  if (reportOptions.reportType !== '3') {
+  if (reportOptions.reportType === '3') {
+    // For type 3, add widths for the fixed columns
+    colWidths.push({ wch: 20 }); // ลายมือชื่อ
+    colWidths.push({ wch: 15 }); // เวลามา
+    colWidths.push({ wch: 15 }); // เวลากลับ
+    colWidths.push({ wch: 30 }); // หมายเหตุ
+  } else {
     // For other report types, use existing logic
     if (reportOptions.additionalFields.gender) colWidths.push({ wch: 8 });
     if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 20 });

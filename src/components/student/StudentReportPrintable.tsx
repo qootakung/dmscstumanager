@@ -53,8 +53,8 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
       ];
 
       if (reportOptions.reportType === '3') {
-        // For "Other Registration Form", only show basic columns
-        return baseData;
+        // For type 3, add the fixed columns: signature, time in, time out, notes
+        return [...baseData, '', '', '', ''];
       }
 
       // For other report types, use existing logic
@@ -83,14 +83,38 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
       }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          {reportOptions.reportType === '3' && reportOptions.customColumn1?.trim() ? (
-            <h1 style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold', 
-              margin: '0 0 8px 0'
-            }}>
-              {reportOptions.customColumn1}
-            </h1>
+          {reportOptions.reportType === '3' ? (
+            <>
+              <h1 style={{ 
+                fontSize: '18px', 
+                fontWeight: 'bold', 
+                margin: '0 0 8px 0'
+              }}>
+                แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้
+              </h1>
+              <p style={{ 
+                fontSize: '15px', 
+                margin: '0 0 8px 0'
+              }}>
+                โรงเรียนบ้านดอนมูล
+              </p>
+              {reportOptions.customColumn1?.trim() && (
+                <p style={{ 
+                  fontSize: '15px', 
+                  margin: '0 0 8px 0'
+                }}>
+                  {reportOptions.customColumn1}
+                </p>
+              )}
+              {reportOptions.customColumn2?.trim() && (
+                <p style={{ 
+                  fontSize: '15px', 
+                  margin: '0 0 8px 0'
+                }}>
+                  {reportOptions.customColumn2}
+                </p>
+              )}
+            </>
           ) : reportOptions.reportType === '2' ? (
             <>
               <h1 style={{ 
@@ -115,15 +139,6 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
             }}>
               {reportTitle}
             </h1>
-          )}
-          
-          {reportOptions.reportType === '3' && reportOptions.customColumn2?.trim() && (
-            <p style={{ 
-              fontSize: '15px', 
-              margin: '0 0 8px 0'
-            }}>
-              {reportOptions.customColumn2}
-            </p>
           )}
           
           <p style={{ 

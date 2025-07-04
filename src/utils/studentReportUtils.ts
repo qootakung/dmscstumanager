@@ -14,9 +14,9 @@ export const sortGrades = (grades: string[]): string[] => {
 export const getReportColumns = (reportOptions: ReportOptions) => {
   const baseColumns = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ - นามสกุล'];
   
-  // For "Other Registration Form" type, only show basic columns
+  // For "Other Registration Form" type, add fixed additional columns
   if (reportOptions.reportType === '3') {
-    return baseColumns;
+    return [...baseColumns, 'ลายมือชื่อ', 'เวลามา', 'เวลากลับ', 'หมายเหตุ'];
   }
   
   // For other report types, use existing logic
@@ -51,7 +51,7 @@ export const getReportTitle = (reportOptions: ReportOptions) => {
     case '2':
       return 'แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้';
     case '3':
-      return 'แบบลงทะเบียนโรงเรียนบ้านดอนมูล';
+      return 'แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้';
     default:
       return 'รายงานนักเรียนโรงเรียนบ้านดอนมูล';
   }
