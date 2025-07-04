@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -56,7 +55,7 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
                   id="customColumn1"
                   value={reportOptions.customColumn1 || ''}
                   onChange={(e) => onOptionChange('customColumn1', e.target.value)}
-                  placeholder="เช่น แบบลงทะเบียนโครงการมะระดับชาติมหิธรกาง"
+                  placeholder="เช่น แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้"
                 />
               </div>
               <div>
