@@ -1,4 +1,5 @@
 
+
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from "@/components/ui/use-toast";
@@ -22,11 +23,8 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   let mainHeader: string[][];
   
   if (reportOptions.reportType === '3') {
-    // For "Other Registration Form", use the new title
-    mainHeader = [
-      ['แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้'],
-      ['โรงเรียนบ้านดอนมูล']
-    ];
+    // For "Other Registration Form", use the user-entered headers
+    mainHeader = [];
     
     // Add custom headers if provided
     if (reportOptions.customColumn1?.trim()) {
@@ -178,3 +176,4 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     description: "ไฟล์ Excel กำลังถูกดาวน์โหลด...",
   })
 };
+

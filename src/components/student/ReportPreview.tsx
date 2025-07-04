@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns } from '@/utils/studentReportUtils';
@@ -20,15 +21,15 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
       <div className="text-center mb-2 font-sarabun">
         {reportOptions.reportType === '3' ? (
           <>
-            <h3 className="text-lg font-bold">
-              แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้
-            </h3>
-            <p className="text-base">โรงเรียนบ้านดอนมูล</p>
             {reportOptions.customColumn1?.trim() && (
-              <p className="text-sm">{reportOptions.customColumn1}</p>
+              <h3 className="text-lg font-bold">
+                {reportOptions.customColumn1}
+              </h3>
             )}
             {reportOptions.customColumn2?.trim() && (
-              <p className="text-sm">{reportOptions.customColumn2}</p>
+              <p className="text-lg font-bold">
+                {reportOptions.customColumn2}
+              </p>
             )}
           </>
         ) : reportOptions.reportType === '2' ? (
@@ -133,3 +134,4 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
 };
 
 export default ReportPreview;
+
