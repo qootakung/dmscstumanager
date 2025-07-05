@@ -2,13 +2,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, GraduationCap, Users, FileText, Award } from 'lucide-react';
+import { Download, Printer, GraduationCap, Users, FileText, Award, Settings } from 'lucide-react';
 import { getTeachers } from '@/utils/teacherStorage';
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
 import { generateTeacherExcel, formatThaiDate } from '@/utils/teacherReportExcel';
 import TeacherReportForm from '@/components/teacher/TeacherReportForm';
 import TeacherReportPreview from '@/components/teacher/TeacherReportPreview';
+import ResizableTeacherReportPreview from '@/components/teacher/ResizableTeacherReportPreview';
 import { toast } from "@/components/ui/use-toast";
 import { printTeacherReport } from '@/utils/teacherReportPrint';
 
@@ -37,6 +38,7 @@ const TeacherReports: React.FC = () => {
     selectedDate: '',
   });
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [isResizableMode, setIsResizableMode] = useState(false);
 
   useEffect(() => {
     const fetchTeachers = async () => {
@@ -139,17 +141,37 @@ const TeacherReports: React.FC = () => {
 
             {/* Enhanced Preview Section */}
             <div className="bg-gradient-to-br from-slate-50/50 to-gray-50/50 rounded-2xl p-6 border border-slate-200">
-              <div className="flex items-center gap-3 mb-6 print:hidden">
-                <div className="p-2 bg-slate-500 rounded-lg">
-                  <Users className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between gap-3 mb-6 print:hidden">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-500 rounded-lg">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-700">ตัวอย่างรายงาน</h3>
                 </div>
-                <h3 className="text-xl font-semibold text-slate-700">ตัวอย่างรายงาน</h3>
+                <Button
+                  onClick={() => setIsResizableMode(!isResizableMode)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  {isResizableMode ? 'โหมดปกติ' : 'ปรับขนาดคอลัมน์'}
+                </Button>
               </div>
-              <TeacherReportPreview
-                reportOptions={reportOptions}
-                teachers={teachers}
-                formatThaiDate={formatThaiDate}
-              />
+              
+              {isResizableMode ? (
+                <ResizableTeacherReportPreview
+                  reportOptions={reportOptions}
+                  teachers={teachers}
+                  formatThaiDate={formatThaiDate}
+                />
+              ) : (
+                <TeacherReportPreview
+                  reportOptions={reportOptions}
+                  teachers={teachers}
+                  formatThaiDate={formatThaiDate}
+                />
+              )}
             </div>
 
             {/* Enhanced Action Buttons */}
