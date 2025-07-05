@@ -61,7 +61,14 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
           <thead>
             <tr className="bg-gray-100">
               {allColumns.map((column, index) => (
-                <th key={index} className="border border-black px-2 py-1 text-center font-medium">
+                <th 
+                  key={index} 
+                  className="border border-black px-2 py-1 text-center font-medium"
+                  style={{
+                    color: column === 'AAAAAA' ? '#f3f4f6' : 'inherit',
+                    backgroundColor: column === 'AAAAAA' ? '#f3f4f6' : '#f3f4f6'
+                  }}
+                >
                   {column}
                 </th>
               ))}
@@ -109,9 +116,9 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
                       <td className="border border-black px-2 py-1 text-center">{student.guardianPhone}</td>
                     )}
 
-                    {/* Custom empty columns */}
+                    {/* Custom empty columns with placeholder styling */}
                     {Array.from({ length: reportOptions.customColumns || 0 }).map((_, colIndex) => (
-                      <td key={`custom-${colIndex}`} className="border border-black px-2 py-1"></td>
+                      <td key={`custom-${colIndex}`} className="border border-black px-2 py-1" style={{ minWidth: '80px' }}></td>
                     ))}
 
                     {/* Note column at the end */}

@@ -6,12 +6,17 @@ import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns } from '@/utils/studentReportUtils';
 
 export const generateStudentExcel = (filteredStudents: Student[], reportOptions: ReportOptions) => {
-  // Define styles
-  const borderAll = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+  // Enhanced styles with stronger black borders
+  const borderAll = { 
+    top: { style: "thin", color: { rgb: "000000" } }, 
+    bottom: { style: "thin", color: { rgb: "000000" } }, 
+    left: { style: "thin", color: { rgb: "000000" } }, 
+    right: { style: "thin", color: { rgb: "000000" } } 
+  };
   const titleStyle = { font: { name: 'Sarabun', sz: 14, bold: true }, alignment: { horizontal: "center", vertical: "center" } };
   const subtitleStyle = { font: { name: 'Sarabun', sz: 12 }, alignment: { horizontal: "center", vertical: "center" } };
   const summaryStyle = { font: { name: 'Sarabun', sz: 11 } };
-  const tableHeaderStyle = { font: { name: 'Sarabun', sz: 11, bold: true }, border: borderAll, alignment: { horizontal: "center", vertical: "center" } };
+  const tableHeaderStyle = { font: { name: 'Sarabun', sz: 11, bold: true }, border: borderAll, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "F3F4F6" } } };
   const cellStyle = { font: { name: 'Sarabun', sz: 11 }, border: borderAll };
   const cellCenterStyle = { ...cellStyle, alignment: { horizontal: "center" } };
 
@@ -77,8 +82,36 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   if(ws[`B${summaryRow}`]) ws[`B${summaryRow}`].s = summaryStyle;
   if(ws[`C${summaryRow}`]) ws[`C${summaryRow}`].s = summaryStyle;
 
-  // Table Columns
-  const allColumns = getReportColumns(reportOptions);
+  // Table Columns - with placeholder text for custom columns
+  const baseColumns = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ - นามสกุล'];
+  let allColumns: string[];
+  
+  if (reportOptions.reportType === '3') {
+    allColumns = [...baseColumns, 'ลายมือชื่อ', 'เวลามา', 'เวลากลับ', 'หมายเหตุ'];
+  } else {
+    const additionalColumns = [];
+    if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
+    if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประชาชน');
+    if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
+    if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
+    if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
+    if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
+    if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
+
+    const customColumns: string[] = [];
+    if (reportOptions.customColumns && reportOptions.customColumns > 0) {
+      for (let i = 1; i <= reportOptions.customColumns; i++) {
+        customColumns.push('AAAAAA'); // Placeholder text
+      }
+    }
+
+    const noteColumn: string[] = [];
+    if (reportOptions.additionalFields.note) {
+      noteColumn.push('หมายเหตุ');
+    }
+
+    allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
+  }
 
   // Table Header
   const tableHeaderRow = summaryRow + 2;
@@ -138,55 +171,55 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   });
   ws['!merges'] = merges;
   
-  // Enhanced Column Widths - More flexible and appropriate sizing
+  // Enhanced Column Widths - Better proportions with wider custom columns
   const customColumnCount = reportOptions.customColumns || 0;
   
-  // Calculate dynamic widths based on custom column count and report type
+  // Calculate dynamic widths with better proportions
   let nameColumnWidth: number;
   let customColumnWidth: number;
   
   if (customColumnCount === 0) {
-    nameColumnWidth = 28; // Standard width when no custom columns
+    nameColumnWidth = 24; // Standard width when no custom columns
     customColumnWidth = 0;
   } else if (customColumnCount <= 2) {
-    nameColumnWidth = 22; // Reduce name column for 1-2 custom columns
-    customColumnWidth = 18; // About 1 inch width for custom columns
+    nameColumnWidth = 18; // Reduced name column for 1-2 custom columns
+    customColumnWidth = 20; // Enhanced width for custom columns (~1.4 inches)
   } else if (customColumnCount <= 4) {
-    nameColumnWidth = 18; // Further reduce for 3-4 custom columns
-    customColumnWidth = 16; // Slightly smaller custom columns
+    nameColumnWidth = 16; // Further reduce for 3-4 custom columns
+    customColumnWidth = 18; // Good width for custom columns
   } else {
-    nameColumnWidth = 16; // Minimum name column width for 5+ custom columns
-    customColumnWidth = 14; // Smaller custom columns for many columns
+    nameColumnWidth = 14; // Minimum name column width for 5+ custom columns
+    customColumnWidth = 16; // Adequate width for many custom columns
   }
   
   const colWidths = [
-    { wch: 6 }, // ลำดับที่ - smaller
-    { wch: 12 }, // รหัสนักเรียน - compact
+    { wch: 5 }, // ลำดับที่ - more compact
+    { wch: 10 }, // รหัสนักเรียน - more compact
     { wch: nameColumnWidth }, // ชื่อ - นามสกุล (dynamic width)
   ];
   
   if (reportOptions.reportType === '3') {
     // For type 3, add widths for the fixed columns
-    colWidths.push({ wch: 18 }); // ลายมือชื่อ
-    colWidths.push({ wch: 12 }); // เวลามา - compact
-    colWidths.push({ wch: 12 }); // เวลากลับ - compact
-    colWidths.push({ wch: 25 }); // หมายเหตุ - wider for notes
+    colWidths.push({ wch: 16 }); // ลายมือชื่อ
+    colWidths.push({ wch: 10 }); // เวลามา - more compact
+    colWidths.push({ wch: 10 }); // เวลากลับ - more compact
+    colWidths.push({ wch: 22 }); // หมายเหตุ - wider for notes
   } else {
     // For other report types, use existing logic with optimized widths
-    if (reportOptions.additionalFields.gender) colWidths.push({ wch: 6 }); // เพศ - very compact
-    if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 16 }); // บัตรประชาชน - compact
-    if (reportOptions.additionalFields.signature) colWidths.push({ wch: 16 }); // ลายมือชื่อ
-    if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 16 }); // ลายมือชื่อผู้ปกครอง
-    if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 12 }); // เวลามา - compact
-    if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 12 }); // เวลากลับ - compact
-    if (reportOptions.additionalFields.phone) colWidths.push({ wch: 14 }); // เบอร์โทร
+    if (reportOptions.additionalFields.gender) colWidths.push({ wch: 5 }); // เพศ - very compact
+    if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 14 }); // บัตรประชาชน - more compact
+    if (reportOptions.additionalFields.signature) colWidths.push({ wch: 14 }); // ลายมือชื่อ - compact
+    if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 14 }); // ลายมือชื่อผู้ปกครอง - compact
+    if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 10 }); // เวลามา - more compact
+    if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 10 }); // เวลากลับ - more compact
+    if (reportOptions.additionalFields.phone) colWidths.push({ wch: 12 }); // เบอร์โทร - compact
     
-    // Custom columns with calculated width (about 1 inch each)
+    // Custom columns with enhanced calculated width
     for (let i = 0; i < customColumnCount; i++) {
       colWidths.push({ wch: customColumnWidth });
     }
     
-    if (reportOptions.additionalFields.note) colWidths.push({ wch: 25 }); // หมายเหตุ - wider for notes
+    if (reportOptions.additionalFields.note) colWidths.push({ wch: 22 }); // หมายเหตุ - wider for notes
   }
   
   ws['!cols'] = colWidths;
