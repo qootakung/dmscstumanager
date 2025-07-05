@@ -32,7 +32,7 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
   const customColumns: string[] = [];
   if (reportOptions.customColumns && reportOptions.customColumns > 0) {
     for (let i = 1; i <= reportOptions.customColumns; i++) {
-      customColumns.push('AAAAAA'); // Show placeholder text in preview
+      customColumns.push('');
     }
   }
 
