@@ -29,8 +29,8 @@ export const generateTeacherExcel = (
       return aNum - bNum;
     });
 
-  // Define styles
-  const borderAll = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+  // Define styles with enhanced black borders
+  const borderAll = { top: { style: "thin", color: { rgb: "000000" } }, bottom: { style: "thin", color: { rgb: "000000" } }, left: { style: "thin", color: { rgb: "000000" } }, right: { style: "thin", color: { rgb: "000000" } } };
   const titleStyle = { font: { name: 'Sarabun', sz: 14, bold: true }, alignment: { horizontal: "center", vertical: "center" } };
   const subtitleStyle = { font: { name: 'Sarabun', sz: 12 }, alignment: { horizontal: "center", vertical: "center" } };
   const tableHeaderStyle = { font: { name: 'Sarabun', sz: 11, bold: true }, border: borderAll, alignment: { horizontal: "center", vertical: "center" } };
@@ -143,49 +143,47 @@ export const generateTeacherExcel = (
   }
   ws['!merges'] = merges;
   
-  // Enhanced Column Widths - More flexible and appropriate sizing
+  // Enhanced Column Widths - More flexible spacing with minimum 1 inch for custom columns
+  const customColumnWidth = Math.max(14.4, customColumnCount > 0 ? 14.4 / Math.min(customColumnCount, 6) * 6 : 14.4); // Minimum ~1 inch (14.4 units)
+  
   let nameColumnWidth: number;
-  let customColumnWidth: number;
   
   if (customColumnCount === 0) {
-    nameColumnWidth = 26; // Standard width when no custom columns
-    customColumnWidth = 0;
+    nameColumnWidth = 24; // Standard width when no custom columns
   } else if (customColumnCount <= 2) {
-    nameColumnWidth = 20; // Reduce name column for 1-2 custom columns
-    customColumnWidth = 18; // About 1 inch width for custom columns
+    nameColumnWidth = 18; // Reduce for 1-2 custom columns
   } else if (customColumnCount <= 4) {
-    nameColumnWidth = 17; // Further reduce for 3-4 custom columns
-    customColumnWidth = 16; // Slightly smaller custom columns
+    nameColumnWidth = 16; // Further reduce for 3-4 custom columns
   } else {
-    nameColumnWidth = 15; // Minimum name column width for 5+ custom columns
-    customColumnWidth = 14; // Smaller custom columns for many columns
+    nameColumnWidth = 14; // Minimum for 5+ custom columns
   }
   
   const colWidths = [
-    { wch: 6 }, // ลำดับที่ - compact
+    { wch: 8 }, // ลำดับที่ - compact with padding
     { wch: nameColumnWidth } // ชื่อ - นามสกุล (dynamic width)
   ];
   
-  if (reportOptions.additionalFields.position) colWidths.push({ wch: 18 }); // ตำแหน่ง
-  if (reportOptions.additionalFields.email) colWidths.push({ wch: 22 }); // Email - compact
-  if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 16 }); // บัตรประชาชน - compact
-  if (reportOptions.additionalFields.salary) colWidths.push({ wch: 12 }); // เงินเดือน - compact
-  if (reportOptions.additionalFields.birthDate) colWidths.push({ wch: 18 }); // วันเกิด
-  if (reportOptions.additionalFields.appointmentDate) colWidths.push({ wch: 18 }); // วันที่บรรจุ
-  if (reportOptions.additionalFields.education) colWidths.push({ wch: 18 }); // วุฒิการศึกษา
-  if (reportOptions.additionalFields.major) colWidths.push({ wch: 18 }); // วิชาเอก
-  if (reportOptions.additionalFields.phone) colWidths.push({ wch: 12 }); // เบอร์โทร - compact
-  if (reportOptions.additionalFields.lineId) colWidths.push({ wch: 12 }); // ID Line - compact
-  if (reportOptions.additionalFields.signature) colWidths.push({ wch: 16 }); // ลายมือชื่อ
-  if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 12 }); // เวลามา - compact
-  if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 12 }); // เวลากลับ - compact
+  // Add spacing buffer (0.5-1 cm ≈ 2-4 character width buffer)
+  if (reportOptions.additionalFields.position) colWidths.push({ wch: 20 }); // ตำแหน่ง with buffer
+  if (reportOptions.additionalFields.email) colWidths.push({ wch: 24 }); // Email with buffer
+  if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 18 }); // บัตรประชาชน with buffer
+  if (reportOptions.additionalFields.salary) colWidths.push({ wch: 14 }); // เงินเดือน with buffer
+  if (reportOptions.additionalFields.birthDate) colWidths.push({ wch: 20 }); // วันเกิด with buffer
+  if (reportOptions.additionalFields.appointmentDate) colWidths.push({ wch: 20 }); // วันที่บรรจุ with buffer
+  if (reportOptions.additionalFields.education) colWidths.push({ wch: 20 }); // วุฒิการศึกษา with buffer
+  if (reportOptions.additionalFields.major) colWidths.push({ wch: 20 }); // วิชาเอก with buffer
+  if (reportOptions.additionalFields.phone) colWidths.push({ wch: 14 }); // เบอร์โทร with buffer
+  if (reportOptions.additionalFields.lineId) colWidths.push({ wch: 14 }); // ID Line with buffer
+  if (reportOptions.additionalFields.signature) colWidths.push({ wch: 18 }); // ลายมือชื่อ with buffer
+  if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 14 }); // เวลามา with buffer
+  if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 14 }); // เวลากลับ with buffer
 
-  // Custom columns with calculated width (about 1 inch each)
+  // Custom columns with minimum 1 inch width (~14.4 units)
   for (let i = 0; i < customColumnCount; i++) {
     colWidths.push({ wch: customColumnWidth });
   }
 
-  if (reportOptions.additionalFields.note) colWidths.push({ wch: 22 }); // หมายเหตุ - wider for notes
+  if (reportOptions.additionalFields.note) colWidths.push({ wch: 24 }); // หมายเหตุ with buffer
   
   ws['!cols'] = colWidths;
 
