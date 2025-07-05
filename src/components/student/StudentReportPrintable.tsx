@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns, getReportTitle } from '@/utils/studentReportUtils';
@@ -98,7 +97,7 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
               {reportOptions.customColumn2?.trim() && (
                 <p style={{ 
                   fontSize: '18px', 
-                  fontWeight: 'bold',
+                  fontWeight: 'normal',
                   margin: '0 0 8px 0'
                 }}>
                   {reportOptions.customColumn2}
@@ -186,4 +185,3 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
 StudentReportPrintable.displayName = 'StudentReportPrintable';
 
 export default StudentReportPrintable;
-

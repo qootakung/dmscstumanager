@@ -1,5 +1,4 @@
 
-
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from "@/components/ui/use-toast";
@@ -54,11 +53,16 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   
   XLSX.utils.sheet_add_aoa(ws, mainHeader, { origin: 'A1' });
   
-  // Apply styles to headers
+  // Apply styles to headers - first header is bold, second header is normal for type 3
   mainHeader.forEach((_, rowIndex) => {
     const cellRef = XLSX.utils.encode_cell({c: 0, r: rowIndex});
     if (ws[cellRef]) {
-      ws[cellRef].s = rowIndex === 0 ? titleStyle : subtitleStyle;
+      if (reportOptions.reportType === '3' && rowIndex === 1) {
+        // For type 3, make second header normal weight
+        ws[cellRef].s = { font: { name: 'Sarabun', sz: 14 }, alignment: { horizontal: "center", vertical: "center" } };
+      } else {
+        ws[cellRef].s = rowIndex === 0 ? titleStyle : subtitleStyle;
+      }
     }
   });
   
@@ -134,9 +138,14 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   });
   ws['!merges'] = merges;
   
-  // Column Widths
+  // Column Widths - Adjust for better proportion with custom columns
+  const customColumnCount = reportOptions.customColumns || 0;
+  const nameColumnWidth = customColumnCount > 0 ? Math.max(20, 35 - customColumnCount * 2) : 30; // Reduce name column when custom columns exist
+  
   const colWidths = [
-    { wch: 8 }, { wch: 15 }, { wch: 30 },
+    { wch: 8 }, // ลำดับที่
+    { wch: 15 }, // รหัสนักเรียน
+    { wch: nameColumnWidth }, // ชื่อ - นามสกุล (dynamic width)
   ];
   
   if (reportOptions.reportType === '3') {
@@ -154,9 +163,12 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
     if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
     if (reportOptions.additionalFields.phone) colWidths.push({ wch: 15 });
-    for (let i = 0; i < (reportOptions.customColumns || 0); i++) {
-      colWidths.push({ wch: 20 });
+    
+    // Custom columns with flexible width
+    for (let i = 0; i < customColumnCount; i++) {
+      colWidths.push({ wch: Math.max(15, 25 - customColumnCount) }); // Flexible custom column width
     }
+    
     if (reportOptions.additionalFields.note) colWidths.push({ wch: 30 });
   }
   
@@ -176,4 +188,3 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
     description: "ไฟล์ Excel กำลังถูกดาวน์โหลด...",
   })
 };
-

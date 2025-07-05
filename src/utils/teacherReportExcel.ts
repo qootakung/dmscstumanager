@@ -74,7 +74,8 @@ export const generateTeacherExcel = (
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
   
-  const customColumns = Array.from({ length: reportOptions.customColumns || 0 }, () => '');
+  const customColumnCount = reportOptions.customColumns || 0;
+  const customColumns = Array.from({ length: customColumnCount }, () => '');
   
   const noteColumn: string[] = [];
   if (reportOptions.additionalFields.note) {
@@ -111,7 +112,7 @@ export const generateTeacherExcel = (
     if (reportOptions.additionalFields.timeIn) row.push('');
     if (reportOptions.additionalFields.timeOut) row.push('');
     
-    for (let i = 0; i < (reportOptions.customColumns || 0); i++) { row.push(''); }
+    for (let i = 0; i < customColumnCount; i++) { row.push(''); }
 
     if (reportOptions.additionalFields.note) { row.push(''); }
 
@@ -142,8 +143,14 @@ export const generateTeacherExcel = (
   }
   ws['!merges'] = merges;
   
-  // Column Widths
-  const colWidths = [{ wch: 8 }, { wch: 30 }];
+  // Column Widths - Adjust for better proportion with custom columns
+  const nameColumnWidth = customColumnCount > 0 ? Math.max(20, 30 - customColumnCount * 1.5) : 30; // Reduce name column when custom columns exist
+  
+  const colWidths = [
+    { wch: 8 }, // ลำดับที่
+    { wch: nameColumnWidth } // ชื่อ - นามสกุล (dynamic width)
+  ];
+  
   if (reportOptions.additionalFields.position) colWidths.push({ wch: 20 });
   if (reportOptions.additionalFields.email) colWidths.push({ wch: 25 });
   if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 20 });
@@ -158,7 +165,10 @@ export const generateTeacherExcel = (
   if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
   if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
 
-  customColumns.forEach(() => colWidths.push({ wch: 20 }));
+  // Custom columns with flexible width
+  for (let i = 0; i < customColumnCount; i++) {
+    colWidths.push({ wch: Math.max(15, 25 - customColumnCount) }); // Flexible custom column width
+  }
 
   if (reportOptions.additionalFields.note) colWidths.push({ wch: 25 });
   

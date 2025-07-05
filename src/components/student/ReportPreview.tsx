@@ -27,7 +27,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
               </h3>
             )}
             {reportOptions.customColumn2?.trim() && (
-              <p className="text-lg font-bold">
+              <p className="text-lg">
                 {reportOptions.customColumn2}
               </p>
             )}
@@ -134,4 +134,3 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
 };
 
 export default ReportPreview;
-
