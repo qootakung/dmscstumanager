@@ -143,34 +143,49 @@ export const generateTeacherExcel = (
   }
   ws['!merges'] = merges;
   
-  // Column Widths - Adjust for better proportion with custom columns
-  const nameColumnWidth = customColumnCount > 0 ? Math.max(20, 30 - customColumnCount * 1.5) : 30; // Reduce name column when custom columns exist
+  // Enhanced Column Widths - More flexible and appropriate sizing
+  let nameColumnWidth: number;
+  let customColumnWidth: number;
+  
+  if (customColumnCount === 0) {
+    nameColumnWidth = 26; // Standard width when no custom columns
+    customColumnWidth = 0;
+  } else if (customColumnCount <= 2) {
+    nameColumnWidth = 20; // Reduce name column for 1-2 custom columns
+    customColumnWidth = 18; // About 1 inch width for custom columns
+  } else if (customColumnCount <= 4) {
+    nameColumnWidth = 17; // Further reduce for 3-4 custom columns
+    customColumnWidth = 16; // Slightly smaller custom columns
+  } else {
+    nameColumnWidth = 15; // Minimum name column width for 5+ custom columns
+    customColumnWidth = 14; // Smaller custom columns for many columns
+  }
   
   const colWidths = [
-    { wch: 8 }, // ลำดับที่
+    { wch: 6 }, // ลำดับที่ - compact
     { wch: nameColumnWidth } // ชื่อ - นามสกุล (dynamic width)
   ];
   
-  if (reportOptions.additionalFields.position) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.email) colWidths.push({ wch: 25 });
-  if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.salary) colWidths.push({ wch: 15 });
-  if (reportOptions.additionalFields.birthDate) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.appointmentDate) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.education) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.major) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.phone) colWidths.push({ wch: 15 });
-  if (reportOptions.additionalFields.lineId) colWidths.push({ wch: 15 });
-  if (reportOptions.additionalFields.signature) colWidths.push({ wch: 20 });
-  if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
-  if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
+  if (reportOptions.additionalFields.position) colWidths.push({ wch: 18 }); // ตำแหน่ง
+  if (reportOptions.additionalFields.email) colWidths.push({ wch: 22 }); // Email - compact
+  if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 16 }); // บัตรประชาชน - compact
+  if (reportOptions.additionalFields.salary) colWidths.push({ wch: 12 }); // เงินเดือน - compact
+  if (reportOptions.additionalFields.birthDate) colWidths.push({ wch: 18 }); // วันเกิด
+  if (reportOptions.additionalFields.appointmentDate) colWidths.push({ wch: 18 }); // วันที่บรรจุ
+  if (reportOptions.additionalFields.education) colWidths.push({ wch: 18 }); // วุฒิการศึกษา
+  if (reportOptions.additionalFields.major) colWidths.push({ wch: 18 }); // วิชาเอก
+  if (reportOptions.additionalFields.phone) colWidths.push({ wch: 12 }); // เบอร์โทร - compact
+  if (reportOptions.additionalFields.lineId) colWidths.push({ wch: 12 }); // ID Line - compact
+  if (reportOptions.additionalFields.signature) colWidths.push({ wch: 16 }); // ลายมือชื่อ
+  if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 12 }); // เวลามา - compact
+  if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 12 }); // เวลากลับ - compact
 
-  // Custom columns with flexible width
+  // Custom columns with calculated width (about 1 inch each)
   for (let i = 0; i < customColumnCount; i++) {
-    colWidths.push({ wch: Math.max(15, 25 - customColumnCount) }); // Flexible custom column width
+    colWidths.push({ wch: customColumnWidth });
   }
 
-  if (reportOptions.additionalFields.note) colWidths.push({ wch: 25 });
+  if (reportOptions.additionalFields.note) colWidths.push({ wch: 22 }); // หมายเหตุ - wider for notes
   
   ws['!cols'] = colWidths;
 

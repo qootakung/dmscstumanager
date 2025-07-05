@@ -138,38 +138,55 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
   });
   ws['!merges'] = merges;
   
-  // Column Widths - Adjust for better proportion with custom columns
+  // Enhanced Column Widths - More flexible and appropriate sizing
   const customColumnCount = reportOptions.customColumns || 0;
-  const nameColumnWidth = customColumnCount > 0 ? Math.max(20, 35 - customColumnCount * 2) : 30; // Reduce name column when custom columns exist
+  
+  // Calculate dynamic widths based on custom column count and report type
+  let nameColumnWidth: number;
+  let customColumnWidth: number;
+  
+  if (customColumnCount === 0) {
+    nameColumnWidth = 28; // Standard width when no custom columns
+    customColumnWidth = 0;
+  } else if (customColumnCount <= 2) {
+    nameColumnWidth = 22; // Reduce name column for 1-2 custom columns
+    customColumnWidth = 18; // About 1 inch width for custom columns
+  } else if (customColumnCount <= 4) {
+    nameColumnWidth = 18; // Further reduce for 3-4 custom columns
+    customColumnWidth = 16; // Slightly smaller custom columns
+  } else {
+    nameColumnWidth = 16; // Minimum name column width for 5+ custom columns
+    customColumnWidth = 14; // Smaller custom columns for many columns
+  }
   
   const colWidths = [
-    { wch: 8 }, // ลำดับที่
-    { wch: 15 }, // รหัสนักเรียน
+    { wch: 6 }, // ลำดับที่ - smaller
+    { wch: 12 }, // รหัสนักเรียน - compact
     { wch: nameColumnWidth }, // ชื่อ - นามสกุล (dynamic width)
   ];
   
   if (reportOptions.reportType === '3') {
     // For type 3, add widths for the fixed columns
-    colWidths.push({ wch: 20 }); // ลายมือชื่อ
-    colWidths.push({ wch: 15 }); // เวลามา
-    colWidths.push({ wch: 15 }); // เวลากลับ
-    colWidths.push({ wch: 30 }); // หมายเหตุ
+    colWidths.push({ wch: 18 }); // ลายมือชื่อ
+    colWidths.push({ wch: 12 }); // เวลามา - compact
+    colWidths.push({ wch: 12 }); // เวลากลับ - compact
+    colWidths.push({ wch: 25 }); // หมายเหตุ - wider for notes
   } else {
-    // For other report types, use existing logic
-    if (reportOptions.additionalFields.gender) colWidths.push({ wch: 8 });
-    if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 20 });
-    if (reportOptions.additionalFields.signature) colWidths.push({ wch: 20 });
-    if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 20 });
-    if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 15 });
-    if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 15 });
-    if (reportOptions.additionalFields.phone) colWidths.push({ wch: 15 });
+    // For other report types, use existing logic with optimized widths
+    if (reportOptions.additionalFields.gender) colWidths.push({ wch: 6 }); // เพศ - very compact
+    if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 16 }); // บัตรประชาชน - compact
+    if (reportOptions.additionalFields.signature) colWidths.push({ wch: 16 }); // ลายมือชื่อ
+    if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 16 }); // ลายมือชื่อผู้ปกครอง
+    if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 12 }); // เวลามา - compact
+    if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 12 }); // เวลากลับ - compact
+    if (reportOptions.additionalFields.phone) colWidths.push({ wch: 14 }); // เบอร์โทร
     
-    // Custom columns with flexible width
+    // Custom columns with calculated width (about 1 inch each)
     for (let i = 0; i < customColumnCount; i++) {
-      colWidths.push({ wch: Math.max(15, 25 - customColumnCount) }); // Flexible custom column width
+      colWidths.push({ wch: customColumnWidth });
     }
     
-    if (reportOptions.additionalFields.note) colWidths.push({ wch: 30 });
+    if (reportOptions.additionalFields.note) colWidths.push({ wch: 25 }); // หมายเหตุ - wider for notes
   }
   
   ws['!cols'] = colWidths;
