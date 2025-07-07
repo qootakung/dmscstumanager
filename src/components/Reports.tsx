@@ -138,7 +138,6 @@ const Reports: React.FC = () => {
               <ReportOptionsForm
                 reportOptions={reportOptions}
                 academicYears={academicYears}
-                grades={grades}
                 onOptionChange={handleOptionChange}
                 onAdditionalFieldChange={handleAdditionalFieldChange}
               />
