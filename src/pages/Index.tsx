@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, ChevronDown } from 'lucide-react';
 import Auth from '@/components/Auth';
 import Dashboard from '@/components/Dashboard';
 import StudentManagement from '@/components/StudentManagement';
@@ -17,13 +17,15 @@ import { getCurrentUser, logout } from '@/utils/userStorage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Index = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -112,114 +114,115 @@ const Index = () => {
         {/* Navigation Menu */}
         <div className="border-t bg-gray-50">
           <div className="container mx-auto px-4 py-2">
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
+            <div className="flex items-center space-x-1">
+              <Button 
+                variant="ghost" 
+                onClick={() => setActiveTab('dashboard')}
+                className={`px-6 ${activeTab === 'dashboard' ? 'bg-school-primary text-white' : ''}`}
+              >
+                หน้าแรก
+              </Button>
+              
+              {/* Multi-level Dropdown for จัดการข้อมูล */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost" 
-                    onClick={() => setActiveTab('dashboard')}
-                    className={`px-6 ${activeTab === 'dashboard' ? 'bg-school-primary text-white' : ''}`}
+                    className="px-6 flex items-center gap-1"
                   >
-                    หน้าแรก
-                  </Button>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className={`px-6 ${'data-[state=open]:bg-school-primary data-[state=open]:text-white'}`}>
                     จัดการข้อมูล
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid gap-3 p-6 w-48">
-                      <NavigationMenuLink asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="justify-start"
-                          onClick={() => setActiveTab('students')}
-                        >
-                          ข้อมูลนักเรียน
-                        </Button>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="justify-start"
-                          onClick={() => setActiveTab('teachers')}
-                        >
-                          ข้อมูลครู
-                        </Button>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="justify-start"
-                          onClick={() => setActiveTab('student-health')}
-                        >
-                          น้ำหนัก-ส่วนสูง
-                        </Button>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="justify-start"
-                          onClick={() => setActiveTab('student-analysis')}
-                        >
-                          วิเคราะห์ผู้เรียน
-                        </Button>
-                      </NavigationMenuLink>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg">
+                  {/* ข้อมูลนักเรียน Submenu */}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="cursor-pointer">
+                      ข้อมูลนักเรียน
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="bg-white border border-gray-200 shadow-lg">
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => setActiveTab('students')}
+                      >
+                        ข้อมูลพื้นฐาน
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => setActiveTab('student-health')}
+                      >
+                        น้ำหนัก-ส่วนสูง
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => setActiveTab('student-analysis')}
+                      >
+                        วิเคราะห์ผู้เรียน
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => setActiveTab('assessment')}
+                      >
+                        แบบประเมินสมรรถนะ
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  {/* ข้อมูลครู */}
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => setActiveTab('teachers')}
+                  >
+                    ข้อมูลครู
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className={`px-6 ${'data-[state=open]:bg-school-primary data-[state=open]:text-white'}`}>
+              {/* รายงาน Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="px-6 flex items-center gap-1"
+                  >
                     รายงาน
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid gap-3 p-6 w-48">
-                      <NavigationMenuLink asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="justify-start"
-                          onClick={() => setActiveTab('student-reports')}
-                        >
-                          รายงานข้อมูลนักเรียน
-                        </Button>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="justify-start"
-                          onClick={() => setActiveTab('teacher-reports')}
-                        >
-                          รายงานข้อมูลครู
-                        </Button>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="justify-start"
-                          onClick={() => setActiveTab('financial-reports')}
-                        >
-                          รายงานการเงิน
-                        </Button>
-                      </NavigationMenuLink>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg">
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => setActiveTab('student-reports')}
+                  >
+                    รายงานข้อมูลนักเรียน
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => setActiveTab('teacher-reports')}
+                  >
+                    รายงานข้อมูลครู
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => setActiveTab('financial-reports')}
+                  >
+                    รายงานการเงิน
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                {isAdmin && (
-                  <NavigationMenuItem>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => setActiveTab('admin')}
-                      className={`px-6 ${activeTab === 'admin' ? 'bg-school-primary text-white' : ''}`}
-                    >
-                      จัดการระบบ
-                    </Button>
-                  </NavigationMenuItem>
-                )}
-              </NavigationMenuList>
-            </NavigationMenu>
+              {isAdmin && (
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setActiveTab('admin')}
+                  className={`px-6 ${activeTab === 'admin' ? 'bg-school-primary text-white' : ''}`}
+                >
+                  จัดการระบบ
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -232,6 +235,12 @@ const Index = () => {
           {activeTab === 'teachers' && <TeacherManagement />}
           {activeTab === 'student-health' && <StudentHealth />}
           {activeTab === 'student-analysis' && <StudentAnalysis />}
+          {activeTab === 'assessment' && (
+            <div className="text-center p-8">
+              <h2 className="text-2xl font-bold mb-4">แบบประเมินสมรรถนะ</h2>
+              <p className="text-gray-600">หน้านี้อยู่ระหว่างการพัฒนา</p>
+            </div>
+          )}
           {activeTab === 'student-reports' && <Reports />}
           {activeTab === 'teacher-reports' && <TeacherReports />}
           {activeTab === 'financial-reports' && <FinancialReports />}
