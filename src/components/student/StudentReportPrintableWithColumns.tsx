@@ -1,52 +1,51 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns } from '@/utils/studentReportUtils';
-import { ResizableTable, ResizableTh, ResizableTd } from '@/components/ui/resizable-table';
-import { saveColumnWidths, loadColumnWidths } from '@/utils/columnWidthStorage';
+import { loadColumnWidths } from '@/utils/columnWidthStorage';
 
-interface ResizableReportPreviewProps {
+interface StudentReportPrintableWithColumnsProps {
   students: Student[];
   reportOptions: ReportOptions;
 }
 
-const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ students, reportOptions }) => {
-  if (!reportOptions.classLevel || !reportOptions.academicYear) return null;
-
+const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColumnsProps> = ({ 
+  students, 
+  reportOptions 
+}) => {
   const allColumns = getReportColumns(reportOptions);
-  const getDefaultWidths = () => allColumns.map((_, index) => {
+  
+  // โหลดขนาดคอลัมน์ที่บันทึกไว้
+  const reportKey = `student_${reportOptions.reportType}_${reportOptions.classLevel}_${reportOptions.academicYear}`;
+  const defaultWidths = allColumns.map((_, index) => {
     if (index === 0) return 80; // ลำดับที่
     if (index === 1) return 120; // รหัสนักเรียน
     if (index === 2) return 200; // ชื่อ-สกุล
     return 120; // คอลัมน์อื่นๆ
   });
-
-  const reportKey = `student_${reportOptions.reportType}_${reportOptions.classLevel}_${reportOptions.academicYear}`;
-  const [columnWidths, setColumnWidths] = useState<number[]>(() => 
-    loadColumnWidths(reportKey, getDefaultWidths())
-  );
-
-  useEffect(() => {
-    const defaultWidths = getDefaultWidths();
-    const savedWidths = loadColumnWidths(reportKey, defaultWidths);
-    setColumnWidths(savedWidths);
-  }, [reportOptions.reportType, reportOptions.classLevel, reportOptions.academicYear, allColumns.length]);
-
-  const handleColumnResize = (columnIndex: number, newWidth: number) => {
-    setColumnWidths(prev => {
-      const updated = [...prev];
-      updated[columnIndex] = newWidth;
-      saveColumnWidths(reportKey, updated);
-      return updated;
-    });
-  };
+  const columnWidths = loadColumnWidths(reportKey, defaultWidths);
 
   const maleCount = students.filter(s => s.gender === 'ชาย').length;
   const femaleCount = students.filter(s => s.gender === 'หญิง').length;
-  const totalCount = students.length;
 
   return (
-    <div className="mt-6 border rounded-lg p-4 bg-white">
+    <div className="p-4 font-sarabun">
+      <style>{`
+        body { 
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        @media print {
+          table, th, td {
+            border: 1px solid #d1d5db !important;
+            border-collapse: collapse !important;
+          }
+          th {
+            background-color: #f3f4f6 !important;
+          }
+        }
+      `}</style>
+      
       <div className="text-center mb-2 font-sarabun">
         {reportOptions.reportType === '3' ? (
           <>
@@ -82,42 +81,38 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
       <div className="text-sm flex justify-start gap-x-4 mb-2 font-sarabun">
         <span>จำนวนเพศชาย {maleCount} คน</span>
         <span>เพศหญิง {femaleCount} คน</span>
-        <span>รวม {totalCount} คน</span>
+        <span>รวม {students.length} คน</span>
       </div>
 
-      <div className="mb-2 text-sm text-blue-600 font-sarabun">
-        💡 เลื่อนขอบคอลัมน์เพื่อปรับขนาด (ค่าจะถูกบันทึกอัตโนมัติ)
-      </div>
-
-      <div className="overflow-auto max-h-96">
-        <ResizableTable className="text-sm">
+      <div className="overflow-auto">
+        <table className="w-full border-collapse border border-black text-sm" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100">
               {allColumns.map((column, index) => (
-                <ResizableTh 
-                  key={index}
-                  width={columnWidths[index]}
-                  onResize={(width) => handleColumnResize(index, width)}
+                <th 
+                  key={index} 
+                  className="border border-black px-2 py-1 text-center font-medium"
+                  style={{ width: `${columnWidths[index]}px`, minWidth: `${columnWidths[index]}px` }}
                 >
                   {column}
-                </ResizableTh>
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {students.map((student, index) => (
               <tr key={student.id}>
-                <ResizableTd width={columnWidths[0]} className="text-center">{index + 1}</ResizableTd>
-                <ResizableTd width={columnWidths[1]} className="text-center">{student.studentId}</ResizableTd>
-                <ResizableTd width={columnWidths[2]}>{(student.titleTh || '')}{student.firstNameTh} {student.lastNameTh}</ResizableTd>
+                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[0]}px` }}>{index + 1}</td>
+                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[1]}px` }}>{student.studentId}</td>
+                <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[2]}px` }}>{(student.titleTh || '')}{student.firstNameTh} {student.lastNameTh}</td>
                 
                 {/* For type 3, add the fixed columns */}
                 {reportOptions.reportType === '3' && (
                   <>
-                    <ResizableTd width={columnWidths[3]}></ResizableTd>
-                    <ResizableTd width={columnWidths[4]}></ResizableTd>
-                    <ResizableTd width={columnWidths[5]}></ResizableTd>
-                    <ResizableTd width={columnWidths[6]}></ResizableTd>
+                    <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[3]}px` }}></td>
+                    <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[4]}px` }}></td>
+                    <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[5]}px` }}></td>
+                    <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[6]}px` }}></td>
                   </>
                 )}
                 
@@ -125,52 +120,48 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
                 {reportOptions.reportType !== '3' && (
                   <>
                     {reportOptions.additionalFields.gender && (
-                      <ResizableTd width={columnWidths[3]} className="text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</ResizableTd>
+                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[3]}px` }}>{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
                     )}
                     {reportOptions.additionalFields.citizenId && (
-                      <ResizableTd width={columnWidths[4]} className="text-center">{student.citizenId}</ResizableTd>
+                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[4]}px` }}>{student.citizenId}</td>
                     )}
                     {reportOptions.additionalFields.signature && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ')]}></ResizableTd>
+                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ')]}px` }}></td>
                     )}
                     {reportOptions.additionalFields.guardianSignature && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('ลายเซ็นผู้ปกครอง')]}></ResizableTd>
+                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายเซ็นผู้ปกครอง')]}px` }}></td>
                     )}
                     {reportOptions.additionalFields.timeIn && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('เวลามา')]}></ResizableTd>
+                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลามา')]}px` }}></td>
                     )}
                     {reportOptions.additionalFields.timeOut && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('เวลากลับ')]}></ResizableTd>
+                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลากลับ')]}px` }}></td>
                     )}
                     {reportOptions.additionalFields.phone && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('เบอร์โทร')]} className="text-center">{student.guardianPhone}</ResizableTd>
+                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เบอร์โทร')]}px` }}>{student.guardianPhone}</td>
                     )}
 
                     {/* Custom empty columns */}
                     {Array.from({ length: reportOptions.customColumns || 0 }).map((_, colIndex) => {
                       const columnIndex = allColumns.length - (reportOptions.additionalFields.note ? 1 : 0) - (reportOptions.customColumns || 0) + colIndex;
                       return (
-                        <ResizableTd key={`custom-${colIndex}`} width={columnWidths[columnIndex]}></ResizableTd>
+                        <td key={`custom-${colIndex}`} className="border border-black px-2 py-1" style={{ width: `${columnWidths[columnIndex]}px` }}></td>
                       );
                     })}
 
                     {/* Note column at the end */}
                     {reportOptions.additionalFields.note && (
-                      <ResizableTd width={columnWidths[allColumns.length - 1]}></ResizableTd>
+                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.length - 1]}px` }}></td>
                     )}
                   </>
                 )}
               </tr>
             ))}
           </tbody>
-        </ResizableTable>
+        </table>
       </div>
-
-      <p className="text-sm text-gray-600 mt-2">
-        รวมทั้งหมด {students.length} รายการ
-      </p>
     </div>
   );
 };
 
-export default ResizableReportPreview;
+export default StudentReportPrintableWithColumns;

@@ -1,8 +1,8 @@
-
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
+import { sortTeachersByPosition } from '@/utils/teacherSortUtils';
 
 export const formatThaiDate = (dateString: string): string => {
   if (!dateString) return '';
@@ -22,12 +22,9 @@ export const generateTeacherExcel = (
   reportOptions: TeacherReportOptions
 ) => {
   const filteredTeachers = teachers
-    .filter(teacher => teacher.academicYear === reportOptions.academicYear)
-    .sort((a, b) => {
-      const aNum = parseInt(a.positionNumber) || 0;
-      const bNum = parseInt(b.positionNumber) || 0;
-      return aNum - bNum;
-    });
+    .filter(teacher => teacher.academicYear === reportOptions.academicYear);
+  
+  const sortedTeachers = sortTeachersByPosition(filteredTeachers);
 
   // Define styles with enhanced black borders
   const borderAll = { top: { style: "thin", color: { rgb: "000000" } }, bottom: { style: "thin", color: { rgb: "000000" } }, left: { style: "thin", color: { rgb: "000000" } }, right: { style: "thin", color: { rgb: "000000" } } };
@@ -93,7 +90,7 @@ export const generateTeacherExcel = (
   });
 
   // Table Data
-  const tableData = filteredTeachers.map((teacher, index) => {
+  const tableData = sortedTeachers.map((teacher, index) => {
     const row: (string|number)[] = [
       index + 1,
       `${teacher.firstName} ${teacher.lastName}`,

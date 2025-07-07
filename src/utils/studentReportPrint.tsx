@@ -2,7 +2,7 @@
 import { createRoot } from 'react-dom/client';
 import { toast } from "@/components/ui/use-toast";
 import type { Student, ReportOptions } from '@/types/student';
-import StudentReportPrintable from '@/components/student/StudentReportPrintable';
+import StudentReportPrintableWithColumns from '@/components/student/StudentReportPrintableWithColumns';
 
 export const printStudentReport = (studentsToPrint: Student[], reportOptions: ReportOptions) => {
     const printWindow = window.open('', '', 'height=800,width=1000');
@@ -24,7 +24,7 @@ export const printStudentReport = (studentsToPrint: Student[], reportOptions: Re
     printWindow.document.body.appendChild(printRootEl);
     
     const root = createRoot(printRootEl);
-    root.render(<StudentReportPrintable students={studentsToPrint} reportOptions={reportOptions} />);
+    root.render(<StudentReportPrintableWithColumns students={studentsToPrint} reportOptions={reportOptions} />);
 
     setTimeout(() => {
       printWindow.focus();

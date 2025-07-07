@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { toast } from "@/components/ui/use-toast";
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
-import TeacherReportPrintable from '@/components/teacher/TeacherReportPrintable';
+import TeacherReportPrintableWithColumns from '@/components/teacher/TeacherReportPrintableWithColumns';
 
 export const printTeacherReport = (teachers: Teacher[], reportOptions: TeacherReportOptions) => {
     const printWindow = window.open('', '', 'height=800,width=1000');
@@ -26,7 +26,7 @@ export const printTeacherReport = (teachers: Teacher[], reportOptions: TeacherRe
     printWindow.document.body.appendChild(printRootEl);
     
     const root = createRoot(printRootEl);
-    root.render(<TeacherReportPrintable teachers={teachers} reportOptions={reportOptions} />);
+    root.render(<TeacherReportPrintableWithColumns teachers={teachers} reportOptions={reportOptions} />);
 
     setTimeout(() => {
       printWindow.focus();

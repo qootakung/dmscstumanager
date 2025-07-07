@@ -1,7 +1,7 @@
-
 import React from 'react';
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
+import { sortTeachersByPosition } from '@/utils/teacherSortUtils';
 import { cn } from '@/lib/utils';
 
 interface TeacherReportPreviewProps {
@@ -22,14 +22,11 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   if (!reportOptions.academicYear) return null;
 
   const filteredTeachers = teachers
-    .filter(teacher => teacher.academicYear === reportOptions.academicYear)
-    .sort((a, b) => {
-      const aNum = parseInt(a.positionNumber) || 0;
-      const bNum = parseInt(b.positionNumber) || 0;
-      return aNum - bNum;
-    });
+    .filter(teacher => teacher.academicYear === reportOptions.academicYear);
+  
+  const sortedTeachers = sortTeachersByPosition(filteredTeachers);
 
-  const previewTeachers = filteredTeachers;
+  const previewTeachers = sortedTeachers;
 
   // สร้างคอลัมน์พื้นฐาน
   const baseColumns = [
@@ -159,7 +156,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
       
       {showTotal && (
         <p className="text-sm text-gray-600 mt-2 print:hidden">
-          รวมทั้งหมด {filteredTeachers.length} รายการ
+          รวมทั้งหมด {sortedTeachers.length} รายการ
         </p>
       )}
     </div>

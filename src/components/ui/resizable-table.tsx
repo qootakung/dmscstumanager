@@ -15,7 +15,7 @@ interface ResizableThProps {
 }
 
 interface ResizableTdProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   width?: number;
 }

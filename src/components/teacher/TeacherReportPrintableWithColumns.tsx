@@ -1,41 +1,28 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
-import { ResizableTable, ResizableTh, ResizableTd } from '@/components/ui/resizable-table';
-import { saveColumnWidths, loadColumnWidths } from '@/utils/columnWidthStorage';
 import { sortTeachersByPosition } from '@/utils/teacherSortUtils';
+import { loadColumnWidths } from '@/utils/columnWidthStorage';
+import { formatThaiDate } from '@/utils/teacherReportExcel';
 import { cn } from '@/lib/utils';
 
-interface ResizableTeacherReportPreviewProps {
-  reportOptions: TeacherReportOptions;
+interface TeacherReportPrintableWithColumnsProps {
   teachers: Teacher[];
-  formatThaiDate: (dateString: string) => string;
-  className?: string;
-  showTotal?: boolean;
+  reportOptions: TeacherReportOptions;
 }
 
-const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps> = ({
-  reportOptions,
-  teachers,
-  formatThaiDate,
-  className,
-  showTotal = true,
+const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColumnsProps> = ({ 
+  teachers, 
+  reportOptions 
 }) => {
-  if (!reportOptions.academicYear) return null;
-
   const filteredTeachers = teachers
     .filter(teacher => teacher.academicYear === reportOptions.academicYear);
   
   const sortedTeachers = sortTeachersByPosition(filteredTeachers);
 
-  // สร้างคอลัมน์พื้นฐาน
-  const baseColumns = [
-    'ลำดับที่',
-    'ชื่อ - นามสกุล',
-  ];
-
-  // เพิ่มคอลัมน์เพิ่มเติมที่เลือก
+  // สร้างคอลัมน์เหมือนกับ ResizableTeacherReportPreview
+  const baseColumns = ['ลำดับที่', 'ชื่อ - นามสกุล'];
   const additionalColumns = [];
   if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่ง');
   if (reportOptions.additionalFields.email) additionalColumns.push('Email');
@@ -51,7 +38,6 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
-  // เพิ่มคอลัมน์ว่างตามจำนวนที่ระบุ
   const customColumns = [];
   if (reportOptions.customColumns && reportOptions.customColumns > 0) {
     for (let i = 1; i <= reportOptions.customColumns; i++) {
@@ -59,7 +45,6 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
     }
   }
 
-  // เพิ่มคอลัมน์หมายเหตุท้ายสุด
   const noteColumn = [];
   if (reportOptions.additionalFields.note) {
     noteColumn.push('หมายเหตุ');
@@ -67,34 +52,33 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
 
   const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
   
-  const getDefaultWidths = () => allColumns.map((_, index) => {
+  // โหลดขนาดคอลัมน์ที่บันทึกไว้
+  const reportKey = `teacher_${reportOptions.reportType}_${reportOptions.academicYear}`;
+  const defaultWidths = allColumns.map((_, index) => {
     if (index === 0) return 80; // ลำดับที่
     if (index === 1) return 200; // ชื่อ-สกุล
     return 120; // คอลัมน์อื่นๆ
   });
-
-  const reportKey = `teacher_${reportOptions.reportType}_${reportOptions.academicYear}`;
-  const [columnWidths, setColumnWidths] = useState<number[]>(() => 
-    loadColumnWidths(reportKey, getDefaultWidths())
-  );
-
-  useEffect(() => {
-    const defaultWidths = getDefaultWidths();
-    const savedWidths = loadColumnWidths(reportKey, defaultWidths);
-    setColumnWidths(savedWidths);
-  }, [reportOptions.reportType, reportOptions.academicYear, allColumns.length]);
-
-  const handleColumnResize = (columnIndex: number, newWidth: number) => {
-    setColumnWidths(prev => {
-      const updated = [...prev];
-      updated[columnIndex] = newWidth;
-      saveColumnWidths(reportKey, updated);
-      return updated;
-    });
-  };
+  const columnWidths = loadColumnWidths(reportKey, defaultWidths);
 
   return (
-    <div className={cn("mt-6 border rounded-lg p-4 bg-white print:border-none print:shadow-none print:p-0 print:m-0", className)}>
+    <div className="p-4 font-sarabun">
+      <style>{`
+        body { 
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        @media print {
+          table, th, td {
+            border: 1px solid #d1d5db !important;
+            border-collapse: collapse !important;
+          }
+          th {
+            background-color: #f3f4f6 !important;
+          }
+        }
+      `}</style>
+      
       <div className="text-center mb-4 font-sarabun">
         <h3 className="text-base font-bold">
           {reportOptions.reportType === '1' 
@@ -107,98 +91,88 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
           <p className="text-sm">วันที่ {formatThaiDate(reportOptions.selectedDate)}</p>
         )}
       </div>
-
-      <div className="mb-2 text-sm text-blue-600 font-sarabun print:hidden">
-        💡 เลื่อนขอบคอลัมน์เพื่อปรับขนาด (ค่าจะถูกบันทึกอัตโนมัติ)
-      </div>
       
       <div className="overflow-x-auto">
-        <ResizableTable className="text-sm">
+        <table className="w-full border-collapse border border-black text-sm" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100">
               {allColumns.map((column, index) => (
-                <ResizableTh
-                  key={index}
-                  width={columnWidths[index]}
-                  onResize={(width) => handleColumnResize(index, width)}
+                <th 
+                  key={index} 
+                  className="border border-black px-2 py-1 text-center font-medium"
+                  style={{ width: `${columnWidths[index]}px`, minWidth: `${columnWidths[index]}px` }}
                 >
                   {column}
-                </ResizableTh>
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {sortedTeachers.map((teacher, index) => (
               <tr key={teacher.id}>
-                <ResizableTd width={columnWidths[0]} className="text-center">{index + 1}</ResizableTd>
-                <ResizableTd width={columnWidths[1]}>{teacher.firstName} {teacher.lastName}</ResizableTd>
+                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[0]}px` }}>{index + 1}</td>
+                <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[1]}px` }}>{teacher.firstName} {teacher.lastName}</td>
                 
-                {/* Additional fields */}
+                {/* Additional fields with respective widths */}
                 {reportOptions.additionalFields.position && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('ตำแหน่ง')]}>{teacher.position}</ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ตำแหน่ง')]}px` }}>{teacher.position}</td>
                 )}
                 {reportOptions.additionalFields.email && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('Email')]}>{teacher.email || ''}</ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('Email')]}px` }}>{teacher.email || ''}</td>
                 )}
                 {reportOptions.additionalFields.citizenId && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เลขบัตรประจำตัวประชาชน')]} className="text-center">{teacher.citizenId}</ResizableTd>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เลขบัตรประจำตัวประชาชน')]}px` }}>{teacher.citizenId}</td>
                 )}
                 {reportOptions.additionalFields.salary && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เงินเดือน')]} className="text-center">{teacher.salary}</ResizableTd>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เงินเดือน')]}px` }}>{teacher.salary}</td>
                 )}
                 {reportOptions.additionalFields.birthDate && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วัน/เดือน/ปีเกิด')]} className="text-center">{formatThaiDate(teacher.birthDate)}</ResizableTd>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วัน/เดือน/ปีเกิด')]}px` }}>{formatThaiDate(teacher.birthDate)}</td>
                 )}
                 {reportOptions.additionalFields.appointmentDate && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วันที่บรรจุ')]} className="text-center">{formatThaiDate(teacher.appointmentDate)}</ResizableTd>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วันที่บรรจุ')]}px` }}>{formatThaiDate(teacher.appointmentDate)}</td>
                 )}
                 {reportOptions.additionalFields.education && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วุฒิการศึกษา')]}>{teacher.education}</ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('วุฒิการศึกษา')]}px` }}>{teacher.education}</td>
                 )}
                 {reportOptions.additionalFields.major && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วิชาเอก')]}>{teacher.majorSubject}</ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('วิชาเอก')]}px` }}>{teacher.majorSubject}</td>
                 )}
                 {reportOptions.additionalFields.phone && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เบอร์โทร')]} className="text-center">{teacher.phone}</ResizableTd>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เบอร์โทร')]}px` }}>{teacher.phone}</td>
                 )}
                 {reportOptions.additionalFields.lineId && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('ID Line')]} className="text-center">{teacher.lineId}</ResizableTd>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('ID Line')]}px` }}>{teacher.lineId}</td>
                 )}
                 {reportOptions.additionalFields.signature && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ')]}></ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ')]}px` }}></td>
                 )}
                 {reportOptions.additionalFields.timeIn && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เวลามา')]}></ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลามา')]}px` }}></td>
                 )}
                 {reportOptions.additionalFields.timeOut && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เวลากลับ')]}></ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลากลับ')]}px` }}></td>
                 )}
                 
                 {/* Custom empty columns */}
                 {customColumns.map((_, colIndex) => {
                   const columnIndex = baseColumns.length + additionalColumns.length + colIndex;
                   return (
-                    <ResizableTd key={`custom-${colIndex}`} width={columnWidths[columnIndex]}></ResizableTd>
+                    <td key={`custom-${colIndex}`} className="border border-black px-2 py-1" style={{ width: `${columnWidths[columnIndex]}px` }}></td>
                   );
                 })}
 
                 {/* Note column */}
                 {reportOptions.additionalFields.note && (
-                  <ResizableTd width={columnWidths[allColumns.length - 1]}></ResizableTd>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.length - 1]}px` }}></td>
                 )}
               </tr>
             ))}
           </tbody>
-        </ResizableTable>
+        </table>
       </div>
-      
-      {showTotal && (
-        <p className="text-sm text-gray-600 mt-2 print:hidden">
-          รวมทั้งหมด {sortedTeachers.length} รายการ
-        </p>
-      )}
     </div>
   );
 };
 
-export default ResizableTeacherReportPreview;
+export default TeacherReportPrintableWithColumns;
