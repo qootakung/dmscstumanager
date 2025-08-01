@@ -37,8 +37,11 @@ const HealthEditableCell: React.FC<HealthEditableCellProps> = ({
         onBlur={onUpdate}
         onKeyDown={onKeyDown}
         autoFocus
-        className="w-24 h-8"
+        className="w-28 h-8 text-center"
         disabled={isPending}
+        placeholder={column === 'weight' ? 'น้ำหนัก' : 'ส่วนสูง'}
+        min="0"
+        step="0.1"
       />
     );
   }
@@ -46,9 +49,21 @@ const HealthEditableCell: React.FC<HealthEditableCellProps> = ({
   return (
     <div 
       onClick={() => onCellClick(record, column)} 
-      className="cursor-pointer min-h-[32px] flex items-center p-2 -m-2 rounded-md hover:bg-muted"
+      className="cursor-pointer min-h-[32px] flex items-center justify-center p-2 -m-2 rounded-md hover:bg-muted/60 transition-colors group"
+      title={`คลิกเพื่อแก้ไข${column === 'weight' ? 'น้ำหนัก' : 'ส่วนสูง'}`}
     >
-      {value !== null && value !== undefined ? value.toFixed(2) : <span className="text-muted-foreground">-</span>}
+      <div className="flex items-center gap-1">
+        {value !== null && value !== undefined ? (
+          <span className="text-center min-w-[60px]">{value.toFixed(2)}</span>
+        ) : (
+          <span className="text-muted-foreground text-center min-w-[60px] group-hover:text-primary">
+            คลิกเพื่อเพิ่ม
+          </span>
+        )}
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground">
+          ✏️
+        </span>
+      </div>
     </div>
   );
 };

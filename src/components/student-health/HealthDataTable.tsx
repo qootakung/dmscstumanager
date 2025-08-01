@@ -79,6 +79,18 @@ const HealthDataTable: React.FC = () => {
         toast.error("กรุณาใส่ข้อมูลเป็นตัวเลขที่ถูกต้อง");
         return;
       }
+      
+      // Additional validation
+      if (editingCell.column === 'weight' && (parsedValue < 0 || parsedValue > 300)) {
+        toast.error("น้ำหนักต้องอยู่ระหว่าง 0-300 กิโลกรัม");
+        return;
+      }
+      
+      if (editingCell.column === 'height' && (parsedValue < 0 || parsedValue > 300)) {
+        toast.error("ส่วนสูงต้องอยู่ระหว่าง 0-300 เซนติเมตร");
+        return;
+      }
+      
       finalValue = parsedValue;
     }
 
@@ -86,6 +98,7 @@ const HealthDataTable: React.FC = () => {
       ? { weight_kg: finalValue }
       : { height_cm: finalValue };
     
+    console.log('Updating record:', editingCell.recordId, 'with:', updates);
     updateMutation.mutate({ recordId: editingCell.recordId, updates });
   };
   
