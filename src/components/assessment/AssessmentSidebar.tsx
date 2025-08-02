@@ -18,6 +18,7 @@ import {
   Target,
   BarChart3,
   ChevronRight,
+  UserPlus,
 } from 'lucide-react';
 
 interface AssessmentSidebarProps {
@@ -26,6 +27,13 @@ interface AssessmentSidebarProps {
 }
 
 const menuItems = [
+  {
+    id: 'student-import',
+    title: 'นำเข้าข้อมูลนักเรียน',
+    icon: UserPlus,
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50 hover:bg-indigo-100',
+  },
   {
     id: 'cover',
     title: 'หน้าปก',
@@ -57,11 +65,11 @@ const menuItems = [
 ];
 
 const competencyItems = [
-  { id: 'competency-1', title: 'สมรรถนะด้านที่ 1' },
-  { id: 'competency-2', title: 'สมรรถนะด้านที่ 2' },
-  { id: 'competency-3', title: 'สมรรถนะด้านที่ 3' },
-  { id: 'competency-4', title: 'สมรรถนะด้านที่ 4' },
-  { id: 'competency-5', title: 'สมรรถนะด้านที่ 5' },
+  { id: 'competency-1', title: 'สมรรถนะด้านที่ 1: การสื่อสาร' },
+  { id: 'competency-2', title: 'สมรรถนะด้านที่ 2: การคิด' },
+  { id: 'competency-3', title: 'สมรรถนะด้านที่ 3: การแก้ปัญหา' },
+  { id: 'competency-4', title: 'สมรรถนะด้านที่ 4: การใช้ทักษะชีวิต' },
+  { id: 'competency-5', title: 'สมรรถนะด้านที่ 5: การใช้เทคโนโลยี' },
 ];
 
 export function AssessmentSidebar({ activeSection, onSectionChange }: AssessmentSidebarProps) {

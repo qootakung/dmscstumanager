@@ -11,12 +11,15 @@ import { IntroductionPage } from './assessment/pages/IntroductionPage';
 import { InstructionsPage } from './assessment/pages/InstructionsPage';
 import { CompetencyPage } from './assessment/pages/CompetencyPage';
 import { SummaryPage } from './assessment/pages/SummaryPage';
+import { StudentImportPage } from './assessment/pages/StudentImportPage';
 
 const Assessment = () => {
-  const [activeSection, setActiveSection] = useState('cover');
+  const [activeSection, setActiveSection] = useState('student-import');
 
   const renderContent = () => {
     switch (activeSection) {
+      case 'student-import':
+        return <StudentImportPage />;
       case 'cover':
         return <CoverPage />;
       case 'notes':
@@ -26,19 +29,19 @@ const Assessment = () => {
       case 'instructions':
         return <InstructionsPage />;
       case 'competency-1':
-        return <CompetencyPage competencyNumber={1} title="สมรรถนะด้านที่ 1" />;
+        return <CompetencyPage competencyNumber={1} title="สมรรถนะด้านที่ 1: ความสามารถในการสื่อสาร" />;
       case 'competency-2':
-        return <CompetencyPage competencyNumber={2} title="สมรรถนะด้านที่ 2" />;
+        return <CompetencyPage competencyNumber={2} title="สมรรถนะด้านที่ 2: ความสามารถในการคิด" />;
       case 'competency-3':
-        return <CompetencyPage competencyNumber={3} title="สมรรถนะด้านที่ 3" />;
+        return <CompetencyPage competencyNumber={3} title="สมรรถนะด้านที่ 3: ความสามารถในการแก้ปัญหา" />;
       case 'competency-4':
-        return <CompetencyPage competencyNumber={4} title="สมรรถนะด้านที่ 4" />;
+        return <CompetencyPage competencyNumber={4} title="สมรรถนะด้านที่ 4: ความสามารถในการใช้ทักษะชีวิต" />;
       case 'competency-5':
-        return <CompetencyPage competencyNumber={5} title="สมรรถนะด้านที่ 5" />;
+        return <CompetencyPage competencyNumber={5} title="สมรรถนะด้านที่ 5: ความสามารถในการใช้เทคโนโลยี" />;
       case 'summary':
         return <SummaryPage />;
       default:
-        return <CoverPage />;
+        return <StudentImportPage />;
     }
   };
 
