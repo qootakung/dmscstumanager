@@ -13,6 +13,7 @@ import AdminPanel from '@/components/AdminPanel';
 import StudentHealth from '@/components/StudentHealth';
 import StudentAnalysis from '@/components/StudentAnalysis';
 import FinancialReports from '@/components/FinancialReports';
+import Assessment from '@/components/Assessment';
 import { getCurrentUser, logout } from '@/utils/userStorage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -235,12 +236,7 @@ const Index = () => {
           {activeTab === 'teachers' && <TeacherManagement />}
           {activeTab === 'student-health' && <StudentHealth />}
           {activeTab === 'student-analysis' && <StudentAnalysis />}
-          {activeTab === 'assessment' && (
-            <div className="text-center p-8">
-              <h2 className="text-2xl font-bold mb-4">แบบประเมินสมรรถนะ</h2>
-              <p className="text-gray-600">หน้านี้อยู่ระหว่างการพัฒนา</p>
-            </div>
-          )}
+          {activeTab === 'assessment' && <Assessment />}
           {activeTab === 'student-reports' && <Reports />}
           {activeTab === 'teacher-reports' && <TeacherReports />}
           {activeTab === 'financial-reports' && <FinancialReports />}
