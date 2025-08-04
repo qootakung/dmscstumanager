@@ -1,70 +1,64 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Target, Save, Printer, FileText, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Save, Printer, FileText, GraduationCap } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { getStudents } from '@/utils/studentStorage';
+import type { Student } from '@/types/student';
 
 interface CompetencyPageProps {
   competencyNumber: number;
   title: string;
 }
 
-interface CompetencyItem {
-  id: string;
-  description: string;
-  score: number;
-}
-
-interface Assessment {
-  items: CompetencyItem[];
+interface StudentAssessment {
+  studentId: string;
+  studentName: string;
+  scores: number[]; // 5 scores for each competency item
   totalScore: number;
   grade: string;
 }
 
-const getCompetencyItems = (competencyNumber: number): CompetencyItem[] => {
-  const competencyData = {
-    1: [
-      { id: '1.1', description: 'มีความสามารถในการรับสาร – ส่งสาร', score: 0 },
-      { id: '1.2', description: 'มีความสามารถในการถ่ายทอดความรู้ ความคิด ความเข้าใจของตนเอง โดยใช้ภาษาอย่างเหมาะสม', score: 0 },
-      { id: '1.3', description: 'ใช้วิธีการสื่อสารที่เหมาะสม มีประสิทธิภาพ', score: 0 },
-      { id: '1.4', description: 'เจรจาต่อรอง เพื่อขจัดและลดปัญหาความขัดแย้งต่าง ๆ ได้', score: 0 },
-      { id: '1.5', description: 'เลือกรับและไม่รับข้อมูลข่าวสารด้วยเหตุผลและถูกต้อง', score: 0 }
-    ],
-    2: [
-      { id: '2.1', description: 'มีความสามารถในการคิดวิเคราะห์ สังเคราะห์', score: 0 },
-      { id: '2.2', description: 'มีทักษะในการคิดนอกกรอบอย่างสร้างสรรค์', score: 0 },
-      { id: '2.3', description: 'สามารถคิดอย่างมีวิจารณญาณ', score: 0 },
-      { id: '2.4', description: 'มีความสามารถในการคิดอย่างมีระบบ', score: 0 },
-      { id: '2.5', description: 'ตัดสินใจแก้ปัญหาเกี่ยวกับตนเองได้อย่างเหมาะสม', score: 0 }
-    ],
-    3: [
-      { id: '3.1', description: 'สามารถแก้ปัญหาและอุปสรรคต่าง ๆ ที่เผชิญได้', score: 0 },
-      { id: '3.2', description: 'ใช้เหตุผลในการแก้ปัญหา', score: 0 },
-      { id: '3.3', description: 'เข้าใจความสัมพันธ์และการเปลี่ยนแปลงในสังคม', score: 0 },
-      { id: '3.4', description: 'แสวงหาความรู้ ประยุกต์ความรู้มาใช้ในการป้องกันและแก้ไขปัญหา', score: 0 },
-      { id: '3.5', description: 'สามารถตัดสินใจได้เหมาะสมตามวัย', score: 0 }
-    ],
-    4: [
-      { id: '4.1', description: 'เรียนรู้ด้วยตนเองได้เหมาะสมตามวัย', score: 0 },
-      { id: '4.2', description: 'สามารถทำงานกลุ่มร่วมกับผู้อื่นได้', score: 0 },
-      { id: '4.3', description: 'นำความรู้ที่ได้ไปใช้ประโยชน์ในชีวิตประจำวัน', score: 0 },
-      { id: '4.4', description: 'จัดการปัญหาและความขัดแย้งได้เหมาะสม', score: 0 },
-      { id: '4.5', description: 'หลีกเลี่ยงพฤติกรรมไม่พึงประสงค์ที่ส่งผลกระทบต่อตนเอง', score: 0 }
-    ],
-    5: [
-      { id: '5.1', description: 'เลือกและใช้เทคโนโลยีได้เหมาะสมตามวัย', score: 0 },
-      { id: '5.2', description: 'มีทักษะกระบวนการทางเทคโนโลยี', score: 0 },
-      { id: '5.3', description: 'สามารถนำเทคโนโลยีไปใช้พัฒนาตนเอง', score: 0 },
-      { id: '5.4', description: 'ใช้เทคโนโลยีในการแก้ปัญหาอย่างสร้างสรรค์', score: 0 },
-      { id: '5.5', description: 'มีคุณธรรม จริยธรรม ในการใช้เทคโนโลยี', score: 0 }
-    ]
-  };
-  return competencyData[competencyNumber as keyof typeof competencyData] || [];
+const competencyItems = {
+  1: [
+    'มีความสามารถในการรับสาร – ส่งสาร',
+    'มีความสามารถในการถ่ายทอดความรู้ ความคิด ความเข้าใจของตนเอง โดยใช้ภาษาอย่างเหมาะสม',
+    'ใช้วิธีการสื่อสารที่เหมาะสม มีประสิทธิภาพ',
+    'เจรจาต่อรอง เพื่อขจัดและลดปัญหาความขัดแย้งต่าง ๆ ได้',
+    'เลือกรับและไม่รับข้อมูลข่าวสารด้วยเหตุผลและถูกต้อง'
+  ],
+  2: [
+    'มีความสามารถในการคิดวิเคราะห์ สังเคราะห์',
+    'มีทักษะในการคิดนอกกรอบอย่างสร้างสรรค์',
+    'สามารถคิดอย่างมีวิจารณญาณ',
+    'มีความสามารถในการคิดอย่างมีระบบ',
+    'ตัดสินใจแก้ปัญหาเกี่ยวกับตนเองได้อย่างเหมาะสม'
+  ],
+  3: [
+    'สามารถแก้ปัญหาและอุปสรรคต่าง ๆ ที่เผชิญได้',
+    'ใช้เหตุผลในการแก้ปัญหา',
+    'เข้าใจความสัมพันธ์และการเปลี่ยนแปลงในสังคม',
+    'แสวงหาความรู้ ประยุกต์ความรู้มาใช้ในการป้องกันและแก้ไขปัญหา',
+    'สามารถตัดสินใจได้เหมาะสมตามวัย'
+  ],
+  4: [
+    'เรียนรู้ด้วยตนเองได้เหมาะสมตามวัย',
+    'สามารถทำงานกลุ่มร่วมกับผู้อื่นได้',
+    'นำความรู้ที่ได้ไปใช้ประโยชน์ในชีวิตประจำวัน',
+    'จัดการปัญหาและความขัดแย้งได้เหมาะสม',
+    'หลีกเลี่ยงพฤติกรรมไม่พึงประสงค์ที่ส่งผลกระทบต่อตนเอง'
+  ],
+  5: [
+    'เลือกและใช้เทคโนโลยีได้เหมาะสมตามวัย',
+    'มีทักษะกระบวนการทางเทคโนโลยี',
+    'สามารถนำเทคโนโลยีไปใช้พัฒนาตนเอง',
+    'ใช้เทคโนโลยีในการแก้ปัญหาอย่างสร้างสรรค์',
+    'มีคุณธรรม จริยธรรม ในการใช้เทคโนโลยี'
+  ]
 };
 
 const getGradeFromScore = (score: number): string => {
@@ -76,49 +70,112 @@ const getGradeFromScore = (score: number): string => {
 
 const getGradeColor = (grade: string): string => {
   switch (grade) {
-    case 'ดีเยี่ยม': return 'bg-green-100 text-green-800';
-    case 'ดี': return 'bg-blue-100 text-blue-800';
-    case 'ผ่าน': return 'bg-yellow-100 text-yellow-800';
-    case 'ไม่ผ่าน': return 'bg-red-100 text-red-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'ดีเยี่ยม': return 'bg-green-100 text-green-800 border-green-200';
+    case 'ดี': return 'bg-blue-100 text-blue-800 border-blue-200';
+    case 'ผ่าน': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'ไม่ผ่าน': return 'bg-red-100 text-red-800 border-red-200';
+    default: return 'bg-gray-100 text-gray-800 border-gray-200';
   }
 };
 
-export const CompetencyPage = ({ competencyNumber, title }: CompetencyPageProps) => {
-  const [assessment, setAssessment] = useState<Assessment>(() => {
-    const items = getCompetencyItems(competencyNumber);
-    const totalScore = items.reduce((sum, item) => sum + item.score, 0);
-    return {
-      items,
-      totalScore,
-      grade: getGradeFromScore(totalScore)
-    };
-  });
-  const [isSaving, setIsSaving] = useState(false);
+const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title }) => {
+  const [selectedGrade, setSelectedGrade] = useState<string>('');
+  const [students, setStudents] = useState<Student[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [assessments, setAssessments] = useState<StudentAssessment[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const updateItemScore = (itemId: string, score: number) => {
-    const updatedItems = assessment.items.map(item => 
-      item.id === itemId ? { ...item, score } : item
-    );
-    const totalScore = updatedItems.reduce((sum, item) => sum + item.score, 0);
-    const grade = getGradeFromScore(totalScore);
-    
-    setAssessment({
-      items: updatedItems,
-      totalScore,
-      grade
+  const items = competencyItems[competencyNumber as keyof typeof competencyItems] || [];
+
+  // Fetch students on component mount
+  useEffect(() => {
+    const fetchStudents = async () => {
+      setIsLoading(true);
+      try {
+        const studentData = await getStudents();
+        setStudents(studentData);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        toast({
+          title: 'เกิดข้อผิดพลาด',
+          description: 'ไม่สามารถดึงข้อมูลนักเรียนได้',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+  // Filter students by grade
+  useEffect(() => {
+    if (selectedGrade) {
+      const filtered = students.filter(student => student.grade === selectedGrade);
+      setFilteredStudents(filtered);
+      
+      // Initialize assessments for filtered students
+      const initialAssessments = filtered.map(student => ({
+        studentId: student.studentId,
+        studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
+        scores: [0, 0, 0, 0, 0],
+        totalScore: 0,
+        grade: 'ไม่ผ่าน'
+      }));
+      setAssessments(initialAssessments);
+    } else {
+      setFilteredStudents([]);
+      setAssessments([]);
+    }
+  }, [selectedGrade, students]);
+
+  // Get unique grades from students
+  const availableGrades = [...new Set(students.map(student => student.grade))]
+    .filter(Boolean)
+    .sort((a, b) => {
+      const gradeOrder = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+      return gradeOrder.indexOf(a) - gradeOrder.indexOf(b);
     });
+
+  const updateScore = (studentId: string, itemIndex: number, score: number) => {
+    setAssessments(prev => prev.map(assessment => {
+      if (assessment.studentId === studentId) {
+        const newScores = [...assessment.scores];
+        newScores[itemIndex] = score;
+        const newTotalScore = newScores.reduce((sum, s) => sum + s, 0);
+        const newGrade = getGradeFromScore(newTotalScore);
+        
+        return {
+          ...assessment,
+          scores: newScores,
+          totalScore: newTotalScore,
+          grade: newGrade
+        };
+      }
+      return assessment;
+    }));
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
+    setIsLoading(true);
     try {
+      // Simulate save operation
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('บันทึกข้อมูลสำเร็จ');
+      
+      toast({
+        title: 'บันทึกสำเร็จ',
+        description: 'ข้อมูลการประเมินได้รับการบันทึกแล้ว',
+      });
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาดในการบันทึก');
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถบันทึกข้อมูลได้',
+        variant: 'destructive',
+      });
     } finally {
-      setIsSaving(false);
+      setIsLoading(false);
     }
   };
 
@@ -126,171 +183,149 @@ export const CompetencyPage = ({ competencyNumber, title }: CompetencyPageProps)
     window.print();
   };
 
-  const getCompetencyColor = (number: number) => {
-    const colors = [
-      'from-red-500 to-pink-600',
-      'from-blue-500 to-indigo-600', 
-      'from-green-500 to-emerald-600',
-      'from-purple-500 to-violet-600',
-      'from-orange-500 to-yellow-600'
-    ];
-    return colors[(number - 1) % colors.length];
-  };
-
-  const getCompetencyBg = (number: number) => {
-    const backgrounds = [
-      'from-red-50 to-pink-50',
-      'from-blue-50 to-indigo-50',
-      'from-green-50 to-emerald-50', 
-      'from-purple-50 to-violet-50',
-      'from-orange-50 to-yellow-50'
-    ];
-    return backgrounds[(number - 1) % backgrounds.length];
-  };
-
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className={`text-3xl font-bold bg-gradient-to-r ${getCompetencyColor(competencyNumber)} bg-clip-text text-transparent mb-3`}>
-          {title}
-        </h2>
-        <p className="text-gray-600 text-lg">
-          ประเมินและบันทึกข้อมูลสมรรถนะของนักเรียน
-        </p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
+          <p className="text-gray-600">ประเมินสมรรถนะนักเรียนในด้านต่างๆ</p>
+        </div>
+        <div className="flex gap-3">
+          <Button 
+            onClick={handleSave} 
+            disabled={isLoading}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            บันทึก
+          </Button>
+          <Button 
+            onClick={handlePrint}
+            variant="outline"
+            className="border-blue-300 text-blue-600 hover:bg-blue-50"
+          >
+            <Printer className="w-4 h-4 mr-2" />
+            พิมพ์
+          </Button>
+        </div>
       </div>
 
-      <Card className={`border-0 shadow-lg bg-gradient-to-br ${getCompetencyBg(competencyNumber)}`}>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-xl text-gray-700">
-            <Target className="h-6 w-6" />
-            การประเมินสมรรถนะ
+      {/* Grade Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <GraduationCap className="w-5 h-5" />
+            เลือกระดับชั้น
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <div className="mb-6">
-              <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                <h4 className="font-medium text-blue-800 mb-2">เกณฑ์การให้คะแนน:</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                  <div className="text-green-700">ดีเยี่ยม = 3 คะแนน</div>
-                  <div className="text-blue-700">ดี = 2 คะแนน</div>
-                  <div className="text-yellow-700">ผ่าน = 1 คะแนน</div>
-                  <div className="text-red-700">ไม่ผ่าน = 0 คะแนน</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              {assessment.items.map((item) => (
-                <div key={item.id} className="border rounded-lg p-4 bg-gray-50">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800 mb-2">
-                        {item.id} {item.description}
-                      </h4>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-700">
-                      ระดับคะแนน
-                    </Label>
-                    <RadioGroup
-                      value={item.score.toString()}
-                      onValueChange={(value) => updateItemScore(item.id, parseInt(value))}
-                      className="grid grid-cols-2 md:grid-cols-4 gap-4"
-                    >
-                      {[
-                        { value: '3', label: 'ดีเยี่ยม (3)', color: 'text-green-600' },
-                        { value: '2', label: 'ดี (2)', color: 'text-blue-600' },
-                        { value: '1', label: 'ผ่าน (1)', color: 'text-yellow-600' },
-                        { value: '0', label: 'ไม่ผ่าน (0)', color: 'text-red-600' }
-                      ].map((option) => (
-                        <div key={option.value} className="flex items-center space-x-2">
-                          <RadioGroupItem value={option.value} id={`${item.id}-${option.value}`} />
-                          <Label 
-                            htmlFor={`${item.id}-${option.value}`} 
-                            className={`text-sm cursor-pointer ${option.color}`}
-                          >
-                            {option.label}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                </div>
+        <CardContent>
+          <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+            <SelectTrigger className="w-full max-w-xs">
+              <SelectValue placeholder="เลือกระดับชั้น" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableGrades.map(grade => (
+                <SelectItem key={grade} value={grade}>
+                  {grade}
+                </SelectItem>
               ))}
-            </div>
-          </div>
-
-          {/* Score Summary */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">สรุปผลคะแนน</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{assessment.totalScore}</div>
-                <div className="text-sm text-blue-700">คะแนนรวม</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-600">15</div>
-                <div className="text-sm text-gray-700">คะแนนเต็ม</div>
-              </div>
-              <div className={`text-center p-4 rounded-lg ${getGradeColor(assessment.grade)}`}>
-                <div className="text-2xl font-bold">{assessment.grade}</div>
-                <div className="text-sm">ผลการประเมิน</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3 pt-4 border-t bg-white rounded-lg p-4">
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className={`flex items-center gap-2 bg-gradient-to-r ${getCompetencyColor(competencyNumber)} text-white`}
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
-            </Button>
-            
-            <Button
-              onClick={handlePrint}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Printer className="h-4 w-4" />
-              พิมพ์รายงาน
-            </Button>
-            
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              ตัวอย่างรายงาน
-            </Button>
-          </div>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
+      {/* Assessment Table */}
+      {selectedGrade && (
+        <Card>
+          <CardHeader>
+            <CardTitle>แบบประเมินสมรรถนะด้านที่ {competencyNumber}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="border border-gray-300 p-3 text-center min-w-[60px]">ลำดับที่</th>
+                    <th className="border border-gray-300 p-3 text-center min-w-[200px]">ชื่อ-สกุล</th>
+                    <th className="border border-gray-300 p-2 text-center" colSpan={5}>
+                      สมรรถนะด้านที่ {competencyNumber}
+                    </th>
+                    <th className="border border-gray-300 p-3 text-center min-w-[80px]">รวม</th>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <th className="border border-gray-300 p-2"></th>
+                    <th className="border border-gray-300 p-2"></th>
+                    {items.map((item, index) => (
+                      <th key={index} className="border border-gray-300 p-2 text-xs text-center min-w-[100px]">
+                        {competencyNumber}.{index + 1}
+                        <div className="mt-1 text-xs font-normal text-gray-600">
+                          {item.length > 30 ? item.substring(0, 30) + '...' : item}
+                        </div>
+                        <div className="mt-1 text-xs text-blue-600">3</div>
+                      </th>
+                    ))}
+                    <th className="border border-gray-300 p-2 text-center">15</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assessments.map((assessment, index) => (
+                    <tr key={assessment.studentId} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 p-3 text-center">{index + 1}</td>
+                      <td className="border border-gray-300 p-3">{assessment.studentName}</td>
+                      {assessment.scores.map((score, itemIndex) => (
+                        <td key={itemIndex} className="border border-gray-300 p-2 text-center">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="3"
+                            value={score}
+                            onChange={(e) => updateScore(assessment.studentId, itemIndex, parseInt(e.target.value) || 0)}
+                            className="w-16 text-center"
+                          />
+                        </td>
+                      ))}
+                      <td className="border border-gray-300 p-3 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="font-semibold">{assessment.totalScore}</span>
+                          <Badge className={getGradeColor(assessment.grade)}>
+                            {assessment.grade}
+                          </Badge>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Grading Criteria */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl text-gray-700">เกณฑ์การสรุปผล</CardTitle>
+      <Card>
+        <CardHeader>
+          <CardTitle>เกณฑ์การให้คะแนน</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-              {[
-                { label: 'ดีเยี่ยม', range: '13-15 คะแนน', color: 'bg-green-100 text-green-800' },
-                { label: 'ดี', range: '9-12 คะแนน', color: 'bg-blue-100 text-blue-800' },
-                { label: 'ผ่าน', range: '5-8 คะแนน', color: 'bg-yellow-100 text-yellow-800' },
-                { label: 'ไม่ผ่าน', range: '0-4 คะแนน', color: 'bg-red-100 text-red-800' }
-              ].map((criteria) => (
-                <div key={criteria.label} className={`p-4 rounded-lg ${criteria.color}`}>
-                  <div className="text-lg font-bold">{criteria.label}</div>
-                  <div className="text-sm font-medium">{criteria.range}</div>
-                </div>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold mb-3">เกณฑ์การให้คะแนนระดับคุณภาพ</h4>
+              <ul className="space-y-2 text-sm">
+                <li><span className="font-medium">ดีเยี่ยม</span> – พฤติกรรมที่ปฏิบัติชัดเจนและสม่ำเสมอ ให้ 3 คะแนน</li>
+                <li><span className="font-medium">ดี</span> – พฤติกรรมที่ปฏิบัติชัดเจนและบ่อยครั้ง ให้ 2 คะแนน</li>
+                <li><span className="font-medium">ผ่าน</span> – พฤติกรรมที่ปฏิบัติบางครั้ง ให้ 1 คะแนน</li>
+                <li><span className="font-medium">ไม่ผ่าน</span> – ไม่เคยปฏิบัติพฤติกรรม ให้ 0 คะแนน</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">เกณฑ์การสรุปผล</h4>
+              <ul className="space-y-2 text-sm">
+                <li><span className="font-medium">ดีเยี่ยม</span> 13 – 15 คะแนน</li>
+                <li><span className="font-medium">ดี</span> 9 – 12 คะแนน</li>
+                <li><span className="font-medium">ผ่าน</span> 5 – 8 คะแนน</li>
+                <li><span className="font-medium">ไม่ผ่าน</span> 0 – 4 คะแนน</li>
+              </ul>
             </div>
           </div>
         </CardContent>
@@ -298,3 +333,5 @@ export const CompetencyPage = ({ competencyNumber, title }: CompetencyPageProps)
     </div>
   );
 };
+
+export default CompetencyPage;

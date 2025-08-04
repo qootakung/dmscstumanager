@@ -28,13 +28,6 @@ interface AssessmentSidebarProps {
 
 const menuItems = [
   {
-    id: 'student-import',
-    title: 'นำเข้าข้อมูลนักเรียน',
-    icon: UserPlus,
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50 hover:bg-indigo-100',
-  },
-  {
     id: 'cover',
     title: 'หน้าปก',
     icon: FileText,

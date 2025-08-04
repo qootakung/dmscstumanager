@@ -9,17 +9,15 @@ import { CoverPage } from './assessment/pages/CoverPage';
 import { NotesPage } from './assessment/pages/NotesPage';
 import { IntroductionPage } from './assessment/pages/IntroductionPage';
 import { InstructionsPage } from './assessment/pages/InstructionsPage';
-import { CompetencyPage } from './assessment/pages/CompetencyPage';
+import CompetencyPage from './assessment/pages/CompetencyPage';
 import { SummaryPage } from './assessment/pages/SummaryPage';
 import { StudentImportPage } from './assessment/pages/StudentImportPage';
 
 const Assessment = () => {
-  const [activeSection, setActiveSection] = useState('student-import');
+  const [activeSection, setActiveSection] = useState('competency-1');
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'student-import':
-        return <StudentImportPage />;
       case 'cover':
         return <CoverPage />;
       case 'notes':
@@ -41,7 +39,7 @@ const Assessment = () => {
       case 'summary':
         return <SummaryPage />;
       default:
-        return <StudentImportPage />;
+        return <CompetencyPage competencyNumber={1} title="สมรรถนะด้านที่ 1: ความสามารถในการสื่อสาร" />;
     }
   };
 
