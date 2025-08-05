@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Save, Printer, FileText, GraduationCap } from 'lucide-react';
+import { Save, Printer, FileText, GraduationCap, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getStudents } from '@/utils/studentStorage';
+import { supabase } from '@/integrations/supabase/client';
+import { generateAcademicYears } from '@/utils/data';
 import type { Student } from '@/types/student';
 
 interface CompetencyPageProps {
@@ -21,6 +22,25 @@ interface StudentAssessment {
   scores: number[]; // 5 scores for each competency item
   totalScore: number;
   grade: string;
+  dbId?: string; // Database ID for existing records
+  dbStudentId?: string; // Student database ID
+}
+
+interface CompetencyAssessmentData {
+  id: string;
+  student_id: string;
+  competency_number: number;
+  item_1_score: number;
+  item_2_score: number;
+  item_3_score: number;
+  item_4_score: number;
+  item_5_score: number;
+  total_score: number;
+  grade: string;
+  academic_year: string;
+  assessed_by?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const competencyItems = {
@@ -80,21 +100,34 @@ const getGradeColor = (grade: string): string => {
 
 const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title }) => {
   const [selectedGrade, setSelectedGrade] = useState<string>('');
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('');
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [assessments, setAssessments] = useState<StudentAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const academicYears = generateAcademicYears();
+
   const items = competencyItems[competencyNumber as keyof typeof competencyItems] || [];
 
-  // Fetch students on component mount
+  // Fetch students based on academic year
   useEffect(() => {
     const fetchStudents = async () => {
+      if (!selectedAcademicYear) {
+        setStudents([]);
+        return;
+      }
+
       setIsLoading(true);
       try {
-        const studentData = await getStudents();
-        setStudents(studentData);
+        const { data: studentData, error } = await supabase
+          .from('students')
+          .select('*')
+          .eq('academicYear', selectedAcademicYear);
+
+        if (error) throw error;
+        setStudents((studentData || []) as Student[]);
       } catch (error) {
         console.error('Error fetching students:', error);
         toast({
@@ -108,28 +141,75 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
     };
 
     fetchStudents();
-  }, []);
+  }, [selectedAcademicYear]);
 
-  // Filter students by grade
+  // Filter students by grade and load existing assessments
   useEffect(() => {
-    if (selectedGrade) {
+    const loadAssessments = async () => {
+      if (!selectedGrade || !selectedAcademicYear) {
+        setFilteredStudents([]);
+        setAssessments([]);
+        return;
+      }
+
       const filtered = students.filter(student => student.grade === selectedGrade);
       setFilteredStudents(filtered);
-      
-      // Initialize assessments for filtered students
-      const initialAssessments = filtered.map(student => ({
-        studentId: student.studentId,
-        studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
-        scores: [0, 0, 0, 0, 0],
-        totalScore: 0,
-        grade: 'ไม่ผ่าน'
-      }));
-      setAssessments(initialAssessments);
-    } else {
-      setFilteredStudents([]);
-      setAssessments([]);
-    }
-  }, [selectedGrade, students]);
+
+      // Load existing assessments from database
+      try {
+        const { data: existingAssessments, error } = await (supabase as any)
+          .from('competency_assessments')
+          .select('*')
+          .eq('competency_number', competencyNumber)
+          .eq('academic_year', selectedAcademicYear)
+          .in('student_id', filtered.map(s => s.id));
+
+        if (error) throw error;
+
+        // Initialize assessments for filtered students
+        const initialAssessments = filtered.map(student => {
+          const existingAssessment = (existingAssessments as CompetencyAssessmentData[])?.find(a => a.student_id === student.id);
+          
+          if (existingAssessment) {
+            return {
+              studentId: student.studentId || '',
+              studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
+              scores: [
+                existingAssessment.item_1_score,
+                existingAssessment.item_2_score,
+                existingAssessment.item_3_score,
+                existingAssessment.item_4_score,
+                existingAssessment.item_5_score
+              ],
+              totalScore: existingAssessment.total_score,
+              grade: existingAssessment.grade,
+              dbId: existingAssessment.id,
+              dbStudentId: student.id
+            };
+          } else {
+            return {
+              studentId: student.studentId || '',
+              studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
+              scores: [0, 0, 0, 0, 0],
+              totalScore: 0,
+              grade: 'ไม่ผ่าน',
+              dbStudentId: student.id
+            };
+          }
+        });
+        setAssessments(initialAssessments);
+      } catch (error) {
+        console.error('Error loading assessments:', error);
+        toast({
+          title: 'เกิดข้อผิดพลาด',
+          description: 'ไม่สามารถดึงข้อมูลการประเมินได้',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    loadAssessments();
+  }, [selectedGrade, students, selectedAcademicYear, competencyNumber]);
 
   // Get unique grades from students
   const availableGrades = [...new Set(students.map(student => student.grade))]
@@ -159,16 +239,89 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
   };
 
   const handleSave = async () => {
+    if (!selectedAcademicYear) {
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'กรุณาเลือกปีการศึกษา',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Simulate save operation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare data for saving
+      const assessmentData = assessments.map(assessment => ({
+        student_id: assessment.dbStudentId,
+        competency_number: competencyNumber,
+        item_1_score: assessment.scores[0],
+        item_2_score: assessment.scores[1],
+        item_3_score: assessment.scores[2],
+        item_4_score: assessment.scores[3],
+        item_5_score: assessment.scores[4],
+        academic_year: selectedAcademicYear,
+        assessed_by: 'ครู' // You can modify this to get actual user info
+      }));
+
+      // Use upsert to update existing records or insert new ones
+      const { error } = await (supabase as any)
+        .from('competency_assessments')
+        .upsert(assessmentData, {
+          onConflict: 'student_id,competency_number,academic_year'
+        });
+
+      if (error) throw error;
       
       toast({
         title: 'บันทึกสำเร็จ',
         description: 'ข้อมูลการประเมินได้รับการบันทึกแล้ว',
       });
+
+      // Reload assessments to get updated data with auto-calculated totals
+      const filtered = students.filter(student => student.grade === selectedGrade);
+      const { data: updatedAssessments, error: fetchError } = await (supabase as any)
+        .from('competency_assessments')
+        .select('*')
+        .eq('competency_number', competencyNumber)
+        .eq('academic_year', selectedAcademicYear)
+        .in('student_id', filtered.map(s => s.id));
+
+      if (fetchError) throw fetchError;
+
+      // Update local state with fresh data
+      const refreshedAssessments = filtered.map(student => {
+        const updatedAssessment = (updatedAssessments as CompetencyAssessmentData[])?.find(a => a.student_id === student.id);
+        
+        if (updatedAssessment) {
+          return {
+            studentId: student.studentId || '',
+            studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
+            scores: [
+              updatedAssessment.item_1_score,
+              updatedAssessment.item_2_score,
+              updatedAssessment.item_3_score,
+              updatedAssessment.item_4_score,
+              updatedAssessment.item_5_score
+            ],
+            totalScore: updatedAssessment.total_score,
+            grade: updatedAssessment.grade,
+            dbId: updatedAssessment.id,
+            dbStudentId: student.id
+          };
+        }
+        return assessments.find(a => a.dbStudentId === student.id) || {
+          studentId: student.studentId || '',
+          studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
+          scores: [0, 0, 0, 0, 0],
+          totalScore: 0,
+          grade: 'ไม่ผ่าน',
+          dbStudentId: student.id
+        };
+      });
+      setAssessments(refreshedAssessments);
+
     } catch (error) {
+      console.error('Error saving assessments:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถบันทึกข้อมูลได้',
@@ -211,32 +364,61 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
         </div>
       </div>
 
-      {/* Grade Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GraduationCap className="w-5 h-5" />
-            เลือกระดับชั้น
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-            <SelectTrigger className="w-full max-w-xs">
-              <SelectValue placeholder="เลือกระดับชั้น" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableGrades.map(grade => (
-                <SelectItem key={grade} value={grade}>
-                  {grade}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
+      {/* Academic Year and Grade Selection */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              เลือกปีการศึกษา
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select value={selectedAcademicYear} onValueChange={setSelectedAcademicYear}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="เลือกปีการศึกษา" />
+              </SelectTrigger>
+              <SelectContent>
+                {academicYears.map(year => (
+                  <SelectItem key={year} value={year}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5" />
+              เลือกระดับชั้น
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select 
+              value={selectedGrade} 
+              onValueChange={setSelectedGrade}
+              disabled={!selectedAcademicYear}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="เลือกระดับชั้น" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableGrades.map(grade => (
+                  <SelectItem key={grade} value={grade}>
+                    {grade}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Assessment Table */}
-      {selectedGrade && (
+      {selectedGrade && selectedAcademicYear && (
         <Card>
           <CardHeader>
             <CardTitle>แบบประเมินสมรรถนะด้านที่ {competencyNumber}</CardTitle>

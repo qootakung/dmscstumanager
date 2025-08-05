@@ -1,8 +1,8 @@
 
-// Generate academic years from 2568 to 2600
+// Generate academic years from 2567 to 2587
 export const generateAcademicYears = (): string[] => {
   const years: string[] = [];
-  for (let year = 2568; year <= 2600; year++) {
+  for (let year = 2567; year <= 2587; year++) {
     years.push(`${year}`);
   }
   return years;
