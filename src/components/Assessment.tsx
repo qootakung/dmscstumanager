@@ -71,13 +71,6 @@ const Assessment = () => {
               
               <div className="flex items-center gap-3">
                 <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="bg-white/70 hover:bg-white border-gray-300"
-                >
-                  บันทึกการทำงาน
-                </Button>
-                <Button 
                   size="sm"
                   className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md"
                 >

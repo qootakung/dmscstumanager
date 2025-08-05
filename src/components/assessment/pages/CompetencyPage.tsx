@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { generateAcademicYears } from '@/utils/data';
 import type { Student } from '@/types/student';
+import CompetencyPrintPreview from '../CompetencyPrintPreview';
 
 interface CompetencyPageProps {
   competencyNumber: number;
@@ -105,6 +106,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [assessments, setAssessments] = useState<StudentAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const { toast } = useToast();
 
   const academicYears = generateAcademicYears();
@@ -354,12 +356,12 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
             บันทึก
           </Button>
           <Button 
-            onClick={handlePrint}
+            onClick={() => setShowPrintPreview(true)}
             variant="outline"
             className="border-blue-300 text-blue-600 hover:bg-blue-50"
           >
-            <Printer className="w-4 h-4 mr-2" />
-            พิมพ์
+            <FileText className="w-4 h-4 mr-2" />
+            ตัวอย่างก่อนพิมพ์
           </Button>
         </div>
       </div>
@@ -512,6 +514,22 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
           </div>
         </CardContent>
       </Card>
+
+      {/* Print Preview Dialog */}
+      <CompetencyPrintPreview
+        isOpen={showPrintPreview}
+        onOpenChange={setShowPrintPreview}
+        competencyNumber={competencyNumber}
+        title={title}
+        academicYear={selectedAcademicYear}
+        students={assessments.map(assessment => ({
+          id: assessment.studentId,
+          name: assessment.studentName,
+          scores: assessment.scores,
+          total: assessment.totalScore,
+          grade: assessment.grade
+        }))}
+      />
     </div>
   );
 };
