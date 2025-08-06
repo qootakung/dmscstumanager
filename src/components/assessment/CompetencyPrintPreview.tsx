@@ -41,16 +41,6 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   });
   const [directorName, setDirectorName] = useState('');
   const [teacherName, setTeacherName] = useState('');
-  
-  // Calculate pages based on student count (18 students per page)
-  const studentsPerPage = 18;
-  const totalPages = Math.ceil(students.length / studentsPerPage);
-  
-  const getStudentsForPage = (pageIndex: number) => {
-    const start = pageIndex * studentsPerPage;
-    const end = start + studentsPerPage;
-    return students.slice(start, end);
-  };
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -235,274 +225,155 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </div>
         )}
 
-        <div ref={printRef} className="bg-white font-sarabun">
+        <div ref={printRef} className="bg-white p-8 font-sarabun">
           <style>{`
             @media print {
-              body { 
-                font-family: 'Sarabun', sans-serif !important; 
-                margin: 0 !important; 
-                padding: 0 !important;
-                font-size: 15pt !important;
-                line-height: 1.2 !important;
-              }
-              .print-page {
-                page-break-after: always;
-                padding: 15mm !important;
-                width: 210mm !important;
-                min-height: 297mm !important;
-                max-height: 297mm !important;
-                box-sizing: border-box !important;
-                overflow: hidden !important;
-              }
-              .print-page:last-child {
-                page-break-after: avoid;
-              }
-              table {
-                border-collapse: collapse !important;
-                width: 100% !important;
-                table-layout: fixed !important;
-              }
               table, th, td {
                 border: 1px solid #000 !important;
                 border-collapse: collapse !important;
               }
               th {
                 background-color: #f8f9fa !important;
-                font-weight: bold !important;
-                padding: 4px !important;
-                text-align: center !important;
-                vertical-align: middle !important;
-                word-wrap: break-word !important;
-                overflow: hidden !important;
-              }
-              td {
-                padding: 4px !important;
-                text-align: center !important;
-                vertical-align: middle !important;
-                word-wrap: break-word !important;
-                overflow: hidden !important;
-              }
-              .vertical-text {
-                writing-mode: vertical-rl !important;
-                text-orientation: mixed !important;
-                height: 120px !important;
-                width: 40px !important;
-                font-size: 11pt !important;
-                line-height: 1.1 !important;
-                padding: 2px !important;
-                overflow: hidden !important;
-                word-wrap: break-word !important;
-              }
-              .signature-section {
-                margin-top: 15px !important;
-                font-size: 14pt !important;
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: flex-start !important;
-              }
-              .signature-box {
-                text-align: center !important;
-                width: 45% !important;
-              }
-              .signature-line {
-                margin: 8px 0 !important;
-              }
-              .page-break {
-                page-break-before: always !important;
-              }
-            }
-            @media screen {
-              .print-page {
-                border: 1px solid #ccc;
-                margin-bottom: 20px;
-                padding: 15mm;
-                width: 210mm;
-                min-height: 297mm;
-                background: white;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
               }
             }
           `}</style>
           
-          {/* Generate pages */}
-          {Array.from({ length: totalPages }, (_, pageIndex) => {
-            const pageStudents = getStudentsForPage(pageIndex);
-            const emptyRowsCount = Math.max(0, studentsPerPage - pageStudents.length);
-            
-            return (
-              <div key={pageIndex} className={`print-page ${pageIndex > 0 ? 'page-break' : ''}`}>
-                {/* Header */}
-                <div className="text-center mb-4" style={{ fontSize: '16pt' }}>
-                  <h1 className="font-bold mb-2">
-                    แบบประเมินสมรรถนะสำหรับผู้เรียนเด่น ชั้นประถมศึกษาปีที่ 1
-                  </h1>
-                  <h2 className="font-semibold mb-1">
-                    สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
-                  </h2>
-                  <p style={{ fontSize: '14pt' }}>ปีการศึกษา {academicYear}</p>
-                  {totalPages > 1 && (
-                    <p style={{ fontSize: '12pt' }} className="mt-2">หน้าที่ {pageIndex + 1} จาก {totalPages}</p>
-                  )}
-                </div>
+          {/* Header */}
+          <div className="text-center mb-6">
+            <h1 className="text-lg font-bold mb-2">
+              แบบประเมินสมรรถนะสำหรับผู้เรียนเด่น ชั้นประถมศึกษาปีที่ 1
+            </h1>
+            <h2 className="text-base font-semibold">
+              สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
+            </h2>
+            <p className="text-sm mt-2">ปีการศึกษา {academicYear}</p>
+          </div>
 
-                {/* Assessment Table */}
-                <table className="w-full border-collapse border-black" style={{ fontSize: '15pt', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr>
-                      <th 
-                        rowSpan={2} 
-                        className="border border-black bg-gray-100"
-                        style={{ width: '40px', padding: '4px', textAlign: 'center' }}
-                      >
-                        เลขที่
-                      </th>
-                      <th 
-                        rowSpan={2} 
-                        className="border border-black bg-gray-100"
-                        style={{ width: '120px', padding: '4px', textAlign: 'center' }}
-                      >
-                        ชื่อ-สกุล
-                      </th>
-                      <th colSpan={5} className="border border-black bg-gray-100" style={{ padding: '4px', textAlign: 'center' }}>
-                        สมรรถนะด้านที่ {competencyNumber}
-                      </th>
-                      <th 
-                        rowSpan={2} 
-                        className="border border-black bg-gray-100"
-                        style={{ width: '35px', padding: '4px', textAlign: 'center' }}
-                      >
-                        รวม
-                      </th>
-                      <th 
-                        rowSpan={2} 
-                        className="border border-black bg-gray-100"
-                        style={{ width: '50px', padding: '4px', textAlign: 'center' }}
-                      >
-                        ระดับคุณภาพ
-                      </th>
-                    </tr>
-                    <tr>
-                      {competencyCriteria.map((criteria, index) => {
-                        const shouldSplit = criteria.length > 25;
-                        let firstLine = criteria;
-                        let secondLine = '';
-                        
-                        if (shouldSplit) {
-                          const words = criteria.split(' ');
-                          const midPoint = Math.ceil(words.length / 2);
-                          firstLine = words.slice(0, midPoint).join(' ');
-                          secondLine = words.slice(midPoint).join(' ');
-                        }
-                        
-                        return (
-                          <th 
-                            key={index} 
-                            className="border border-black bg-gray-100 vertical-text"
-                            style={{ 
-                              width: '40px',
-                              writingMode: 'vertical-rl',
-                              textOrientation: 'mixed',
-                              fontSize: '11pt',
-                              lineHeight: '1.1',
-                              height: '120px',
-                              padding: '2px',
-                              position: 'relative'
-                            }}
-                          >
-                            <div style={{ 
-                              display: 'flex', 
-                              flexDirection: 'column', 
-                              alignItems: 'center', 
-                              justifyContent: 'center', 
-                              height: '100%',
-                              gap: '2px'
-                            }}>
-                              <span>{firstLine}</span>
-                              {secondLine && (
-                                <>
-                                  <div style={{ 
-                                    width: '20px', 
-                                    height: '1px', 
-                                    backgroundColor: '#dc2626', 
-                                    margin: '2px 0' 
-                                  }}></div>
-                                  <span>{secondLine}</span>
-                                </>
-                              )}
-                            </div>
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pageStudents.map((student, index) => (
-                      <tr key={student.id}>
-                        <td className="border border-black" style={{ padding: '4px', textAlign: 'center' }}>
-                          {pageIndex * studentsPerPage + index + 1}
-                        </td>
-                        <td className="border border-black" style={{ padding: '4px', textAlign: 'left' }}>
-                          {student.name}
-                        </td>
-                        {student.scores.map((score, scoreIndex) => (
-                          <td key={scoreIndex} className="border border-black" style={{ padding: '4px', textAlign: 'center' }}>
-                            {score || '-'}
-                          </td>
-                        ))}
-                        <td className="border border-black font-semibold" style={{ padding: '4px', textAlign: 'center' }}>
-                          {student.total || '-'}
-                        </td>
-                        <td className="border border-black" style={{ padding: '4px', textAlign: 'center' }}>
-                          {student.grade || '-'}
-                        </td>
-                      </tr>
-                    ))}
-                    
-                    {/* Add empty rows for this page */}
-                    {Array.from({ length: emptyRowsCount }, (_, index) => (
-                      <tr key={`empty-${pageIndex}-${index}`}>
-                        <td className="border border-black" style={{ padding: '4px', textAlign: 'center' }}>
-                          {pageIndex * studentsPerPage + pageStudents.length + index + 1}
-                        </td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                        <td className="border border-black" style={{ padding: '4px' }}>&nbsp;</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          {/* Assessment Table */}
+          <table className="w-full border-collapse border border-black" style={{ fontSize: '16px' }}>
+            <thead>
+              <tr>
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.no}px` }}
+                >
+                  เลขที่
+                </th>
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.name}px` }}
+                >
+                  ชื่อ-สกุล
+                </th>
+                <th colSpan={5} className="border border-black p-2 bg-gray-100 text-center">
+                  สมรรถนะด้านที่ {competencyNumber}
+                </th>
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.total}px` }}
+                >
+                  รวม
+                </th>
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.grade}px` }}
+                >
+                  ระดับคุณภาพ
+                </th>
+              </tr>
+              <tr>
+                {competencyCriteria.map((criteria, index) => {
+                  // Split long text into multiple lines
+                  const shouldSplit = criteria.length > 30;
+                  const words = criteria.split(' ');
+                  const midPoint = Math.ceil(words.length / 2);
+                  const firstLine = shouldSplit ? words.slice(0, midPoint).join(' ') : criteria;
+                  const secondLine = shouldSplit ? words.slice(midPoint).join(' ') : '';
+                  
+                  return (
+                    <th 
+                      key={index} 
+                      className="border border-black p-1 bg-gray-100 text-center relative"
+                      style={{ 
+                        width: `${columnWidths.competency}px`,
+                        writingMode: 'vertical-rl',
+                        textOrientation: 'mixed',
+                        fontSize: '12px',
+                        lineHeight: '1.3',
+                        height: '150px'
+                      }}
+                    >
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <span className="block">{firstLine}</span>
+                        {secondLine && (
+                          <>
+                            <div className="w-full border-t border-red-500 my-1"></div>
+                            <span className="block">{secondLine}</span>
+                          </>
+                        )}
+                      </div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((student, index) => (
+                <tr key={student.id}>
+                  <td className="border border-black p-2 text-center">{index + 1}</td>
+                  <td className="border border-black p-2">{student.name}</td>
+                  {student.scores.map((score, scoreIndex) => (
+                    <td key={scoreIndex} className="border border-black p-2 text-center">
+                      {score || '-'}
+                    </td>
+                  ))}
+                  <td className="border border-black p-2 text-center font-semibold">
+                    {student.total || '-'}
+                  </td>
+                  <td className="border border-black p-2 text-center">
+                    {student.grade || '-'}
+                  </td>
+                </tr>
+              ))}
+              
+              {/* Add empty rows if needed */}
+              {Array.from({ length: Math.max(0, 10 - students.length) }, (_, index) => (
+                <tr key={`empty-${index}`}>
+                  <td className="border border-black p-2 text-center">{students.length + index + 1}</td>
+                  <td className="border border-black p-2">&nbsp;</td>
+                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-                {/* Signature Section */}
-                <div className="signature-section" style={{ 
-                  marginTop: '15px', 
-                  fontSize: '14pt',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start'
-                }}>
-                  <div className="signature-box" style={{ textAlign: 'center', width: '45%' }}>
-                    <p style={{ marginBottom: '8px' }}>รับรองข้อมูลถูกต้อง</p>
-                    <div className="signature-line" style={{ margin: '8px 0' }}>
-                      <p>( {directorName || '.................................'} )</p>
-                    </div>
-                    <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
-                  </div>
-                  <div className="signature-box" style={{ textAlign: 'center', width: '45%' }}>
-                    <p style={{ marginBottom: '8px' }}>ตรวจสอบข้อมูลถูกต้อง</p>
-                    <div className="signature-line" style={{ margin: '8px 0' }}>
-                      <p>( {teacherName || '.................................'} )</p>
-                    </div>
-                    <p>ครูประจำชั้น</p>
-                  </div>
-                </div>
+          {/* Signature Section */}
+          <div className="mt-6 flex justify-between items-start" style={{ fontSize: '15px' }}>
+            <div className="text-center">
+              <p className="mb-6">รับรองข้อมูลถูกต้อง</p>
+              <div className="mb-6">
+                <p>( {directorName || '.................................'} )</p>
               </div>
-            );
-          })}
+              <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
+            </div>
+            <div className="text-center">
+              <p className="mb-6">ตรวจสอบข้อมูลถูกต้อง</p>
+              <div className="mb-6">
+                <p>( {teacherName || '.................................'} )</p>
+              </div>
+              <p>ครูประจำชั้น</p>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
