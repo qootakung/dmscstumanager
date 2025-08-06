@@ -62,13 +62,56 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
     `,
   });
 
-  const competencyCriteria = [
-    'ข้อที่ 1 เด็กสามารถรับฟังและเข้าใจคำพูด ประโยค ข้อความ',
-    'ข้อที่ 2 เด็กสามารถใช้คำศัพท์ ประโยคพื้นฐานสำหรับการสื่อสาร', 
-    'ข้อที่ 3 เด็กสามารถเล่าเรื่องที่ตนเองสนใจ',
-    'ข้อที่ 4 เด็กสามารถแสดงออกทางสายตาและการใช้ร่างกาย',
-    'ข้อที่ 5 เด็กสามารถใช้สื่อและเทคโนโลยีในการสื่อสาร'
-  ];
+  const getCompetencyCriteria = (competencyNumber: number) => {
+    const criteria = {
+      1: [
+        'มีความสามารถในการรับสาร – ส่งสาร',
+        'มีความสามารถในการถ่ายทอดความรู้ ความคิด ความเข้าใจของตนเอง โดยใช้ภาษาอย่างเหมาะสม',
+        'ใช้วิธีการสื่อสารที่เหมาะสม มีประสิทธิภาพ',
+        'เจรจาต่อรอง เพื่อขจัดและลดปัญหาความขัดแย้งต่าง ๆ ได้',
+        'เลือกรับและไม่รับข้อมูลข่าวสารด้วยเหตุผลและถูกต้อง'
+      ],
+      2: [
+        'มีความสามารถในการคิดวิเคราะห์ สังเคราะห์',
+        'มีทักษะในการคิดนอกกรอบอย่างสร้างสรรค์',
+        'สามารถคิดอย่างมีวิจารณญาณ',
+        'มีความสามารถในการคิดอย่างมีระบบ',
+        'ตัดสินใจแก้ปัญหาเกี่ยวกับตนเองได้อย่างเหมาะสม'
+      ],
+      3: [
+        'สามารถแก้ปัญหาและอุปสรรคต่าง ๆ ที่เผชิญได้',
+        'ใช้เหตุผลในการแก้ปัญหา',
+        'เข้าใจความสัมพันธ์และการเปลี่ยนแปลงในสังคม',
+        'แสวงหาความรู้ ประยุกต์ความรู้มาใช้ในการป้องกันและแก้ไขปัญหา',
+        'สามารถตัดสินใจได้เหมาะสมตามวัย'
+      ],
+      4: [
+        'เรียนรู้ด้วยตนเองได้เหมาะสมตามวัย',
+        'สามารถทำงานกลุ่มร่วมกับผู้อื่นได้',
+        'นำความรู้ที่ได้ไปใช้ประโยชน์ในชีวิตประจำวัน',
+        'จัดการปัญหาและความขัดแย้งได้เหมาะสม',
+        'หลีกเลี่ยงพฤติกรรมไม่พึงประสงค์ที่ส่งผลกระทบต่อตนเอง'
+      ],
+      5: [
+        'เลือกและใช้เทคโนโลยีได้เหมาะสมตามวัย',
+        'มีทักษะกระบวนการทางเทคโนโลยี',
+        'สามารถนำเทคโนโลยีไปใช้พัฒนาตนเอง',
+        'ใช้เทคโนโลยีในการแก้ปัญหาอย่างสร้างสรรค์',
+        'มีคุณธรรม จริยธรรม ในการใช้เทคโนโลยี'
+      ]
+    };
+    return criteria[competencyNumber] || [];
+  };
+
+  const competencyCriteria = getCompetencyCriteria(competencyNumber);
+  
+  const competencyTitles = {
+    1: 'ความสามารถในการสื่อสาร',
+    2: 'ความสามารถในการคิด', 
+    3: 'ความสามารถในการแก้ปัญหา',
+    4: 'ความสามารถในการใช้ทักษะชีวิต',
+    5: 'ความสามารถในการใช้เทคโนโลยี'
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -108,41 +151,63 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
               แบบประเมินสมรรถนะสำหรับผู้เรียนเด่น ชั้นประถมศึกษาปีที่ 1
             </h1>
             <h2 className="text-base font-semibold">
-              {title}
+              สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
             </h2>
             <p className="text-sm mt-2">ปีการศึกษา {academicYear}</p>
           </div>
 
           {/* Assessment Table */}
-          <table className="w-full border-collapse border border-black text-sm">
+          <table className="w-full border-collapse border border-black text-xs">
             <thead>
               <tr>
-                <th rowSpan={2} className="border border-black p-2 bg-gray-100 w-12 text-center">
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-8 text-center">
                   เลขที่
                 </th>
-                <th rowSpan={2} className="border border-black p-2 bg-gray-100 w-48 text-center">
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-32 text-center">
                   ชื่อ-สกุล
                 </th>
-                <th colSpan={5} className="border border-black p-2 bg-gray-100 text-center">
+                <th colSpan={5} className="border border-black p-1 bg-gray-100 text-center">
                   สมรรถนะด้านที่ {competencyNumber}
                 </th>
-                <th rowSpan={2} className="border border-black p-2 bg-gray-100 w-16 text-center">
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-12 text-center">
                   รวม
                 </th>
-                <th rowSpan={2} className="border border-black p-2 bg-gray-100 w-20 text-center">
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-16 text-center">
                   ระดับคุณภาพ
                 </th>
               </tr>
               <tr>
-                {competencyCriteria.map((criteria, index) => (
-                  <th 
-                    key={index} 
-                    className="border border-black p-1 bg-gray-100 text-xs text-center writing-mode-vertical-rl transform rotate-180"
-                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
-                  >
-                    {criteria}
-                  </th>
-                ))}
+                {competencyCriteria.map((criteria, index) => {
+                  // Split long text into multiple lines
+                  const shouldSplit = criteria.length > 35;
+                  const words = criteria.split(' ');
+                  const midPoint = Math.ceil(words.length / 2);
+                  const firstLine = shouldSplit ? words.slice(0, midPoint).join(' ') : criteria;
+                  const secondLine = shouldSplit ? words.slice(midPoint).join(' ') : '';
+                  
+                  return (
+                    <th 
+                      key={index} 
+                      className="border border-black p-1 bg-gray-100 w-20 text-center vertical-text"
+                      style={{ 
+                        writingMode: 'vertical-rl', 
+                        textOrientation: 'mixed',
+                        fontSize: '10px',
+                        lineHeight: '1.2'
+                      }}
+                    >
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <span>{firstLine}</span>
+                        {secondLine && (
+                          <>
+                            <hr className="w-full border-red-500 my-1" />
+                            <span>{secondLine}</span>
+                          </>
+                        )}
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -182,16 +247,20 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </table>
 
           {/* Signature Section */}
-          <div className="mt-8 flex justify-between">
+          <div className="mt-6 flex justify-between items-start">
             <div className="text-center">
-              <p className="mb-16">ลงชื่อ .................................. ผู้ประเมิน</p>
-              <p>( .................................. )</p>
-              <p>วันที่ .................................</p>
+              <p className="text-sm">รับรองข้อมูลถูกต้อง</p>
+              <div className="mt-8 mb-2">
+                <p>( ................................. )</p>
+              </div>
+              <p className="text-sm">ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
             </div>
             <div className="text-center">
-              <p className="mb-16">ลงชื่อ .................................. ผู้ตรวจสอบ</p>
-              <p>( .................................. )</p>
-              <p>วันที่ .................................</p>
+              <p className="text-sm">ตรวจสอบข้อมูลถูกต้อง</p>
+              <div className="mt-8 mb-2">
+                <p>( ................................. )</p>
+              </div>
+              <p className="text-sm">ครูประจำชั้น</p>
             </div>
           </div>
         </div>
