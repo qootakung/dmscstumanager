@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Printer, X, Settings } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 
 interface Student {
@@ -30,6 +31,16 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   students
 }) => {
   const printRef = React.useRef<HTMLDivElement>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [columnWidths, setColumnWidths] = useState({
+    no: 30,
+    name: 180,
+    competency: 50,
+    total: 40,
+    grade: 60
+  });
+  const [directorName, setDirectorName] = useState('');
+  const [teacherName, setTeacherName] = useState('');
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -120,6 +131,14 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           <DialogTitle className="flex items-center justify-between">
             <span>ตัวอย่างก่อนพิมพ์</span>
             <div className="flex gap-2">
+              <Button 
+                onClick={() => setShowSettings(!showSettings)} 
+                variant="outline" 
+                size="sm"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                ปรับตาราง
+              </Button>
               <Button onClick={handlePrint} size="sm" className="bg-blue-600 hover:bg-blue-700">
                 <Printer className="h-4 w-4 mr-2" />
                 พิมพ์
@@ -131,6 +150,80 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
             </div>
           </DialogTitle>
         </DialogHeader>
+
+        {/* Settings Panel */}
+        {showSettings && (
+          <div className="bg-gray-50 p-4 mb-4 rounded-lg">
+            <h3 className="font-semibold mb-3">ปรับขนาดตาราง</h3>
+            <div className="grid grid-cols-5 gap-4 mb-4">
+              <div>
+                <label className="text-sm font-medium">เลขที่</label>
+                <Input
+                  type="number"
+                  value={columnWidths.no}
+                  onChange={(e) => setColumnWidths(prev => ({...prev, no: parseInt(e.target.value)}))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">ชื่อ-สกุล</label>
+                <Input
+                  type="number"
+                  value={columnWidths.name}
+                  onChange={(e) => setColumnWidths(prev => ({...prev, name: parseInt(e.target.value)}))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">สมรรถนะ</label>
+                <Input
+                  type="number"
+                  value={columnWidths.competency}
+                  onChange={(e) => setColumnWidths(prev => ({...prev, competency: parseInt(e.target.value)}))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">รวม</label>
+                <Input
+                  type="number"
+                  value={columnWidths.total}
+                  onChange={(e) => setColumnWidths(prev => ({...prev, total: parseInt(e.target.value)}))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">ระดับคุณภาพ</label>
+                <Input
+                  type="number"
+                  value={columnWidths.grade}
+                  onChange={(e) => setColumnWidths(prev => ({...prev, grade: parseInt(e.target.value)}))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">ชื่อผู้อำนวยการ</label>
+                <Input
+                  value={directorName}
+                  onChange={(e) => setDirectorName(e.target.value)}
+                  placeholder="กรอกชื่อผู้อำนวยการ"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">ชื่อครูประจำชั้น</label>
+                <Input
+                  value={teacherName}
+                  onChange={(e) => setTeacherName(e.target.value)}
+                  placeholder="กรอกชื่อครูประจำชั้น"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div ref={printRef} className="bg-white p-8 font-sarabun">
           <style>{`
@@ -157,29 +250,45 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </div>
 
           {/* Assessment Table */}
-          <table className="w-full border-collapse border border-black text-xs">
+          <table className="w-full border-collapse border border-black" style={{ fontSize: '16px' }}>
             <thead>
               <tr>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-8 text-center">
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.no}px` }}
+                >
                   เลขที่
                 </th>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-32 text-center">
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.name}px` }}
+                >
                   ชื่อ-สกุล
                 </th>
-                <th colSpan={5} className="border border-black p-1 bg-gray-100 text-center">
+                <th colSpan={5} className="border border-black p-2 bg-gray-100 text-center">
                   สมรรถนะด้านที่ {competencyNumber}
                 </th>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-12 text-center">
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.total}px` }}
+                >
                   รวม
                 </th>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-16 text-center">
+                <th 
+                  rowSpan={2} 
+                  className="border border-black p-2 bg-gray-100 text-center"
+                  style={{ width: `${columnWidths.grade}px` }}
+                >
                   ระดับคุณภาพ
                 </th>
               </tr>
               <tr>
                 {competencyCriteria.map((criteria, index) => {
                   // Split long text into multiple lines
-                  const shouldSplit = criteria.length > 35;
+                  const shouldSplit = criteria.length > 30;
                   const words = criteria.split(' ');
                   const midPoint = Math.ceil(words.length / 2);
                   const firstLine = shouldSplit ? words.slice(0, midPoint).join(' ') : criteria;
@@ -188,20 +297,22 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
                   return (
                     <th 
                       key={index} 
-                      className="border border-black p-1 bg-gray-100 w-20 text-center vertical-text"
+                      className="border border-black p-1 bg-gray-100 text-center relative"
                       style={{ 
-                        writingMode: 'vertical-rl', 
+                        width: `${columnWidths.competency}px`,
+                        writingMode: 'vertical-rl',
                         textOrientation: 'mixed',
-                        fontSize: '10px',
-                        lineHeight: '1.2'
+                        fontSize: '12px',
+                        lineHeight: '1.3',
+                        height: '150px'
                       }}
                     >
                       <div className="flex flex-col items-center justify-center h-full">
-                        <span>{firstLine}</span>
+                        <span className="block">{firstLine}</span>
                         {secondLine && (
                           <>
-                            <hr className="w-full border-red-500 my-1" />
-                            <span>{secondLine}</span>
+                            <div className="w-full border-t border-red-500 my-1"></div>
+                            <span className="block">{secondLine}</span>
                           </>
                         )}
                       </div>
@@ -247,20 +358,20 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </table>
 
           {/* Signature Section */}
-          <div className="mt-6 flex justify-between items-start">
+          <div className="mt-6 flex justify-between items-start" style={{ fontSize: '15px' }}>
             <div className="text-center">
-              <p className="text-sm">รับรองข้อมูลถูกต้อง</p>
-              <div className="mt-8 mb-2">
-                <p>( ................................. )</p>
+              <p className="mb-6">รับรองข้อมูลถูกต้อง</p>
+              <div className="mb-6">
+                <p>( {directorName || '.................................'} )</p>
               </div>
-              <p className="text-sm">ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
+              <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
             </div>
             <div className="text-center">
-              <p className="text-sm">ตรวจสอบข้อมูลถูกต้อง</p>
-              <div className="mt-8 mb-2">
-                <p>( ................................. )</p>
+              <p className="mb-6">ตรวจสอบข้อมูลถูกต้อง</p>
+              <div className="mb-6">
+                <p>( {teacherName || '.................................'} )</p>
               </div>
-              <p className="text-sm">ครูประจำชั้น</p>
+              <p>ครูประจำชั้น</p>
             </div>
           </div>
         </div>
