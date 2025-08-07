@@ -33,14 +33,15 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   const printRef = React.useRef<HTMLDivElement>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [columnWidths, setColumnWidths] = useState({
-    no: 30,
-    name: 180,
-    competency: 50,
-    total: 40,
-    grade: 60
+    no: 25,
+    name: 200,
+    competency: 40,
+    total: 35,
+    grade: 55
   });
   const [directorName, setDirectorName] = useState('');
   const [teacherName, setTeacherName] = useState('');
+  const [gradeLevel, setGradeLevel] = useState('1');
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -48,26 +49,55 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
     pageStyle: `
       @page {
         size: A4;
-        margin: 20mm;
+        margin: 15mm 12mm;
       }
       @media print {
+        * {
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
         body {
-          font-family: 'Sarabun', sans-serif;
-          line-height: 1.2;
+          font-family: 'TH Sarabun New', 'Sarabun', sans-serif !important;
+          line-height: 1.1 !important;
+          font-size: 16pt !important;
         }
         table {
           border-collapse: collapse !important;
           width: 100% !important;
+          table-layout: fixed !important;
         }
         table, th, td {
           border: 1px solid #000 !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
         }
         th {
           background-color: #f8f9fa !important;
           font-weight: bold !important;
+          font-size: 15pt !important;
+        }
+        td {
+          font-size: 15pt !important;
+          padding: 4px !important;
+        }
+        .competency-header {
+          font-size: 12pt !important;
+          line-height: 1.1 !important;
         }
         .no-break {
           page-break-inside: avoid;
+        }
+        .signature-section {
+          font-size: 15pt !important;
+          margin-top: 20px !important;
+        }
+        h1 {
+          font-size: 18pt !important;
+          font-weight: bold !important;
+        }
+        h2 {
+          font-size: 16pt !important;
+          font-weight: bold !important;
         }
       }
     `,
@@ -202,7 +232,16 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">ระดับชั้น</label>
+                <Input
+                  value={gradeLevel}
+                  onChange={(e) => setGradeLevel(e.target.value)}
+                  placeholder="ป.1"
+                  className="mt-1"
+                />
+              </div>
               <div>
                 <label className="text-sm font-medium">ชื่อผู้อำนวยการ</label>
                 <Input
@@ -241,7 +280,7 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           {/* Header */}
           <div className="text-center mb-6">
             <h1 className="text-lg font-bold mb-2">
-              แบบประเมินสมรรถนะสำหรับผู้เรียนเด่น ชั้นประถมศึกษาปีที่ 1
+              แบบประเมินสมรรถนะสำคัญผู้เรียน ชั้นประถมศึกษาปีที่{gradeLevel}
             </h1>
             <h2 className="text-base font-semibold">
               สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
@@ -287,37 +326,47 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
               </tr>
               <tr>
                 {competencyCriteria.map((criteria, index) => {
-                  // Split long text into multiple lines
-                  const shouldSplit = criteria.length > 30;
-                  const words = criteria.split(' ');
-                  const midPoint = Math.ceil(words.length / 2);
-                  const firstLine = shouldSplit ? words.slice(0, midPoint).join(' ') : criteria;
-                  const secondLine = shouldSplit ? words.slice(midPoint).join(' ') : '';
-                  
-                  return (
-                    <th 
-                      key={index} 
-                      className="border border-black p-1 bg-gray-100 text-center relative"
-                      style={{ 
-                        width: `${columnWidths.competency}px`,
-                        writingMode: 'vertical-rl',
-                        textOrientation: 'mixed',
-                        fontSize: '12px',
-                        lineHeight: '1.3',
-                        height: '150px'
-                      }}
-                    >
-                      <div className="flex flex-col items-center justify-center h-full">
-                        <span className="block">{firstLine}</span>
-                        {secondLine && (
-                          <>
-                            <div className="w-full border-t border-red-500 my-1"></div>
-                            <span className="block">{secondLine}</span>
-                          </>
-                        )}
-                      </div>
-                    </th>
-                  );
+                   // Limit to 3 lines maximum for competency headers
+                   const shouldSplit = criteria.length > 25;
+                   const words = criteria.split(' ');
+                   let lines = [];
+                   
+                   if (shouldSplit) {
+                     const wordsPerLine = Math.ceil(words.length / 3);
+                     for (let i = 0; i < words.length; i += wordsPerLine) {
+                       lines.push(words.slice(i, i + wordsPerLine).join(' '));
+                     }
+                     // Ensure max 3 lines
+                     lines = lines.slice(0, 3);
+                   } else {
+                     lines = [criteria];
+                   }
+                   
+                   return (
+                     <th 
+                       key={index} 
+                       className="border border-black p-1 bg-gray-100 text-center relative"
+                       style={{ 
+                         width: `${columnWidths.competency}px`,
+                         writingMode: 'vertical-rl',
+                         textOrientation: 'mixed',
+                         fontSize: '12px',
+                         lineHeight: '1.2',
+                         height: '150px'
+                       }}
+                     >
+                       <div className="flex flex-col items-center justify-center h-full">
+                         {lines.map((line, lineIndex) => (
+                           <div key={lineIndex} className="flex flex-col items-center">
+                             <span className="block">{line}</span>
+                             {lineIndex < lines.length - 1 && (
+                               <div className="w-full border-t border-red-500 my-1"></div>
+                             )}
+                           </div>
+                         ))}
+                       </div>
+                     </th>
+                   );
                 })}
               </tr>
             </thead>
@@ -341,7 +390,7 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
               ))}
               
               {/* Add empty rows if needed */}
-              {Array.from({ length: Math.max(0, 10 - students.length) }, (_, index) => (
+              {Array.from({ length: Math.max(0, 18 - students.length) }, (_, index) => (
                 <tr key={`empty-${index}`}>
                   <td className="border border-black p-2 text-center">{students.length + index + 1}</td>
                   <td className="border border-black p-2">&nbsp;</td>
@@ -358,20 +407,20 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </table>
 
           {/* Signature Section */}
-          <div className="mt-6 flex justify-between items-start" style={{ fontSize: '15px' }}>
+          <div className="mt-8 flex justify-between items-start" style={{ fontSize: '15px' }}>
             <div className="text-center">
               <p className="mb-6">รับรองข้อมูลถูกต้อง</p>
-              <div className="mb-6">
+              <div className="mb-1">
                 <p>( {directorName || '.................................'} )</p>
               </div>
-              <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
+              <p className="mt-0">ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
             </div>
             <div className="text-center">
               <p className="mb-6">ตรวจสอบข้อมูลถูกต้อง</p>
-              <div className="mb-6">
+              <div className="mb-1">
                 <p>( {teacherName || '.................................'} )</p>
               </div>
-              <p>ครูประจำชั้น</p>
+              <p className="mt-0">ครูประจำชั้น</p>
             </div>
           </div>
         </div>
