@@ -308,25 +308,25 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
                     {student.name || ""}
                   </td>
                   <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? "3" : ""}
+                    {student.scores?.[0] || ""}
                   </td>
                   <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? "3" : ""}
+                    {student.scores?.[1] || ""}
                   </td>
                   <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? "3" : ""}
+                    {student.scores?.[2] || ""}
                   </td>
                   <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? "3" : ""}
+                    {student.scores?.[3] || ""}
                   </td>
                   <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? "3" : ""}
+                    {student.scores?.[4] || ""}
                   </td>
                   <td className="border border-black text-center font-semibold" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? "15" : ""}
+                    {student.total || ""}
                   </td>
                   <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? calculateGrade(15) : ""}
+                    {student.grade || ""}
                   </td>
                 </tr>
               ))}
