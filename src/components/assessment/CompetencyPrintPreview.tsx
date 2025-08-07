@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, Edit } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Student {
   id: string;
@@ -13,6 +14,12 @@ interface Student {
   grade: string;
 }
 
+interface Teacher {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
 interface CompetencyPrintPreviewProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
@@ -20,6 +27,7 @@ interface CompetencyPrintPreviewProps {
   title: string;
   academicYear: string;
   students: Student[];
+  grade: string; // Add grade as prop
 }
 
 const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
@@ -28,12 +36,54 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   competencyNumber,
   title,
   academicYear,
-  students
+  students,
+  grade
 }) => {
   const printRef = React.useRef<HTMLDivElement>(null);
-  const [selectedGrade, setSelectedGrade] = useState('1');
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>('');
+  const [customTeacherName, setCustomTeacherName] = useState('');
+  const [isEditingTeacher, setIsEditingTeacher] = useState(false);
   const [directorName, setDirectorName] = useState('');
-  const [teacherName, setTeacherName] = useState('');
+
+  // Fetch teachers from database
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const { data: teachersData, error } = await supabase
+          .from('teachers')
+          .select('id, firstName, lastName')
+          .order('firstName');
+
+        if (error) throw error;
+        setTeachers(teachersData || []);
+        
+        // Set first teacher as default if available
+        if (teachersData && teachersData.length > 0) {
+          setSelectedTeacherId(teachersData[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching teachers:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchTeachers();
+    }
+  }, [isOpen]);
+
+  const getSelectedTeacherName = () => {
+    if (isEditingTeacher) {
+      return customTeacherName;
+    }
+    
+    if (selectedTeacherId) {
+      const teacher = teachers.find(t => t.id === selectedTeacherId);
+      return teacher ? `${teacher.firstName} ${teacher.lastName}` : '';
+    }
+    
+    return '';
+  };
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -119,22 +169,6 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           <DialogTitle className="flex items-center justify-between">
             <span>ตัวอย่างก่อนพิมพ์</span>
             <div className="flex gap-2 items-center">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium">ชั้น:</label>
-                <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-                  <SelectTrigger className="w-20">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="2">2</SelectItem>
-                    <SelectItem value="3">3</SelectItem>
-                    <SelectItem value="4">4</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="6">6</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               <Button onClick={handlePrint} size="sm" className="bg-blue-600 hover:bg-blue-700">
                 <Printer className="h-4 w-4 mr-2" />
                 พิมพ์
@@ -161,13 +195,53 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </div>
           <div>
             <label className="text-sm font-medium mb-1 block">ชื่อครูประจำชั้น:</label>
-            <input
-              type="text"
-              value={teacherName}
-              onChange={(e) => setTeacherName(e.target.value)}
-              className="w-full px-2 py-1 border rounded text-sm"
-              placeholder="กรอกชื่อครูประจำชั้น"
-            />
+            <div className="flex gap-2">
+              {!isEditingTeacher ? (
+                <>
+                  <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="เลือกครู" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teachers.map(teacher => (
+                        <SelectItem key={teacher.id} value={teacher.id}>
+                          {teacher.firstName} {teacher.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsEditingTeacher(true);
+                      setCustomTeacherName(getSelectedTeacherName());
+                    }}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={customTeacherName}
+                    onChange={(e) => setCustomTeacherName(e.target.value)}
+                    className="flex-1 px-2 py-1 border rounded text-sm"
+                    placeholder="กรอกชื่อครูประจำชั้น"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditingTeacher(false)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -175,7 +249,7 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           {/* Header */}
           <div className="text-center mb-6">
             <h1 className="text-base font-bold mb-1" style={{ lineHeight: "1.2" }}>
-              แบบประเมินสมรรถนะสำหรับผู้เรียน ชั้นประถมศึกษาปีที่ {selectedGrade}
+              แบบประเมินสมรรถนะสำหรับผู้เรียน ชั้นประถมศึกษาปีที่ {grade}
             </h1>
             <h2 className="text-sm font-semibold mb-1">
               สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
@@ -284,7 +358,7 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
                   display: "inline-block",
                   paddingBottom: "2px"
                 }}>
-                  {teacherName ? ` ${teacherName} ` : " ................................. "}
+                  {getSelectedTeacherName() ? ` ${getSelectedTeacherName()} ` : " ................................. "}
                 </span>
               </div>
               <p>ครูประจำชั้น</p>

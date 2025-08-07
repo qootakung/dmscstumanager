@@ -522,6 +522,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
         competencyNumber={competencyNumber}
         title={title}
         academicYear={selectedAcademicYear}
+        grade={selectedGrade}
         students={assessments.map(assessment => ({
           id: assessment.studentId,
           name: assessment.studentName,
