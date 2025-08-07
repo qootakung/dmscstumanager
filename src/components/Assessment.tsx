@@ -8,6 +8,7 @@ import { Menu, ClipboardList } from 'lucide-react';
 import { CoverPage } from './assessment/pages/CoverPage';
 import { NotesPage } from './assessment/pages/NotesPage';
 import { IntroductionPage } from './assessment/pages/IntroductionPage';
+import { TableOfContentsPage } from './assessment/pages/TableOfContentsPage';
 import { InstructionsPage } from './assessment/pages/InstructionsPage';
 import CompetencyPage from './assessment/pages/CompetencyPage';
 import { SummaryPage } from './assessment/pages/SummaryPage';
@@ -24,6 +25,8 @@ const Assessment = () => {
         return <NotesPage />;
       case 'introduction':
         return <IntroductionPage />;
+      case 'table_of_contents':
+        return <TableOfContentsPage />;
       case 'instructions':
         return <InstructionsPage />;
       case 'competency-1':

@@ -14,6 +14,7 @@ import {
   FileText,
   NotebookPen,
   BookOpen,
+  List,
   Info,
   Target,
   BarChart3,
@@ -47,6 +48,13 @@ const menuItems = [
     icon: BookOpen,
     color: 'text-purple-600',
     bgColor: 'bg-purple-50 hover:bg-purple-100',
+  },
+  {
+    id: 'table_of_contents',
+    title: 'สารบัญ',
+    icon: List,
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-50 hover:bg-teal-100',
   },
   {
     id: 'instructions',
