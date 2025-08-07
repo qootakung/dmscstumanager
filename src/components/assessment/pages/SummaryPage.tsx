@@ -447,14 +447,6 @@ export const SummaryPage = () => {
                 <Printer className="h-4 w-4" />
                 พิมพ์รายงาน
               </Button>
-              
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                ส่งออกรายงาน
-              </Button>
             </div>
           </div>
         </CardContent>

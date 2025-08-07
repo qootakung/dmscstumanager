@@ -13,6 +13,7 @@ import { InstructionsPage } from './assessment/pages/InstructionsPage';
 import CompetencyPage from './assessment/pages/CompetencyPage';
 import { SummaryPage } from './assessment/pages/SummaryPage';
 import { StudentImportPage } from './assessment/pages/StudentImportPage';
+import { StudentReportPage } from './assessment/pages/StudentReportPage';
 
 const Assessment = () => {
   const [activeSection, setActiveSection] = useState('competency-1');
@@ -41,6 +42,8 @@ const Assessment = () => {
         return <CompetencyPage competencyNumber={5} title="สมรรถนะด้านที่ 5: ความสามารถในการใช้เทคโนโลยี" />;
       case 'summary':
         return <SummaryPage />;
+      case 'student-report':
+        return <StudentReportPage />;
       default:
         return <CompetencyPage competencyNumber={1} title="สมรรถนะด้านที่ 1: ความสามารถในการสื่อสาร" />;
     }
@@ -72,14 +75,6 @@ const Assessment = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
-                <Button 
-                  size="sm"
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md"
-                >
-                  ส่งออกรายงาน
-                </Button>
-              </div>
             </div>
           </header>
 

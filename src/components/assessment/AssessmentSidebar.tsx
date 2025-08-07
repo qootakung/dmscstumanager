@@ -143,8 +143,11 @@ export function AssessmentSidebar({ activeSection, onSectionChange }: Assessment
 
         {/* Summary Section */}
         <SidebarGroup className="mt-6">
+          <SidebarGroupLabel className="text-lg font-semibold text-gray-800 mb-4">
+            รายงาน
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={() => onSectionChange('summary')}
@@ -159,6 +162,24 @@ export function AssessmentSidebar({ activeSection, onSectionChange }: Assessment
                   <BarChart3 className="h-5 w-5" />
                   <span className="font-medium">สรุปผลการประเมินรายชั้นปี</span>
                   {activeSection === 'summary' && (
+                    <ChevronRight className="h-4 w-4 ml-auto" />
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onSectionChange('student-report')}
+                  className={`
+                    w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                    ${activeSection === 'student-report' 
+                      ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600 shadow-sm' 
+                      : 'hover:bg-gray-50 text-gray-700'
+                    }
+                  `}
+                >
+                  <UserPlus className="h-5 w-5" />
+                  <span className="font-medium">สรุปผลการประเมินรายชั้นเรียน</span>
+                  {activeSection === 'student-report' && (
                     <ChevronRight className="h-4 w-4 ml-auto" />
                   )}
                 </SidebarMenuButton>

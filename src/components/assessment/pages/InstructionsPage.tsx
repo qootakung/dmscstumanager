@@ -121,27 +121,12 @@ export const InstructionsPage = () => {
               
               <div className="flex flex-wrap gap-3">
                 <Button
-                  onClick={handlePreview}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Eye className="h-4 w-4" />
-                  ดูตัวอย่าง
-                </Button>
-                <Button
                   onClick={handleDownload}
                   variant="outline"
                   className="flex items-center gap-2"
                 >
                   <Download className="h-4 w-4" />
                   ดาวน์โหลด
-                </Button>
-                <Button
-                  onClick={handlePrint}
-                  className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
-                >
-                  <Printer className="h-4 w-4" />
-                  พิมพ์รายงาน
                 </Button>
               </div>
               
