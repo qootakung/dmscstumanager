@@ -45,11 +45,17 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `แบบประเมินสมรรถนะด้าน_${competencyNumber}_${academicYear}`,
+    documentTitle: `แบบประเมินสมรรถนะด้าน_${competencyNumber}_ชั้น${gradeLevel}_${academicYear}`,
     pageStyle: `
       @page {
         size: A4;
-        margin: 15mm 12mm;
+        margin: 10mm 8mm;
+        @top-center {
+          content: none;
+        }
+        @bottom-center {
+          content: none;
+        }
       }
       @media print {
         * {
@@ -58,49 +64,93 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
         }
         body {
           font-family: 'TH Sarabun New', 'Sarabun', sans-serif !important;
-          line-height: 1.1 !important;
-          font-size: 16pt !important;
+          line-height: 1.2 !important;
+          font-size: 15pt !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .print-container {
+          width: 100% !important;
+          height: 100vh !important;
+          display: flex !important;
+          flex-direction: column !important;
+          page-break-inside: avoid !important;
+        }
+        .print-header {
+          text-align: center !important;
+          margin-bottom: 15px !important;
         }
         table {
           border-collapse: collapse !important;
           width: 100% !important;
           table-layout: fixed !important;
+          font-size: 15pt !important;
         }
         table, th, td {
-          border: 1px solid #000 !important;
+          border: 2px solid #000 !important;
           word-wrap: break-word !important;
           overflow-wrap: break-word !important;
         }
         th {
           background-color: #f8f9fa !important;
           font-weight: bold !important;
-          font-size: 15pt !important;
+          padding: 8px 4px !important;
+          text-align: center !important;
+          vertical-align: middle !important;
         }
         td {
-          font-size: 15pt !important;
-          padding: 4px !important;
+          padding: 6px 4px !important;
+          text-align: center !important;
+          vertical-align: middle !important;
+        }
+        .student-name {
+          text-align: left !important;
+          padding-left: 8px !important;
         }
         .competency-header {
-          font-size: 12pt !important;
+          writing-mode: vertical-rl !important;
+          text-orientation: mixed !important;
+          height: 120px !important;
+          width: 35px !important;
+          font-size: 11pt !important;
           line-height: 1.1 !important;
-        }
-        .no-break {
-          page-break-inside: avoid;
+          padding: 4px 2px !important;
         }
         .signature-section {
-          font-size: 15pt !important;
-          margin-top: 20px !important;
+          margin-top: 30px !important;
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: flex-start !important;
+        }
+        .signature-item {
+          text-align: center !important;
+          flex: 1 !important;
         }
         h1 {
-          font-size: 18pt !important;
-          font-weight: bold !important;
-        }
-        h2 {
           font-size: 16pt !important;
           font-weight: bold !important;
+          margin: 10px 0 !important;
+        }
+        h2 {
+          font-size: 14pt !important;
+          font-weight: bold !important;
+          margin: 8px 0 !important;
+        }
+        .grade-year {
+          font-size: 13pt !important;
+          margin: 5px 0 !important;
+        }
+        .page-break {
+          page-break-before: always !important;
         }
       }
     `,
+    onBeforePrint: async () => {
+      console.log('Starting print...');
+    },
+    onAfterPrint: async () => {
+      console.log('Print completed!');
+    },
   });
 
   const getCompetencyCriteria = (competencyNumber: number) => {
@@ -264,165 +314,302 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </div>
         )}
 
-        <div ref={printRef} className="bg-white p-8 font-sarabun">
-          <style>{`
-            @media print {
-              table, th, td {
-                border: 1px solid #000 !important;
-                border-collapse: collapse !important;
-              }
-              th {
-                background-color: #f8f9fa !important;
-              }
-            }
-          `}</style>
-          
-          {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-lg font-bold mb-2">
-              แบบประเมินสมรรถนะสำคัญผู้เรียน ชั้นประถมศึกษาปีที่{gradeLevel}
-            </h1>
-            <h2 className="text-base font-semibold">
-              สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
-            </h2>
-            <p className="text-sm mt-2">ปีการศึกษา {academicYear}</p>
-          </div>
-
-          {/* Assessment Table */}
-          <table className="w-full border-collapse border border-black" style={{ fontSize: '16px' }}>
-            <thead>
-              <tr>
-                <th 
-                  rowSpan={2} 
-                  className="border border-black p-2 bg-gray-100 text-center"
-                  style={{ width: `${columnWidths.no}px` }}
-                >
-                  เลขที่
-                </th>
-                <th 
-                  rowSpan={2} 
-                  className="border border-black p-2 bg-gray-100 text-center"
-                  style={{ width: `${columnWidths.name}px` }}
-                >
-                  ชื่อ-สกุล
-                </th>
-                <th colSpan={5} className="border border-black p-2 bg-gray-100 text-center">
-                  สมรรถนะด้านที่ {competencyNumber}
-                </th>
-                <th 
-                  rowSpan={2} 
-                  className="border border-black p-2 bg-gray-100 text-center"
-                  style={{ width: `${columnWidths.total}px` }}
-                >
-                  รวม
-                </th>
-                <th 
-                  rowSpan={2} 
-                  className="border border-black p-2 bg-gray-100 text-center"
-                  style={{ width: `${columnWidths.grade}px` }}
-                >
-                  ระดับคุณภาพ
-                </th>
-              </tr>
-              <tr>
-                {competencyCriteria.map((criteria, index) => {
-                   // Limit to 3 lines maximum for competency headers
-                   const shouldSplit = criteria.length > 25;
-                   const words = criteria.split(' ');
-                   let lines = [];
-                   
-                   if (shouldSplit) {
-                     const wordsPerLine = Math.ceil(words.length / 3);
-                     for (let i = 0; i < words.length; i += wordsPerLine) {
-                       lines.push(words.slice(i, i + wordsPerLine).join(' '));
-                     }
-                     // Ensure max 3 lines
-                     lines = lines.slice(0, 3);
-                   } else {
-                     lines = [criteria];
-                   }
-                   
-                   return (
-                     <th 
-                       key={index} 
-                       className="border border-black p-1 bg-gray-100 text-center relative"
-                       style={{ 
-                         width: `${columnWidths.competency}px`,
-                         writingMode: 'vertical-rl',
-                         textOrientation: 'mixed',
-                         fontSize: '12px',
-                         lineHeight: '1.2',
-                         height: '150px'
-                       }}
-                     >
-                       <div className="flex flex-col items-center justify-center h-full">
-                         {lines.map((line, lineIndex) => (
-                           <div key={lineIndex} className="flex flex-col items-center">
-                             <span className="block">{line}</span>
-                             {lineIndex < lines.length - 1 && (
-                               <div className="w-full border-t border-red-500 my-1"></div>
-                             )}
-                           </div>
-                         ))}
-                       </div>
-                     </th>
-                   );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student, index) => (
-                <tr key={student.id}>
-                  <td className="border border-black p-2 text-center">{index + 1}</td>
-                  <td className="border border-black p-2">{student.name}</td>
-                  {student.scores.map((score, scoreIndex) => (
-                    <td key={scoreIndex} className="border border-black p-2 text-center">
-                      {score || '-'}
-                    </td>
-                  ))}
-                  <td className="border border-black p-2 text-center font-semibold">
-                    {student.total || '-'}
-                  </td>
-                  <td className="border border-black p-2 text-center">
-                    {student.grade || '-'}
-                  </td>
-                </tr>
-              ))}
+        <div ref={printRef} className="bg-white p-6 font-sarabun">
+          {/* Generate pages with max 18 students each */}
+          {(() => {
+            const pages = [];
+            const studentsPerPage = 18;
+            const totalPages = Math.ceil(students.length / studentsPerPage);
+            
+            for (let pageIndex = 0; pageIndex < Math.max(1, totalPages); pageIndex++) {
+              const startIndex = pageIndex * studentsPerPage;
+              const endIndex = Math.min(startIndex + studentsPerPage, students.length);
+              const pageStudents = students.slice(startIndex, endIndex);
               
-              {/* Add empty rows if needed */}
-              {Array.from({ length: Math.max(0, 18 - students.length) }, (_, index) => (
-                <tr key={`empty-${index}`}>
-                  <td className="border border-black p-2 text-center">{students.length + index + 1}</td>
-                  <td className="border border-black p-2">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              // Calculate remaining empty rows
+              const emptyRowsCount = studentsPerPage - pageStudents.length;
+              
+              pages.push(
+                <div key={pageIndex} className={`print-container ${pageIndex > 0 ? 'page-break' : ''}`}>
+                  {/* Header */}
+                  <div className="print-header">
+                    <h1 className="text-lg font-bold mb-2">
+                      แบบประเมินสมรรถนะสำคัญผู้เรียน ชั้นประถมศึกษาปีที่ {gradeLevel}
+                    </h1>
+                    <h2 className="text-base font-semibold">
+                      สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
+                    </h2>
+                    <p className="grade-year">ปีการศึกษา {academicYear}</p>
+                    {totalPages > 1 && (
+                      <p className="text-sm mt-1">หน้าที่ {pageIndex + 1} จาก {totalPages}</p>
+                    )}
+                  </div>
 
-          {/* Signature Section */}
-          <div className="mt-8 flex justify-between items-start" style={{ fontSize: '15px' }}>
-            <div className="text-center">
-              <p className="mb-6">รับรองข้อมูลถูกต้อง</p>
-              <div className="mb-1">
-                <p>( {directorName || '.................................'} )</p>
-              </div>
-              <p className="mt-0">ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
-            </div>
-            <div className="text-center">
-              <p className="mb-6">ตรวจสอบข้อมูลถูกต้อง</p>
-              <div className="mb-1">
-                <p>( {teacherName || '.................................'} )</p>
-              </div>
-              <p className="mt-0">ครูประจำชั้น</p>
-            </div>
-          </div>
+                  {/* Assessment Table */}
+                  <table style={{ fontSize: '15px', borderCollapse: 'collapse', width: '100%' }}>
+                    <thead>
+                      <tr>
+                        <th 
+                          rowSpan={2} 
+                          style={{ 
+                            width: `${columnWidths.no}px`,
+                            border: '2px solid #000',
+                            backgroundColor: '#f8f9fa',
+                            padding: '8px 4px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          เลขที่
+                        </th>
+                        <th 
+                          rowSpan={2} 
+                          style={{ 
+                            width: `${columnWidths.name}px`,
+                            border: '2px solid #000',
+                            backgroundColor: '#f8f9fa',
+                            padding: '8px 4px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          ชื่อ-สกุล
+                        </th>
+                        <th 
+                          colSpan={5} 
+                          style={{ 
+                            border: '2px solid #000',
+                            backgroundColor: '#f8f9fa',
+                            padding: '8px 4px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          สมรรถนะด้านที่ {competencyNumber}
+                        </th>
+                        <th 
+                          rowSpan={2} 
+                          style={{ 
+                            width: `${columnWidths.total}px`,
+                            border: '2px solid #000',
+                            backgroundColor: '#f8f9fa',
+                            padding: '8px 4px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          รวม
+                        </th>
+                        <th 
+                          rowSpan={2} 
+                          style={{ 
+                            width: `${columnWidths.grade}px`,
+                            border: '2px solid #000',
+                            backgroundColor: '#f8f9fa',
+                            padding: '8px 4px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          ระดับคุณภาพ
+                        </th>
+                      </tr>
+                      <tr>
+                        {competencyCriteria.map((criteria, index) => {
+                           // Split criteria into max 3 lines
+                           const words = criteria.split(' ');
+                           let lines = [];
+                           
+                           if (words.length > 3) {
+                             const wordsPerLine = Math.ceil(words.length / 3);
+                             for (let i = 0; i < words.length; i += wordsPerLine) {
+                               lines.push(words.slice(i, i + wordsPerLine).join(' '));
+                             }
+                             lines = lines.slice(0, 3);
+                           } else {
+                             lines = [criteria];
+                           }
+                           
+                           return (
+                             <th 
+                               key={index} 
+                               className="competency-header"
+                               style={{ 
+                                 width: `${columnWidths.competency}px`,
+                                 border: '2px solid #000',
+                                 backgroundColor: '#f8f9fa',
+                                 writingMode: 'vertical-rl',
+                                 textOrientation: 'mixed',
+                                 height: '120px',
+                                 fontSize: '11pt',
+                                 padding: '4px 2px',
+                                 textAlign: 'center',
+                                 verticalAlign: 'middle'
+                               }}
+                             >
+                               <div style={{ 
+                                 display: 'flex', 
+                                 flexDirection: 'column', 
+                                 alignItems: 'center', 
+                                 justifyContent: 'center', 
+                                 height: '100%' 
+                               }}>
+                                 {lines.map((line, lineIndex) => (
+                                   <div key={lineIndex}>
+                                     <span>{line}</span>
+                                     {lineIndex < lines.length - 1 && (
+                                       <div style={{ 
+                                         borderTop: '1px solid #dc2626', 
+                                         margin: '2px 0', 
+                                         width: '100%' 
+                                       }}></div>
+                                     )}
+                                   </div>
+                                 ))}
+                               </div>
+                             </th>
+                           );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pageStudents.map((student, index) => (
+                        <tr key={student.id}>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            {startIndex + index + 1}
+                          </td>
+                          <td 
+                            className="student-name"
+                            style={{ 
+                              border: '2px solid #000', 
+                              padding: '6px 8px', 
+                              textAlign: 'left' 
+                            }}
+                          >
+                            {student.name}
+                          </td>
+                          {student.scores.map((score, scoreIndex) => (
+                            <td key={scoreIndex} style={{ 
+                              border: '2px solid #000', 
+                              padding: '6px 4px', 
+                              textAlign: 'center' 
+                            }}>
+                              {score || '-'}
+                            </td>
+                          ))}
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center', 
+                            fontWeight: 'bold' 
+                          }}>
+                            {student.total || '-'}
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            {student.grade || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {/* Add empty rows to fill the page */}
+                      {Array.from({ length: emptyRowsCount }, (_, index) => (
+                        <tr key={`empty-${pageIndex}-${index}`}>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            {startIndex + pageStudents.length + index + 1}
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                          <td style={{ 
+                            border: '2px solid #000', 
+                            padding: '6px 4px', 
+                            textAlign: 'center' 
+                          }}>
+                            &nbsp;
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* Signature Section - only on last page */}
+                  {pageIndex === totalPages - 1 && (
+                    <div className="signature-section">
+                      <div className="signature-item">
+                        <p style={{ marginBottom: '30px' }}>รับรองข้อมูลถูกต้อง</p>
+                        <p style={{ marginBottom: '8px' }}>
+                          ( {directorName || '.................................'} )
+                        </p>
+                        <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
+                      </div>
+                      <div className="signature-item">
+                        <p style={{ marginBottom: '30px' }}>ตรวจสอบข้อมูลถูกต้อง</p>
+                        <p style={{ marginBottom: '8px' }}>
+                          ( {teacherName || '.................................'} )
+                        </p>
+                        <p>ครูประจำชั้น</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            
+            return pages;
+          })()}
         </div>
       </DialogContent>
     </Dialog>
