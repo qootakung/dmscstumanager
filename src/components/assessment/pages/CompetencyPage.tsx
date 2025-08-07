@@ -213,12 +213,12 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
     loadAssessments();
   }, [selectedGrade, students, selectedAcademicYear, competencyNumber]);
 
-  // Get unique grades from students
+  // Get unique grades from students, limited to ป.1-6 only
+  const primaryGrades = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
   const availableGrades = [...new Set(students.map(student => student.grade))]
-    .filter(Boolean)
+    .filter(grade => grade && primaryGrades.includes(grade))
     .sort((a, b) => {
-      const gradeOrder = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
-      return gradeOrder.indexOf(a) - gradeOrder.indexOf(b);
+      return primaryGrades.indexOf(a) - primaryGrades.indexOf(b);
     });
 
   const updateScore = (studentId: string, itemIndex: number, score: number) => {
@@ -523,13 +523,16 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
         title={title}
         academicYear={selectedAcademicYear}
         grade={selectedGrade}
-        students={assessments.map(assessment => ({
-          id: assessment.studentId,
-          name: assessment.studentName,
-          scores: assessment.scores,
-          total: assessment.totalScore,
-          grade: assessment.grade
-        }))}
+        students={assessments
+          .filter(assessment => assessment.totalScore > 0 || assessment.scores.some(score => score > 0))
+          .map(assessment => ({
+            id: assessment.studentId,
+            name: assessment.studentName,
+            scores: assessment.scores,
+            total: assessment.totalScore,
+            grade: assessment.grade
+          }))
+        }
       />
     </div>
   );
