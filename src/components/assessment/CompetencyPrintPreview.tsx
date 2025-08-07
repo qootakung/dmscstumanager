@@ -91,6 +91,14 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
     5: 'ความสามารถในการใช้เทคโนโลยี'
   };
 
+  // Function to calculate grade based on total score
+  const calculateGrade = (total: number) => {
+    if (total >= 13) return 'ดีเยี่ยม';
+    if (total >= 11) return 'ดี';
+    if (total >= 8) return 'ผ่าน';
+    return 'ไม่ผ่าน';
+  };
+
   // Generate student list with actual students + empty rows to fill up to 12
   const displayStudents = [...students];
   const emptyRowsNeeded = Math.max(0, 12 - students.length);
@@ -244,7 +252,7 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
                     {student.name ? "15" : ""}
                   </td>
                   <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
-                    {student.name ? "" : ""}
+                    {student.name ? calculateGrade(15) : ""}
                   </td>
                 </tr>
               ))}
