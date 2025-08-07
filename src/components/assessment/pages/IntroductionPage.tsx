@@ -133,27 +133,12 @@ export const IntroductionPage = () => {
                 
                 <div className="flex flex-wrap gap-3">
                   <Button
-                    onClick={previewFile}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    ดูตัวอย่าง
-                  </Button>
-                  <Button
                     onClick={downloadFile}
                     variant="outline"
                     className="flex items-center gap-2"
                   >
                     <Download className="h-4 w-4" />
                     ดาวน์โหลด
-                  </Button>
-                  <Button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-                  >
-                    <Printer className="h-4 w-4" />
-                    พิมพ์รายงาน
                   </Button>
                   <Button
                     onClick={deleteFile}

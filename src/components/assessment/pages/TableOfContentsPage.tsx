@@ -300,27 +300,12 @@ export const TableOfContentsPage = () => {
                 
                 <div className="flex flex-wrap gap-3">
                   <Button
-                    onClick={handlePreview}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    ดูตัวอย่าง
-                  </Button>
-                  <Button
                     onClick={handleDownload}
                     variant="outline"
                     className="flex items-center gap-2"
                   >
                     <Download className="h-4 w-4" />
                     ดาวน์โหลด
-                  </Button>
-                  <Button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
-                  >
-                    <Printer className="h-4 w-4" />
-                    พิมพ์รายงาน
                   </Button>
                   <Button
                     onClick={handleDelete}
