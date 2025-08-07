@@ -91,14 +91,7 @@ export const CoverPage = () => {
                       <p className="text-sm text-gray-500 mb-4">
                         รองรับไฟล์ .PDF และ .DOCX
                       </p>
-                      <label htmlFor="cover-file" className="cursor-pointer">
-                        <Button 
-                          type="button" 
-                          className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-                          disabled={isUploading}
-                        >
-                          {isUploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์'}
-                        </Button>
+                      <div>
                         <input
                           id="cover-file"
                           type="file"
@@ -106,7 +99,17 @@ export const CoverPage = () => {
                           onChange={handleFileUpload}
                           className="hidden"
                         />
-                      </label>
+                        <label htmlFor="cover-file" className="cursor-pointer">
+                          <Button 
+                            type="button" 
+                            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+                            disabled={isUploading}
+                            asChild
+                          >
+                            <span>{isUploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์'}</span>
+                          </Button>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -163,17 +166,17 @@ export const CoverPage = () => {
                 </div>
                 
                 <div className="mt-4 pt-4 border-t">
+                  <input
+                    id="cover-file-replace"
+                    type="file"
+                    accept=".pdf,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
                   <label htmlFor="cover-file-replace" className="cursor-pointer">
-                    <Button variant="ghost" size="sm">
-                      เปลี่ยนไฟล์
+                    <Button variant="ghost" size="sm" asChild>
+                      <span>เปลี่ยนไฟล์</span>
                     </Button>
-                    <input
-                      id="cover-file-replace"
-                      type="file"
-                      accept=".pdf,.docx"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
                   </label>
                 </div>
               </div>

@@ -258,14 +258,7 @@ export const TableOfContentsPage = () => {
                       <p className="text-sm text-gray-500 mb-4">
                         รองรับไฟล์ .PDF และ .DOCX
                       </p>
-                      <label htmlFor="toc-file" className="cursor-pointer">
-                        <Button 
-                          type="button" 
-                          className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
-                          disabled={isUploading || isLoading}
-                        >
-                          {isUploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์'}
-                        </Button>
+                      <div>
                         <input
                           id="toc-file"
                           type="file"
@@ -273,7 +266,17 @@ export const TableOfContentsPage = () => {
                           onChange={handleFileUpload}
                           className="hidden"
                         />
-                      </label>
+                        <label htmlFor="toc-file" className="cursor-pointer">
+                          <Button 
+                            type="button" 
+                            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
+                            disabled={isUploading || isLoading}
+                            asChild
+                          >
+                            <span>{isUploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์'}</span>
+                          </Button>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -330,17 +333,17 @@ export const TableOfContentsPage = () => {
                 </div>
                 
                 <div className="mt-4 pt-4 border-t">
+                  <input
+                    id="toc-file-replace"
+                    type="file"
+                    accept=".pdf,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
                   <label htmlFor="toc-file-replace" className="cursor-pointer">
-                    <Button variant="ghost" size="sm">
-                      เปลี่ยนไฟล์
+                    <Button variant="ghost" size="sm" asChild>
+                      <span>เปลี่ยนไฟล์</span>
                     </Button>
-                    <input
-                      id="toc-file-replace"
-                      type="file"
-                      accept=".pdf,.docx"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
                   </label>
                 </div>
               </div>

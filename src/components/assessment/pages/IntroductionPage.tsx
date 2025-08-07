@@ -91,14 +91,7 @@ export const IntroductionPage = () => {
                       <p className="text-sm text-gray-500 mb-4">
                         รองรับไฟล์ .PDF และ .DOCX
                       </p>
-                      <label htmlFor="introduction-file" className="cursor-pointer">
-                        <Button 
-                          type="button" 
-                          className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-                          disabled={isUploading}
-                        >
-                          {isUploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์'}
-                        </Button>
+                      <div>
                         <input
                           id="introduction-file"
                           type="file"
@@ -106,7 +99,17 @@ export const IntroductionPage = () => {
                           onChange={handleFileUpload}
                           className="hidden"
                         />
-                      </label>
+                        <label htmlFor="introduction-file" className="cursor-pointer">
+                          <Button 
+                            type="button" 
+                            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                            disabled={isUploading}
+                            asChild
+                          >
+                            <span>{isUploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์'}</span>
+                          </Button>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -163,17 +166,17 @@ export const IntroductionPage = () => {
                 </div>
                 
                 <div className="mt-4 pt-4 border-t">
+                  <input
+                    id="introduction-file-replace"
+                    type="file"
+                    accept=".pdf,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
                   <label htmlFor="introduction-file-replace" className="cursor-pointer">
-                    <Button variant="ghost" size="sm">
-                      เปลี่ยนไฟล์
+                    <Button variant="ghost" size="sm" asChild>
+                      <span>เปลี่ยนไฟล์</span>
                     </Button>
-                    <input
-                      id="introduction-file-replace"
-                      type="file"
-                      accept=".pdf,.docx"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
                   </label>
                 </div>
               </div>
