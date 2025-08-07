@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer, X } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 
@@ -30,6 +31,9 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   students
 }) => {
   const printRef = React.useRef<HTMLDivElement>(null);
+  const [selectedGrade, setSelectedGrade] = useState('1');
+  const [directorName, setDirectorName] = useState('');
+  const [teacherName, setTeacherName] = useState('');
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -37,12 +41,14 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
     pageStyle: `
       @page {
         size: A4;
-        margin: 20mm;
+        margin: 15mm;
       }
       @media print {
         body {
-          font-family: 'Sarabun', sans-serif;
-          line-height: 1.2;
+          font-family: 'TH Sarabun', 'Sarabun', Arial, sans-serif !important;
+          font-size: 14px !important;
+          line-height: 1.1 !important;
+          color: black !important;
         }
         table {
           border-collapse: collapse !important;
@@ -55,56 +61,28 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           background-color: #f8f9fa !important;
           font-weight: bold !important;
         }
-        .no-break {
-          page-break-inside: avoid;
+        .vertical-text {
+          writing-mode: vertical-rl !important;
+          text-orientation: mixed !important;
+        }
+        .signature-line {
+          border-bottom: 1px dotted #000 !important;
+          min-width: 200px !important;
+          display: inline-block !important;
         }
       }
     `,
   });
 
-  const getCompetencyCriteria = (competencyNumber: number) => {
-    const criteria = {
-      1: [
-        'มีความสามารถในการรับสาร – ส่งสาร',
-        'มีความสามารถในการถ่ายทอดความรู้ ความคิด ความเข้าใจของตนเอง โดยใช้ภาษาอย่างเหมาะสม',
-        'ใช้วิธีการสื่อสารที่เหมาะสม มีประสิทธิภาพ',
-        'เจรจาต่อรอง เพื่อขจัดและลดปัญหาความขัดแย้งต่าง ๆ ได้',
-        'เลือกรับและไม่รับข้อมูลข่าวสารด้วยเหตุผลและถูกต้อง'
-      ],
-      2: [
-        'มีความสามารถในการคิดวิเคราะห์ สังเคราะห์',
-        'มีทักษะในการคิดนอกกรอบอย่างสร้างสรรค์',
-        'สามารถคิดอย่างมีวิจารณญาณ',
-        'มีความสามารถในการคิดอย่างมีระบบ',
-        'ตัดสินใจแก้ปัญหาเกี่ยวกับตนเองได้อย่างเหมาะสม'
-      ],
-      3: [
-        'สามารถแก้ปัญหาและอุปสรรคต่าง ๆ ที่เผชิญได้',
-        'ใช้เหตุผลในการแก้ปัญหา',
-        'เข้าใจความสัมพันธ์และการเปลี่ยนแปลงในสังคม',
-        'แสวงหาความรู้ ประยุกต์ความรู้มาใช้ในการป้องกันและแก้ไขปัญหา',
-        'สามารถตัดสินใจได้เหมาะสมตามวัย'
-      ],
-      4: [
-        'เรียนรู้ด้วยตนเองได้เหมาะสมตามวัย',
-        'สามารถทำงานกลุ่มร่วมกับผู้อื่นได้',
-        'นำความรู้ที่ได้ไปใช้ประโยชน์ในชีวิตประจำวัน',
-        'จัดการปัญหาและความขัดแย้งได้เหมาะสม',
-        'หลีกเลี่ยงพฤติกรรมไม่พึงประสงค์ที่ส่งผลกระทบต่อตนเอง'
-      ],
-      5: [
-        'เลือกและใช้เทคโนโลยีได้เหมาะสมตามวัย',
-        'มีทักษะกระบวนการทางเทคโนโลยี',
-        'สามารถนำเทคโนโลยีไปใช้พัฒนาตนเอง',
-        'ใช้เทคโนโลยีในการแก้ปัญหาอย่างสร้างสรรค์',
-        'มีคุณธรรม จริยธรรม ในการใช้เทคโนโลยี'
-      ]
-    };
-    return criteria[competencyNumber] || [];
-  };
+  // Competency criteria matching the image
+  const competencyCriteria = [
+    'มีความสามารถในการรับสาร – ส่งสาร',
+    'มีความสามารถในการถ่ายทอดความรู้ ความคิด ความเข้าใจของตนเอง โดยใช้ภาษาอย่างเหมาะสม',
+    'ใช้วิธีการสื่อสารที่เหมาะสม มีประสิทธิภาพ',
+    'เจรจาต่อรอง เพื่อขจัดและลดปัญหาความขัดแย้งต่าง ๆ ได้',
+    'เลือกรับและไม่รับข้อมูลข่าวสารด้วยเหตุผลและถูกต้อง'
+  ];
 
-  const competencyCriteria = getCompetencyCriteria(competencyNumber);
-  
   const competencyTitles = {
     1: 'ความสามารถในการสื่อสาร',
     2: 'ความสามารถในการคิด', 
@@ -113,13 +91,42 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
     5: 'ความสามารถในการใช้เทคโนโลยี'
   };
 
+  // Generate student list with actual students + empty rows to fill up to 12
+  const displayStudents = [...students];
+  const emptyRowsNeeded = Math.max(0, 12 - students.length);
+  for (let i = 0; i < emptyRowsNeeded; i++) {
+    displayStudents.push({
+      id: `empty-${i}`,
+      name: '',
+      scores: [0, 0, 0, 0, 0],
+      total: 0,
+      grade: ''
+    });
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>ตัวอย่างก่อนพิมพ์</span>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">ชั้น:</label>
+                <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1</SelectItem>
+                    <SelectItem value="2">2</SelectItem>
+                    <SelectItem value="3">3</SelectItem>
+                    <SelectItem value="4">4</SelectItem>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="6">6</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Button onClick={handlePrint} size="sm" className="bg-blue-600 hover:bg-blue-700">
                 <Printer className="h-4 w-4 mr-2" />
                 พิมพ์
@@ -132,135 +139,147 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="bg-white p-8 font-sarabun">
-          <style>{`
-            @media print {
-              table, th, td {
-                border: 1px solid #000 !important;
-                border-collapse: collapse !important;
-              }
-              th {
-                background-color: #f8f9fa !important;
-              }
-            }
-          `}</style>
-          
+        {/* Controls for editing */}
+        <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded">
+          <div>
+            <label className="text-sm font-medium mb-1 block">ชื่อผู้อำนวยการ:</label>
+            <input
+              type="text"
+              value={directorName}
+              onChange={(e) => setDirectorName(e.target.value)}
+              className="w-full px-2 py-1 border rounded text-sm"
+              placeholder="กรอกชื่อผู้อำนวยการ"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">ชื่อครูประจำชั้น:</label>
+            <input
+              type="text"
+              value={teacherName}
+              onChange={(e) => setTeacherName(e.target.value)}
+              className="w-full px-2 py-1 border rounded text-sm"
+              placeholder="กรอกชื่อครูประจำชั้น"
+            />
+          </div>
+        </div>
+
+        <div ref={printRef} className="bg-white p-6" style={{ fontFamily: "'TH Sarabun', 'Sarabun', Arial, sans-serif", fontSize: "14px" }}>
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-lg font-bold mb-2">
-              แบบประเมินสมรรถนะสำหรับผู้เรียนเด่น ชั้นประถมศึกษาปีที่ 1
+            <h1 className="text-base font-bold mb-1" style={{ lineHeight: "1.2" }}>
+              แบบประเมินสมรรถนะสำหรับผู้เรียน ชั้นประถมศึกษาปีที่ {selectedGrade}
             </h1>
-            <h2 className="text-base font-semibold">
+            <h2 className="text-sm font-semibold mb-1">
               สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
             </h2>
-            <p className="text-sm mt-2">ปีการศึกษา {academicYear}</p>
+            <p className="text-sm">ปีการศึกษา {academicYear}</p>
           </div>
 
           {/* Assessment Table */}
-          <table className="w-full border-collapse border border-black text-xs">
+          <table className="w-full border-collapse border border-black" style={{ fontSize: "12px" }}>
             <thead>
               <tr>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-8 text-center">
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 text-center" style={{ width: "40px" }}>
                   เลขที่
                 </th>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-32 text-center">
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 text-center" style={{ width: "180px" }}>
                   ชื่อ-สกุล
                 </th>
-                <th colSpan={5} className="border border-black p-1 bg-gray-100 text-center">
+                <th colSpan={5} className="border border-black p-1 bg-gray-100 text-center" style={{ fontSize: "12px" }}>
                   สมรรถนะด้านที่ {competencyNumber}
                 </th>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-12 text-center">
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 text-center" style={{ width: "40px" }}>
                   รวม
                 </th>
-                <th rowSpan={2} className="border border-black p-1 bg-gray-100 w-16 text-center">
-                  ระดับคุณภาพ
+                <th rowSpan={2} className="border border-black p-1 bg-gray-100 text-center" style={{ width: "60px" }}>
+                  สรุปผล
                 </th>
               </tr>
               <tr>
-                {competencyCriteria.map((criteria, index) => {
-                  // Split long text into multiple lines
-                  const shouldSplit = criteria.length > 35;
-                  const words = criteria.split(' ');
-                  const midPoint = Math.ceil(words.length / 2);
-                  const firstLine = shouldSplit ? words.slice(0, midPoint).join(' ') : criteria;
-                  const secondLine = shouldSplit ? words.slice(midPoint).join(' ') : '';
-                  
-                  return (
-                    <th 
-                      key={index} 
-                      className="border border-black p-1 bg-gray-100 w-20 text-center vertical-text"
-                      style={{ 
-                        writingMode: 'vertical-rl', 
-                        textOrientation: 'mixed',
-                        fontSize: '10px',
-                        lineHeight: '1.2'
-                      }}
-                    >
-                      <div className="flex flex-col items-center justify-center h-full">
-                        <span>{firstLine}</span>
-                        {secondLine && (
-                          <>
-                            <hr className="w-full border-red-500 my-1" />
-                            <span>{secondLine}</span>
-                          </>
-                        )}
-                      </div>
-                    </th>
-                  );
-                })}
+                {competencyCriteria.map((criteria, index) => (
+                  <th 
+                    key={index} 
+                    className="border border-black p-1 bg-gray-100 text-center vertical-text"
+                    style={{ 
+                      width: "35px",
+                      writingMode: "vertical-rl",
+                      textOrientation: "mixed",
+                      fontSize: "9px",
+                      lineHeight: "1.1",
+                      height: "120px"
+                    }}
+                  >
+                    <div style={{ transform: "rotate(0deg)" }}>
+                      {criteria}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {students.map((student, index) => (
-                <tr key={student.id}>
-                  <td className="border border-black p-2 text-center">{index + 1}</td>
-                  <td className="border border-black p-2">{student.name}</td>
-                  {student.scores.map((score, scoreIndex) => (
-                    <td key={scoreIndex} className="border border-black p-2 text-center">
-                      {score || '-'}
-                    </td>
-                  ))}
-                  <td className="border border-black p-2 text-center font-semibold">
-                    {student.total || '-'}
+              {displayStudents.map((student, index) => (
+                <tr key={student.id || `row-${index}`} style={{ height: "25px" }}>
+                  <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
+                    {index + 1}
                   </td>
-                  <td className="border border-black p-2 text-center">
-                    {student.grade || '-'}
+                  <td className="border border-black" style={{ padding: "2px 4px", fontSize: "11px" }}>
+                    {student.name || ""}
                   </td>
-                </tr>
-              ))}
-              
-              {/* Add empty rows if needed */}
-              {Array.from({ length: Math.max(0, 10 - students.length) }, (_, index) => (
-                <tr key={`empty-${index}`}>
-                  <td className="border border-black p-2 text-center">{students.length + index + 1}</td>
-                  <td className="border border-black p-2">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
-                  <td className="border border-black p-2 text-center">&nbsp;</td>
+                  <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
+                    {student.name ? "3" : ""}
+                  </td>
+                  <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
+                    {student.name ? "3" : ""}
+                  </td>
+                  <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
+                    {student.name ? "3" : ""}
+                  </td>
+                  <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
+                    {student.name ? "3" : ""}
+                  </td>
+                  <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
+                    {student.name ? "3" : ""}
+                  </td>
+                  <td className="border border-black text-center font-semibold" style={{ padding: "2px", fontSize: "11px" }}>
+                    {student.name ? "15" : ""}
+                  </td>
+                  <td className="border border-black text-center" style={{ padding: "2px", fontSize: "11px" }}>
+                    {student.name ? "" : ""}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
           {/* Signature Section */}
-          <div className="mt-6 flex justify-between items-start">
+          <div className="mt-8 flex justify-between items-start" style={{ fontSize: "12px" }}>
             <div className="text-center">
-              <p className="text-sm">รับรองข้อมูลถูกต้อง</p>
-              <div className="mt-8 mb-2">
-                <p>( ................................. )</p>
+              <p className="mb-6">รับรองข้อมูลถูกต้อง</p>
+              <div className="mb-2">
+                <span className="signature-line" style={{ 
+                  borderBottom: "1px dotted #000",
+                  minWidth: "200px",
+                  display: "inline-block",
+                  paddingBottom: "2px"
+                }}>
+                  {directorName ? ` ${directorName} ` : " ................................. "}
+                </span>
               </div>
-              <p className="text-sm">ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
+              <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
             </div>
             <div className="text-center">
-              <p className="text-sm">ตรวจสอบข้อมูลถูกต้อง</p>
-              <div className="mt-8 mb-2">
-                <p>( ................................. )</p>
+              <p className="mb-6">ตรวจสอบข้อมูลถูกต้อง</p>
+              <div className="mb-2">
+                <span className="signature-line" style={{ 
+                  borderBottom: "1px dotted #000",
+                  minWidth: "200px",
+                  display: "inline-block",
+                  paddingBottom: "2px"
+                }}>
+                  {teacherName ? ` ${teacherName} ` : " ................................. "}
+                </span>
               </div>
-              <p className="text-sm">ครูประจำชั้น</p>
+              <p>ครูประจำชั้น</p>
             </div>
           </div>
         </div>
