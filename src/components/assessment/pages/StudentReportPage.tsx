@@ -1,92 +1,203 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Printer, Eye, Save } from 'lucide-react';
+import { Printer, Eye } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-interface StudentAssessment {
+interface Student {
+  id: string;
+  studentId: string;
+  firstNameTh: string;
+  lastNameTh: string;
+  titleTh: string;
+  grade: string;
+  academicYear: string;
+}
+
+interface CompetencyAssessment {
+  student_id: string;
+  total_score: number;
+  grade: string;
+}
+
+interface StudentWithAssessment {
   id: string;
   studentId: string;
   studentName: string;
-  score: number;
+  totalScore: number;
   grade: string;
 }
 
 export const StudentReportPage = () => {
-  const [academicYear, setAcademicYear] = useState('2567');
+  const [academicYear, setAcademicYear] = useState('');
   const [gradeLevel, setGradeLevel] = useState('');
-  const [semester, setSemester] = useState('1');
-  const [students, setStudents] = useState<StudentAssessment[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [assessments, setAssessments] = useState<CompetencyAssessment[]>([]);
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
+  const [availableGrades, setAvailableGrades] = useState<string[]>([]);
   const [teacher, setTeacher] = useState('');
   const [principal, setPrincipal] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Mock student data - replace with actual data from your system
+  // Fetch available academic years
   useEffect(() => {
-    const mockStudents: StudentAssessment[] = [
-      { id: '1', studentId: '001', studentName: 'เด็กชายจิรเมธ สายชล', score: 3, grade: 'ดีเยี่ยม' },
-      { id: '2', studentId: '002', studentName: 'เด็กหญิงนภัสสร เสียงใส', score: 2, grade: 'ดี' },
-      { id: '3', studentId: '003', studentName: 'เด็กชายพีรวัส มั่นใจ', score: 1, grade: 'ผ่าน' },
-      { id: '4', studentId: '004', studentName: 'เด็กหญิงสุภางค์ ยอดเก่ง', score: 3, grade: 'ดีเยี่ยม' },
-      { id: '5', studentId: '005', studentName: 'เด็กชายธนวัฒน์ คิดเก่ง', score: 2, grade: 'ดี' },
-    ];
-    setStudents(mockStudents);
+    const fetchAcademicYears = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select('academicYear')
+          .not('academicYear', 'is', null);
+        
+        if (error) throw error;
+        
+        const years = [...new Set(data.map(d => d.academicYear))].sort().reverse();
+        setAvailableYears(years);
+      } catch (error) {
+        console.error('Error fetching academic years:', error);
+      }
+    };
+    
+    fetchAcademicYears();
   }, []);
 
-  const updateStudentScore = (studentId: string, newScore: number) => {
-    const getGrade = (score: number) => {
-      switch (score) {
-        case 3: return 'ดีเยี่ยม';
-        case 2: return 'ดี';
-        case 1: return 'ผ่าน';
-        case 0: return 'ไม่ผ่าน';
-        default: return 'ไม่ผ่าน';
+  // Fetch available grades when academic year changes
+  useEffect(() => {
+    if (!academicYear) {
+      setAvailableGrades([]);
+      return;
+    }
+
+    const fetchGrades = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select('grade')
+          .eq('academicYear', academicYear)
+          .not('grade', 'is', null);
+        
+        if (error) throw error;
+        
+        const grades = [...new Set(data.map(d => d.grade))].sort();
+        setAvailableGrades(grades);
+      } catch (error) {
+        console.error('Error fetching grades:', error);
+      }
+    };
+    
+    fetchGrades();
+  }, [academicYear]);
+
+  // Fetch students and assessments when both year and grade are selected
+  useEffect(() => {
+    if (!academicYear || !gradeLevel) {
+      setStudents([]);
+      setAssessments([]);
+      return;
+    }
+
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch students
+        const { data: studentsData, error: studentsError } = await supabase
+          .from('students')
+          .select('id, studentId, firstNameTh, lastNameTh, titleTh, grade, academicYear')
+          .eq('academicYear', academicYear)
+          .eq('grade', gradeLevel)
+          .order('studentId');
+
+        if (studentsError) throw studentsError;
+
+        // Fetch competency assessments for these students
+        const studentIds = studentsData.map(s => s.id);
+        
+        if (studentIds.length > 0) {
+          const { data: assessmentsData, error: assessmentsError } = await supabase
+            .from('competency_assessments')
+            .select('student_id, total_score, grade')
+            .in('student_id', studentIds)
+            .eq('academic_year', academicYear);
+
+          if (assessmentsError) throw assessmentsError;
+
+          setAssessments(assessmentsData || []);
+        } else {
+          setAssessments([]);
+        }
+
+        setStudents(studentsData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+      } finally {
+        setLoading(false);
       }
     };
 
-    setStudents(prev => prev.map(student => 
-      student.id === studentId 
-        ? { ...student, score: newScore, grade: getGrade(newScore) }
-        : student
-    ));
-  };
+    fetchData();
+  }, [academicYear, gradeLevel]);
+
+  // Combine students with their assessments
+  const studentsWithAssessments = useMemo(() => {
+    return students.map(student => {
+      // Find the total score for this student across all competencies
+      const studentAssessments = assessments.filter(a => a.student_id === student.id);
+      
+      let totalScore = 0;
+      let grade = 'ไม่ผ่าน';
+      
+      if (studentAssessments.length > 0) {
+        // Sum up all total scores from different competency assessments
+        totalScore = studentAssessments.reduce((sum, assessment) => sum + assessment.total_score, 0);
+        
+        // Calculate grade based on total score (following the criteria: 13-15=ดีเยี่ยม, 9-12=ดี, 5-8=ผ่าน, 0=ไม่ผ่าน)
+        if (totalScore >= 13) {
+          grade = 'ดีเยี่ยม';
+        } else if (totalScore >= 9) {
+          grade = 'ดี';
+        } else if (totalScore >= 5) {
+          grade = 'ผ่าน';
+        } else {
+          grade = 'ไม่ผ่าน';
+        }
+      }
+
+      return {
+        id: student.id,
+        studentId: student.studentId,
+        studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
+        totalScore,
+        grade
+      };
+    });
+  }, [students, assessments]);
 
   const getGradeStats = () => {
     const stats = {
-      excellent: students.filter(s => s.score === 3).length,
-      good: students.filter(s => s.score === 2).length,
-      pass: students.filter(s => s.score === 1).length,
-      fail: students.filter(s => s.score === 0).length,
+      excellent: studentsWithAssessments.filter(s => s.grade === 'ดีเยี่ยม').length,
+      good: studentsWithAssessments.filter(s => s.grade === 'ดี').length,
+      pass: studentsWithAssessments.filter(s => s.grade === 'ผ่าน').length,
+      fail: studentsWithAssessments.filter(s => s.grade === 'ไม่ผ่าน').length,
     };
     
-    const total = students.length;
+    const total = studentsWithAssessments.length;
     return {
       ...stats,
       total,
-      excellentPercent: total > 0 ? ((stats.excellent / total) * 100).toFixed(1) : 0,
-      goodPercent: total > 0 ? ((stats.good / total) * 100).toFixed(1) : 0,
-      passPercent: total > 0 ? ((stats.pass / total) * 100).toFixed(1) : 0,
-      failPercent: total > 0 ? ((stats.fail / total) * 100).toFixed(1) : 0,
+      excellentPercent: total > 0 ? ((stats.excellent / total) * 100).toFixed(1) : '0',
+      goodPercent: total > 0 ? ((stats.good / total) * 100).toFixed(1) : '0',
+      passPercent: total > 0 ? ((stats.pass / total) * 100).toFixed(1) : '0',
+      failPercent: total > 0 ? ((stats.fail / total) * 100).toFixed(1) : '0',
     };
   };
 
   const stats = getGradeStats();
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('บันทึกข้อมูลสำเร็จ');
-    } catch (error) {
-      toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handlePreview = () => {
     window.open('', '_blank');
@@ -113,41 +224,32 @@ export const StudentReportPage = () => {
           <CardTitle className="text-xl text-blue-700">ข้อมูลพื้นฐาน</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="academic-year">ปีการศึกษา</Label>
-              <Input
-                id="academic-year"
-                value={academicYear}
-                onChange={(e) => setAcademicYear(e.target.value)}
-                placeholder="เช่น 2567"
-              />
+              <Select value={academicYear} onValueChange={setAcademicYear}>
+                <SelectTrigger id="academic-year">
+                  <SelectValue placeholder="เลือกปีการศึกษา" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableYears.map(year => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="grade-level">ชั้น</Label>
-              <Select value={gradeLevel} onValueChange={setGradeLevel}>
+              <Select value={gradeLevel} onValueChange={setGradeLevel} disabled={!academicYear}>
                 <SelectTrigger id="grade-level">
                   <SelectValue placeholder="เลือกชั้นเรียน" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ป.1">ประถมศึกษาปีที่ 1</SelectItem>
-                  <SelectItem value="ป.2">ประถมศึกษาปีที่ 2</SelectItem>
-                  <SelectItem value="ป.3">ประถมศึกษาปีที่ 3</SelectItem>
-                  <SelectItem value="ป.4">ประถมศึกษาปีที่ 4</SelectItem>
-                  <SelectItem value="ป.5">ประถมศึกษาปีที่ 5</SelectItem>
-                  <SelectItem value="ป.6">ประถมศึกษาปีที่ 6</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="semester">ภาคเรียนที่</Label>
-              <Select value={semester} onValueChange={setSemester}>
-                <SelectTrigger id="semester">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
+                  {availableGrades.map(grade => (
+                    <SelectItem key={grade} value={grade}>
+                      {grade.startsWith('ป.') ? `ประถมศึกษาปีที่ ${grade.slice(2)}` : grade}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -155,125 +257,135 @@ export const StudentReportPage = () => {
         </CardContent>
       </Card>
 
-      {/* Student Assessment Table */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl text-blue-700">รายการนักเรียนและผลการประเมิน</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center">ลำดับที่</TableHead>
-                  <TableHead>ชื่อ-สกุล</TableHead>
-                  <TableHead className="text-center">ผลการประเมิน</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {students.map((student, index) => (
-                  <TableRow key={student.id}>
-                    <TableCell className="text-center">{index + 1}</TableCell>
-                    <TableCell>{student.studentName}</TableCell>
-                    <TableCell className="text-center">
-                      <Select 
-                        value={student.score.toString()} 
-                        onValueChange={(value) => updateStudentScore(student.id, parseInt(value))}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="3">ดีเยี่ยม (3)</SelectItem>
-                          <SelectItem value="2">ดี (2)</SelectItem>
-                          <SelectItem value="1">ผ่าน (1)</SelectItem>
-                          <SelectItem value="0">ไม่ผ่าน (0)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Summary Statistics */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold mb-3">สรุปผลการประเมิน</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="text-center">
-                <div className="font-medium">ดีเยี่ยม</div>
-                <div>{stats.excellent} คน ({stats.excellentPercent}%)</div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium">ดี</div>
-                <div>{stats.good} คน ({stats.goodPercent}%)</div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium">ผ่าน</div>
-                <div>{stats.pass} คน ({stats.passPercent}%)</div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium">ไม่ผ่าน</div>
-                <div>{stats.fail} คน ({stats.failPercent}%)</div>
-              </div>
+      {/* Report Display */}
+      {academicYear && gradeLevel && (
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-8">
+            {/* Report Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold mb-2">สรุปผลการประเมินรายชั้นเรียน</h1>
+              <p className="text-lg mb-1">
+                ชั้น{gradeLevel.startsWith('ป.') ? `ประถมศึกษาปีที่ ${gradeLevel.slice(2)}` : gradeLevel}
+              </p>
+              <p className="text-lg">ปีการศึกษา {academicYear}</p>
             </div>
-          </div>
 
-          {/* Signature Section */}
-          <div className="mt-6 p-4 border-t">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="teacher">ผู้ประเมิน (ครูประจำชั้น)</Label>
-                <Input
-                  id="teacher"
-                  value={teacher}
-                  onChange={(e) => setTeacher(e.target.value)}
-                  placeholder="ชื่อครูประจำชั้น"
-                />
+            {loading ? (
+              <div className="text-center py-8">
+                <p>กำลังโหลดข้อมูล...</p>
               </div>
-              <div>
-                <Label htmlFor="principal">ผู้รับรอง (ผู้อำนวยการ)</Label>
-                <Input
-                  id="principal"
-                  value={principal}
-                  onChange={(e) => setPrincipal(e.target.value)}
-                  placeholder="ชื่อผู้อำนวยการ"
-                />
+            ) : studentsWithAssessments.length === 0 ? (
+              <div className="text-center py-8">
+                <p>ไม่พบข้อมูลนักเรียนในชั้นและปีการศึกษาที่เลือก</p>
               </div>
-            </div>
-          </div>
+            ) : (
+              <>
+                {/* Student Table */}
+                <div className="overflow-x-auto mb-8">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-center border">ลำดับที่</TableHead>
+                        <TableHead className="border">ชื่อ-สกุล</TableHead>
+                        <TableHead className="text-center border">ผลการประเมิน</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {studentsWithAssessments.map((student, index) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="text-center border">{index + 1}</TableCell>
+                          <TableCell className="border">{student.studentName}</TableCell>
+                          <TableCell className="text-center border">
+                            <span className={`px-2 py-1 rounded text-sm font-medium ${
+                              student.grade === 'ดีเยี่ยม' ? 'bg-green-100 text-green-800' :
+                              student.grade === 'ดี' ? 'bg-blue-100 text-blue-800' :
+                              student.grade === 'ผ่าน' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {student.grade}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 pt-4 border-t mt-4">
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
-            </Button>
-            
-            <Button
-              onClick={handlePreview}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              ตัวอย่างก่อนพิมพ์
-            </Button>
-            
-            <Button
-              onClick={handlePrint}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-            >
-              <Printer className="h-4 w-4" />
-              พิมพ์
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+                {/* Summary Statistics */}
+                <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+                  <h3 className="font-semibold mb-4 text-lg">สรุปผลการประเมิน</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-white rounded border">
+                      <div className="text-green-600 font-medium text-lg">ดีเยี่ยม</div>
+                      <div className="text-2xl font-bold">{stats.excellent}</div>
+                      <div className="text-sm text-gray-600">({stats.excellentPercent}%)</div>
+                    </div>
+                    <div className="text-center p-4 bg-white rounded border">
+                      <div className="text-blue-600 font-medium text-lg">ดี</div>
+                      <div className="text-2xl font-bold">{stats.good}</div>
+                      <div className="text-sm text-gray-600">({stats.goodPercent}%)</div>
+                    </div>
+                    <div className="text-center p-4 bg-white rounded border">
+                      <div className="text-yellow-600 font-medium text-lg">ผ่าน</div>
+                      <div className="text-2xl font-bold">{stats.pass}</div>
+                      <div className="text-sm text-gray-600">({stats.passPercent}%)</div>
+                    </div>
+                    <div className="text-center p-4 bg-white rounded border">
+                      <div className="text-red-600 font-medium text-lg">ไม่ผ่าน</div>
+                      <div className="text-2xl font-bold">{stats.fail}</div>
+                      <div className="text-sm text-gray-600">({stats.failPercent}%)</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Signature Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16 pt-8 border-t">
+                  <div className="text-center">
+                    <p className="mb-16">ผู้ประเมิน (ครูประจำชั้น)</p>
+                    <div className="border-b border-black w-48 mx-auto mb-2"></div>
+                    <Input
+                      value={teacher}
+                      onChange={(e) => setTeacher(e.target.value)}
+                      placeholder="ชื่อครูประจำชั้น"
+                      className="text-center border-none text-sm"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="mb-16">ผู้รับรอง (ผู้อำนวยการ)</p>
+                    <div className="border-b border-black w-48 mx-auto mb-2"></div>
+                    <Input
+                      value={principal}
+                      onChange={(e) => setPrincipal(e.target.value)}
+                      placeholder="ชื่อผู้อำนวยการ"
+                      className="text-center border-none text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 pt-8 mt-8 border-t">
+                  <Button
+                    onClick={handlePreview}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    ตัวอย่างก่อนพิมพ์
+                  </Button>
+                  
+                  <Button
+                    onClick={handlePrint}
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  >
+                    <Printer className="h-4 w-4" />
+                    พิมพ์
+                  </Button>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
