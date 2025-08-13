@@ -282,33 +282,105 @@ export const StudentReportPage = () => {
               <>
                 {/* Student Table */}
                 <div className="overflow-x-auto mb-8">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-center border">ลำดับที่</TableHead>
-                        <TableHead className="border">ชื่อ-สกุล</TableHead>
-                        <TableHead className="text-center border">ผลการประเมิน</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <style>{`
+                    @media print {
+                      .print-table {
+                        border-collapse: collapse;
+                        width: 100%;
+                        font-size: 12px;
+                      }
+                      .print-table th,
+                      .print-table td {
+                        border: 1px solid black !important;
+                        padding: 4px 8px;
+                        text-align: left;
+                      }
+                      .print-table th {
+                        background-color: white !important;
+                        font-weight: bold;
+                        text-align: center;
+                      }
+                      .print-center {
+                        text-align: center !important;
+                      }
+                      .page-break {
+                        page-break-before: always;
+                      }
+                      @page {
+                        size: A4;
+                        margin: 1cm;
+                      }
+                    }
+                    .preview-table {
+                      border-collapse: collapse;
+                      width: 100%;
+                    }
+                    .preview-table th,
+                    .preview-table td {
+                      border: 1px solid black;
+                      padding: 8px;
+                      text-align: left;
+                    }
+                    .preview-table th {
+                      background-color: #f8f9fa;
+                      font-weight: bold;
+                      text-align: center;
+                    }
+                  `}</style>
+                  
+                  <table className="preview-table print-table">
+                    <thead>
+                      <tr>
+                        <th rowSpan={2} className="w-16">ลำดับที่</th>
+                        <th rowSpan={2} className="w-48">ชื่อ-สกุล</th>
+                        <th colSpan={5} className="text-center">ผลการประเมินรายสมรรถนะ</th>
+                        <th rowSpan={2} className="w-24">สรุปผลการประเมิน</th>
+                      </tr>
+                      <tr>
+                        <th className="w-16">ด้านที่ 1</th>
+                        <th className="w-16">ด้านที่ 2</th>
+                        <th className="w-16">ด้านที่ 3</th>
+                        <th className="w-16">ด้านที่ 4</th>
+                        <th className="w-16">ด้านที่ 5</th>
+                      </tr>
+                    </thead>
+                    <tbody>
                       {studentsWithAssessments.map((student, index) => (
-                        <TableRow key={student.id}>
-                          <TableCell className="text-center border">{index + 1}</TableCell>
-                          <TableCell className="border">{student.studentName}</TableCell>
-                          <TableCell className="text-center border">
-                            <span className={`px-2 py-1 rounded text-sm font-medium ${
-                              student.grade === 'ดีเยี่ยม' ? 'bg-green-100 text-green-800' :
-                              student.grade === 'ดี' ? 'bg-blue-100 text-blue-800' :
-                              student.grade === 'ผ่าน' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {student.grade}
-                            </span>
-                          </TableCell>
-                        </TableRow>
+                        <tr key={student.id} className={index === 16 ? 'page-break' : ''}>
+                          <td className="text-center print-center">{index + 1}</td>
+                          <td>{student.studentName}</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">{student.grade}</td>
+                        </tr>
                       ))}
-                    </TableBody>
-                  </Table>
+                      {/* Add empty rows to reach minimum 16 rows for consistent formatting */}
+                      {Array.from({ length: Math.max(0, 16 - studentsWithAssessments.length) }).map((_, index) => (
+                        <tr key={`empty-${index}`}>
+                          <td className="text-center print-center">{studentsWithAssessments.length + index + 1}</td>
+                          <td></td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">-</td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td colSpan={2} className="text-center print-center font-bold">รวม</td>
+                        <td className="text-center print-center">-</td>
+                        <td className="text-center print-center">-</td>
+                        <td className="text-center print-center">-</td>
+                        <td className="text-center print-center">-</td>
+                        <td className="text-center print-center">-</td>
+                        <td className="text-center print-center">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Summary Statistics */}
