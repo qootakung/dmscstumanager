@@ -21,6 +21,12 @@ interface Student {
 
 interface CompetencyAssessment {
   student_id: string;
+  competency_number: number;
+  item_1_score: number;
+  item_2_score: number;
+  item_3_score: number;
+  item_4_score: number;
+  item_5_score: number;
   total_score: number;
   grade: string;
 }
@@ -29,6 +35,7 @@ interface StudentWithAssessment {
   id: string;
   studentId: string;
   studentName: string;
+  competencyScores: number[];
   totalScore: number;
   grade: string;
 }
@@ -119,7 +126,7 @@ export const StudentReportPage = () => {
         if (studentIds.length > 0) {
           const { data: assessmentsData, error: assessmentsError } = await supabase
             .from('competency_assessments')
-            .select('student_id, total_score, grade')
+            .select('student_id, competency_number, item_1_score, item_2_score, item_3_score, item_4_score, item_5_score, total_score, grade')
             .in('student_id', studentIds)
             .eq('academic_year', academicYear);
 
@@ -145,17 +152,28 @@ export const StudentReportPage = () => {
   // Combine students with their assessments
   const studentsWithAssessments = useMemo(() => {
     return students.map(student => {
-      // Find the total score for this student across all competencies
+      // Find all competency assessments for this student
       const studentAssessments = assessments.filter(a => a.student_id === student.id);
       
+      // Initialize competency scores for each of the 5 competencies
+      const competencyScores = [0, 0, 0, 0, 0];
       let totalScore = 0;
       let grade = 'ไม่ผ่าน';
       
       if (studentAssessments.length > 0) {
-        // Sum up all total scores from different competency assessments
-        totalScore = studentAssessments.reduce((sum, assessment) => sum + assessment.total_score, 0);
+        // For each competency assessment, get the total score across all 5 items
+        studentAssessments.forEach(assessment => {
+          const compIndex = assessment.competency_number - 1; // Convert to 0-based index
+          if (compIndex >= 0 && compIndex < 5) {
+            competencyScores[compIndex] = assessment.item_1_score + assessment.item_2_score + 
+              assessment.item_3_score + assessment.item_4_score + assessment.item_5_score;
+          }
+        });
         
-        // Calculate grade based on total score (following the criteria: 13-15=ดีเยี่ยม, 9-12=ดี, 5-8=ผ่าน, 0=ไม่ผ่าน)
+        // Calculate total score from all competencies
+        totalScore = competencyScores.reduce((sum, score) => sum + score, 0);
+        
+        // Calculate grade based on total score
         if (totalScore >= 13) {
           grade = 'ดีเยี่ยม';
         } else if (totalScore >= 9) {
@@ -171,6 +189,7 @@ export const StudentReportPage = () => {
         id: student.id,
         studentId: student.studentId,
         studentName: `${student.titleTh || ''}${student.firstNameTh} ${student.lastNameTh}`.trim(),
+        competencyScores,
         totalScore,
         grade
       };
@@ -349,11 +368,11 @@ export const StudentReportPage = () => {
                         <tr key={student.id} className={index === 16 ? 'page-break' : ''}>
                           <td className="text-center print-center">{index + 1}</td>
                           <td>{student.studentName}</td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">{student.competencyScores[0] || 0}</td>
+                          <td className="text-center print-center">{student.competencyScores[1] || 0}</td>
+                          <td className="text-center print-center">{student.competencyScores[2] || 0}</td>
+                          <td className="text-center print-center">{student.competencyScores[3] || 0}</td>
+                          <td className="text-center print-center">{student.competencyScores[4] || 0}</td>
                           <td className="text-center print-center">{student.grade}</td>
                         </tr>
                       ))}
@@ -362,21 +381,21 @@ export const StudentReportPage = () => {
                         <tr key={`empty-${index}`}>
                           <td className="text-center print-center">{studentsWithAssessments.length + index + 1}</td>
                           <td></td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
-                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center">0</td>
+                          <td className="text-center print-center">0</td>
+                          <td className="text-center print-center">0</td>
+                          <td className="text-center print-center">0</td>
+                          <td className="text-center print-center">0</td>
                           <td className="text-center print-center">-</td>
                         </tr>
                       ))}
                       <tr>
                         <td colSpan={2} className="text-center print-center font-bold">รวม</td>
-                        <td className="text-center print-center">-</td>
-                        <td className="text-center print-center">-</td>
-                        <td className="text-center print-center">-</td>
-                        <td className="text-center print-center">-</td>
-                        <td className="text-center print-center">-</td>
+                        <td className="text-center print-center">{studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[0] || 0), 0)}</td>
+                        <td className="text-center print-center">{studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[1] || 0), 0)}</td>
+                        <td className="text-center print-center">{studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[2] || 0), 0)}</td>
+                        <td className="text-center print-center">{studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[3] || 0), 0)}</td>
+                        <td className="text-center print-center">{studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[4] || 0), 0)}</td>
                         <td className="text-center print-center">-</td>
                       </tr>
                     </tbody>
