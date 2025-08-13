@@ -222,11 +222,256 @@ export const StudentReportPage = () => {
 
 
   const handlePreview = () => {
-    window.open('', '_blank');
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const reportHTML = generateReportHTML();
+      printWindow.document.write(reportHTML);
+      printWindow.document.close();
+    }
   };
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const generateReportHTML = () => {
+    const studentsHTML = studentsWithAssessments.map((student, index) => `
+      <tr ${index === 16 ? 'class="page-break"' : ''}>
+        <td class="text-center">${index + 1}</td>
+        <td>${student.studentName}</td>
+        <td class="text-center">${student.competencyScores[0] || 0}</td>
+        <td class="text-center">${student.competencyScores[1] || 0}</td>
+        <td class="text-center">${student.competencyScores[2] || 0}</td>
+        <td class="text-center">${student.competencyScores[3] || 0}</td>
+        <td class="text-center">${student.competencyScores[4] || 0}</td>
+        <td class="text-center">${student.grade}</td>
+      </tr>
+    `).join('');
+
+    const emptyRowsCount = Math.max(0, 16 - studentsWithAssessments.length);
+    const emptyRowsHTML = Array.from({ length: emptyRowsCount }).map(() => `
+      <tr>
+        <td class="text-center"></td>
+        <td></td>
+        <td class="text-center"></td>
+        <td class="text-center"></td>
+        <td class="text-center"></td>
+        <td class="text-center"></td>
+        <td class="text-center"></td>
+        <td class="text-center"></td>
+      </tr>
+    `).join('');
+
+    const totalScores = [
+      studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[0] || 0), 0),
+      studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[1] || 0), 0),
+      studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[2] || 0), 0),
+      studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[3] || 0), 0),
+      studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[4] || 0), 0)
+    ];
+
+    return `
+      <!DOCTYPE html>
+      <html lang="th">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>สรุปผลการประเมินรายชั้นเรียน</title>
+        <style>
+          body { 
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: white;
+          }
+          .report-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+          }
+          .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+          }
+          .report-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+          }
+          .report-subtitle {
+            font-size: 18px;
+            margin-bottom: 5px;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+            margin-bottom: 30px;
+          }
+          th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            text-align: center;
+          }
+          .text-center {
+            text-align: center;
+          }
+          .summary-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+          }
+          .summary-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+          }
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+          }
+          .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+          }
+          .summary-label {
+            font-weight: 500;
+            font-size: 16px;
+            margin-bottom: 5px;
+          }
+          .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+          }
+          .summary-percent {
+            font-size: 12px;
+            color: #666;
+          }
+          .signature-section {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+          }
+          .signature-box {
+            text-align: center;
+            padding: 20px 0;
+          }
+          .signature-label {
+            margin-bottom: 60px;
+            font-weight: 500;
+          }
+          .signature-line {
+            border-bottom: 1px solid black;
+            margin-bottom: 10px;
+            height: 40px;
+          }
+          .page-break {
+            page-break-before: always;
+          }
+          @page {
+            size: A4;
+            margin: 1cm;
+          }
+          @media print {
+            body { margin: 0; padding: 0; }
+            .report-container { max-width: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-container">
+          <div class="report-header">
+            <div class="report-title">สรุปผลการประเมินรายชั้นเรียน</div>
+            <div class="report-subtitle">
+              ชั้น${gradeLevel.startsWith('ป.') ? `ประถมศึกษาปีที่ ${gradeLevel.slice(2)}` : gradeLevel}
+            </div>
+            <div class="report-subtitle">ปีการศึกษา ${academicYear}</div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 60px;">ลำดับที่</th>
+                <th rowspan="2" style="width: 200px;">ชื่อ-สกุล</th>
+                <th colspan="5" class="text-center">ผลการประเมินรายสมรรถนะ</th>
+                <th rowspan="2" style="width: 120px;">สรุปผลการประเมิน</th>
+              </tr>
+              <tr>
+                <th style="width: 80px;">ด้านที่ 1</th>
+                <th style="width: 80px;">ด้านที่ 2</th>
+                <th style="width: 80px;">ด้านที่ 3</th>
+                <th style="width: 80px;">ด้านที่ 4</th>
+                <th style="width: 80px;">ด้านที่ 5</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${studentsHTML}
+              ${emptyRowsHTML}
+              <tr style="font-weight: bold;">
+                <td colspan="2" class="text-center">รวม</td>
+                <td class="text-center">${totalScores[0]}</td>
+                <td class="text-center">${totalScores[1]}</td>
+                <td class="text-center">${totalScores[2]}</td>
+                <td class="text-center">${totalScores[3]}</td>
+                <td class="text-center">${totalScores[4]}</td>
+                <td class="text-center">-</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="summary-section">
+            <div class="summary-title">สรุปผลการประเมิน</div>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="summary-label" style="color: #10b981;">ดีเยี่ยม</div>
+                <div class="summary-value">${stats.excellent}</div>
+                <div class="summary-percent">(${stats.excellentPercent}%)</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label" style="color: #3b82f6;">ดี</div>
+                <div class="summary-value">${stats.good}</div>
+                <div class="summary-percent">(${stats.goodPercent}%)</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label" style="color: #f59e0b;">ผ่าน</div>
+                <div class="summary-value">${stats.pass}</div>
+                <div class="summary-percent">(${stats.passPercent}%)</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label" style="color: #ef4444;">ไม่ผ่าน</div>
+                <div class="summary-value">${stats.fail}</div>
+                <div class="summary-percent">(${stats.failPercent}%)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signature-section">
+            <div class="signature-box">
+              <div class="signature-label">ครูผู้รับผิดชอบ</div>
+              <div class="signature-line"></div>
+              <div>${teacher || '(.....................................)'}</div>
+            </div>
+            <div class="signature-box">
+              <div class="signature-label">ผู้อำนวยการ</div>
+              <div class="signature-line"></div>
+              <div>${principal || '(.....................................)'}</div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
   };
 
   return (
