@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Printer, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import CompetencyPrintPreviewDialog from '../CompetencyPrintPreviewDialog';
 
 interface Student {
   id: string;
@@ -50,6 +51,7 @@ export const StudentReportPage = () => {
   const [teacher, setTeacher] = useState('');
   const [principal, setPrincipal] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
 
   // Fetch available academic years
   useEffect(() => {
@@ -222,12 +224,11 @@ export const StudentReportPage = () => {
 
 
   const handlePreview = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const reportHTML = generateReportHTML();
-      printWindow.document.write(reportHTML);
-      printWindow.document.close();
+    if (!academicYear || !gradeLevel) {
+      toast.error('กรุณาเลือกปีการศึกษาและชั้นเรียนก่อน');
+      return;
     }
+    setShowPreviewDialog(true);
   };
 
   const handlePrint = () => {
@@ -725,6 +726,17 @@ export const StudentReportPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Print Preview Dialog */}
+      <CompetencyPrintPreviewDialog
+        isOpen={showPreviewDialog}
+        onOpenChange={setShowPreviewDialog}
+        studentsWithAssessments={studentsWithAssessments}
+        academicYear={academicYear}
+        gradeLevel={gradeLevel}
+        teacher={teacher}
+        principal={principal}
+      />
     </div>
   );
 };
