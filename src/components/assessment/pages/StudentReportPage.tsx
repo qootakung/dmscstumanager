@@ -382,14 +382,14 @@ export const StudentReportPage = () => {
                       {/* Add empty rows to reach minimum 16 rows for consistent formatting */}
                       {Array.from({ length: Math.max(0, 16 - studentsWithAssessments.length) }).map((_, index) => (
                         <tr key={`empty-${index}`}>
-                          <td className="text-center print-center">{studentsWithAssessments.length + index + 1}</td>
+                          <td className="text-center print-center"></td>
                           <td></td>
-                          <td className="text-center print-center">0</td>
-                          <td className="text-center print-center">0</td>
-                          <td className="text-center print-center">0</td>
-                          <td className="text-center print-center">0</td>
-                          <td className="text-center print-center">0</td>
-                          <td className="text-center print-center">-</td>
+                          <td className="text-center print-center"></td>
+                          <td className="text-center print-center"></td>
+                          <td className="text-center print-center"></td>
+                          <td className="text-center print-center"></td>
+                          <td className="text-center print-center"></td>
+                          <td className="text-center print-center"></td>
                         </tr>
                       ))}
                       <tr>
