@@ -89,7 +89,10 @@ export const StudentReportPage = () => {
         
         if (error) throw error;
         
-        const grades = [...new Set(data.map(d => d.grade))].sort();
+        // Filter out kindergarten classes (อ.1-อ.3) and keep only elementary (ป.)
+        const grades = [...new Set(data.map(d => d.grade))]
+          .filter(grade => grade.startsWith('ป.'))
+          .sort();
         setAvailableGrades(grades);
       } catch (error) {
         console.error('Error fetching grades:', error);
