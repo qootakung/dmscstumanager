@@ -147,8 +147,8 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
     }
   };
 
-  // Only use students with data, no empty rows for preview
-  const allRows = studentsWithAssessments;
+  // Only use students with actual data, filter out empty rows
+  const allRows = studentsWithAssessments.filter(student => student.studentName && student.studentName.trim() !== '');
 
   if (!isOpen) {
     return null;
