@@ -721,15 +721,13 @@ export const StudentReportPage = () => {
       )}
 
       {/* Print Preview Dialog */}
-      <CompetencyPrintPreviewDialog
-        isOpen={showPreviewDialog}
-        onOpenChange={setShowPreviewDialog}
-        studentsWithAssessments={studentsWithAssessments}
-        academicYear={academicYear}
-        gradeLevel={gradeLevel}
-        teacher={teacher}
-        principal={principal}
-      />
+          <CompetencyPrintPreviewDialog
+            isOpen={showPreviewDialog}
+            onOpenChange={setShowPreviewDialog}
+            studentsWithAssessments={studentsWithAssessments}
+            academicYear={academicYear}
+            gradeLevel={gradeLevel}
+          />
     </div>
   );
 };

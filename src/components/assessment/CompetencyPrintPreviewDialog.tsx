@@ -1,9 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { getTeachers } from '@/utils/teacherStorage';
+import type { Teacher } from '@/types/teacher';
 
 interface StudentWithAssessment {
   id: string;
@@ -20,8 +24,6 @@ interface CompetencyPrintPreviewDialogProps {
   studentsWithAssessments: StudentWithAssessment[];
   academicYear: string;
   gradeLevel: string;
-  teacher: string;
-  principal: string;
 }
 
 const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> = ({
@@ -30,11 +32,28 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
   studentsWithAssessments,
   academicYear,
   gradeLevel,
-  teacher,
-  principal
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   const [printing, setPrinting] = useState(false);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [selectedTeacher, setSelectedTeacher] = useState<string>('');
+  const [selectedPrincipal, setSelectedPrincipal] = useState<string>('');
+
+  // Fetch teachers
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const teachersData = await getTeachers();
+        setTeachers(teachersData);
+      } catch (error) {
+        console.error('Error fetching teachers:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchTeachers();
+    }
+  }, [isOpen]);
 
   const getGradeStats = () => {
     const stats = {
@@ -125,6 +144,38 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
       <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-2 border-b">
           <DialogTitle>ตัวอย่างก่อนพิมพ์</DialogTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <Label htmlFor="teacher">ครูผู้รับผิดชอบ</Label>
+              <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกครูผู้รับผิดชอบ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.firstName} {teacher.lastName} ({teacher.position})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="principal">ผู้อำนวยการ</Label>
+              <Select value={selectedPrincipal} onValueChange={setSelectedPrincipal}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกผู้อำนวยการ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.filter(t => t.position === 'ผู้อำนวยการโรงเรียน').map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.firstName} {teacher.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </DialogHeader>
         <div className="flex-1 overflow-auto bg-gray-100 p-8">
           <div className="p-6 bg-white shadow-lg mx-auto" style={{ maxWidth: '210mm' }}>
@@ -239,14 +290,14 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
               {/* Signature Section */}
               <div style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px' }}>
                 <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                  <div style={{ marginBottom: '60px', fontWeight: '500' }}>ครูผู้รับผิดชอบ</div>
+                  <div style={{ marginBottom: '90px', fontWeight: '500' }}>ครูผู้รับผิดชอบ</div>
                   <div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '40px' }}></div>
-                  <div>{teacher || '(.....................................)'}</div>
+                  <div>{selectedTeacher ? teachers.find(t => t.id === selectedTeacher)?.firstName + ' ' + teachers.find(t => t.id === selectedTeacher)?.lastName : '(.....................................)'}</div>
                 </div>
                 <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                  <div style={{ marginBottom: '60px', fontWeight: '500' }}>ผู้อำนวยการ</div>
+                  <div style={{ marginBottom: '90px', fontWeight: '500' }}>ผู้อำนวยการ</div>
                   <div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '40px' }}></div>
-                  <div>{principal || '(.....................................)'}</div>
+                  <div>{selectedPrincipal ? teachers.find(t => t.id === selectedPrincipal)?.firstName + ' ' + teachers.find(t => t.id === selectedPrincipal)?.lastName : '(.....................................)'}</div>
                 </div>
               </div>
             </div>
