@@ -303,16 +303,51 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
               </div>
 
               {/* Signature Section */}
-              <div className="signature-section" style={{ marginTop: '30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-                <div style={{ textAlign: 'center', padding: '15px 0' }}>
-                  <div style={{ marginBottom: '60px', fontWeight: '500', fontSize: '12px' }}>ครูผู้รับผิดชอบ</div>
-                  <div style={{ borderBottom: '1px solid black', marginBottom: '8px', height: '30px' }}></div>
-                  <div style={{ fontSize: '11px' }}>{selectedTeacher ? teachers.find(t => t.id === selectedTeacher)?.firstName + ' ' + teachers.find(t => t.id === selectedTeacher)?.lastName : '(.....................................)'}</div>
+              <div className="signature-section" style={{ marginTop: '40px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '40px' }}>
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <div style={{ marginBottom: '20px', fontSize: '12px' }}>วันจองข้อมูลก่อนสอบ</div>
+                    <div style={{ borderBottom: '1px dotted black', width: '200px', margin: '0 auto 8px', height: '20px' }}></div>
+                    <div style={{ fontSize: '11px', marginTop: '8px' }}>
+                      ผู้อำนวยการโรงเรียนบ้านหนองบัว
+                    </div>
+                    <div style={{ fontSize: '11px', marginTop: '30px' }}>
+                      ครูประจำชั้น
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <div style={{ marginBottom: '20px', fontSize: '12px' }}>ตรวจสอบข้อมูลก่อนสอบ</div>
+                    <div style={{ borderBottom: '1px dotted black', width: '200px', margin: '0 auto 8px', height: '20px' }}></div>
+                    <div style={{ fontSize: '11px', marginTop: '8px' }}>
+                      หางโครงการ เชียงใส
+                    </div>
+                    <div style={{ fontSize: '11px', marginTop: '30px' }}>
+                      ครูประจำชั้น
+                    </div>
+                  </div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '15px 0' }}>
-                  <div style={{ marginBottom: '60px', fontWeight: '500', fontSize: '12px' }}>ผู้อำนวยการ</div>
-                  <div style={{ borderBottom: '1px solid black', marginBottom: '8px', height: '30px' }}></div>
-                  <div style={{ fontSize: '11px' }}>{selectedPrincipal ? teachers.find(t => t.id === selectedPrincipal)?.firstName + ' ' + teachers.find(t => t.id === selectedPrincipal)?.lastName : '(.....................................)'}</div>
+                
+                <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                  <div style={{ marginBottom: '20px', fontSize: '12px' }}>
+                    <span>ลงชื่อ</span>
+                    <span style={{ borderBottom: '1px dotted black', display: 'inline-block', width: '200px', margin: '0 8px', verticalAlign: 'middle' }}></span>
+                    <span>ครูผู้รับผิดชอบ</span>
+                  </div>
+                  <div style={{ fontSize: '11px', marginTop: '8px' }}>
+                    ({selectedTeacher ? teachers.find(t => t.id === selectedTeacher)?.firstName + ' ' + teachers.find(t => t.id === selectedTeacher)?.lastName : '.....................................'})
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                  <div style={{ marginBottom: '8px', fontSize: '12px' }}>ตรวจสอบแล้วถูกต้อง</div>
+                  <div style={{ marginBottom: '20px' }}>
+                    <span>ลงชื่อ</span>
+                    <span style={{ borderBottom: '1px dotted black', display: 'inline-block', width: '200px', margin: '0 8px', verticalAlign: 'middle' }}></span>
+                    <span>ผู้อำนวยการโรงเรียน</span>
+                  </div>
+                  <div style={{ fontSize: '11px', marginTop: '8px' }}>
+                    ({selectedPrincipal ? teachers.find(t => t.id === selectedPrincipal)?.firstName + ' ' + teachers.find(t => t.id === selectedPrincipal)?.lastName : '.....................................'})
+                  </div>
                 </div>
               </div>
             </div>
