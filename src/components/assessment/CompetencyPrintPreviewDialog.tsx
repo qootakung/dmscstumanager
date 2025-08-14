@@ -85,20 +85,20 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
   ];
 
   const handlePrint = useReactToPrint({
-    // @ts-ignore
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `สรุปผลการประเมินรายชั้นเรียน-${gradeLevel}-${academicYear}`,
     pageStyle: `
       @page {
         size: A4;
-        margin: 1cm;
+        margin: 15mm;
       }
       @media print {
         body {
           -webkit-print-color-adjust: exact !important;
           color-adjust: exact !important;
           font-family: 'Sarabun', sans-serif !important;
-          font-size: 14px !important;
+          font-size: 12px !important;
+          line-height: 1.3 !important;
         }
         table, th, td {
           border: 1px solid #000000 !important;
@@ -107,30 +107,45 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
         th {
           background-color: #f8f9fa !important;
           font-weight: bold !important;
+          padding: 4px !important;
+        }
+        td {
+          padding: 4px !important;
+        }
+        .print-container {
+          max-width: none !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .signature-section {
+          page-break-inside: avoid !important;
+        }
+        .summary-section {
+          page-break-inside: avoid !important;
         }
       }
-    `,
-    onBeforeGetContent: () => {
-      setPrinting(true);
-      return Promise.resolve();
-    },
-    onAfterPrint: () => {
-      setPrinting(false);
+    `
+  });
+
+  const handlePrintClick = async () => {
+    setPrinting(true);
+    try {
+      await handlePrint();
       toast({
         title: "พิมพ์เอกสารสำเร็จ",
         description: "สามารถนำเอกสารไปใช้งานต่อได้",
       });
-    },
-    onPrintError: (error: any) => {
-      setPrinting(false);
+    } catch (error) {
       toast({
         title: "เกิดข้อผิดพลาดขณะพิมพ์",
         description: "ไม่สามารถพิมพ์เอกสารได้ โปรดลองใหม่",
         variant: "destructive",
       });
       console.error("Print Error:", error);
+    } finally {
+      setPrinting(false);
     }
-  });
+  };
 
   // Only use students with data, no empty rows for preview
   const allRows = studentsWithAssessments;
@@ -179,125 +194,125 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
         </DialogHeader>
         <div className="flex-1 overflow-auto bg-gray-100 p-8">
           <div className="p-6 bg-white shadow-lg mx-auto" style={{ maxWidth: '210mm' }}>
-            <div ref={componentRef} style={{ fontFamily: 'Sarabun, sans-serif', fontSize: '14px' }}>
+            <div ref={componentRef} className="print-container" style={{ fontFamily: 'Sarabun, sans-serif', fontSize: '12px', lineHeight: '1.3' }}>
               {/* Header */}
-              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
                   สรุปผลการประเมินรายชั้นเรียน
                 </div>
-                <div style={{ fontSize: '18px', marginBottom: '5px' }}>
+                <div style={{ fontSize: '14px', marginBottom: '4px' }}>
                   ชั้น{gradeLevel.startsWith('ป.') ? `ประถมศึกษาปีที่ ${gradeLevel.slice(2)}` : gradeLevel}
                 </div>
-                <div style={{ fontSize: '18px' }}>ปีการศึกษา {academicYear}</div>
+                <div style={{ fontSize: '14px' }}>ปีการศึกษา {academicYear}</div>
               </div>
 
               {/* Table */}
-              <table style={{ borderCollapse: 'collapse', width: '100%', marginBottom: '30px' }}>
+              <table style={{ borderCollapse: 'collapse', width: '100%', marginBottom: '20px', fontSize: '11px' }}>
                 <thead>
                   <tr>
-                    <th rowSpan={2} style={{ width: '60px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
+                    <th rowSpan={2} style={{ width: '40px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
                       ลำดับที่
                     </th>
-                    <th rowSpan={2} style={{ width: '200px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
+                    <th rowSpan={2} style={{ width: '120px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
                       ชื่อ-สกุล
                     </th>
-                    <th colSpan={5} style={{ border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
+                    <th colSpan={5} style={{ border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
                       ผลการประเมินรายสมรรถนะ
                     </th>
-                    <th rowSpan={2} style={{ width: '120px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
+                    <th rowSpan={2} style={{ width: '60px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
                       สรุปผลการประเมิน
                     </th>
                   </tr>
                   <tr>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 1: ความสามารถในการสื่อสาร</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 2: ความสามารถในการคิด</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 3: ความสามารถในการแก้ปัญหา</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 4: ความสามารถในการใช้ทักษะชีวิต</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 5: ความสามารถในการใช้เทคโนโลยี</th>
+                    <th style={{ width: '60px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa', fontSize: '10px' }}>สมรรถนะด้านที่ 1: ความสามารถในการสื่อสาร</th>
+                    <th style={{ width: '60px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa', fontSize: '10px' }}>สมรรถนะด้านที่ 2: ความสามารถในการคิด</th>
+                    <th style={{ width: '60px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa', fontSize: '10px' }}>สมรรถนะด้านที่ 3: ความสามารถในการแก้ปัญหา</th>
+                    <th style={{ width: '60px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa', fontSize: '10px' }}>สมรรถนะด้านที่ 4: ความสามารถในการใช้ทักษะชีวิต</th>
+                    <th style={{ width: '60px', border: '1px solid black', padding: '4px', textAlign: 'center', backgroundColor: '#f8f9fa', fontSize: '10px' }}>สมรรถนะด้านที่ 5: ความสามารถในการใช้เทคโนโลยี</th>
                   </tr>
                 </thead>
                 <tbody>
                   {allRows.map((student, index) => {
-                    const isPageBreak = index === 16;
+                    const isPageBreak = index === 20;
                     return (
                       <tr key={student.id} style={isPageBreak ? { pageBreakBefore: 'always' } : {}}>
-                        <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
                           {student.studentName ? (index + 1) : ''}
                         </td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', fontSize: '10px' }}>
                           {student.studentName}
                         </td>
-                        <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
                           {student.studentName ? (student.competencyScores[0] || '') : ''}
                         </td>
-                        <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
                           {student.studentName ? (student.competencyScores[1] || '') : ''}
                         </td>
-                        <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
                           {student.studentName ? (student.competencyScores[2] || '') : ''}
                         </td>
-                        <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
                           {student.studentName ? (student.competencyScores[3] || '') : ''}
                         </td>
-                        <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
                           {student.studentName ? (student.competencyScores[4] || '') : ''}
                         </td>
-                        <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center', fontSize: '10px' }}>
                           {student.grade && student.grade !== 'ไม่ผ่าน' ? student.grade : (student.studentName ? student.grade : '')}
                         </td>
                       </tr>
                     );
                   })}
                   <tr style={{ fontWeight: 'bold' }}>
-                    <td colSpan={2} style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>รวม</td>
-                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>{totalScores[0]}</td>
-                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>{totalScores[1]}</td>
-                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>{totalScores[2]}</td>
-                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>{totalScores[3]}</td>
-                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>{totalScores[4]}</td>
-                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>-</td>
+                    <td colSpan={2} style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>รวม</td>
+                    <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>{totalScores[0]}</td>
+                    <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>{totalScores[1]}</td>
+                    <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>{totalScores[2]}</td>
+                    <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>{totalScores[3]}</td>
+                    <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>{totalScores[4]}</td>
+                    <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>-</td>
                   </tr>
                 </tbody>
               </table>
 
               {/* Summary Section */}
-              <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>สรุปผลการประเมิน</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
-                  <div style={{ textAlign: 'center', padding: '15px', background: 'white', borderRadius: '6px', border: '1px solid #ddd' }}>
-                    <div style={{ fontWeight: '500', fontSize: '16px', marginBottom: '5px', color: '#10b981' }}>ดีเยี่ยม</div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.excellent}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>({stats.excellentPercent}%)</div>
+              <div className="summary-section" style={{ marginTop: '20px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '10px' }}>สรุปผลการประเมิน</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                  <div style={{ textAlign: 'center', padding: '8px', background: 'white', borderRadius: '4px', border: '1px solid #ddd' }}>
+                    <div style={{ fontWeight: '500', fontSize: '12px', marginBottom: '2px', color: '#10b981' }}>ดีเยี่ยม</div>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{stats.excellent}</div>
+                    <div style={{ fontSize: '10px', color: '#666' }}>({stats.excellentPercent}%)</div>
                   </div>
-                  <div style={{ textAlign: 'center', padding: '15px', background: 'white', borderRadius: '6px', border: '1px solid #ddd' }}>
-                    <div style={{ fontWeight: '500', fontSize: '16px', marginBottom: '5px', color: '#3b82f6' }}>ดี</div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.good}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>({stats.goodPercent}%)</div>
+                  <div style={{ textAlign: 'center', padding: '8px', background: 'white', borderRadius: '4px', border: '1px solid #ddd' }}>
+                    <div style={{ fontWeight: '500', fontSize: '12px', marginBottom: '2px', color: '#3b82f6' }}>ดี</div>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{stats.good}</div>
+                    <div style={{ fontSize: '10px', color: '#666' }}>({stats.goodPercent}%)</div>
                   </div>
-                  <div style={{ textAlign: 'center', padding: '15px', background: 'white', borderRadius: '6px', border: '1px solid #ddd' }}>
-                    <div style={{ fontWeight: '500', fontSize: '16px', marginBottom: '5px', color: '#f59e0b' }}>ผ่าน</div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.pass}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>({stats.passPercent}%)</div>
+                  <div style={{ textAlign: 'center', padding: '8px', background: 'white', borderRadius: '4px', border: '1px solid #ddd' }}>
+                    <div style={{ fontWeight: '500', fontSize: '12px', marginBottom: '2px', color: '#f59e0b' }}>ผ่าน</div>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{stats.pass}</div>
+                    <div style={{ fontSize: '10px', color: '#666' }}>({stats.passPercent}%)</div>
                   </div>
-                  <div style={{ textAlign: 'center', padding: '15px', background: 'white', borderRadius: '6px', border: '1px solid #ddd' }}>
-                    <div style={{ fontWeight: '500', fontSize: '16px', marginBottom: '5px', color: '#ef4444' }}>ไม่ผ่าน</div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.fail}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>({stats.failPercent}%)</div>
+                  <div style={{ textAlign: 'center', padding: '8px', background: 'white', borderRadius: '4px', border: '1px solid #ddd' }}>
+                    <div style={{ fontWeight: '500', fontSize: '12px', marginBottom: '2px', color: '#ef4444' }}>ไม่ผ่าน</div>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{stats.fail}</div>
+                    <div style={{ fontSize: '10px', color: '#666' }}>({stats.failPercent}%)</div>
                   </div>
                 </div>
               </div>
 
               {/* Signature Section */}
-              <div style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px' }}>
-                <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                  <div style={{ marginBottom: '90px', fontWeight: '500' }}>ครูผู้รับผิดชอบ</div>
-                  <div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '40px' }}></div>
-                  <div>{selectedTeacher ? teachers.find(t => t.id === selectedTeacher)?.firstName + ' ' + teachers.find(t => t.id === selectedTeacher)?.lastName : '(.....................................)'}</div>
+              <div className="signature-section" style={{ marginTop: '30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+                <div style={{ textAlign: 'center', padding: '15px 0' }}>
+                  <div style={{ marginBottom: '60px', fontWeight: '500', fontSize: '12px' }}>ครูผู้รับผิดชอบ</div>
+                  <div style={{ borderBottom: '1px solid black', marginBottom: '8px', height: '30px' }}></div>
+                  <div style={{ fontSize: '11px' }}>{selectedTeacher ? teachers.find(t => t.id === selectedTeacher)?.firstName + ' ' + teachers.find(t => t.id === selectedTeacher)?.lastName : '(.....................................)'}</div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                  <div style={{ marginBottom: '90px', fontWeight: '500' }}>ผู้อำนวยการ</div>
-                  <div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '40px' }}></div>
-                  <div>{selectedPrincipal ? teachers.find(t => t.id === selectedPrincipal)?.firstName + ' ' + teachers.find(t => t.id === selectedPrincipal)?.lastName : '(.....................................)'}</div>
+                <div style={{ textAlign: 'center', padding: '15px 0' }}>
+                  <div style={{ marginBottom: '60px', fontWeight: '500', fontSize: '12px' }}>ผู้อำนวยการ</div>
+                  <div style={{ borderBottom: '1px solid black', marginBottom: '8px', height: '30px' }}></div>
+                  <div style={{ fontSize: '11px' }}>{selectedPrincipal ? teachers.find(t => t.id === selectedPrincipal)?.firstName + ' ' + teachers.find(t => t.id === selectedPrincipal)?.lastName : '(.....................................)'}</div>
                 </div>
               </div>
             </div>
@@ -307,7 +322,7 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
           <DialogClose asChild>
             <Button variant="outline" disabled={printing}>ปิด</Button>
           </DialogClose>
-          <Button onClick={handlePrint} disabled={printing}>
+          <Button onClick={handlePrintClick} disabled={printing}>
             <Printer className="mr-2 h-4 w-4" />
             {printing ? "กำลังพิมพ์..." : "พิมพ์เอกสาร"}
           </Button>
