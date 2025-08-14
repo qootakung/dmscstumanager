@@ -232,37 +232,34 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
                   </tr>
                 </thead>
                 <tbody>
-                  {allRows.map((student, index) => {
-                    const isPageBreak = index === 20;
-                    return (
-                      <tr key={student.id} style={isPageBreak ? { pageBreakBefore: 'always' } : {}}>
-                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
-                          {student.studentName ? (index + 1) : ''}
-                        </td>
-                        <td style={{ border: '1px solid black', padding: '4px', fontSize: '10px' }}>
-                          {student.studentName}
-                        </td>
-                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
-                          {student.studentName ? (student.competencyScores[0] || '') : ''}
-                        </td>
-                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
-                          {student.studentName ? (student.competencyScores[1] || '') : ''}
-                        </td>
-                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
-                          {student.studentName ? (student.competencyScores[2] || '') : ''}
-                        </td>
-                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
-                          {student.studentName ? (student.competencyScores[3] || '') : ''}
-                        </td>
-                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
-                          {student.studentName ? (student.competencyScores[4] || '') : ''}
-                        </td>
-                        <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center', fontSize: '10px' }}>
-                          {student.grade && student.grade !== 'ไม่ผ่าน' ? student.grade : (student.studentName ? student.grade : '')}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {allRows.map((student, index) => (
+                    <tr key={student.id}>
+                      <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
+                        {index + 1}
+                      </td>
+                      <td style={{ border: '1px solid black', padding: '4px', fontSize: '10px' }}>
+                        {student.studentName}
+                      </td>
+                      <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
+                        {student.competencyScores[0] || ''}
+                      </td>
+                      <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
+                        {student.competencyScores[1] || ''}
+                      </td>
+                      <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
+                        {student.competencyScores[2] || ''}
+                      </td>
+                      <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
+                        {student.competencyScores[3] || ''}
+                      </td>
+                      <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
+                        {student.competencyScores[4] || ''}
+                      </td>
+                      <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center', fontSize: '10px' }}>
+                        {student.grade && student.grade !== 'ไม่ผ่าน' ? student.grade : (student.grade || '')}
+                      </td>
+                    </tr>
+                  ))}
                   <tr style={{ fontWeight: 'bold' }}>
                     <td colSpan={2} style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>รวม</td>
                     <td style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>{totalScores[0]}</td>
