@@ -409,11 +409,11 @@ export const StudentReportPage = () => {
                 <th rowspan="2" style="width: 120px;">สรุปผลการประเมิน</th>
               </tr>
               <tr>
-                <th style="width: 80px;">ด้านที่ 1</th>
-                <th style="width: 80px;">ด้านที่ 2</th>
-                <th style="width: 80px;">ด้านที่ 3</th>
-                <th style="width: 80px;">ด้านที่ 4</th>
-                <th style="width: 80px;">ด้านที่ 5</th>
+                <th style="width: 80px;">สมรรถนะด้านที่ 1: ความสามารถในการสื่อสาร</th>
+                <th style="width: 80px;">สมรรถนะด้านที่ 2: ความสามารถในการคิด</th>
+                <th style="width: 80px;">สมรรถนะด้านที่ 3: ความสามารถในการแก้ปัญหา</th>
+                <th style="width: 80px;">สมรรถนะด้านที่ 4: ความสามารถในการใช้ทักษะชีวิต</th>
+                <th style="width: 80px;">สมรรถนะด้านที่ 5: ความสามารถในการใช้เทคโนโลยี</th>
               </tr>
             </thead>
             <tbody>
@@ -713,13 +713,6 @@ export const StudentReportPage = () => {
                     ตัวอย่างก่อนพิมพ์
                   </Button>
                   
-                  <Button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                  >
-                    <Printer className="h-4 w-4" />
-                    พิมพ์
-                  </Button>
                 </div>
               </>
             )}

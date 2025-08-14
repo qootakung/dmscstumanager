@@ -113,19 +113,8 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
     }
   });
 
-  // Fill empty rows to make 16 total
-  const maxRows = 16;
-  const emptyRowsCount = Math.max(0, maxRows - studentsWithAssessments.length);
-  const emptyRows = Array.from({ length: emptyRowsCount }, (_, index) => ({
-    id: `empty-${index}`,
-    studentId: '',
-    studentName: '',
-    competencyScores: [0, 0, 0, 0, 0],
-    totalScore: 0,
-    grade: ''
-  }));
-
-  const allRows = [...studentsWithAssessments, ...emptyRows];
+  // Only use students with data, no empty rows for preview
+  const allRows = studentsWithAssessments;
 
   if (!isOpen) {
     return null;
@@ -169,11 +158,11 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
                     </th>
                   </tr>
                   <tr>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>ด้านที่ 1</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>ด้านที่ 2</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>ด้านที่ 3</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>ด้านที่ 4</th>
-                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>ด้านที่ 5</th>
+                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 1: ความสามารถในการสื่อสาร</th>
+                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 2: ความสามารถในการคิด</th>
+                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 3: ความสามารถในการแก้ปัญหา</th>
+                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 4: ความสามารถในการใช้ทักษะชีวิต</th>
+                    <th style={{ width: '80px', border: '1px solid black', padding: '8px', textAlign: 'center', backgroundColor: '#f8f9fa' }}>สมรรถนะด้านที่ 5: ความสามารถในการใช้เทคโนโลยี</th>
                   </tr>
                 </thead>
                 <tbody>
