@@ -166,6 +166,12 @@ const Index = () => {
                       >
                         แบบประเมินสมรรถนะ
                       </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => window.open('https://donmul-grades-hub.lovable.app/', '_blank')}
+                      >
+                        คะแนนและใบงาน
+                      </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
                   
@@ -177,6 +183,16 @@ const Index = () => {
                     onClick={() => setActiveTab('teachers')}
                   >
                     ข้อมูลครู
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  {/* บัญชีการเงิน */}
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => window.open('https://baandonmoon-voucher-log.lovable.app/', '_blank')}
+                  >
+                    บัญชีการเงิน
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
