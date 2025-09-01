@@ -12,7 +12,7 @@ interface DocumentRecord {
   academic_year: string;
 }
 
-export const useDocumentUpload = (documentType: 'cover' | 'introduction' | 'table_of_contents') => {
+export const useDocumentUpload = (documentType: 'cover' | 'introduction' | 'table_of_contents' | 'notes' | 'instructions') => {
   const [isUploading, setIsUploading] = useState(false);
   const [documentRecord, setDocumentRecord] = useState<DocumentRecord | null>(null);
 

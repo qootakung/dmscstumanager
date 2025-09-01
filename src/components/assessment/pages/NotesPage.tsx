@@ -1,40 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { NotebookPen, Save, Printer, FileText } from 'lucide-react';
-import { toast } from 'sonner';
+import { Upload, FileText, Download, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { generateAcademicYears } from '@/utils/data';
+import { useDocumentUpload } from '@/hooks/useDocumentUpload';
 
 export const NotesPage = () => {
-  const [formData, setFormData] = useState({
-    title: '',
-    date: new Date().toISOString().split('T')[0],
-    author: '',
-    content: '',
-    notes: ''
-  });
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('');
+  const academicYears = generateAcademicYears();
+  
+  const {
+    isUploading,
+    documentRecord,
+    loadExistingDocument,
+    uploadFile,
+    downloadFile,
+    deleteFile
+  } = useDocumentUpload('notes');
 
-  const [isSaving, setIsSaving] = useState(false);
+  // Load existing document when academic year changes
+  useEffect(() => {
+    loadExistingDocument(selectedAcademicYear);
+  }, [selectedAcademicYear]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // Simulate save delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('บันทึกข้อมูลสำเร็จ');
-    } catch (error) {
-      toast.error('เกิดข้อผิดพลาดในการบันทึก');
-    } finally {
-      setIsSaving(false);
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && selectedAcademicYear) {
+      await uploadFile(file, selectedAcademicYear);
     }
   };
 
@@ -49,157 +42,129 @@ export const NotesPage = () => {
           บันทึกข้อความ
         </h2>
         <p className="text-gray-600 text-lg">
-          สร้างและแก้ไขบันทึกข้อความสำหรับแบบประเมินสมรรถนะ
+          อัปโหลดและจัดการไฟล์บันทึกข้อความของแบบประเมินสมรรถนะ
         </p>
       </div>
 
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-xl text-green-700">
-            <NotebookPen className="h-6 w-6" />
-            ข้อมูลบันทึก
-          </CardTitle>
+      {/* Academic Year Selection */}
+      <Card className="border-0 shadow-md bg-white/80">
+        <CardHeader>
+          <CardTitle className="text-lg text-gray-700">เลือกปีการศึกษา</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="space-y-2">
-                <Label htmlFor="title" className="text-sm font-medium text-gray-700">
-                  หัวข้อบันทึก
-                </Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="ระบุหัวข้อบันทึก"
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="date" className="text-sm font-medium text-gray-700">
-                  วันที่
-                </Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => handleInputChange('date', e.target.value)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2 mb-6">
-              <Label htmlFor="author" className="text-sm font-medium text-gray-700">
-                ผู้บันทึก
-              </Label>
-              <Input
-                id="author"
-                value={formData.author}
-                onChange={(e) => handleInputChange('author', e.target.value)}
-                placeholder="ระบุชื่อผู้บันทึก"
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2 mb-6">
-              <Label htmlFor="content" className="text-sm font-medium text-gray-700">
-                เนื้อหาบันทึก
-              </Label>
-              <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) => handleInputChange('content', e.target.value)}
-                placeholder="เขียนเนื้อหาบันทึกที่นี่..."
-                className="min-h-[200px] w-full resize-none"
-              />
-            </div>
-
-            <div className="space-y-2 mb-6">
-              <Label htmlFor="notes" className="text-sm font-medium text-gray-700">
-                หมายเหตุเพิ่มเติม
-              </Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
-                placeholder="หมายเหตุหรือข้อสังเกตเพิ่มเติม..."
-                className="min-h-[100px] w-full resize-none"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-3 pt-4 border-t">
-              <Button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-              >
-                <Save className="h-4 w-4" />
-                {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
-              </Button>
-              
-              <Button
-                onClick={handlePrint}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Printer className="h-4 w-4" />
-                พิมพ์รายงาน
-              </Button>
-              
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                ตัวอย่างรายงาน
-              </Button>
-            </div>
-          </div>
+        <CardContent>
+          <Select value={selectedAcademicYear} onValueChange={setSelectedAcademicYear}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="เลือกปีการศึกษา" />
+            </SelectTrigger>
+            <SelectContent>
+              {academicYears.map(year => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
-      {/* Preview Section */}
-      {(formData.title || formData.content) && (
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl text-gray-700">ตัวอย่างรายงาน</CardTitle>
+      {selectedAcademicYear && (
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
+          <CardHeader className="text-center pb-4">
+            <CardTitle className="flex items-center justify-center gap-2 text-xl text-green-700">
+              <Upload className="h-6 w-6" />
+              อัปโหลดไฟล์บันทึกข้อความ
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
-              <div className="print-area">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    {formData.title || 'บันทึกข้อความ'}
-                  </h3>
-                  <p className="text-gray-600">
-                    วันที่: {new Date(formData.date).toLocaleDateString('th-TH')}
-                  </p>
-                  {formData.author && (
-                    <p className="text-gray-600">
-                      ผู้บันทึก: {formData.author}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-3">เนื้อหา</h4>
-                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                    {formData.content || 'ยังไม่มีเนื้อหา'}
-                  </div>
-                </div>
-
-                {formData.notes && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3">หมายเหตุ</h4>
-                    <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                      {formData.notes}
+          <CardContent className="space-y-6">
+            {!documentRecord ? (
+              <div className="text-center">
+                <div className="border-2 border-dashed border-green-300 rounded-lg p-8 bg-white/50">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="p-4 bg-green-100 rounded-full">
+                      <FileText className="h-8 w-8 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-700 mb-2">
+                        เลือกไฟล์เพื่ออัปโหลด
+                      </h3>
+                      <p className="text-sm text-gray-500 mb-4">
+                        รองรับไฟล์ .PDF และ .DOCX
+                      </p>
+                      <div>
+                        <input
+                          id="notes-file"
+                          type="file"
+                          accept=".pdf,.docx"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                        <label htmlFor="notes-file" className="cursor-pointer">
+                          <Button 
+                            type="button" 
+                            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                            disabled={isUploading}
+                            asChild
+                          >
+                            <span>{isUploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์'}</span>
+                          </Button>
+                        </label>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white rounded-lg p-6 shadow-sm border">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <FileText className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-800">{documentRecord.file_name}</h3>
+                    <p className="text-sm text-gray-500">
+                      ขนาด: {(documentRecord.file_size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      อัปโหลดเมื่อ: {new Date(documentRecord.created_at).toLocaleDateString('th-TH')}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={downloadFile}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    ดาวน์โหลด
+                  </Button>
+                  <Button
+                    onClick={deleteFile}
+                    variant="outline"
+                    className="flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    ลบไฟล์
+                  </Button>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t">
+                  <input
+                    id="notes-file-replace"
+                    type="file"
+                    accept=".pdf,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <label htmlFor="notes-file-replace" className="cursor-pointer">
+                    <Button variant="ghost" size="sm" asChild>
+                      <span>เปลี่ยนไฟล์</span>
+                    </Button>
+                  </label>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
