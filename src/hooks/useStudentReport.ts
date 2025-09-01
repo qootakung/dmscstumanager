@@ -18,6 +18,9 @@ export const useStudentReport = () => {
       timeOut: false,
       phone: false,
       note: false,
+      gradeLevel: false,
+      address: false,
+      age: false,
     },
     customColumns: 0,
   });

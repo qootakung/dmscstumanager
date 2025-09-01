@@ -179,6 +179,30 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
                   />
                   <Label htmlFor="note" className="text-sm">หมายเหตุ</Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="gradeLevel"
+                    checked={reportOptions.additionalFields.gradeLevel}
+                    onCheckedChange={(checked) => onAdditionalFieldChange('gradeLevel', !!checked)}
+                  />
+                  <Label htmlFor="gradeLevel" className="text-sm">ระดับชั้น</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="address"
+                    checked={reportOptions.additionalFields.address}
+                    onCheckedChange={(checked) => onAdditionalFieldChange('address', !!checked)}
+                  />
+                  <Label htmlFor="address" className="text-sm">ที่อยู่</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="age"
+                    checked={reportOptions.additionalFields.age}
+                    onCheckedChange={(checked) => onAdditionalFieldChange('age', !!checked)}
+                  />
+                  <Label htmlFor="age" className="text-sm">อายุ</Label>
+                </div>
               </div>
             </div>
 

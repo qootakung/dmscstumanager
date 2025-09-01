@@ -61,6 +61,9 @@ export interface ReportOptions {
     timeOut: boolean;
     phone: boolean;
     note: boolean;
+    gradeLevel: boolean;
+    address: boolean;
+    age: boolean;
   };
   customColumns: number;
   customColumn1?: string;
