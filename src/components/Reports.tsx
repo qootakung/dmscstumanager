@@ -7,6 +7,7 @@ import { getStudents } from '@/utils/studentStorage';
 import type { Student, ReportOptions } from '@/types/student';
 import { generateStudentExcel } from '@/utils/studentReportExcel';
 import { printStudentReport } from '@/utils/studentReportPrint';
+import { printStudentReportPaginated } from '@/utils/studentReportPrintPaginated';
 import ReportOptionsForm from '@/components/student/ReportOptionsForm';
 import ReportPreview from '@/components/student/ReportPreview';
 import ResizableReportPreview from '@/components/student/ResizableReportPreview';
@@ -84,7 +85,11 @@ const Reports: React.FC = () => {
   };
 
   const handlePrint = () => {
-    printStudentReport(filteredStudents, reportOptions);
+    if (isPaginatedMode) {
+      printStudentReportPaginated(filteredStudents, reportOptions);
+    } else {
+      printStudentReport(filteredStudents, reportOptions);
+    }
   };
 
   return (
