@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, GraduationCap, Users, FileText, Award, Settings } from 'lucide-react';
+import { Download, Printer, GraduationCap, Users, FileText, Award, Settings, FileUp } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import type { Student, ReportOptions } from '@/types/student';
 import { generateStudentExcel } from '@/utils/studentReportExcel';
@@ -10,6 +10,7 @@ import { printStudentReport } from '@/utils/studentReportPrint';
 import ReportOptionsForm from '@/components/student/ReportOptionsForm';
 import ReportPreview from '@/components/student/ReportPreview';
 import ResizableReportPreview from '@/components/student/ResizableReportPreview';
+import PaginatedReportPreview from '@/components/student/PaginatedReportPreview';
 import { sortGrades } from '@/utils/studentReportUtils';
 import { toast } from "@/components/ui/use-toast";
 
@@ -38,6 +39,7 @@ const Reports: React.FC = () => {
   });
   const [students, setStudents] = useState<Student[]>([]);
   const [isResizableMode, setIsResizableMode] = useState(false);
+  const [isPaginatedMode, setIsPaginatedMode] = useState(false);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -157,18 +159,45 @@ const Reports: React.FC = () => {
                   </div>
                   <h3 className="text-xl font-semibold text-slate-700">ตัวอย่างรายงาน</h3>
                 </div>
-                <Button
-                  onClick={() => setIsResizableMode(!isResizableMode)}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4" />
-                  {isResizableMode ? 'โหมดปกติ' : 'ปรับขนาดคอลัมน์'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setIsPaginatedMode(!isPaginatedMode);
+                      if (isPaginatedMode) {
+                        setIsResizableMode(false);
+                      }
+                    }}
+                    variant={isPaginatedMode ? "default" : "outline"}
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <FileUp className="w-4 h-4" />
+                    {isPaginatedMode ? 'ปิดโหมดแยกหน้า' : 'โหมดแยกหน้า'}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setIsResizableMode(!isResizableMode);
+                      if (isResizableMode) {
+                        setIsPaginatedMode(false);
+                      }
+                    }}
+                    variant={isResizableMode ? "default" : "outline"}
+                    size="sm"
+                    className="flex items-center gap-2"
+                    disabled={isPaginatedMode}
+                  >
+                    <Settings className="w-4 h-4" />
+                    {isResizableMode ? 'โหมดปกติ' : 'ปรับขนาดคอลัมน์'}
+                  </Button>
+                </div>
               </div>
               
-              {isResizableMode ? (
+              {isPaginatedMode ? (
+                <PaginatedReportPreview
+                  students={filteredStudents}
+                  reportOptions={reportOptions}
+                />
+              ) : isResizableMode ? (
                 <ResizableReportPreview
                   students={filteredStudents}
                   reportOptions={reportOptions}
