@@ -37,7 +37,7 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
         }
         @media print {
           table, th, td {
-            border: 1px solid #d1d5db !important;
+            border: 1px solid #000 !important;
             border-collapse: collapse !important;
           }
           th {

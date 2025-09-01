@@ -20,11 +20,11 @@ const TeacherReportPrintable: React.FC<TeacherReportPrintableProps> = ({ teacher
         }
         @media print {
           table, th, td {
-            border: 1px solid #d1d5db !important; /* Tailwind gray-300 */
+            border: 1px solid #000 !important;
             border-collapse: collapse !important;
           }
           th {
-            background-color: #f3f4f6 !important; /* Tailwind gray-100 */
+            background-color: #f3f4f6 !important;
           }
         }
       `}</style>

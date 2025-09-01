@@ -44,6 +44,10 @@ const HealthReportPrintable: React.FC<HealthReportPrintableProps> = ({ data, gra
             padding: 4px 6px !important;
             vertical-align: middle;
           }
+          table {
+            border: 1px solid #000 !important;
+            border-collapse: collapse !important;
+          }
           th {
             background-color: #f2f2f2 !important;
             text-align: center !important;

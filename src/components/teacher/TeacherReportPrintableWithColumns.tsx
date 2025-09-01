@@ -70,7 +70,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
         }
         @media print {
           table, th, td {
-            border: 1px solid #d1d5db !important;
+            border: 1px solid #000 !important;
             border-collapse: collapse !important;
           }
           th {

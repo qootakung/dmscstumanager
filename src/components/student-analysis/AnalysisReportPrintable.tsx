@@ -32,6 +32,21 @@ const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportP
 
   return (
     <div ref={ref} className="hidden print:block p-4 font-sarabun">
+      <style>{`
+        body { 
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        @media print {
+          table, th, td {
+            border: 1px solid #000 !important;
+            border-collapse: collapse !important;
+          }
+          th {
+            background-color: #f3f4f6 !important;
+          }
+        }
+      `}</style>
       {sortedGrades.map((grade, pageIndex) => (
         <div key={grade} className={pageIndex < sortedGrades.length - 1 ? 'break-after-page' : ''}>
           <div className="text-center mb-4">
