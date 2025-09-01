@@ -50,13 +50,6 @@ const menuItems = [
     bgColor: 'bg-purple-50 hover:bg-purple-100',
   },
   {
-    id: 'table_of_contents',
-    title: 'สารบัญ',
-    icon: List,
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50 hover:bg-teal-100',
-  },
-  {
     id: 'instructions',
     title: 'คำชี้แจง',
     icon: Info,
@@ -160,7 +153,7 @@ export function AssessmentSidebar({ activeSection, onSectionChange }: Assessment
                   `}
                 >
                   <BarChart3 className="h-5 w-5" />
-                  <span className="font-medium">สรุปผลการประเมินรายชั้นปี</span>
+                  <span className="font-medium">สรุปผลการประเมินรายชั้นเรียน</span>
                   {activeSection === 'summary' && (
                     <ChevronRight className="h-4 w-4 ml-auto" />
                   )}
@@ -178,7 +171,7 @@ export function AssessmentSidebar({ activeSection, onSectionChange }: Assessment
                   `}
                 >
                   <UserPlus className="h-5 w-5" />
-                  <span className="font-medium">สรุปผลการประเมินรายชั้นเรียน</span>
+                  <span className="font-medium">สรุปผลการประเมินรายชั้นปี</span>
                   {activeSection === 'student-report' && (
                     <ChevronRight className="h-4 w-4 ml-auto" />
                   )}
