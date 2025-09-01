@@ -1,5 +1,5 @@
 
-import type { ReportOptions } from '@/types/student';
+import type { ReportOptions, Student } from '@/types/student';
 
 export const gradeOrder = [
   'อ.1', 'อ.2', 'อ.3',
@@ -21,13 +21,17 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
   
   // For other report types, use existing logic
   const additionalColumns = [];
+  if (reportOptions.additionalFields.gradeLevel) additionalColumns.push('ระดับชั้น');
   if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
   if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
+  if (reportOptions.additionalFields.birthDate) additionalColumns.push('วันเดือนปีเกิด');
+  if (reportOptions.additionalFields.age) additionalColumns.push('อายุ');
+  if (reportOptions.additionalFields.address) additionalColumns.push('ที่อยู่');
+  if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
-  if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
 
   const customColumns: string[] = [];
   if (reportOptions.customColumns && reportOptions.customColumns > 0) {
@@ -42,6 +46,44 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
   }
 
   return [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
+};
+
+export const calculateAge = (birthDate: string): string => {
+  if (!birthDate) return '';
+  
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age.toString();
+};
+
+export const formatAddress = (student: Student): string => {
+  const parts = [];
+  if (student.houseNumber) parts.push(`บ้านเลขที่ ${student.houseNumber}`);
+  if (student.moo) parts.push(`หมู่ ${student.moo}`);
+  if (student.subDistrict) parts.push(`ต.${student.subDistrict}`);
+  if (student.district) parts.push(`อ.${student.district}`);
+  if (student.province) parts.push(`จ.${student.province}`);
+  if (student.postalCode) parts.push(student.postalCode);
+  
+  return parts.join(' ');
+};
+
+export const formatBirthDate = (birthDate: string): string => {
+  if (!birthDate) return '';
+  
+  const date = new Date(birthDate);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = (date.getFullYear() + 543).toString(); // Convert to Buddhist year
+  
+  return `${day}/${month}/${year}`;
 };
 
 export const getReportTitle = (reportOptions: ReportOptions) => {

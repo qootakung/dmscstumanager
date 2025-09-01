@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { Student, ReportOptions } from '@/types/student';
-import { getReportColumns } from '@/utils/studentReportUtils';
+import { getReportColumns, calculateAge, formatAddress, formatBirthDate } from '@/utils/studentReportUtils';
 import { ResizableTable, ResizableTh, ResizableTd } from '@/components/ui/resizable-table';
 import { saveColumnWidths, loadColumnWidths } from '@/utils/columnWidthStorage';
 
@@ -124,11 +124,23 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
                 {/* Additional fields for non-type-3 reports */}
                 {reportOptions.reportType !== '3' && (
                   <>
+                    {reportOptions.additionalFields.gradeLevel && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('ระดับชั้น')]} className="text-center">{student.grade}</ResizableTd>
+                    )}
                     {reportOptions.additionalFields.gender && (
-                      <ResizableTd width={columnWidths[3]} className="text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</ResizableTd>
+                      <ResizableTd width={columnWidths[allColumns.indexOf('เพศ')]} className="text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</ResizableTd>
                     )}
                     {reportOptions.additionalFields.citizenId && (
-                      <ResizableTd width={columnWidths[4]} className="text-center">{student.citizenId}</ResizableTd>
+                      <ResizableTd width={columnWidths[allColumns.indexOf('เลขบัตรประจำตัวประชาชน')]} className="text-center">{student.citizenId}</ResizableTd>
+                    )}
+                    {reportOptions.additionalFields.birthDate && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('วันเดือนปีเกิด')]} className="text-center">{formatBirthDate(student.birthDate)}</ResizableTd>
+                    )}
+                    {reportOptions.additionalFields.age && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('อายุ')]} className="text-center">{calculateAge(student.birthDate)}</ResizableTd>
+                    )}
+                    {reportOptions.additionalFields.address && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('ที่อยู่')]}>{formatAddress(student)}</ResizableTd>
                     )}
                     {reportOptions.additionalFields.signature && (
                       <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ')]}></ResizableTd>

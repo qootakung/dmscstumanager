@@ -203,6 +203,14 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
                   />
                   <Label htmlFor="age" className="text-sm">อายุ</Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="birthDate"
+                    checked={reportOptions.additionalFields.birthDate}
+                    onCheckedChange={(checked) => onAdditionalFieldChange('birthDate', !!checked)}
+                  />
+                  <Label htmlFor="birthDate" className="text-sm">ว/ด/ป เกิด</Label>
+                </div>
               </div>
             </div>
 

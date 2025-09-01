@@ -21,6 +21,7 @@ export const useStudentReport = () => {
       gradeLevel: false,
       address: false,
       age: false,
+      birthDate: false,
     },
     customColumns: 0,
   });

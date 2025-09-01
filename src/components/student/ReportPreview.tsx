@@ -1,7 +1,7 @@
 
 import React from 'react';
 import type { Student, ReportOptions } from '@/types/student';
-import { getReportColumns } from '@/utils/studentReportUtils';
+import { getReportColumns, calculateAge, formatAddress, formatBirthDate } from '@/utils/studentReportUtils';
 
 interface ReportPreviewProps {
   students: Student[];
@@ -87,11 +87,23 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
                 {/* Additional fields for non-type-3 reports */}
                 {reportOptions.reportType !== '3' && (
                   <>
+                    {reportOptions.additionalFields.gradeLevel && (
+                      <td className="border border-black px-2 py-1 text-center">{student.grade}</td>
+                    )}
                     {reportOptions.additionalFields.gender && (
                       <td className="border border-black px-2 py-1 text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
                     )}
                     {reportOptions.additionalFields.citizenId && (
                       <td className="border border-black px-2 py-1 text-center">{student.citizenId}</td>
+                    )}
+                    {reportOptions.additionalFields.birthDate && (
+                      <td className="border border-black px-2 py-1 text-center">{formatBirthDate(student.birthDate)}</td>
+                    )}
+                    {reportOptions.additionalFields.age && (
+                      <td className="border border-black px-2 py-1 text-center">{calculateAge(student.birthDate)}</td>
+                    )}
+                    {reportOptions.additionalFields.address && (
+                      <td className="border border-black px-2 py-1">{formatAddress(student)}</td>
                     )}
                     {reportOptions.additionalFields.signature && (
                       <td className="border border-black px-2 py-1"></td>

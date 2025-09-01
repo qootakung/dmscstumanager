@@ -64,6 +64,7 @@ export interface ReportOptions {
     gradeLevel: boolean;
     address: boolean;
     age: boolean;
+    birthDate: boolean;
   };
   customColumns: number;
   customColumn1?: string;
