@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AssessmentSidebar } from './assessment/AssessmentSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -11,7 +12,6 @@ import { IntroductionPage } from './assessment/pages/IntroductionPage';
 import { TableOfContentsPage } from './assessment/pages/TableOfContentsPage';
 import { InstructionsPage } from './assessment/pages/InstructionsPage';
 import CompetencyPage from './assessment/pages/CompetencyPage';
-import { SummaryPage } from './assessment/pages/SummaryPage';
 import { StudentImportPage } from './assessment/pages/StudentImportPage';
 import { StudentReportPage } from './assessment/pages/StudentReportPage';
 
@@ -40,8 +40,6 @@ const Assessment = () => {
         return <CompetencyPage competencyNumber={4} title="สมรรถนะด้านที่ 4: ความสามารถในการใช้ทักษะชีวิต" />;
       case 'competency-5':
         return <CompetencyPage competencyNumber={5} title="สมรรถนะด้านที่ 5: ความสามารถในการใช้เทคโนโลยี" />;
-      case 'summary':
-        return <SummaryPage />;
       case 'student-report':
         return <StudentReportPage />;
       default:
