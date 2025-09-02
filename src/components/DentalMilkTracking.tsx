@@ -325,71 +325,159 @@ const DentalMilkTracking = () => {
 
         <TabsContent value="recording" className="space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle>บันทึกข้อมูลรายเดือน</CardTitle>
-              <div className="flex items-center space-x-4 mt-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="recording-mode"
-                    checked={recordingMode === 'milk'}
-                    onCheckedChange={(checked) => setRecordingMode(checked ? 'milk' : 'brushing')}
-                  />
-                  <Label htmlFor="recording-mode">
-                    {recordingMode === 'brushing' ? 'บันทึกการแปรงฟัน' : 'บันทึกการดื่มนม'}
-                  </Label>
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold text-school-primary">
+                  บันทึกข้อมูล{recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'}
+                </CardTitle>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="recording-mode"
+                      checked={recordingMode === 'milk'}
+                      onCheckedChange={(checked) => setRecordingMode(checked ? 'milk' : 'brushing')}
+                    />
+                    <Label htmlFor="recording-mode" className="font-medium">
+                      {recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}
+                    </Label>
+                  </div>
+                  <Button onClick={handlePrint} variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
+                    <Printer className="w-4 h-4 mr-2" />
+                    พิมพ์ตาราง
+                  </Button>
                 </div>
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                {months.find(m => m.value === selectedMonth)?.label} {selectedYear} 
+                {selectedGrade !== 'all' && ` - ${selectedGrade}`}
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {/* Calendar Header */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                  {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((day) => (
-                    <div key={day} className="text-center font-medium p-2 text-sm">
-                      {day}
+              <div className="overflow-x-auto">
+                <div className="min-w-[1200px]">
+                  {/* Header Row */}
+                  <div className="grid grid-cols-[60px_200px_repeat(31,40px)_80px] gap-1 mb-2">
+                    <div className="text-center font-bold text-sm bg-school-primary text-white p-2 rounded">
+                      ที่
                     </div>
-                  ))}
+                    <div className="text-center font-bold text-sm bg-school-primary text-white p-2 rounded">
+                      ชื่อ
+                    </div>
+                    {Array.from({ length: 31 }, (_, i) => {
+                      const day = i + 1;
+                      const gregorianYear = selectedYear - 543;
+                      const date = new Date(gregorianYear, selectedMonth - 1, day);
+                      const dayOfWeek = date.getDay();
+                      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                      const isValidDay = day <= getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
+                      
+                      return (
+                        <div 
+                          key={day} 
+                          className={`text-center font-bold text-xs p-2 rounded ${
+                            !isValidDay ? 'invisible' : 
+                            isWeekend ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {isValidDay ? day : ''}
+                        </div>
+                      );
+                    })}
+                    <div className="text-center font-bold text-sm bg-orange-100 text-orange-700 p-2 rounded">
+                      รวม
+                    </div>
+                  </div>
+
+                  {/* Student Rows */}
+                  {(selectedGrade === 'all' ? students : students.filter(s => s.grade === selectedGrade))
+                    .sort((a, b) => {
+                      // Sort by grade first, then by studentId
+                      if (a.grade !== b.grade) {
+                        const gradeOrder = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+                        return gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade);
+                      }
+                      return parseInt(a.studentId) - parseInt(b.studentId);
+                    })
+                    .map((student, index) => {
+                      const daysInMonth = getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
+                      // Mock data for demonstration - in real app, this would come from database
+                      const mockRecords = Array.from({ length: daysInMonth }, (_, i) => {
+                        const day = i + 1;
+                        const gregorianYear = selectedYear - 543;
+                        const date = new Date(gregorianYear, selectedMonth - 1, day);
+                        const dayOfWeek = date.getDay();
+                        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                        return !isWeekend && Math.random() > 0.3; // 70% chance of having record on weekdays
+                      });
+                      const totalRecords = mockRecords.filter(Boolean).length;
+                      
+                      return (
+                        <div key={student.id} className="grid grid-cols-[60px_200px_repeat(31,40px)_80px] gap-1 mb-1">
+                          <div className="text-center text-sm p-2 bg-gray-50 rounded font-medium">
+                            {index + 1}
+                          </div>
+                          <div className="text-left text-sm p-2 bg-gray-50 rounded font-medium truncate">
+                            {student.firstNameTh} {student.lastNameTh}
+                          </div>
+                          {Array.from({ length: 31 }, (_, i) => {
+                            const day = i + 1;
+                            const gregorianYear = selectedYear - 543;
+                            const date = new Date(gregorianYear, selectedMonth - 1, day);
+                            const dayOfWeek = date.getDay();
+                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                            const isValidDay = day <= daysInMonth;
+                            const hasRecord = isValidDay && mockRecords[i];
+                            
+                            return (
+                              <div 
+                                key={day}
+                                className={`text-center text-sm p-2 rounded cursor-pointer transition-colors ${
+                                  !isValidDay ? 'invisible' :
+                                  isWeekend ? 'bg-red-50 cursor-not-allowed' :
+                                  hasRecord ? (recordingMode === 'brushing' ? 'bg-green-100 hover:bg-green-200' : 'bg-purple-100 hover:bg-purple-200') :
+                                  'bg-white border border-gray-200 hover:bg-gray-50'
+                                }`}
+                                onClick={() => {
+                                  if (!isWeekend && isValidDay) {
+                                    toast({
+                                      title: hasRecord ? "ลบการบันทึก" : "บันทึกสำเร็จ",
+                                      description: `${hasRecord ? 'ลบ' : 'บันทึก'}การ${recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}ของ ${student.firstNameTh} วันที่ ${day}`,
+                                    });
+                                  }
+                                }}
+                              >
+                                {isValidDay && hasRecord && !isWeekend ? '/' : ''}
+                              </div>
+                            );
+                          })}
+                          <div className="text-center text-sm p-2 bg-orange-50 rounded font-bold text-orange-700">
+                            {totalRecords}
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
                 
-                {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-1">
-                  {calendarDays.map((day, index) => (
-                    <div
-                      key={index}
-                      className={`
-                        h-20 border rounded-lg p-1 flex flex-col items-center justify-center
-                        ${day === null ? 'invisible' : ''}
-                        ${day?.isWeekend ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}
-                        ${day?.isWeekend ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-blue-50'}
-                      `}
-                    >
-                      {day && (
-                        <>
-                          <span className={`text-sm font-medium ${day.isWeekend ? 'text-red-500' : 'text-gray-700'}`}>
-                            {day.day}
-                          </span>
-                          {!day.isWeekend && (
-                            <div className="mt-1 text-xs">
-                              <div className={`w-3 h-3 rounded-full ${recordingMode === 'brushing' ? 'bg-green-200' : 'bg-purple-200'}`}></div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
                 {/* Legend */}
-                <div className="flex items-center justify-center space-x-6 mt-4 text-sm">
+                <div className="flex flex-wrap items-center justify-center gap-6 mt-6 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
-                    <span>วันหยุด (เสาร์-อาทิตย์)</span>
+                    <span className="text-sm">วันหยุด (เสาร์-อาทิตย์)</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${recordingMode === 'brushing' ? 'bg-green-200' : 'bg-purple-200'}`}></div>
-                    <span>
-                      {recordingMode === 'brushing' ? 'บันทึกการแปรงฟัน' : 'บันทึกการดื่มนม'}
+                    <div className={`w-4 h-4 rounded ${recordingMode === 'brushing' ? 'bg-green-100 border border-green-200' : 'bg-purple-100 border border-purple-200'}`}></div>
+                    <span className="text-sm">
+                      {recordingMode === 'brushing' ? 'แปรงฟันแล้ว' : 'ดื่มนมแล้ว'}
                     </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-white border border-gray-200 rounded"></div>
+                    <span className="text-sm">
+                      {recordingMode === 'brushing' ? 'ยังไม่แปรงฟัน' : 'ยังไม่ดื่มนม'}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium">คลิกในช่องเพื่อบันทึกข้อมูล</span>
                   </div>
                 </div>
               </div>
