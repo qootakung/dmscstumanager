@@ -5,28 +5,76 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Download, Printer, Users, Activity, TrendingUp, CheckCircle2, XCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import type { Student } from '@/types/student';
 
 const DentalMilkTracking = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState(2568);
   const [selectedGrade, setSelectedGrade] = useState('all');
+  const [students, setStudents] = useState<Student[]>([]);
+  const [gradeData, setGradeData] = useState<any[]>([]);
+  const [recordingMode, setRecordingMode] = useState<'brushing' | 'milk'>('brushing');
 
-  // Mock data - in real implementation, this would come from the database
-  const mockData = {
-    totalStudents: 245,
-    todayBrushing: 187,
-    todayMilk: 201,
-    completionRate: 82.5,
-    gradeData: [
-      { grade: 'อ.1', students: 42, brushing: 35, milk: 38, brushingRate: 83.3, milkRate: 90.5 },
-      { grade: 'อ.2', students: 38, brushing: 31, milk: 33, brushingRate: 81.6, milkRate: 86.8 },
-      { grade: 'อ.3', students: 45, brushing: 39, milk: 42, brushingRate: 86.7, milkRate: 93.3 },
-      { grade: 'อ.4', students: 41, brushing: 33, milk: 36, brushingRate: 80.5, milkRate: 87.8 },
-      { grade: 'อ.5', students: 39, brushing: 28, milk: 31, brushingRate: 71.8, milkRate: 79.5 },
-      { grade: 'อ.6', students: 40, brushing: 21, milk: 21, brushingRate: 52.5, milkRate: 52.5 },
-    ]
+  // Load student data from database
+  useEffect(() => {
+    const loadStudents = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select('*')
+          .order('grade', { ascending: true });
+        
+        if (error) throw error;
+        
+        setStudents(data as Student[] || []);
+        
+        // Calculate grade statistics from real data
+        const gradeStats = calculateGradeStatistics(data as Student[] || []);
+        setGradeData(gradeStats);
+      } catch (error) {
+        console.error('Error loading students:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลนักเรียนได้",
+          variant: "destructive",
+        });
+      }
+    };
+
+    loadStudents();
+  }, []);
+
+  // Calculate grade statistics from student data
+  const calculateGradeStatistics = (studentData: Student[]) => {
+    const grades = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+    
+    return grades.map(grade => {
+      const gradeStudents = studentData.filter(s => s.grade === grade);
+      const studentCount = gradeStudents.length;
+      
+      // Mock today's activity data - in real app, this would come from dental_records table
+      const mockBrushing = Math.floor(studentCount * (0.7 + Math.random() * 0.3));
+      const mockMilk = Math.floor(studentCount * (0.75 + Math.random() * 0.25));
+      
+      return {
+        grade,
+        students: studentCount,
+        brushing: mockBrushing,
+        milk: mockMilk,
+        brushingRate: studentCount > 0 ? (mockBrushing / studentCount) * 100 : 0,
+        milkRate: studentCount > 0 ? (mockMilk / studentCount) * 100 : 0,
+      };
+    }).filter(g => g.students > 0);
   };
+
+  const totalStudents = students.length;
+  const todayBrushing = gradeData.reduce((sum, g) => sum + g.brushing, 0);
+  const todayMilk = gradeData.reduce((sum, g) => sum + g.milk, 0);
+  const completionRate = totalStudents > 0 ? ((todayBrushing + todayMilk) / (totalStudents * 2)) * 100 : 0;
 
   const handleExportExcel = () => {
     toast({
@@ -57,7 +105,37 @@ const DentalMilkTracking = () => {
     { value: 12, label: 'ธันวาคม' },
   ];
 
-  const years = [2023, 2024, 2025, 2026, 2027];
+  const years = Array.from({ length: 18 }, (_, i) => 2568 + i); // 2568-2585
+
+  // Generate calendar days for the selected month
+  const getDaysInMonth = (month: number, year: number) => {
+    const gregorianYear = year - 543; // Convert Buddhist to Gregorian year
+    const daysInMonth = new Date(gregorianYear, month, 0).getDate();
+    const firstDay = new Date(gregorianYear, month - 1, 1).getDay();
+    
+    const days = [];
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+    
+    // Add actual days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(gregorianYear, month - 1, day);
+      const dayOfWeek = date.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+      
+      days.push({
+        day,
+        isWeekend,
+        date: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+      });
+    }
+    
+    return days;
+  };
+
+  const calendarDays = getDaysInMonth(selectedMonth, selectedYear);
 
   return (
     <div className="space-y-6">
@@ -126,9 +204,12 @@ const DentalMilkTracking = () => {
               <SelectItem value="อ.1">อนุบาล 1</SelectItem>
               <SelectItem value="อ.2">อนุบาล 2</SelectItem>
               <SelectItem value="อ.3">อนุบาล 3</SelectItem>
-              <SelectItem value="อ.4">ประถม 1</SelectItem>
-              <SelectItem value="อ.5">ประถม 2</SelectItem>
-              <SelectItem value="อ.6">ประถม 3</SelectItem>
+              <SelectItem value="ป.1">ประถม 1</SelectItem>
+              <SelectItem value="ป.2">ประถม 2</SelectItem>
+              <SelectItem value="ป.3">ประถม 3</SelectItem>
+              <SelectItem value="ป.4">ประถม 4</SelectItem>
+              <SelectItem value="ป.5">ประถม 5</SelectItem>
+              <SelectItem value="ป.6">ประถม 6</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -142,7 +223,7 @@ const DentalMilkTracking = () => {
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">{mockData.totalStudents}</div>
+            <div className="text-2xl font-bold text-blue-800">{totalStudents}</div>
             <p className="text-xs text-blue-600 mt-1">คน</p>
           </CardContent>
         </Card>
@@ -153,8 +234,8 @@ const DentalMilkTracking = () => {
             <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-800">{mockData.todayBrushing}</div>
-            <p className="text-xs text-green-600 mt-1">คน ({((mockData.todayBrushing / mockData.totalStudents) * 100).toFixed(1)}%)</p>
+            <div className="text-2xl font-bold text-green-800">{todayBrushing}</div>
+            <p className="text-xs text-green-600 mt-1">คน ({totalStudents > 0 ? ((todayBrushing / totalStudents) * 100).toFixed(1) : 0}%)</p>
           </CardContent>
         </Card>
 
@@ -164,8 +245,8 @@ const DentalMilkTracking = () => {
             <Activity className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-800">{mockData.todayMilk}</div>
-            <p className="text-xs text-purple-600 mt-1">คน ({((mockData.todayMilk / mockData.totalStudents) * 100).toFixed(1)}%)</p>
+            <div className="text-2xl font-bold text-purple-800">{todayMilk}</div>
+            <p className="text-xs text-purple-600 mt-1">คน ({totalStudents > 0 ? ((todayMilk / totalStudents) * 100).toFixed(1) : 0}%)</p>
           </CardContent>
         </Card>
 
@@ -175,18 +256,16 @@ const DentalMilkTracking = () => {
             <TrendingUp className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-800">{mockData.completionRate}%</div>
+            <div className="text-2xl font-bold text-orange-800">{completionRate.toFixed(1)}%</div>
             <p className="text-xs text-orange-600 mt-1">เฉลี่ยรวม</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="dashboard">แดชบอร์ด</TabsTrigger>
-          <TabsTrigger value="daily">บันทึกรายวัน</TabsTrigger>
-          <TabsTrigger value="monthly">รายงานรายเดือน</TabsTrigger>
-          <TabsTrigger value="approval">รับรองข้อมูล</TabsTrigger>
+          <TabsTrigger value="recording">บันทึกข้อมูล</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
@@ -210,7 +289,7 @@ const DentalMilkTracking = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {mockData.gradeData.map((grade) => (
+                    {gradeData.map((grade) => (
                       <tr key={grade.grade} className="border-b">
                         <td className="py-3 font-medium">{grade.grade}</td>
                         <td className="text-center py-3">{grade.students}</td>
@@ -244,61 +323,75 @@ const DentalMilkTracking = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="daily">
+        <TabsContent value="recording" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>บันทึกข้อมูลรายวัน</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                บันทึกการแปรงฟันและดื่มนมของนักเรียนแต่ละคน
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Calendar className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">ฟีเจอร์กำลังพัฒนา</h3>
-                <p className="text-gray-600">
-                  ระบบบันทึกข้อมูลรายวันจะเปิดให้บริการเร็วๆ นี้
-                </p>
+              <CardTitle>บันทึกข้อมูลรายเดือน</CardTitle>
+              <div className="flex items-center space-x-4 mt-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="recording-mode"
+                    checked={recordingMode === 'milk'}
+                    onCheckedChange={(checked) => setRecordingMode(checked ? 'milk' : 'brushing')}
+                  />
+                  <Label htmlFor="recording-mode">
+                    {recordingMode === 'brushing' ? 'บันทึกการแปรงฟัน' : 'บันทึกการดื่มนม'}
+                  </Label>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="monthly">
-          <Card>
-            <CardHeader>
-              <CardTitle>รายงานรายเดือน</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                สรุปข้อมูลการแปรงฟันและดื่มนมรายเดือน
-              </p>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <TrendingUp className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">รายงานรายเดือน</h3>
-                <p className="text-gray-600">
-                  ข้อมูลสำหรับเดือน{months.find(m => m.value === selectedMonth)?.label} {selectedYear}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <div className="space-y-4">
+                {/* Calendar Header */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((day) => (
+                    <div key={day} className="text-center font-medium p-2 text-sm">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {calendarDays.map((day, index) => (
+                    <div
+                      key={index}
+                      className={`
+                        h-20 border rounded-lg p-1 flex flex-col items-center justify-center
+                        ${day === null ? 'invisible' : ''}
+                        ${day?.isWeekend ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}
+                        ${day?.isWeekend ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-blue-50'}
+                      `}
+                    >
+                      {day && (
+                        <>
+                          <span className={`text-sm font-medium ${day.isWeekend ? 'text-red-500' : 'text-gray-700'}`}>
+                            {day.day}
+                          </span>
+                          {!day.isWeekend && (
+                            <div className="mt-1 text-xs">
+                              <div className={`w-3 h-3 rounded-full ${recordingMode === 'brushing' ? 'bg-green-200' : 'bg-purple-200'}`}></div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
 
-        <TabsContent value="approval">
-          <Card>
-            <CardHeader>
-              <CardTitle>รับรองข้อมูลโดยผู้อำนวยการ</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                ระบบรับรองความถูกต้องของข้อมูลโดยผู้บริหาร
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <CheckCircle2 className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">ระบบรับรองข้อมูล</h3>
-                <p className="text-gray-600">
-                  กรุณารอการอนุมัติจากผู้อำนวยการ
-                </p>
+                {/* Legend */}
+                <div className="flex items-center justify-center space-x-6 mt-4 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
+                    <span>วันหยุด (เสาร์-อาทิตย์)</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-3 h-3 rounded-full ${recordingMode === 'brushing' ? 'bg-green-200' : 'bg-purple-200'}`}></div>
+                    <span>
+                      {recordingMode === 'brushing' ? 'บันทึกการแปรงฟัน' : 'บันทึกการดื่มนม'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
