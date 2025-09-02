@@ -128,6 +128,53 @@ export type Database = {
         }
         Relationships: []
       }
+      dental_milk_records: {
+        Row: {
+          academic_year: string
+          created_at: string
+          day: number
+          id: string
+          is_recorded: boolean
+          month: number
+          record_type: string
+          student_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string
+          day: number
+          id?: string
+          is_recorded?: boolean
+          month: number
+          record_type: string
+          student_id: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          day?: number
+          id?: string
+          is_recorded?: boolean
+          month?: number
+          record_type?: string
+          student_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_dental_milk_records_student_id"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_health_records: {
         Row: {
           academic_year: string
