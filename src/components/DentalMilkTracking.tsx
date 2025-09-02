@@ -18,6 +18,7 @@ const DentalMilkTracking = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [gradeData, setGradeData] = useState<any[]>([]);
   const [recordingMode, setRecordingMode] = useState<'brushing' | 'milk'>('brushing');
+  const [recordedData, setRecordedData] = useState<{[key: string]: boolean}>({});
 
   // Load student data from database
   useEffect(() => {
@@ -84,9 +85,49 @@ const DentalMilkTracking = () => {
   };
 
   const handlePrint = () => {
+    const printContent = document.getElementById('dental-table');
+    if (printContent) {
+      const printWindow = window.open('', '_blank');
+      printWindow?.document.write(`
+        <html>
+          <head>
+            <title>บันทึก${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'} - ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}</title>
+            <style>
+              body { font-family: 'Sarabun', sans-serif; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th, td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 12px; }
+              th { background-color: #f0f0f0; font-weight: bold; }
+              .weekend { background-color: #ffe6e6; }
+              .recorded { font-size: 16px; }
+              .header { text-align: center; margin-bottom: 20px; }
+              .header h1 { margin: 0; font-size: 18px; }
+              .header p { margin: 5px 0; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>บันทึก${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'}</h1>
+              <p>${months.find(m => m.value === selectedMonth)?.label} ${selectedYear} ${selectedGrade !== 'all' ? `- ${selectedGrade}` : ''}</p>
+            </div>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow?.document.close();
+      printWindow?.print();
+    }
+  };
+
+  const handleCellClick = (studentIndex: number, day: number) => {
+    const key = `${recordingMode}-${studentIndex}-${day}`;
+    setRecordedData(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+    
     toast({
-      title: "กำลังพิมพ์รายงาน",
-      description: "รายงานการแปรงฟันและดื่มนมกำลังถูกส่งไปยังเครื่องพิมพ์",
+      title: recordedData[key] ? "ลบข้อมูลแล้ว" : "บันทึกข้อมูลแล้ว",
+      description: `${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'} วันที่ ${day}`,
     });
   };
 
@@ -354,7 +395,7 @@ const DentalMilkTracking = () => {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <div className="min-w-[1200px]">
+                <div id="dental-table" className="min-w-[1200px]">
                   {/* Header Row */}
                   <div className="grid grid-cols-[60px_200px_repeat(31,40px)_80px] gap-1 mb-2">
                     <div className="text-center font-bold text-sm bg-school-primary text-white p-2 rounded">
@@ -388,74 +429,71 @@ const DentalMilkTracking = () => {
                     </div>
                   </div>
 
-                  {/* Student Rows */}
-                  {(selectedGrade === 'all' ? students : students.filter(s => s.grade === selectedGrade))
-                    .sort((a, b) => {
-                      // Sort by grade first, then by studentId
-                      if (a.grade !== b.grade) {
-                        const gradeOrder = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
-                        return gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade);
-                      }
-                      return parseInt(a.studentId) - parseInt(b.studentId);
-                    })
-                    .map((student, index) => {
-                      const daysInMonth = getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
-                      // Mock data for demonstration - in real app, this would come from database
-                      const mockRecords = Array.from({ length: daysInMonth }, (_, i) => {
-                        const day = i + 1;
-                        const gregorianYear = selectedYear - 543;
-                        const date = new Date(gregorianYear, selectedMonth - 1, day);
-                        const dayOfWeek = date.getDay();
-                        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                        return !isWeekend && Math.random() > 0.3; // 70% chance of having record on weekdays
-                      });
-                      const totalRecords = mockRecords.filter(Boolean).length;
-                      
-                      return (
-                        <div key={student.id} className="grid grid-cols-[60px_200px_repeat(31,40px)_80px] gap-1 mb-1">
-                          <div className="text-center text-sm p-2 bg-gray-50 rounded font-medium">
-                            {index + 1}
-                          </div>
-                          <div className="text-left text-sm p-2 bg-gray-50 rounded font-medium truncate">
-                            {student.firstNameTh} {student.lastNameTh}
-                          </div>
-                          {Array.from({ length: 31 }, (_, i) => {
-                            const day = i + 1;
-                            const gregorianYear = selectedYear - 543;
-                            const date = new Date(gregorianYear, selectedMonth - 1, day);
-                            const dayOfWeek = date.getDay();
-                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                            const isValidDay = day <= daysInMonth;
-                            const hasRecord = isValidDay && mockRecords[i];
-                            
-                            return (
-                              <div 
-                                key={day}
-                                className={`text-center text-sm p-2 rounded cursor-pointer transition-colors ${
-                                  !isValidDay ? 'invisible' :
-                                  isWeekend ? 'bg-red-50 cursor-not-allowed' :
-                                  hasRecord ? (recordingMode === 'brushing' ? 'bg-green-100 hover:bg-green-200' : 'bg-purple-100 hover:bg-purple-200') :
-                                  'bg-white border border-gray-200 hover:bg-gray-50'
-                                }`}
-                                onClick={() => {
-                                  if (!isWeekend && isValidDay) {
-                                    toast({
-                                      title: hasRecord ? "ลบการบันทึก" : "บันทึกสำเร็จ",
-                                      description: `${hasRecord ? 'ลบ' : 'บันทึก'}การ${recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}ของ ${student.firstNameTh} วันที่ ${day}`,
-                                    });
-                                  }
-                                }}
-                              >
-                                {isValidDay && hasRecord && !isWeekend ? '/' : ''}
-                              </div>
-                            );
-                          })}
-                          <div className="text-center text-sm p-2 bg-orange-50 rounded font-bold text-orange-700">
-                            {totalRecords}
-                          </div>
-                        </div>
-                      );
-                    })}
+                   {/* Student Rows */}
+                   {(selectedGrade === 'all' ? students : students.filter(s => s.grade === selectedGrade))
+                     .sort((a, b) => {
+                       // Sort by grade first, then by studentId
+                       if (a.grade !== b.grade) {
+                         const gradeOrder = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+                         return gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade);
+                       }
+                       return parseInt(a.studentId) - parseInt(b.studentId);
+                     })
+                     .map((student, studentIndex) => {
+                       const daysInMonth = getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
+                       
+                       return (
+                         <div key={student.id} className="grid grid-cols-[60px_200px_repeat(31,40px)_80px] gap-1 mb-1">
+                           <div className="text-center text-sm p-2 bg-gray-50 rounded font-medium">
+                             {studentIndex + 1}
+                           </div>
+                           <div className="text-left text-sm p-2 bg-gray-50 rounded font-medium truncate">
+                             {student.firstNameTh} {student.lastNameTh}
+                           </div>
+                           {Array.from({ length: 31 }, (_, i) => {
+                             const day = i + 1;
+                             const gregorianYear = selectedYear - 543;
+                             const date = new Date(gregorianYear, selectedMonth - 1, day);
+                             const dayOfWeek = date.getDay();
+                             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                             const isValidDay = day <= daysInMonth;
+                             const recordKey = `${recordingMode}-${studentIndex}-${day}`;
+                             const isRecorded = recordedData[recordKey];
+                             
+                             return (
+                               <div 
+                                 key={day}
+                                 className={`text-center text-sm p-2 rounded cursor-pointer transition-colors min-h-[32px] flex items-center justify-center ${
+                                   !isValidDay ? 'invisible' :
+                                   isWeekend ? 'bg-red-50 border border-red-200 cursor-not-allowed' :
+                                   isRecorded ? (recordingMode === 'brushing' ? 'bg-green-100 hover:bg-green-200 border border-green-300' : 'bg-purple-100 hover:bg-purple-200 border border-purple-300') :
+                                   'bg-white border border-gray-200 hover:bg-gray-50'
+                                 }`}
+                                 onClick={() => {
+                                   if (!isWeekend && isValidDay) {
+                                     handleCellClick(studentIndex, day);
+                                   }
+                                 }}
+                               >
+                                 {isValidDay && isRecorded && !isWeekend && (
+                                   <span className="text-base">
+                                     {recordingMode === 'brushing' ? '🦷' : '🥛'}
+                                   </span>
+                                 )}
+                               </div>
+                             );
+                           })}
+                           <div className="text-center text-sm p-2 bg-orange-50 rounded font-bold text-orange-700">
+                             {/* Calculate total from recorded data */}
+                             {Array.from({ length: daysInMonth }, (_, i) => {
+                               const day = i + 1;
+                               const recordKey = `${recordingMode}-${studentIndex}-${day}`;
+                               return recordedData[recordKey] ? 1 : 0;
+                             }).reduce((sum, val) => sum + val, 0)}
+                           </div>
+                         </div>
+                       );
+                     })}
                 </div>
                 
                 {/* Legend */}
@@ -464,12 +502,14 @@ const DentalMilkTracking = () => {
                     <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
                     <span className="text-sm">วันหยุด (เสาร์-อาทิตย์)</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-4 h-4 rounded ${recordingMode === 'brushing' ? 'bg-green-100 border border-green-200' : 'bg-purple-100 border border-purple-200'}`}></div>
-                    <span className="text-sm">
-                      {recordingMode === 'brushing' ? 'แปรงฟันแล้ว' : 'ดื่มนมแล้ว'}
-                    </span>
-                  </div>
+                   <div className="flex items-center space-x-2">
+                     <div className={`w-4 h-4 rounded flex items-center justify-center text-xs ${recordingMode === 'brushing' ? 'bg-green-100 border border-green-200' : 'bg-purple-100 border border-purple-200'}`}>
+                       {recordingMode === 'brushing' ? '🦷' : '🥛'}
+                     </div>
+                     <span className="text-sm">
+                       {recordingMode === 'brushing' ? 'แปรงฟันแล้ว' : 'ดื่มนมแล้ว'}
+                     </span>
+                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-white border border-gray-200 rounded"></div>
                     <span className="text-sm">
