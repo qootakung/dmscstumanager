@@ -14,6 +14,7 @@ import StudentHealth from '@/components/StudentHealth';
 import StudentAnalysis from '@/components/StudentAnalysis';
 import FinancialReports from '@/components/FinancialReports';
 import Assessment from '@/components/Assessment';
+import DentalMilkTracking from '@/components/DentalMilkTracking';
 import { getCurrentUser, logout } from '@/utils/userStorage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -168,6 +169,12 @@ const Index = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         className="cursor-pointer"
+                        onClick={() => setActiveTab('dental-milk')}
+                      >
+                        บันทึกแปรงฟันดื่มนม
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
                         onClick={() => window.open('https://donmul-grades-hub.lovable.app/', '_blank')}
                       >
                         คะแนนและใบงาน
@@ -253,6 +260,7 @@ const Index = () => {
           {activeTab === 'student-health' && <StudentHealth />}
           {activeTab === 'student-analysis' && <StudentAnalysis />}
           {activeTab === 'assessment' && <Assessment />}
+          {activeTab === 'dental-milk' && <DentalMilkTracking />}
           {activeTab === 'student-reports' && <Reports />}
           {activeTab === 'teacher-reports' && <TeacherReports />}
           {activeTab === 'financial-reports' && <FinancialReports />}
