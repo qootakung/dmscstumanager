@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Download, Printer, Users, Activity, TrendingUp, CheckCircle2, XCircle } from 'lucide-react';
+import { Calendar, Download, Printer, Users, Activity, TrendingUp, CheckCircle2, XCircle, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -19,55 +19,94 @@ const DentalMilkTracking = () => {
   const [gradeData, setGradeData] = useState<any[]>([]);
   const [recordingMode, setRecordingMode] = useState<'brushing' | 'milk'>('brushing');
   const [recordedData, setRecordedData] = useState<{[key: string]: boolean}>({});
+  const [loading, setLoading] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Load student data from database
+  // Load student data and dental/milk records from database
   useEffect(() => {
-    const loadStudents = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('students')
-          .select('*')
-          .order('grade', { ascending: true });
-        
-        if (error) throw error;
-        
-        setStudents(data as Student[] || []);
-        
-        // Calculate grade statistics from real data
-        const gradeStats = calculateGradeStatistics(data as Student[] || []);
-        setGradeData(gradeStats);
-      } catch (error) {
-        console.error('Error loading students:', error);
-        toast({
-          title: "เกิดข้อผิดพลาด",
-          description: "ไม่สามารถโหลดข้อมูลนักเรียนได้",
-          variant: "destructive",
-        });
-      }
-    };
+    loadData();
+  }, [selectedMonth, selectedYear, recordingMode]);
 
-    loadStudents();
-  }, []);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load students
+      const { data: studentsData, error: studentsError } = await supabase
+        .from('students')
+        .select('*')
+        .order('grade', { ascending: true });
+      
+      if (studentsError) throw studentsError;
+      
+      setStudents(studentsData as Student[] || []);
+      
+      // Load dental/milk records for the selected month
+      const { data: recordsData, error: recordsError } = await supabase
+        .from('dental_milk_records')
+        .select('*')
+        .eq('month', selectedMonth)
+        .eq('year', selectedYear)
+        .eq('record_type', recordingMode);
+      
+      if (recordsError) throw recordsError;
+      
+      // Convert records to recordedData format
+      const newRecordedData: {[key: string]: boolean} = {};
+      recordsData.forEach((record) => {
+        const studentIndex = studentsData.findIndex(s => s.id === record.student_id);
+        if (studentIndex !== -1) {
+          const key = `${recordingMode}-${studentIndex}-${record.day}`;
+          newRecordedData[key] = record.is_recorded;
+        }
+      });
+      
+      setRecordedData(newRecordedData);
+      
+      // Calculate grade statistics
+      const gradeStats = calculateGradeStatistics(studentsData as Student[] || [], recordsData);
+      setGradeData(gradeStats);
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลได้",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Calculate grade statistics from student data
-  const calculateGradeStatistics = (studentData: Student[]) => {
+  // Calculate grade statistics from student data and records
+  const calculateGradeStatistics = (studentData: Student[], recordsData: any[] = []) => {
     const grades = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
     
     return grades.map(grade => {
       const gradeStudents = studentData.filter(s => s.grade === grade);
       const studentCount = gradeStudents.length;
       
-      // Mock today's activity data - in real app, this would come from dental_records table
-      const mockBrushing = Math.floor(studentCount * (0.7 + Math.random() * 0.3));
-      const mockMilk = Math.floor(studentCount * (0.75 + Math.random() * 0.25));
+      // Count today's records for this grade
+      const today = new Date();
+      const todayDay = today.getDate();
+      
+      const todayRecords = recordsData.filter(record => 
+        record.day === todayDay && 
+        gradeStudents.some(s => s.id === record.student_id) &&
+        record.is_recorded
+      );
+      
+      const todayCount = todayRecords.length;
+      const rate = studentCount > 0 ? (todayCount / studentCount) * 100 : 0;
       
       return {
         grade,
         students: studentCount,
-        brushing: mockBrushing,
-        milk: mockMilk,
-        brushingRate: studentCount > 0 ? (mockBrushing / studentCount) * 100 : 0,
-        milkRate: studentCount > 0 ? (mockMilk / studentCount) * 100 : 0,
+        brushing: recordingMode === 'brushing' ? todayCount : Math.floor(studentCount * 0.75),
+        milk: recordingMode === 'milk' ? todayCount : Math.floor(studentCount * 0.8),
+        brushingRate: recordingMode === 'brushing' ? rate : 75,
+        milkRate: recordingMode === 'milk' ? rate : 80,
       };
     }).filter(g => g.students > 0);
   };
@@ -85,50 +124,287 @@ const DentalMilkTracking = () => {
   };
 
   const handlePrint = () => {
-    const printContent = document.getElementById('dental-table');
-    if (printContent) {
-      const printWindow = window.open('', '_blank');
-      printWindow?.document.write(`
-        <html>
-          <head>
-            <title>บันทึก${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'} - ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}</title>
-            <style>
-              body { font-family: 'Sarabun', sans-serif; }
-              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-              th, td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 12px; }
-              th { background-color: #f0f0f0; font-weight: bold; }
-              .weekend { background-color: #ffe6e6; }
-              .recorded { font-size: 16px; }
-              .header { text-align: center; margin-bottom: 20px; }
-              .header h1 { margin: 0; font-size: 18px; }
-              .header p { margin: 5px 0; font-size: 14px; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>บันทึก${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'}</h1>
-              <p>${months.find(m => m.value === selectedMonth)?.label} ${selectedYear} ${selectedGrade !== 'all' ? `- ${selectedGrade}` : ''}</p>
+    const filteredStudents = selectedGrade === 'all' 
+      ? students.sort((a, b) => {
+          const gradeOrder = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+          if (a.grade !== b.grade) {
+            return gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade);
+          }
+          return parseInt(a.studentId) - parseInt(b.studentId);
+        })
+      : students.filter(s => s.grade === selectedGrade)
+          .sort((a, b) => parseInt(a.studentId) - parseInt(b.studentId));
+
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
+    
+    // Create print content matching the reference image
+    let printContent = `
+      <html>
+        <head>
+          <title>บันทึกข้อมูลการ${recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}</title>
+          <style>
+            @page { 
+              size: A4 landscape; 
+              margin: 15mm; 
+            }
+            body { 
+              font-family: 'Sarabun', Arial, sans-serif; 
+              font-size: 12px;
+              margin: 0;
+              padding: 0;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 15px; 
+            }
+            .header h1 { 
+              margin: 0; 
+              font-size: 18px; 
+              font-weight: bold;
+            }
+            .header p { 
+              margin: 5px 0; 
+              font-size: 14px; 
+            }
+            .controls {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 10px;
+            }
+            .switch-container {
+              display: inline-flex;
+              align-items: center;
+              background: #f0f0f0;
+              border-radius: 20px;
+              padding: 2px;
+            }
+            .switch-option {
+              padding: 4px 12px;
+              border-radius: 18px;
+              font-size: 12px;
+              background: ${recordingMode === 'brushing' ? '#4CAF50' : '#fff'};
+              color: ${recordingMode === 'brushing' ? '#fff' : '#333'};
+            }
+            .switch-option.active {
+              background: #4CAF50;
+              color: white;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              font-size: 10px;
+            }
+            th, td { 
+              border: 1px solid #000; 
+              padding: 4px 2px; 
+              text-align: center; 
+              vertical-align: middle;
+            }
+            th { 
+              background-color: #4CAF50; 
+              color: white;
+              font-weight: bold; 
+              font-size: 9px;
+            }
+            .student-no { 
+              width: 30px; 
+              background-color: #4CAF50;
+              color: white;
+              font-weight: bold;
+            }
+            .student-name { 
+              width: 120px; 
+              text-align: left; 
+              padding-left: 6px;
+              background-color: #4CAF50;
+              color: white;
+              font-weight: bold;
+            }
+            .day-header { 
+              width: 22px; 
+              font-size: 8px;
+            }
+            .weekend { 
+              background-color: #ffebee; 
+              color: #d32f2f;
+            }
+            .recorded { 
+              font-size: 14px; 
+            }
+            .total-col {
+              width: 40px;
+              background-color: #4CAF50;
+              color: white;
+              font-weight: bold;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>บันทึกข้อมูลการ${recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}</h1>
+            <p>${months.find(m => m.value === selectedMonth)?.label} ${selectedYear} ${selectedGrade !== 'all' ? `- ${selectedGrade}` : ''}</p>
+            <div class="controls">
+              <div class="switch-container">
+                <div class="switch-option ${recordingMode === 'brushing' ? 'active' : ''}">แปรงฟัน</div>
+                <div class="switch-option ${recordingMode === 'milk' ? 'active' : ''}">ดื่มนม</div>
+              </div>
             </div>
-            ${printContent.innerHTML}
-          </body>
-        </html>
-      `);
-      printWindow?.document.close();
-      printWindow?.print();
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th class="student-no">ที่</th>
+                <th class="student-name">ชื่อ</th>`;
+    
+    // Add day headers
+    for (let day = 1; day <= 31; day++) {
+      if (day <= daysInMonth) {
+        const gregorianYear = selectedYear - 543;
+        const date = new Date(gregorianYear, selectedMonth - 1, day);
+        const dayOfWeek = date.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        
+        printContent += `<th class="day-header ${isWeekend ? 'weekend' : ''}">${day}</th>`;
+      } else {
+        printContent += `<th style="visibility: hidden; width: 22px;"></th>`;
+      }
     }
+    
+    printContent += `<th class="total-col">รวม</th></tr></thead><tbody>`;
+    
+    // Add student rows
+    filteredStudents.forEach((student, studentIndex) => {
+      const totalRecords = Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1;
+        const recordKey = `${recordingMode}-${studentIndex}-${day}`;
+        return recordedData[recordKey] ? 1 : 0;
+      }).reduce((sum, val) => sum + val, 0);
+      
+      printContent += `
+        <tr>
+          <td class="student-no">${studentIndex + 1}</td>
+          <td class="student-name">${student.firstNameTh} ${student.lastNameTh}</td>`;
+      
+      // Add day cells
+      for (let day = 1; day <= 31; day++) {
+        if (day <= daysInMonth) {
+          const gregorianYear = selectedYear - 543;
+          const date = new Date(gregorianYear, selectedMonth - 1, day);
+          const dayOfWeek = date.getDay();
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+          const recordKey = `${recordingMode}-${studentIndex}-${day}`;
+          const isRecorded = recordedData[recordKey];
+          
+          printContent += `<td class="${isWeekend ? 'weekend' : ''}">${
+            isRecorded && !isWeekend ? (recordingMode === 'brushing' ? '🦷' : '🥛') : ''
+          }</td>`;
+        } else {
+          printContent += `<td style="visibility: hidden;"></td>`;
+        }
+      }
+      
+      printContent += `<td class="total-col">${totalRecords}</td></tr>`;
+    });
+    
+    printContent += `
+          </tbody>
+        </table>
+      </body>
+    </html>`;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow?.document.write(printContent);
+    printWindow?.document.close();
+    printWindow?.print();
   };
 
   const handleCellClick = (studentIndex: number, day: number) => {
     const key = `${recordingMode}-${studentIndex}-${day}`;
+    const newValue = !recordedData[key];
+    
     setRecordedData(prev => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: newValue
     }));
     
+    setHasUnsavedChanges(true);
+    
     toast({
-      title: recordedData[key] ? "ลบข้อมูลแล้ว" : "บันทึกข้อมูลแล้ว",
+      title: newValue ? "เพิ่มข้อมูลแล้ว" : "ลบข้อมูลแล้ว",
       description: `${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'} วันที่ ${day}`,
     });
+  };
+
+  const handleSaveData = async () => {
+    try {
+      setLoading(true);
+      
+      // Get filtered students based on current grade selection
+      const filteredStudents = selectedGrade === 'all' 
+        ? students 
+        : students.filter(s => s.grade === selectedGrade);
+      
+      // Prepare records to upsert
+      const records = [];
+      const daysInMonth = getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
+      
+      for (let studentIndex = 0; studentIndex < filteredStudents.length; studentIndex++) {
+        const student = filteredStudents[studentIndex];
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+          const key = `${recordingMode}-${studentIndex}-${day}`;
+          const recorded = recordedData[key] || false;
+          
+          // Skip weekends
+          const gregorianYear = selectedYear - 543;
+          const date = new Date(gregorianYear, selectedMonth - 1, day);
+          const dayOfWeek = date.getDay();
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+          
+          if (!isWeekend) {
+            records.push({
+              student_id: student.id,
+              academic_year: `${selectedYear}`,
+              month: selectedMonth,
+              year: selectedYear,
+              day: day,
+              record_type: recordingMode,
+              is_recorded: recorded
+            });
+          }
+        }
+      }
+      
+      // Upsert records
+      const { error } = await supabase
+        .from('dental_milk_records')
+        .upsert(records, {
+          onConflict: 'student_id,academic_year,month,year,day,record_type'
+        });
+      
+      if (error) throw error;
+      
+      setHasUnsavedChanges(false);
+      
+      toast({
+        title: "บันทึกข้อมูลสำเร็จ",
+        description: `บันทึกข้อมูล${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'}เรียบร้อยแล้ว`,
+      });
+      
+      // Reload data to update statistics
+      await loadData();
+      
+    } catch (error) {
+      console.error('Error saving data:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกข้อมูลได้",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const months = [
@@ -199,6 +475,12 @@ const DentalMilkTracking = () => {
             <Printer className="w-4 h-4 mr-2" />
             พิมพ์รายงาน
           </Button>
+          {hasUnsavedChanges && (
+            <Button onClick={handleSaveData} disabled={loading} className="bg-orange-500 hover:bg-orange-600">
+              <Save className="w-4 h-4 mr-2" />
+              {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -371,22 +653,29 @@ const DentalMilkTracking = () => {
                 <CardTitle className="text-xl font-bold text-school-primary">
                   บันทึกข้อมูล{recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'}
                 </CardTitle>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="recording-mode"
-                      checked={recordingMode === 'milk'}
-                      onCheckedChange={(checked) => setRecordingMode(checked ? 'milk' : 'brushing')}
-                    />
-                    <Label htmlFor="recording-mode" className="font-medium">
-                      {recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}
-                    </Label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="recording-mode"
+                        checked={recordingMode === 'milk'}
+                        onCheckedChange={(checked) => setRecordingMode(checked ? 'milk' : 'brushing')}
+                        disabled={loading}
+                      />
+                      <Label htmlFor="recording-mode" className="font-medium">
+                        {recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}
+                      </Label>
+                    </div>
+                    <Button onClick={handlePrint} variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
+                      <Printer className="w-4 h-4 mr-2" />
+                      พิมพ์ตาราง
+                    </Button>
+                    {hasUnsavedChanges && (
+                      <Button onClick={handleSaveData} disabled={loading} className="bg-orange-500 hover:bg-orange-600">
+                        <Save className="w-4 h-4 mr-2" />
+                        {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+                      </Button>
+                    )}
                   </div>
-                  <Button onClick={handlePrint} variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
-                    <Printer className="w-4 h-4 mr-2" />
-                    พิมพ์ตาราง
-                  </Button>
-                </div>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 {months.find(m => m.value === selectedMonth)?.label} {selectedYear} 
