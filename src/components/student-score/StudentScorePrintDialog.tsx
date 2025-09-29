@@ -35,10 +35,11 @@ interface StudentScorePrintDialogProps {
   onOpenChange: (open: boolean) => void;
   scores: StudentScore[];
   students: Student[];
-  teacher?: Teacher;
-  subject?: Subject | null;
+  teachers: Teacher[];
   gradeLevel: string;
   academicYear: string;
+  principalName?: string;
+  homeRoomTeacher?: Teacher;
 }
 
 export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = ({
@@ -46,10 +47,11 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   onOpenChange,
   scores,
   students,
-  teacher,
-  subject,
+  teachers,
   gradeLevel,
-  academicYear
+  academicYear,
+  principalName = "นางสาวสุทิตา ใจดี",
+  homeRoomTeacher
 }) => {
   const handlePrint = () => {
     const printContent = document.querySelector('.print-content');
@@ -132,10 +134,11 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           <StudentScorePrintPreview
             scores={scores}
             students={students}
-            teacher={teacher}
-            subject={subject}
+            teachers={teachers}
             gradeLevel={gradeLevel}
             academicYear={academicYear}
+            principalName={principalName}
+            homeRoomTeacher={homeRoomTeacher}
           />
         </div>
 

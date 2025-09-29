@@ -130,6 +130,7 @@ export const StudentScoreManagement: React.FC = () => {
   const [academicYear, setAcademicYear] = useState<string>(new Date().getFullYear() + 543 + '');
   const [studentScores, setStudentScores] = useState<StudentScore[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [allScoresForGrade, setAllScoresForGrade] = useState<StudentScore[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -156,6 +157,14 @@ export const StudentScoreManagement: React.FC = () => {
     }
   }, [selectedTeacher, selectedGrade, selectedSubject]);
 
+  useEffect(() => {
+    if (selectedGrade) {
+      loadAllScoresForGrade();
+    } else {
+      setAllScoresForGrade([]);
+    }
+  }, [selectedGrade, academicYear]);
+
   const loadTeachers = async () => {
     const teacherData = await getTeachers();
     setTeachers(teacherData);
@@ -164,6 +173,27 @@ export const StudentScoreManagement: React.FC = () => {
   const loadStudents = async () => {
     const studentData = await getStudents();
     setStudents(studentData);
+  };
+
+  const loadAllScoresForGrade = async () => {
+    if (!selectedGrade) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('student_scores')
+        .select('*')
+        .eq('grade_level', selectedGrade)
+        .eq('academic_year', academicYear);
+
+      if (error) {
+        console.error('Error loading all scores for grade:', error);
+        return;
+      }
+
+      setAllScoresForGrade(data || []);
+    } catch (error) {
+      console.error('Error loading all scores for grade:', error);
+    }
   };
 
   const loadStudentScores = async () => {
@@ -411,7 +441,7 @@ export const StudentScoreManagement: React.FC = () => {
                 onClick={() => setShowPrintDialog(true)}
                 variant="outline"
                 className="flex items-center gap-2"
-                disabled={studentScores.length === 0}
+                disabled={allScoresForGrade.length === 0}
               >
                 <Printer className="h-4 w-4" />
                 ตัวอย่างก่อนพิมพ์
@@ -487,12 +517,13 @@ export const StudentScoreManagement: React.FC = () => {
       <StudentScorePrintDialog
         open={showPrintDialog}
         onOpenChange={setShowPrintDialog}
-        scores={studentScores}
+        scores={allScoresForGrade}
         students={students}
-        teacher={teachers.find(t => t.id === selectedTeacher)}
-        subject={selectedSubject}
+        teachers={teachers}
         gradeLevel={selectedGrade}
         academicYear={academicYear}
+        principalName="นางสาวสุทิตา ใจดี"
+        homeRoomTeacher={teachers.find(t => t.position?.includes('ครูประจำชั้น'))}
       />
     </div>
   );

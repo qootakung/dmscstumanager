@@ -22,19 +22,21 @@ interface Subject {
 interface StudentScorePrintPreviewProps {
   scores: StudentScore[];
   students: Student[];
-  teacher?: Teacher;
-  subject?: Subject | null;
+  teachers: Teacher[];
   gradeLevel: string;
   academicYear: string;
+  principalName?: string;
+  homeRoomTeacher?: Teacher;
 }
 
 export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> = ({
   scores,
   students,
-  teacher,
-  subject,
+  teachers,
   gradeLevel,
-  academicYear
+  academicYear,
+  principalName = "นางสาวสุทิตา ใจดี",
+  homeRoomTeacher
 }) => {
   const getStudentData = (studentId: string) => {
     return students.find(s => s.id === studentId);
@@ -48,7 +50,23 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
     return `${day}/${month}/${year}`;
   };
 
-  if (!teacher || !subject || scores.length === 0) {
+  // Group scores by student
+  const studentScoresBySubject = scores.reduce((acc, score) => {
+    if (!acc[score.student_id]) {
+      acc[score.student_id] = [];
+    }
+    acc[score.student_id].push(score);
+    return acc;
+  }, {} as Record<string, StudentScore[]>);
+
+  // Get unique subjects
+  const subjects = Array.from(new Set(scores.map(s => s.subject_code)))
+    .map(code => {
+      const score = scores.find(s => s.subject_code === code);
+      return { code, name: score?.subject_name || '' };
+    });
+
+  if (scores.length === 0) {
     return <div>ไม่มีข้อมูลที่จะพิมพ์</div>;
   }
 
@@ -57,7 +75,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       {/* Header */}
       <div className="text-center mb-6">
         <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
-          บันทึกคะแนนนักเรียน
+          บันทึกคะแนนนักเรียน 50%
         </div>
         <div style={{ fontSize: '14px', marginBottom: '4px' }}>
           โรงเรียนบ้านหนองตาไก้
@@ -67,19 +85,11 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
         </div>
       </div>
 
-      {/* Subject and Teacher Info */}
+      {/* Info */}
       <div className="mb-6">
         <div className="grid grid-cols-2 gap-4 mb-2">
           <div>
-            <strong>รายวิชา:</strong> {subject.code} - {subject.name}
-          </div>
-          <div>
             <strong>ชั้น:</strong> {gradeLevel}
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-2">
-          <div>
-            <strong>ครูผู้สอน:</strong> {teacher.firstName} {teacher.lastName}
           </div>
           <div>
             <strong>ปีการศึกษา:</strong> {academicYear}
@@ -94,35 +104,38 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       <table className="w-full border-collapse" style={{ border: '1px solid black' }}>
         <thead>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '8%' }}>
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '5%' }}>
               ลำดับ
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '15%' }}>
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '12%' }}>
               รหัสนักเรียน
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', width: '35%' }}>
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', width: '25%' }}>
               ชื่อ-นามสกุล
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '15%' }}>
-              คะแนนเต็ม
+            {subjects.map(subject => (
+              <th key={subject.code} style={{ border: '1px solid black', padding: '4px', textAlign: 'center', fontSize: '10px' }}>
+                {subject.name}
+              </th>
+            ))}
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '8%' }}>
+              รวม
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '15%' }}>
-              คะแนนที่ได้
-            </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '12%' }}>
-              เปอร์เซ็นต์
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '8%' }}>
+              เฉลี่ย
             </th>
           </tr>
         </thead>
         <tbody>
-          {scores.map((score, index) => {
-            const student = getStudentData(score.student_id);
-            const percentage = score.max_score > 0 ? ((score.score / score.max_score) * 100).toFixed(2) : '0.00';
-            
+          {Object.entries(studentScoresBySubject).map(([studentId, studentScores], index) => {
+            const student = getStudentData(studentId);
             if (!student) return null;
 
+            const totalScore = studentScores.reduce((sum, score) => sum + score.score, 0);
+            const averageScore = studentScores.length > 0 ? (totalScore / studentScores.length).toFixed(2) : '0.00';
+
             return (
-              <tr key={score.student_id}>
+              <tr key={studentId}>
                 <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
                   {index + 1}
                 </td>
@@ -132,14 +145,19 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                 <td style={{ border: '1px solid black', padding: '6px' }}>
                   {student.titleTh}{student.firstNameTh} {student.lastNameTh}
                 </td>
+                {subjects.map(subject => {
+                  const subjectScore = studentScores.find(s => s.subject_code === subject.code);
+                  return (
+                    <td key={subject.code} style={{ border: '1px solid black', padding: '4px', textAlign: 'center', fontSize: '10px' }}>
+                      {subjectScore ? subjectScore.score : '-'}
+                    </td>
+                  );
+                })}
                 <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {score.max_score}
+                  {totalScore}
                 </td>
                 <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {score.score}
-                </td>
-                <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {percentage}%
+                  {averageScore}
                 </td>
               </tr>
             );
@@ -149,36 +167,40 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
 
       {/* Summary */}
       <div className="mt-6">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <strong>จำนวนนักเรียนทั้งหมด:</strong> {scores.length} คน
+            <strong>จำนวนนักเรียนทั้งหมด:</strong> {Object.keys(studentScoresBySubject).length} คน
           </div>
           <div>
-            <strong>คะแนนเฉลีย:</strong> {
-              scores.length > 0 
-                ? (scores.reduce((sum, score) => sum + score.score, 0) / scores.length).toFixed(2)
-                : '0.00'
-            }
-          </div>
-          <div>
-            <strong>ผ่านเกณฑ์ (≥50%):</strong> {
-              scores.filter(score => score.max_score > 0 && (score.score / score.max_score) * 100 >= 50).length
-            } คน
+            <strong>จำนวนวิชาทั้งหมด:</strong> {subjects.length} วิชา
           </div>
         </div>
       </div>
 
-      {/* Signature */}
-      <div className="mt-12 text-right">
-        <div className="inline-block text-center">
-          <div style={{ marginBottom: '60px' }}>
-            ลงชื่อ ......................................
+      {/* Signature Section */}
+      <div className="mt-16">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="text-center">
+            <div style={{ marginBottom: '60px' }}>
+              ลงชื่อ ......................................
+            </div>
+            <div>
+              ({principalName})
+            </div>
+            <div>
+              ผู้อำนวยการโรงเรียน
+            </div>
           </div>
-          <div>
-            ({teacher.firstName} {teacher.lastName})
-          </div>
-          <div>
-            ครูผู้สอน
+          <div className="text-center">
+            <div style={{ marginBottom: '60px' }}>
+              ลงชื่อ ......................................
+            </div>
+            <div>
+              ({homeRoomTeacher ? `${homeRoomTeacher.firstName} ${homeRoomTeacher.lastName}` : '.....................................'})
+            </div>
+            <div>
+              ครูประจำชั้น
+            </div>
           </div>
         </div>
       </div>
