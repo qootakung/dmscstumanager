@@ -50,23 +50,91 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
     return `${day}/${month}/${year}`;
   };
 
-  // Group scores by student
-  const studentScoresBySubject = scores.reduce((acc, score) => {
-    if (!acc[score.student_id]) {
-      acc[score.student_id] = [];
-    }
-    acc[score.student_id].push(score);
-    return acc;
-  }, {} as Record<string, StudentScore[]>);
+  // Get standard subjects for the grade level
+  const getSubjectsForGrade = (grade: string) => {
+    const gradeSubjects = {
+      'ป.1': [
+        { code: 'ท11101', name: 'ภาษาไทย' },
+        { code: 'ค11101', name: 'คณิตศาสตร์' },
+        { code: 'ว11101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
+        { code: 'ส11101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
+        { code: 'ส11102', name: 'ประวัติศาสตร์' },
+        { code: 'พ11101', name: 'สุขศึกษาและพลศึกษา' },
+        { code: 'ศ11101', name: 'ศิลปะ' },
+        { code: 'ง11101', name: 'การงานอาชีพ' },
+        { code: 'อ11101', name: 'ภาषาอังกฤษ' }
+      ],
+      'ป.2': [
+        { code: 'ท12101', name: 'ภาษาไทย' },
+        { code: 'ค12101', name: 'คณิตศาสตร์' },
+        { code: 'ว12101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
+        { code: 'ส12101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
+        { code: 'ส12102', name: 'ประวัติศาสตร์' },
+        { code: 'พ12101', name: 'สุขศึกษาและพลศึกษา' },
+        { code: 'ศ12101', name: 'ศิลปะ' },
+        { code: 'ง12101', name: 'การงานอาชีพ' },
+        { code: 'อ12101', name: 'ภาษาอังกฤษ' }
+      ],
+      'ป.3': [
+        { code: 'ท13101', name: 'ภาษาไทย' },
+        { code: 'ค13101', name: 'คณิตศาสตร์' },
+        { code: 'ว13101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
+        { code: 'ส13101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
+        { code: 'ส13102', name: 'ประวัติศาสตร์' },
+        { code: 'พ13101', name: 'สุขศึกษาและพลศึกษา' },
+        { code: 'ศ13101', name: 'ศิลปะ' },
+        { code: 'ง13101', name: 'การงานอาชีพ' },
+        { code: 'อ13101', name: 'ภาษาอังกฤษ' }
+      ],
+      'ป.4': [
+        { code: 'ท14101', name: 'ภาษาไทย' },
+        { code: 'ค14101', name: 'คณิตศาสตร์' },
+        { code: 'ว14101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
+        { code: 'ส14101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
+        { code: 'ส14102', name: 'ประวัติศาสตร์' },
+        { code: 'พ14101', name: 'สุขศึกษาและพลศึกษา' },
+        { code: 'ศ14101', name: 'ศิลปะ' },
+        { code: 'ง14101', name: 'การงานอาชีพ' },
+        { code: 'อ14101', name: 'ภาษาอังกฤษ' }
+      ],
+      'ป.5': [
+        { code: 'ท15101', name: 'ภาษาไทย' },
+        { code: 'ค15101', name: 'คณิตศาสตร์' },
+        { code: 'ว15101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
+        { code: 'ส15101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
+        { code: 'ส15102', name: 'ประวัติศาสตร์' },
+        { code: 'พ15101', name: 'สุขศึกษาและพลศึกษา' },
+        { code: 'ศ15101', name: 'ศิลปะ' },
+        { code: 'ง15101', name: 'การงานอาชีพ' },
+        { code: 'อ15101', name: 'ภาษาอังกฤษ' }
+      ],
+      'ป.6': [
+        { code: 'ท16101', name: 'ภาษาไทย' },
+        { code: 'ค16101', name: 'คณิตศาสตร์' },
+        { code: 'ว16101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
+        { code: 'ส16101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
+        { code: 'ส16102', name: 'ประวัติศาสตร์' },
+        { code: 'พ16101', name: 'สุขศึกษาและพลศึกษา' },
+        { code: 'ศ16101', name: 'ศิลปะ' },
+        { code: 'ง16101', name: 'การงานอาชีพ' },
+        { code: 'อ16101', name: 'ภาษาอังกฤษ' }
+      ]
+    };
+    return gradeSubjects[grade as keyof typeof gradeSubjects] || [];
+  };
 
-  // Get unique subjects
-  const subjects = Array.from(new Set(scores.map(s => s.subject_code)))
-    .map(code => {
-      const score = scores.find(s => s.subject_code === code);
-      return { code, name: score?.subject_name || '' };
-    });
+  const subjects = getSubjectsForGrade(gradeLevel);
 
-  if (scores.length === 0) {
+  const getAdditionalSubjects = (grade: string) => {
+    const gradeNumber = grade.replace('ป.', '');
+    return [
+      { code: `อ${gradeNumber}1201`, name: 'ภาษาอังกฤษเพื่อการสื่อสาร' },
+      { code: `ว${gradeNumber}1101`, name: 'วิทयาการคำนวณ' },
+      { code: `ส${gradeNumber}1202`, name: 'ป้องกันการทุจริต' }
+    ];
+  };
+
+  if (scores.length === 0 && !gradeLevel) {
     return <div>ไม่มีข้อมูลที่จะพิมพ์</div>;
   }
 
@@ -75,107 +143,89 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       {/* Header */}
       <div className="text-center mb-6">
         <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
-          บันทึกคะแนนนักเรียน 50%
+          รายงานผลคะแนนผู้เรียนรายบุคคล
         </div>
         <div style={{ fontSize: '14px', marginBottom: '4px' }}>
-          โรงเรียนบ้านหนองตาไก้
-        </div>
-        <div style={{ fontSize: '12px' }}>
-          อำเภอเมืองขอนแก่น จังหวัดขอนแก่น
+          โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่{gradeLevel.replace('ป.', '')} ปีการศึกษา {academicYear}
         </div>
       </div>
 
-      {/* Info */}
-      <div className="mb-6">
-        <div className="grid grid-cols-2 gap-4 mb-2">
-          <div>
-            <strong>ชั้น:</strong> {gradeLevel}
-          </div>
-          <div>
-            <strong>ปีการศึกษา:</strong> {academicYear}
-          </div>
-        </div>
-        <div>
-          <strong>วันที่พิมพ์:</strong> {formatDate()}
-        </div>
-      </div>
+      {/* Remove Info and Summary sections */}
 
       {/* Table */}
       <table className="w-full border-collapse" style={{ border: '1px solid black' }}>
         <thead>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '5%' }}>
-              ลำดับ
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '15%' }}>
+              รหัสวิชา
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '12%' }}>
-              รหัสนักเรียน
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '45%' }}>
+              กลุ่มสาระการเรียนรู้
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', width: '25%' }}>
-              ชื่อ-นามสกุล
+            <th colSpan={2} style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '40%' }}>
+              ผลการพัฒนาผู้เรียนรายบุคคล
             </th>
-            {subjects.map(subject => (
-              <th key={subject.code} style={{ border: '1px solid black', padding: '4px', textAlign: 'center', fontSize: '10px' }}>
-                {subject.name}
-              </th>
-            ))}
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '8%' }}>
-              รวม
+          </tr>
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <th style={{ border: '1px solid black', padding: '4px' }}></th>
+            <th style={{ border: '1px solid black', padding: '4px' }}></th>
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '20%' }}>
+              คะแนนเต็ม
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '8%' }}>
-              เฉลี่ย
+            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '20%' }}>
+              คะแนนที่ได้
             </th>
           </tr>
         </thead>
         <tbody>
-          {Object.entries(studentScoresBySubject).map(([studentId, studentScores], index) => {
-            const student = getStudentData(studentId);
-            if (!student) return null;
-
-            const totalScore = studentScores.reduce((sum, score) => sum + score.score, 0);
-            const averageScore = studentScores.length > 0 ? (totalScore / studentScores.length).toFixed(2) : '0.00';
-
+          {subjects.map((subject) => {
+            // Find if there's a score for this subject from any student
+            const subjectScore = scores.find(s => s.subject_code === subject.code);
             return (
-              <tr key={studentId}>
+              <tr key={subject.code}>
                 <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {index + 1}
-                </td>
-                <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {student.studentId}
+                  {subject.code}
                 </td>
                 <td style={{ border: '1px solid black', padding: '6px' }}>
-                  {student.titleTh}{student.firstNameTh} {student.lastNameTh}
-                </td>
-                {subjects.map(subject => {
-                  const subjectScore = studentScores.find(s => s.subject_code === subject.code);
-                  return (
-                    <td key={subject.code} style={{ border: '1px solid black', padding: '4px', textAlign: 'center', fontSize: '10px' }}>
-                      {subjectScore ? subjectScore.score : '-'}
-                    </td>
-                  );
-                })}
-                <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {totalScore}
+                  {subject.name}
                 </td>
                 <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {averageScore}
+                  50
+                </td>
+                <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
+                  {/* Empty for manual filling */}
                 </td>
               </tr>
             );
           })}
+          
+          {/* Additional Learning Areas Section */}
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <td colSpan={4} style={{ border: '1px solid black', padding: '6px', textAlign: 'center', fontWeight: 'bold' }}>
+              สาระการเรียนรู้เพิ่มเติม
+            </td>
+          </tr>
+          
+          {/* Additional subjects based on grade */}
+          {getAdditionalSubjects(gradeLevel).map((subject) => (
+            <tr key={subject.code}>
+              <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
+                {subject.code}
+              </td>
+              <td style={{ border: '1px solid black', padding: '6px' }}>
+                {subject.name}
+              </td>
+              <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
+                50
+              </td>
+              <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
+                {/* Empty for manual filling */}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
-      {/* Summary */}
-      <div className="mt-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <strong>จำนวนนักเรียนทั้งหมด:</strong> {Object.keys(studentScoresBySubject).length} คน
-          </div>
-          <div>
-            <strong>จำนวนวิชาทั้งหมด:</strong> {subjects.length} วิชา
-          </div>
-        </div>
-      </div>
 
       {/* Signature Section */}
       <div className="mt-16">
@@ -188,6 +238,9 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
               ({principalName})
             </div>
             <div>
+              (นางสาวปิยมกรณ์ อรีย์เยอะ)
+            </div>
+            <div>
               ผู้อำนวยการโรงเรียน
             </div>
           </div>
@@ -196,11 +249,16 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
               ลงชื่อ ......................................
             </div>
             <div>
-              ({homeRoomTeacher ? `${homeRoomTeacher.firstName} ${homeRoomTeacher.lastName}` : '.....................................'})
+              (นายอนาณกต์ ศิถิลมัส)
             </div>
             <div>
               ครูประจำชั้น
             </div>
+          </div>
+        </div>
+        <div className="text-center mt-8">
+          <div>
+            ผู้อำนวยการโรงเรียนบ้านดอนมูล
           </div>
         </div>
       </div>
