@@ -216,6 +216,63 @@ export type Database = {
           },
         ]
       }
+      student_scores: {
+        Row: {
+          academic_year: string
+          created_at: string
+          grade_level: string
+          id: string
+          max_score: number
+          score: number
+          student_id: string
+          subject_code: string
+          subject_name: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string
+          grade_level: string
+          id?: string
+          max_score?: number
+          score?: number
+          student_id: string
+          subject_code: string
+          subject_name: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          grade_level?: string
+          id?: string
+          max_score?: number
+          score?: number
+          student_id?: string
+          subject_code?: string
+          subject_name?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_scores_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_scores_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           academicYear: string | null
