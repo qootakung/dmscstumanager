@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,6 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Student } from '@/types/student';
 import { Teacher } from '@/types/teacher';
 import { StudentScorePrintPreview } from './StudentScorePrintPreview';
@@ -50,9 +53,11 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   teachers,
   gradeLevel,
   academicYear,
-  principalName = "นางสาวสุทิตา ใจดี",
+  principalName = "นายธนภูมิ ต๊ะสินธุ",
   homeRoomTeacher
 }) => {
+  const [editablePrincipalName, setEditablePrincipalName] = useState(principalName);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | undefined>(homeRoomTeacher);
   const handlePrint = () => {
     const printContent = document.querySelector('.print-content');
     if (!printContent) return;
@@ -67,7 +72,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           <title>บันทึกคะแนนนักเรียน</title>
           <style>
             @page {
-              size: A4 landscape;
+              size: A4 portrait;
               margin: 1cm;
             }
             body {
@@ -130,15 +135,48 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           </DialogDescription>
         </DialogHeader>
 
-        <div className="border rounded-lg p-4 bg-gray-50">
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
+            <Input
+              id="principalName"
+              value={editablePrincipalName}
+              onChange={(e) => setEditablePrincipalName(e.target.value)}
+              placeholder="กรอกชื่อผู้อำนวยการ"
+            />
+          </div>
+          <div>
+            <Label htmlFor="homeRoomTeacher">ครูประจำชั้น</Label>
+            <Select
+              value={selectedTeacher?.id || ""}
+              onValueChange={(value) => {
+                const teacher = teachers.find(t => t.id === value);
+                setSelectedTeacher(teacher);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="เลือกครูประจำชั้น" />
+              </SelectTrigger>
+              <SelectContent>
+                {teachers.map((teacher) => (
+                  <SelectItem key={teacher.id} value={teacher.id || ""}>
+                    {teacher.firstName} {teacher.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto' }}>
           <StudentScorePrintPreview
             scores={scores}
             students={students}
             teachers={teachers}
             gradeLevel={gradeLevel}
             academicYear={academicYear}
-            principalName={principalName}
-            homeRoomTeacher={homeRoomTeacher}
+            principalName={editablePrincipalName}
+            homeRoomTeacher={selectedTeacher}
           />
         </div>
 

@@ -156,10 +156,10 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       <table className="w-full border-collapse" style={{ border: '1px solid black' }}>
         <thead>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '15%' }}>
+            <th rowSpan={2} style={{ border: '1px solid black', padding: '8px', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>
               รหัสวิชา
             </th>
-            <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '45%' }}>
+            <th rowSpan={2} style={{ border: '1px solid black', padding: '8px', textAlign: 'center', verticalAlign: 'middle', width: '45%' }}>
               กลุ่มสาระการเรียนรู้
             </th>
             <th colSpan={2} style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '40%' }}>
@@ -167,8 +167,6 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
             </th>
           </tr>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <th style={{ border: '1px solid black', padding: '4px' }}></th>
-            <th style={{ border: '1px solid black', padding: '4px' }}></th>
             <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: '20%' }}>
               คะแนนเต็ม
             </th>
