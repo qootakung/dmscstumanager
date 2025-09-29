@@ -58,6 +58,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
 }) => {
   const [editablePrincipalName, setEditablePrincipalName] = useState(principalName);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | undefined>(homeRoomTeacher);
+  const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
   const handlePrint = () => {
     const printContent = document.querySelector('.print-content');
     if (!printContent) return;
@@ -76,8 +77,8 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
               margin: 1cm;
             }
             body {
-              font-family: 'Sarabun', 'Arial', sans-serif;
-              font-size: 12px;
+              font-family: 'TH SarabunPSK', 'TH Sarabun', 'Sarabun', Arial, sans-serif;
+              font-size: 21px;
               margin: 0;
               padding: 0;
               background: white;
@@ -135,7 +136,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <div>
             <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
             <Input
@@ -166,6 +167,28 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label htmlFor="selectedStudent">เลือกนักเรียน</Label>
+            <Select
+              value={selectedStudent?.id || ""}
+              onValueChange={(value) => {
+                const student = students.find(s => s.id === value);
+                setSelectedStudent(student);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="เลือกนักเรียน (ทุกคนหากไม่เลือก)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">ทุกคน</SelectItem>
+                {students.map((student) => (
+                  <SelectItem key={student.id} value={student.id || ""}>
+                    {student.firstNameTh} {student.lastNameTh}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', transform: 'scale(0.8)', transformOrigin: 'top center' }}>
@@ -177,6 +200,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             academicYear={academicYear}
             principalName={editablePrincipalName}
             homeRoomTeacher={selectedTeacher}
+            selectedStudent={selectedStudent}
           />
         </div>
 

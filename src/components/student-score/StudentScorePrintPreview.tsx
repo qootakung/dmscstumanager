@@ -27,6 +27,7 @@ interface StudentScorePrintPreviewProps {
   academicYear: string;
   principalName?: string;
   homeRoomTeacher?: Teacher;
+  selectedStudent?: Student;
 }
 
 export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> = ({
@@ -35,8 +36,9 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   teachers,
   gradeLevel,
   academicYear,
-  principalName = "นางสาวปิยมกรণ์ อรีย์เยอะ",
-  homeRoomTeacher
+  principalName = "นายธนภูมิ ต๊ะสินธุ",
+  homeRoomTeacher,
+  selectedStudent
 }) => {
   const getStudentData = (studentId: string) => {
     return students.find(s => s.id === studentId);
@@ -62,7 +64,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
         { code: 'พ11101', name: 'สุขศึกษาและพลศึกษา' },
         { code: 'ศ11101', name: 'ศิลปะ' },
         { code: 'ง11101', name: 'การงานอาชีพ' },
-        { code: 'อ11101', name: 'ภาषาอังกฤษ' }
+        { code: 'อ11101', name: 'ภาษาอังกฤษ' }
       ],
       'ป.2': [
         { code: 'ท12101', name: 'ภาษาไทย' },
@@ -129,7 +131,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
     const gradeNumber = grade.replace('ป.', '');
     return [
       { code: `อ${gradeNumber}1201`, name: 'ภาษาอังกฤษเพื่อการสื่อสาร' },
-      { code: `ว${gradeNumber}1101`, name: 'วิทयาการคำนวณ' },
+      { code: `ว${gradeNumber}1101`, name: 'วิทยาการคำนวณ' },
       { code: `ส${gradeNumber}1202`, name: 'ป้องกันการทุจริต' }
     ];
   };
@@ -139,15 +141,21 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   }
 
   return (
-    <div className="w-full bg-white text-black print-content" style={{ fontSize: '16px', fontFamily: "'TH SarabunPSK', 'TH Sarabun', 'Sarabun', Arial, sans-serif" }}>
+    <div className="w-full bg-white text-black print-content" style={{ fontSize: '21px', fontFamily: "'TH SarabunPSK', 'TH Sarabun', 'Sarabun', Arial, sans-serif" }}>
       {/* Header */}
       <div className="text-center mb-6">
-        <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+        <div style={{ fontSize: '21px', fontWeight: 'bold', marginBottom: '8px' }}>
           รายงานผลคะแนนผู้เรียนรายบุคคล
         </div>
-        <div style={{ fontSize: '16px', marginBottom: '4px' }}>
+        <div style={{ fontSize: '21px', marginBottom: '4px' }}>
           โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่{gradeLevel.replace('ป.', '')} ปีการศึกษา {academicYear}
         </div>
+        {selectedStudent && (
+          <div style={{ fontSize: '21px', marginBottom: '16px', fontWeight: 'bold' }}>
+            ชื่อ-สกุลนักเรียน: {selectedStudent.firstNameTh} {selectedStudent.lastNameTh} 
+            {selectedStudent.studentId && ` รหัสนักเรียน: ${selectedStudent.studentId}`}
+          </div>
+        )}
       </div>
 
       {/* Remove Info and Summary sections */}
@@ -177,21 +185,23 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
         </thead>
         <tbody>
           {subjects.map((subject) => {
-            // Find if there's a score for this subject from any student
-            const subjectScore = scores.find(s => s.subject_code === subject.code);
+            // Find score for this subject and selected student
+            const subjectScore = selectedStudent 
+              ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
+              : scores.find(s => s.subject_code === subject.code);
             return (
               <tr key={subject.code}>
-                <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
+                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
                   {subject.code}
                 </td>
-                <td style={{ border: '1px solid black', padding: '6px' }}>
+                <td style={{ border: '1px solid black', padding: '8px' }}>
                   {subject.name}
                 </td>
-                <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
+                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
                   50
                 </td>
-                <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                  {/* Empty for manual filling */}
+                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                  {subjectScore ? subjectScore.score : ''}
                 </td>
               </tr>
             );
@@ -205,28 +215,33 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
           </tr>
           
           {/* Additional subjects based on grade */}
-          {getAdditionalSubjects(gradeLevel).map((subject) => (
-            <tr key={subject.code}>
-              <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                {subject.code}
-              </td>
-              <td style={{ border: '1px solid black', padding: '6px' }}>
-                {subject.name}
-              </td>
-              <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                50
-              </td>
-              <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>
-                {/* Empty for manual filling */}
-              </td>
-            </tr>
-          ))}
+          {getAdditionalSubjects(gradeLevel).map((subject) => {
+            const subjectScore = selectedStudent 
+              ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
+              : scores.find(s => s.subject_code === subject.code);
+            return (
+              <tr key={subject.code}>
+                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                  {subject.code}
+                </td>
+                <td style={{ border: '1px solid black', padding: '8px' }}>
+                  {subject.name}
+                </td>
+                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                  50
+                </td>
+                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                  {subjectScore ? subjectScore.score : ''}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
 
       {/* Signature Section */}
-      <div className="mt-16" style={{ fontSize: '16px' }}>
+      <div className="mt-16" style={{ fontSize: '21px' }}>
         <div className="flex justify-between items-start">
           <div className="text-center">
             <p className="mb-6" style={{ fontWeight: 'bold' }}>รับรองข้อมูลถูกต้อง</p>
