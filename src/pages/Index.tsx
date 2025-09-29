@@ -178,7 +178,7 @@ const Index = () => {
                         className="cursor-pointer"
                         onClick={() => setActiveTab('student-scores')}
                       >
-                        เก็บคะแนนนักเรียน
+                        คะแนนนักเรียน 50%
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         className="cursor-pointer"
