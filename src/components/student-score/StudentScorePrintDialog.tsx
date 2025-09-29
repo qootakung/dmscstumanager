@@ -168,7 +168,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           </div>
         </div>
 
-        <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto' }}>
+        <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', transform: 'scale(0.8)', transformOrigin: 'top center' }}>
           <StudentScorePrintPreview
             scores={scores}
             students={students}
