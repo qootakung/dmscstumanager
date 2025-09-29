@@ -35,7 +35,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   teachers,
   gradeLevel,
   academicYear,
-  principalName = "นางสาวสุทิตา ใจดี",
+  principalName = "นางสาวปิยมกรণ์ อรีย์เยอะ",
   homeRoomTeacher
 }) => {
   const getStudentData = (studentId: string) => {
@@ -139,13 +139,13 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   }
 
   return (
-    <div className="w-full bg-white text-black print-content" style={{ fontSize: '12px', fontFamily: 'Arial, sans-serif' }}>
+    <div className="w-full bg-white text-black print-content" style={{ fontSize: '16px', fontFamily: "'TH SarabunPSK', 'TH Sarabun', 'Sarabun', Arial, sans-serif" }}>
       {/* Header */}
       <div className="text-center mb-6">
         <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
           รายงานผลคะแนนผู้เรียนรายบุคคล
         </div>
-        <div style={{ fontSize: '14px', marginBottom: '4px' }}>
+        <div style={{ fontSize: '16px', marginBottom: '4px' }}>
           โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่{gradeLevel.replace('ป.', '')} ปีการศึกษา {academicYear}
         </div>
       </div>
@@ -228,37 +228,35 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
 
 
       {/* Signature Section */}
-      <div className="mt-16">
-        <div className="grid grid-cols-2 gap-8">
+      <div className="mt-16" style={{ fontSize: '16px' }}>
+        <div className="flex justify-between items-start">
           <div className="text-center">
-            <div style={{ marginBottom: '60px' }}>
-              ลงชื่อ ......................................
+            <p className="mb-6" style={{ fontWeight: 'bold' }}>รับรองข้อมูลถูกต้อง</p>
+            <div className="mb-4">
+              <span style={{ 
+                borderBottom: "1px dotted #000",
+                minWidth: "200px",
+                display: "inline-block",
+                paddingBottom: "2px"
+              }}>
+                {principalName ? ` ${principalName} ` : " ................................. "}
+              </span>
             </div>
-            <div>
-              ({principalName})
-            </div>
-            <div>
-              (นางสาวปิยมกรณ์ อรีย์เยอะ)
-            </div>
-            <div>
-              ผู้อำนวยการโรงเรียน
-            </div>
+            <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
           </div>
           <div className="text-center">
-            <div style={{ marginBottom: '60px' }}>
-              ลงชื่อ ......................................
+            <p className="mb-6" style={{ fontWeight: 'bold' }}>ตรวจสอบข้อมูลถูกต้อง</p>
+            <div className="mb-4">
+              <span style={{ 
+                borderBottom: "1px dotted #000",
+                minWidth: "200px",
+                display: "inline-block",
+                paddingBottom: "2px"
+              }}>
+                {homeRoomTeacher ? ` ${homeRoomTeacher.firstName} ${homeRoomTeacher.lastName} ` : " ................................. "}
+              </span>
             </div>
-            <div>
-              (นายอนาณกต์ ศิถิลมัส)
-            </div>
-            <div>
-              ครูประจำชั้น
-            </div>
-          </div>
-        </div>
-        <div className="text-center mt-8">
-          <div>
-            ผู้อำนวยการโรงเรียนบ้านดอนมูล
+            <p>ครูประจำชั้น</p>
           </div>
         </div>
       </div>
