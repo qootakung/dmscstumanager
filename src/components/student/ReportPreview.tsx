@@ -108,6 +108,9 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ students, reportOptions }
                     {reportOptions.additionalFields.signature && (
                       <td className="border border-black px-2 py-1"></td>
                     )}
+                    {reportOptions.additionalFields.signature2 && (
+                      <td className="border border-black px-2 py-1"></td>
+                    )}
                     {reportOptions.additionalFields.guardianSignature && (
                       <td className="border border-black px-2 py-1"></td>
                     )}

@@ -145,6 +145,11 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
                     {reportOptions.additionalFields.signature && (
                       <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ')]}></ResizableTd>
                     )}
+                    {reportOptions.additionalFields.signature2 && (() => {
+                      const firstIndex = allColumns.indexOf('ลายมือชื่อ');
+                      const secondIndex = allColumns.indexOf('ลายมือชื่อ', firstIndex + 1);
+                      return <ResizableTd width={columnWidths[secondIndex]}></ResizableTd>;
+                    })()}
                     {reportOptions.additionalFields.guardianSignature && (
                       <ResizableTd width={columnWidths[allColumns.indexOf('ลายเซ็นผู้ปกครอง')]}></ResizableTd>
                     )}
