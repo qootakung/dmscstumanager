@@ -143,6 +143,14 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
                   />
                   <Label htmlFor="guardianSignature" className="text-sm">ลายเซ็นผู้ปกครอง</Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="teacherSignature"
+                    checked={reportOptions.additionalFields.teacherSignature}
+                    onCheckedChange={(checked) => onAdditionalFieldChange('teacherSignature', !!checked)}
+                  />
+                  <Label htmlFor="teacherSignature" className="text-sm">ลายเซ็นครู</Label>
+                </div>
                 {reportOptions.reportType === '2' && (
                   <>
                     <div className="flex items-center space-x-2">

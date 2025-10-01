@@ -14,6 +14,7 @@ export const useStudentReport = () => {
       citizenId: false,
       signature: false,
       guardianSignature: false,
+      teacherSignature: false,
       timeIn: false,
       timeOut: false,
       phone: false,

@@ -143,6 +143,9 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
                     {reportOptions.additionalFields.guardianSignature && (
                       <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายเซ็นผู้ปกครอง')]}px` }}></td>
                     )}
+                    {reportOptions.additionalFields.teacherSignature && (
+                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายเซ็นครู')]}px` }}></td>
+                    )}
                     {reportOptions.additionalFields.timeIn && (
                       <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลามา')]}px` }}></td>
                     )}

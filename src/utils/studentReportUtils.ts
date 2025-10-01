@@ -30,6 +30,7 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
+  if (reportOptions.additionalFields.teacherSignature) additionalColumns.push('ลายเซ็นครู');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
