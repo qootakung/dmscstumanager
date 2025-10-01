@@ -56,8 +56,8 @@ export interface ReportOptions {
     gender: boolean;
     citizenId: boolean;
     signature: boolean;
+    signature2: boolean;
     guardianSignature: boolean;
-    teacherSignature: boolean;
     timeIn: boolean;
     timeOut: boolean;
     phone: boolean;

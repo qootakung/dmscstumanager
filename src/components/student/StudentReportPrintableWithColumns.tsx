@@ -140,11 +140,13 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
                     {reportOptions.additionalFields.signature && (
                       <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ')]}px` }}></td>
                     )}
+                    {reportOptions.additionalFields.signature2 && (() => {
+                      const firstIndex = allColumns.indexOf('ลายมือชื่อ');
+                      const secondIndex = allColumns.indexOf('ลายมือชื่อ', firstIndex + 1);
+                      return <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[secondIndex]}px` }}></td>;
+                    })()}
                     {reportOptions.additionalFields.guardianSignature && (
                       <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายเซ็นผู้ปกครอง')]}px` }}></td>
-                    )}
-                    {reportOptions.additionalFields.teacherSignature && (
-                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายเซ็นครู')]}px` }}></td>
                     )}
                     {reportOptions.additionalFields.timeIn && (
                       <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลามา')]}px` }}></td>

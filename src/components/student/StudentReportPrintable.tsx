@@ -67,8 +67,8 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
       if (reportOptions.additionalFields.address) additionalData.push('');
       if (reportOptions.additionalFields.phone) additionalData.push(student.guardianPhone || '');
       if (reportOptions.additionalFields.signature) additionalData.push('');
+      if (reportOptions.additionalFields.signature2) additionalData.push('');
       if (reportOptions.additionalFields.guardianSignature) additionalData.push('');
-      if (reportOptions.additionalFields.teacherSignature) additionalData.push('');
       if (reportOptions.additionalFields.timeIn) additionalData.push('');
       if (reportOptions.additionalFields.timeOut) additionalData.push('');
 
