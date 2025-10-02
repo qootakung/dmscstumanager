@@ -19,20 +19,20 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
     return [...baseColumns, 'ลายมือชื่อ', 'เวลามา', 'เวลากลับ', 'หมายเหตุ'];
   }
   
-  // For other report types, use existing logic
+  // For other report types, use existing logic - Order matches the form display order
   const additionalColumns = [];
-  if (reportOptions.additionalFields.gradeLevel) additionalColumns.push('ระดับชั้น');
   if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
   if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
-  if (reportOptions.additionalFields.birthDate) additionalColumns.push('วันเดือนปีเกิด');
-  if (reportOptions.additionalFields.age) additionalColumns.push('อายุ');
-  if (reportOptions.additionalFields.address) additionalColumns.push('ที่อยู่');
-  if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
+  if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
+  if (reportOptions.additionalFields.gradeLevel) additionalColumns.push('ระดับชั้น');
+  if (reportOptions.additionalFields.address) additionalColumns.push('ที่อยู่');
+  if (reportOptions.additionalFields.age) additionalColumns.push('อายุ');
+  if (reportOptions.additionalFields.birthDate) additionalColumns.push('วันเดือนปีเกิด');
 
   const customColumns: string[] = [];
   if (reportOptions.customColumns && reportOptions.customColumns > 0) {

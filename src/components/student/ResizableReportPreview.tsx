@@ -121,26 +121,14 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
                   </>
                 )}
                 
-                {/* Additional fields for non-type-3 reports */}
+                {/* Additional fields for non-type-3 reports - Order matches form display */}
                 {reportOptions.reportType !== '3' && (
                   <>
-                    {reportOptions.additionalFields.gradeLevel && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('ระดับชั้น')]} className="text-center">{student.grade}</ResizableTd>
-                    )}
                     {reportOptions.additionalFields.gender && (
                       <ResizableTd width={columnWidths[allColumns.indexOf('เพศ')]} className="text-center">{student.gender === 'ชาย' ? 'ช' : 'ญ'}</ResizableTd>
                     )}
                     {reportOptions.additionalFields.citizenId && (
                       <ResizableTd width={columnWidths[allColumns.indexOf('เลขบัตรประจำตัวประชาชน')]} className="text-center">{student.citizenId}</ResizableTd>
-                    )}
-                    {reportOptions.additionalFields.birthDate && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('วันเดือนปีเกิด')]} className="text-center">{formatBirthDate(student.birthDate)}</ResizableTd>
-                    )}
-                    {reportOptions.additionalFields.age && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('อายุ')]} className="text-center">{calculateAge(student.birthDate)}</ResizableTd>
-                    )}
-                    {reportOptions.additionalFields.address && (
-                      <ResizableTd width={columnWidths[allColumns.indexOf('ที่อยู่')]}>{formatAddress(student)}</ResizableTd>
                     )}
                     {reportOptions.additionalFields.signature && (
                       <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ')]}></ResizableTd>
@@ -161,6 +149,18 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
                     )}
                     {reportOptions.additionalFields.phone && (
                       <ResizableTd width={columnWidths[allColumns.indexOf('เบอร์โทร')]} className="text-center">{student.guardianPhone}</ResizableTd>
+                    )}
+                    {reportOptions.additionalFields.gradeLevel && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('ระดับชั้น')]} className="text-center">{student.grade}</ResizableTd>
+                    )}
+                    {reportOptions.additionalFields.address && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('ที่อยู่')]}>{formatAddress(student)}</ResizableTd>
+                    )}
+                    {reportOptions.additionalFields.age && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('อายุ')]} className="text-center">{calculateAge(student.birthDate)}</ResizableTd>
+                    )}
+                    {reportOptions.additionalFields.birthDate && (
+                      <ResizableTd width={columnWidths[allColumns.indexOf('วันเดือนปีเกิด')]} className="text-center">{formatBirthDate(student.birthDate)}</ResizableTd>
                     )}
 
                     {/* Custom empty columns */}

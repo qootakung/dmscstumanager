@@ -116,26 +116,14 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
                   </>
                 )}
                 
-                {/* Additional fields for non-type-3 reports */}
+                {/* Additional fields for non-type-3 reports - Order matches form display */}
                 {reportOptions.reportType !== '3' && (
                   <>
-                    {reportOptions.additionalFields.gradeLevel && (
-                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('ระดับชั้น')]}px` }}>{student.grade}</td>
-                    )}
                     {reportOptions.additionalFields.gender && (
                       <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เพศ')]}px` }}>{student.gender === 'ชาย' ? 'ช' : 'ญ'}</td>
                     )}
                     {reportOptions.additionalFields.citizenId && (
                       <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เลขบัตรประจำตัวประชาชน')]}px` }}>{student.citizenId}</td>
-                    )}
-                    {reportOptions.additionalFields.birthDate && (
-                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วันเดือนปีเกิด')]}px` }}>{formatBirthDate(student.birthDate)}</td>
-                    )}
-                    {reportOptions.additionalFields.age && (
-                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('อายุ')]}px` }}>{calculateAge(student.birthDate)}</td>
-                    )}
-                    {reportOptions.additionalFields.address && (
-                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ที่อยู่')]}px` }}>{formatAddress(student)}</td>
                     )}
                     {reportOptions.additionalFields.signature && (
                       <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ')]}px` }}></td>
@@ -156,6 +144,18 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
                     )}
                     {reportOptions.additionalFields.phone && (
                       <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เบอร์โทร')]}px` }}>{student.guardianPhone}</td>
+                    )}
+                    {reportOptions.additionalFields.gradeLevel && (
+                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('ระดับชั้น')]}px` }}>{student.grade}</td>
+                    )}
+                    {reportOptions.additionalFields.address && (
+                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ที่อยู่')]}px` }}>{formatAddress(student)}</td>
+                    )}
+                    {reportOptions.additionalFields.age && (
+                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('อายุ')]}px` }}>{calculateAge(student.birthDate)}</td>
+                    )}
+                    {reportOptions.additionalFields.birthDate && (
+                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วันเดือนปีเกิด')]}px` }}>{formatBirthDate(student.birthDate)}</td>
                     )}
 
                     {/* Custom empty columns */}

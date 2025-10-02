@@ -57,20 +57,20 @@ const StudentReportPrintable = React.forwardRef<HTMLDivElement, StudentReportPri
         return [...baseData, '', '', '', ''];
       }
 
-      // For other report types, use existing logic
+      // For other report types, use existing logic - Order matches form display
       const additionalData = [];
-      if (reportOptions.additionalFields.gradeLevel) additionalData.push(student.grade || '');
       if (reportOptions.additionalFields.gender) additionalData.push(student.gender === 'ชาย' ? 'ช' : 'ญ');
       if (reportOptions.additionalFields.citizenId) additionalData.push(student.citizenId || '');
-      if (reportOptions.additionalFields.birthDate) additionalData.push(student.birthDate ? new Date(student.birthDate).toLocaleDateString('th-TH') : '');
-      if (reportOptions.additionalFields.age) additionalData.push('');
-      if (reportOptions.additionalFields.address) additionalData.push('');
-      if (reportOptions.additionalFields.phone) additionalData.push(student.guardianPhone || '');
       if (reportOptions.additionalFields.signature) additionalData.push('');
       if (reportOptions.additionalFields.signature2) additionalData.push('');
       if (reportOptions.additionalFields.guardianSignature) additionalData.push('');
       if (reportOptions.additionalFields.timeIn) additionalData.push('');
       if (reportOptions.additionalFields.timeOut) additionalData.push('');
+      if (reportOptions.additionalFields.phone) additionalData.push(student.guardianPhone || '');
+      if (reportOptions.additionalFields.gradeLevel) additionalData.push(student.grade || '');
+      if (reportOptions.additionalFields.address) additionalData.push('');
+      if (reportOptions.additionalFields.age) additionalData.push('');
+      if (reportOptions.additionalFields.birthDate) additionalData.push(student.birthDate ? new Date(student.birthDate).toLocaleDateString('th-TH') : '');
 
       const customData = Array(reportOptions.customColumns || 0).fill('');
       const noteData = reportOptions.additionalFields.note ? [''] : [];
