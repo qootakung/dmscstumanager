@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Printer, GraduationCap, Users, FileText, Award, Settings, FileUp } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import type { Student, ReportOptions } from '@/types/student';
-import { generateStudentExcel } from '@/utils/studentReportExcel';
+import { generateStudentExcel, generateStudentExcelPaginated } from '@/utils/studentReportExcel';
 import { printStudentReport } from '@/utils/studentReportPrint';
 import { printStudentReportPaginated } from '@/utils/studentReportPrintPaginated';
 import ReportOptionsForm from '@/components/student/ReportOptionsForm';
@@ -78,11 +78,11 @@ const Reports: React.FC = () => {
   }, [students, reportOptions.classLevel, reportOptions.academicYear]);
 
   const handleGenerateExcel = () => {
-    generateStudentExcel(filteredStudents, reportOptions);
-    toast({
-      title: "ดาวน์โหลดรายงานสำเร็จ!",
-      description: "ไฟล์ Excel กำลังถูกดาวน์โหลด...",
-    });
+    if (isPaginatedMode) {
+      generateStudentExcelPaginated(filteredStudents, reportOptions);
+    } else {
+      generateStudentExcel(filteredStudents, reportOptions);
+    }
   };
 
   const handlePrint = () => {
