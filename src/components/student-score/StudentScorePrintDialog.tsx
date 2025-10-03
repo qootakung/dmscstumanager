@@ -149,9 +149,9 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           <div>
             <Label htmlFor="homeRoomTeacher">ครูประจำชั้น</Label>
             <Select
-              value={selectedTeacher?.id || ""}
+              value={selectedTeacher?.id || "none"}
               onValueChange={(value) => {
-                const teacher = teachers.find(t => t.id === value);
+                const teacher = value === "none" ? undefined : teachers.find(t => t.id === value);
                 setSelectedTeacher(teacher);
               }}
             >
@@ -159,8 +159,9 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
                 <SelectValue placeholder="เลือกครูประจำชั้น" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">-- ไม่ระบุ --</SelectItem>
                 {teachers.map((teacher) => (
-                  <SelectItem key={teacher.id} value={teacher.id || ""}>
+                  <SelectItem key={teacher.id} value={teacher.id || `teacher-${teacher.firstName}-${teacher.lastName}`}>
                     {teacher.firstName} {teacher.lastName}
                   </SelectItem>
                 ))}
@@ -170,9 +171,9 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           <div>
             <Label htmlFor="selectedStudent">เลือกนักเรียน</Label>
             <Select
-              value={selectedStudent?.id || ""}
+              value={selectedStudent?.id || "all"}
               onValueChange={(value) => {
-                const student = students.find(s => s.id === value);
+                const student = value === "all" ? undefined : students.find(s => s.id === value);
                 setSelectedStudent(student);
               }}
             >
@@ -180,9 +181,9 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
                 <SelectValue placeholder="เลือกนักเรียน (ทุกคนหากไม่เลือก)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">ทุกคน</SelectItem>
+                <SelectItem value="all">ทุกคน</SelectItem>
                 {students.map((student) => (
-                  <SelectItem key={student.id} value={student.id || ""}>
+                  <SelectItem key={student.id} value={student.id || `student-${student.studentId}`}>
                     {student.firstNameTh} {student.lastNameTh}
                   </SelectItem>
                 ))}
