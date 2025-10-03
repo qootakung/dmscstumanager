@@ -16,7 +16,41 @@ export const getReportColumns = (reportOptions: ReportOptions) => {
   
   // For "Other Registration Form" type, add fixed additional columns
   if (reportOptions.reportType === '3') {
-    return [...baseColumns, 'ลายมือชื่อ', 'เวลามา', 'เวลากลับ', 'หมายเหตุ'];
+    return [...baseColumns, 'ลายมือชื่อ', 'เวลามา', 'ลายมือชื่อ', 'เวลากลับ'];
+  }
+  
+  // For "Meeting Registration Form" type, order signature and time columns together
+  if (reportOptions.reportType === '2') {
+    const additionalColumns = [];
+    if (reportOptions.additionalFields.gender) additionalColumns.push('เพศ');
+    if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
+    
+    // Add signature and time fields in specific order
+    if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
+    if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
+    if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
+    if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
+    
+    if (reportOptions.additionalFields.guardianSignature) additionalColumns.push('ลายเซ็นผู้ปกครอง');
+    if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
+    if (reportOptions.additionalFields.gradeLevel) additionalColumns.push('ระดับชั้น');
+    if (reportOptions.additionalFields.address) additionalColumns.push('ที่อยู่');
+    if (reportOptions.additionalFields.age) additionalColumns.push('อายุ');
+    if (reportOptions.additionalFields.birthDate) additionalColumns.push('วันเดือนปีเกิด');
+
+    const customColumns: string[] = [];
+    if (reportOptions.customColumns && reportOptions.customColumns > 0) {
+      for (let i = 1; i <= reportOptions.customColumns; i++) {
+        customColumns.push('');
+      }
+    }
+
+    const noteColumn: string[] = [];
+    if (reportOptions.additionalFields.note) {
+      noteColumn.push('หมายเหตุ');
+    }
+
+    return [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
   }
   
   // For other report types, use existing logic - Order matches the form display order
