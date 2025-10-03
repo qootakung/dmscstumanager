@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Student } from '@/types/student';
 import { Teacher } from '@/types/teacher';
 import { StudentScorePrintPreview } from './StudentScorePrintPreview';
-import { Printer } from 'lucide-react';
+import { Printer, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface StudentScore {
   id?: string;
@@ -58,7 +58,41 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
 }) => {
   const [editablePrincipalName, setEditablePrincipalName] = useState(principalName);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | undefined>(homeRoomTeacher);
-  const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
+  const [selectedGrade, setSelectedGrade] = useState<string>(gradeLevel || 'all');
+  const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
+
+  // Get unique grade levels from students
+  const availableGrades = useMemo(() => {
+    const grades = [...new Set(students.map(s => s.grade))].sort();
+    return grades;
+  }, [students]);
+
+  // Filter students by selected grade
+  const filteredStudents = useMemo(() => {
+    if (selectedGrade === 'all') return students;
+    return students.filter(s => s.grade === selectedGrade);
+  }, [students, selectedGrade]);
+
+  // Get current student
+  const selectedStudent = useMemo(() => {
+    if (filteredStudents.length === 0) return undefined;
+    return filteredStudents[currentStudentIndex];
+  }, [filteredStudents, currentStudentIndex]);
+
+  // Navigation handlers
+  const handlePrevious = () => {
+    setCurrentStudentIndex(prev => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentStudentIndex(prev => Math.min(filteredStudents.length - 1, prev + 1));
+  };
+
+  // Reset index when grade changes
+  const handleGradeChange = (grade: string) => {
+    setSelectedGrade(grade);
+    setCurrentStudentIndex(0);
+  };
   const handlePrint = () => {
     const printContent = document.querySelector('.print-content');
     if (!printContent) return;
@@ -136,68 +170,99 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div>
-            <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
-            <Input
-              id="principalName"
-              value={editablePrincipalName}
-              onChange={(e) => setEditablePrincipalName(e.target.value)}
-              placeholder="กรอกชื่อผู้อำนวยการ"
-            />
+        <div className="space-y-4 mb-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
+              <Input
+                id="principalName"
+                value={editablePrincipalName}
+                onChange={(e) => setEditablePrincipalName(e.target.value)}
+                placeholder="กรอกชื่อผู้อำนวยการ"
+              />
+            </div>
+            <div>
+              <Label htmlFor="homeRoomTeacher">ครูประจำชั้น</Label>
+              <Select
+                value={selectedTeacher?.id || "none"}
+                onValueChange={(value) => {
+                  const teacher = value === "none" ? undefined : teachers.find(t => t.id === value);
+                  setSelectedTeacher(teacher);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกครูประจำชั้น" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">-- ไม่ระบุ --</SelectItem>
+                  {teachers.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id || `teacher-${teacher.firstName}-${teacher.lastName}`}>
+                      {teacher.firstName} {teacher.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
           <div>
-            <Label htmlFor="homeRoomTeacher">ครูประจำชั้น</Label>
+            <Label htmlFor="gradeLevel">เลือกชั้น</Label>
             <Select
-              value={selectedTeacher?.id || "none"}
-              onValueChange={(value) => {
-                const teacher = value === "none" ? undefined : teachers.find(t => t.id === value);
-                setSelectedTeacher(teacher);
-              }}
+              value={selectedGrade}
+              onValueChange={handleGradeChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="เลือกครูประจำชั้น" />
+                <SelectValue placeholder="เลือกชั้นเรียน" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">-- ไม่ระบุ --</SelectItem>
-                {teachers.map((teacher) => (
-                  <SelectItem key={teacher.id} value={teacher.id || `teacher-${teacher.firstName}-${teacher.lastName}`}>
-                    {teacher.firstName} {teacher.lastName}
+                <SelectItem value="all">ทุกชั้น</SelectItem>
+                {availableGrades.map((grade) => (
+                  <SelectItem key={grade} value={grade}>
+                    {grade}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label htmlFor="selectedStudent">เลือกนักเรียน</Label>
-            <Select
-              value={selectedStudent?.id || "all"}
-              onValueChange={(value) => {
-                const student = value === "all" ? undefined : students.find(s => s.id === value);
-                setSelectedStudent(student);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="เลือกนักเรียน (ทุกคนหากไม่เลือก)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">ทุกคน</SelectItem>
-                {students.map((student) => (
-                  <SelectItem key={student.id} value={student.id || `student-${student.studentId}`}>
-                    {student.firstNameTh} {student.lastNameTh}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+          <div className="space-y-2">
+            <Label>เลือกนักเรียน ({currentStudentIndex + 1} / {filteredStudents.length})</Label>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handlePrevious}
+                disabled={currentStudentIndex === 0}
+                className="h-10 w-10 shrink-0"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              
+              <div className="flex-1 text-center py-2 px-4 bg-muted rounded-md font-medium">
+                {selectedStudent ? `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}` : 'ไม่มีนักเรียน'}
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleNext}
+                disabled={currentStudentIndex >= filteredStudents.length - 1}
+                className="h-10 w-10 shrink-0"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
         <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', transform: 'scale(0.8)', transformOrigin: 'top center' }}>
           <StudentScorePrintPreview
             scores={scores}
-            students={students}
+            students={filteredStudents}
             teachers={teachers}
-            gradeLevel={gradeLevel}
+            gradeLevel={selectedGrade}
             academicYear={academicYear}
             principalName={editablePrincipalName}
             homeRoomTeacher={selectedTeacher}
