@@ -144,6 +144,20 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
     <div className="w-full bg-white text-black print-content" style={{ fontSize: '21px', fontFamily: "'TH SarabunPSK', 'TH Sarabun', 'Sarabun', Arial, sans-serif" }}>
       {/* Header */}
       <div className="text-center mb-6">
+        {/* Logo Section */}
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/placeholder.svg" 
+            alt="โลโก้โรงเรียน" 
+            style={{ 
+              width: '97.92px',  // 1.02 inches * 96 DPI
+              height: '96px',     // 1 inch * 96 DPI
+              objectFit: 'contain',
+              imageRendering: 'crisp-edges'
+            }}
+          />
+        </div>
+        
         <div style={{ fontSize: '21px', fontWeight: 'bold', marginBottom: '8px' }}>
           รายงานผลคะแนนผู้เรียนรายบุคคล
         </div>
