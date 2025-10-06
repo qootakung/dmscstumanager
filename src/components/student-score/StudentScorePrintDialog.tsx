@@ -60,6 +60,21 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | undefined>(homeRoomTeacher);
   const [selectedGrade, setSelectedGrade] = useState<string>(gradeLevel || 'all');
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
+  const [logoUrl, setLogoUrl] = useState<string>('');
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setLogoUrl(result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
 
   // Get unique grade levels from students
   const availableGrades = useMemo(() => {
@@ -225,6 +240,26 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             </Select>
           </div>
 
+          <div>
+            <Label htmlFor="logoUpload">เลือกรูป Logo โรงเรียน</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="logoUpload"
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="flex-1"
+              />
+              {logoUrl && (
+                <img 
+                  src={logoUrl} 
+                  alt="Logo preview" 
+                  className="h-12 w-12 object-contain border rounded"
+                />
+              )}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>เลือกนักเรียน ({currentStudentIndex + 1} / {filteredStudents.length})</Label>
             <div className="flex items-center gap-2">
@@ -267,6 +302,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             principalName={editablePrincipalName}
             homeRoomTeacher={selectedTeacher}
             selectedStudent={selectedStudent}
+            logoUrl={logoUrl}
           />
         </div>
 

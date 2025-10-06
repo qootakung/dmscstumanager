@@ -28,6 +28,7 @@ interface StudentScorePrintPreviewProps {
   principalName?: string;
   homeRoomTeacher?: Teacher;
   selectedStudent?: Student;
+  logoUrl?: string;
 }
 
 export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> = ({
@@ -38,7 +39,8 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   academicYear,
   principalName = "นายธนภูมิ ต๊ะสินธุ",
   homeRoomTeacher,
-  selectedStudent
+  selectedStudent,
+  logoUrl
 }) => {
   const getStudentData = (studentId: string) => {
     return students.find(s => s.id === studentId);
@@ -145,18 +147,20 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       {/* Header */}
       <div className="text-center mb-6">
         {/* Logo Section */}
-        <div className="flex justify-center mb-4">
-          <img 
-            src="/placeholder.svg" 
-            alt="โลโก้โรงเรียน" 
-            style={{ 
-              width: '97.92px',  // 1.02 inches * 96 DPI
-              height: '96px',     // 1 inch * 96 DPI
-              objectFit: 'contain',
-              imageRendering: 'crisp-edges'
-            }}
-          />
-        </div>
+        {logoUrl && (
+          <div className="flex justify-center mb-4">
+            <img 
+              src={logoUrl} 
+              alt="โลโก้โรงเรียน" 
+              style={{ 
+                width: '97.92px',  // 1.02 inches * 96 DPI
+                height: '96px',     // 1 inch * 96 DPI
+                objectFit: 'contain',
+                imageRendering: 'crisp-edges'
+              }}
+            />
+          </div>
+        )}
         
         <div style={{ fontSize: '21px', fontWeight: 'bold', marginBottom: '8px' }}>
           รายงานผลคะแนนผู้เรียนรายบุคคล
