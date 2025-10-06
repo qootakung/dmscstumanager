@@ -72,7 +72,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
       </div>
     </div>
     <div style={{ textAlign: 'center', marginTop: '48px' }}> 
-      <div style={{ marginBottom: '8px' }}>ตรวจสอบแล้วถูกต้อง</div>
+      <div style={{ marginBottom: '24px' }}>ตรวจสอบแล้วถูกต้อง</div>
       <div>
         <span>ลงชื่อ</span>
         <span style={signatureLineStyle}></span>
