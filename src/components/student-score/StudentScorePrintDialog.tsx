@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -68,6 +68,13 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   const [selectedGrade, setSelectedGrade] = useState<string>(gradeLevel || 'all');
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const [logoUrl, setLogoUrl] = useState<string>('');
+
+  // Update principal name when prop changes
+  useEffect(() => {
+    if (principalName) {
+      setEditablePrincipalName(principalName);
+    }
+  }, [principalName]);
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

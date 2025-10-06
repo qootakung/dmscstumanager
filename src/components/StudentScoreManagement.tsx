@@ -201,7 +201,13 @@ export const StudentScoreManagement: React.FC = () => {
       console.log('loadAllScoresForGrade - Data received:', data);
       console.log('loadAllScoresForGrade - Data count:', data?.length || 0);
       
-      setAllScoresForGrade(data || []);
+      // Override all max_score to 50
+      const scoresWithFixedMaxScore = (data || []).map(score => ({
+        ...score,
+        max_score: 50
+      }));
+      
+      setAllScoresForGrade(scoresWithFixedMaxScore);
     } catch (error) {
       console.error('Error loading all scores for grade:', error);
     }
@@ -240,7 +246,10 @@ export const StudentScoreManagement: React.FC = () => {
       const allScores = filteredStudents.map(student => {
         const existingScore = scoresMap[student.id];
         if (existingScore) {
-          return existingScore;
+          return {
+            ...existingScore,
+            max_score: 50  // Override to always show 50
+          };
         }
         return {
           student_id: student.id,
