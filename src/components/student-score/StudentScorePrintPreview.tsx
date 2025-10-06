@@ -42,6 +42,14 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   selectedStudent,
   logoUrl
 }) => {
+  // Debug logs
+  console.log('StudentScorePrintPreview - All props:', {
+    scoresCount: scores.length,
+    studentsCount: students.length,
+    gradeLevel,
+    selectedStudent: selectedStudent ? { id: selectedStudent.id, name: `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}` } : null
+  });
+  console.log('StudentScorePrintPreview - All scores:', scores);
   const getStudentData = (studentId: string) => {
     return students.find(s => s.id === studentId);
   };
@@ -207,6 +215,10 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
             const subjectScore = selectedStudent 
               ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
               : scores.find(s => s.subject_code === subject.code);
+            
+            // Log for debugging
+            console.log('Subject:', subject.code, 'Score found:', subjectScore);
+            
             return (
               <tr key={subject.code}>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
@@ -216,7 +228,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                   {subject.name}
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  50
+                  {subjectScore ? subjectScore.max_score : 50}
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
                   {subjectScore ? subjectScore.score : ''}
@@ -237,6 +249,10 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
             const subjectScore = selectedStudent 
               ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
               : scores.find(s => s.subject_code === subject.code);
+            
+            // Log for debugging
+            console.log('Additional Subject:', subject.code, 'Score found:', subjectScore);
+            
             return (
               <tr key={subject.code}>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
@@ -246,7 +262,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                   {subject.name}
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  50
+                  {subjectScore ? subjectScore.max_score : 50}
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
                   {subjectScore ? subjectScore.score : ''}
