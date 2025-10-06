@@ -185,7 +185,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
         </div>
         {selectedStudent && (
           <div style={{ fontSize: '21px', marginBottom: '16px', fontWeight: 'bold' }}>
-            ชื่อ-สกุลนักเรียน: {selectedStudent.firstNameTh} {selectedStudent.lastNameTh} 
+            ชื่อ-สกุลนักเรียน: {selectedStudent.titleTh}{selectedStudent.firstNameTh} {selectedStudent.lastNameTh} 
             {selectedStudent.studentId && ` รหัสนักเรียน: ${selectedStudent.studentId}`}
           </div>
         )}
