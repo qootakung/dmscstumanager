@@ -228,7 +228,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                   {subject.name}
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  {subjectScore ? subjectScore.max_score : 50}
+                  50
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
                   {subjectScore ? subjectScore.score : ''}
@@ -262,7 +262,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                   {subject.name}
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  {subjectScore ? subjectScore.max_score : 50}
+                  50
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
                   {subjectScore ? subjectScore.score : ''}
