@@ -190,6 +190,10 @@ export const StudentScoreManagement: React.FC = () => {
         return;
       }
 
+      console.log('loadAllScoresForGrade - Query params:', { selectedGrade, academicYear });
+      console.log('loadAllScoresForGrade - Data received:', data);
+      console.log('loadAllScoresForGrade - Data count:', data?.length || 0);
+      
       setAllScoresForGrade(data || []);
     } catch (error) {
       console.error('Error loading all scores for grade:', error);
@@ -516,7 +520,15 @@ export const StudentScoreManagement: React.FC = () => {
 
       <StudentScorePrintDialog
         open={showPrintDialog}
-        onOpenChange={setShowPrintDialog}
+        onOpenChange={(open) => {
+          console.log('StudentScorePrintDialog opening:', open);
+          if (open) {
+            console.log('Sending to Dialog - allScoresForGrade:', allScoresForGrade);
+            console.log('Sending to Dialog - students count:', students.length);
+            console.log('Sending to Dialog - gradeLevel:', selectedGrade);
+          }
+          setShowPrintDialog(open);
+        }}
         scores={allScoresForGrade}
         students={students}
         teachers={teachers}

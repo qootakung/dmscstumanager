@@ -56,6 +56,13 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   principalName = "นายธนภูมิ ต๊ะสินธุ",
   homeRoomTeacher
 }) => {
+  console.log('StudentScorePrintDialog props:', {
+    scoresCount: scores.length,
+    studentsCount: students.length,
+    gradeLevel,
+    academicYear,
+    scoresPreview: scores.slice(0, 3)
+  });
   const [editablePrincipalName, setEditablePrincipalName] = useState(principalName);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | undefined>(homeRoomTeacher);
   const [selectedGrade, setSelectedGrade] = useState<string>(gradeLevel || 'all');
