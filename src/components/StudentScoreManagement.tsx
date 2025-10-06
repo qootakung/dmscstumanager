@@ -241,7 +241,7 @@ export const StudentScoreManagement: React.FC = () => {
           subject_code: selectedSubject.code,
           subject_name: selectedSubject.name,
           grade_level: selectedGrade,
-          max_score: 100,
+          max_score: 50,
           score: 0,
           academic_year: academicYear,
         };
