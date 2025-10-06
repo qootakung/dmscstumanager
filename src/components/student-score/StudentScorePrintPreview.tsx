@@ -50,6 +50,17 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
     selectedStudent: selectedStudent ? { id: selectedStudent.id, name: `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}` } : null
   });
   console.log('StudentScorePrintPreview - All scores:', scores);
+  
+  // Debug: Filter scores for selected student
+  if (selectedStudent) {
+    const studentScores = scores.filter(s => s.student_id === selectedStudent.id);
+    console.log('StudentScorePrintPreview - Scores for selected student:', {
+      studentId: selectedStudent.id,
+      studentName: `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}`,
+      scoresCount: studentScores.length,
+      scores: studentScores.map(s => ({ subject: s.subject_code, score: s.score }))
+    });
+  }
   const getStudentData = (studentId: string) => {
     return students.find(s => s.id === studentId);
   };
@@ -223,9 +234,6 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
               ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
               : scores.find(s => s.subject_code === subject.code);
             
-            // Log for debugging
-            console.log('Subject:', subject.code, 'Score found:', subjectScore);
-            
             return (
               <tr key={subject.code}>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
@@ -256,9 +264,6 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
             const subjectScore = selectedStudent 
               ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
               : scores.find(s => s.subject_code === subject.code);
-            
-            // Log for debugging
-            console.log('Additional Subject:', subject.code, 'Score found:', subjectScore);
             
             return (
               <tr key={subject.code}>
