@@ -130,9 +130,9 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   const getAdditionalSubjects = (grade: string) => {
     const gradeNumber = grade.replace('ป.', '');
     return [
-      { code: `อ${gradeNumber}1201`, name: 'ภาษาอังกฤษเพื่อการสื่อสาร' },
-      { code: `ว${gradeNumber}1101`, name: 'วิทยาการคำนวณ' },
-      { code: `ส${gradeNumber}1202`, name: 'ป้องกันการทุจริต' }
+      { code: `อ1${gradeNumber}201`, name: 'ภาษาอังกฤษเพื่อการสื่อสาร' },
+      { code: `ว1${gradeNumber}101`, name: 'วิทยาการคำนวณ' },
+      { code: `ส1${gradeNumber}202`, name: 'ป้องกันการทุจริต' }
     ];
   };
 
