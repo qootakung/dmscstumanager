@@ -152,12 +152,17 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             .mb-4 { margin-bottom: 16px; }
             .mb-6 { margin-bottom: 24px; }
             .mt-6 { margin-top: 24px; }
+            .mt-8 { margin-top: 32px; }
             .mt-12 { margin-top: 48px; }
             .grid { display: grid; }
             .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
             .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
             .gap-4 { gap: 16px; }
             .inline-block { display: inline-block; }
+            .flex { display: flex; }
+            .justify-between { justify-content: space-between; }
+            .items-start { align-items: flex-start; }
+            .justify-center { justify-content: center; }
             @media print {
               body { -webkit-print-color-adjust: exact; }
             }
