@@ -134,6 +134,7 @@ export const StudentScoreManagement: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [principalName, setPrincipalName] = useState<string>('');
 
   useEffect(() => {
     loadTeachers();
@@ -168,6 +169,12 @@ export const StudentScoreManagement: React.FC = () => {
   const loadTeachers = async () => {
     const teacherData = await getTeachers();
     setTeachers(teacherData);
+    
+    // Auto-fill principal name from teachers list
+    const principal = teacherData.find((t) => t.position === "ผู้อำนวยการโรงเรียน");
+    if (principal) {
+      setPrincipalName(`${principal.firstName} ${principal.lastName}`);
+    }
   };
 
   const loadStudents = async () => {
@@ -534,7 +541,7 @@ export const StudentScoreManagement: React.FC = () => {
         teachers={teachers}
         gradeLevel={selectedGrade}
         academicYear={academicYear}
-        principalName="นางสาวสุทิตา ใจดี"
+        principalName={principalName}
         homeRoomTeacher={teachers.find(t => t.position?.includes('ครูประจำชั้น'))}
       />
     </div>
