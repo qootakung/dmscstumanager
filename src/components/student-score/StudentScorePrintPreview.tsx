@@ -139,11 +139,18 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
 
   const getAdditionalSubjects = (grade: string) => {
     const gradeNumber = grade.replace('ป.', '');
-    return [
+    const baseSubjects = [
       { code: `อ1${gradeNumber}201`, name: 'ภาษาอังกฤษเพื่อการสื่อสาร' },
       { code: `ว1${gradeNumber}102`, name: 'วิทยาการคำนวณ' },
       { code: `ส1${gradeNumber}202`, name: 'ป้องกันการทุจริต' }
     ];
+    
+    // Add "วิทย์พลังสิบ" for grades 4-6
+    if (['4', '5', '6'].includes(gradeNumber)) {
+      baseSubjects.push({ code: `ว1${gradeNumber}202`, name: 'วิทย์พลังสิบ' });
+    }
+    
+    return baseSubjects;
   };
 
   if (scores.length === 0 && !gradeLevel) {
