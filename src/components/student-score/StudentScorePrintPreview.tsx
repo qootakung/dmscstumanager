@@ -261,9 +261,9 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       {/* Signature Section */}
       <div className="mt-16" style={{ fontSize: '21px' }}>
         <div className="flex justify-between items-start">
-          <div className="text-center">
-            <p className="mb-6" style={{ fontWeight: 'bold' }}>รับรองข้อมูลถูกต้อง</p>
-            <div className="mb-4">
+          <div className="text-left" style={{ minWidth: '250px' }}>
+            <p className="mb-2">รับรองข้อมูลถูกต้อง</p>
+            <div className="mb-1">
               <span style={{ 
                 borderBottom: "1px dotted #000",
                 minWidth: "200px",
@@ -275,9 +275,9 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
             </div>
             <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
           </div>
-          <div className="text-center">
-            <p className="mb-6" style={{ fontWeight: 'bold' }}>ตรวจสอบข้อมูลถูกต้อง</p>
-            <div className="mb-4">
+          <div className="text-left" style={{ minWidth: '250px' }}>
+            <p className="mb-2">ตรวจสอบข้อมูลถูกต้อง</p>
+            <div className="mb-1">
               <span style={{ 
                 borderBottom: "1px dotted #000",
                 minWidth: "200px",
