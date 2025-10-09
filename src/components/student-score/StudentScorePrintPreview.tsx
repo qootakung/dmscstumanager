@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Student } from '@/types/student';
 import { Teacher } from '@/types/teacher';
 
@@ -91,96 +91,45 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
     return `${day}/${month}/${year}`;
   };
 
-  // Get standard subjects for the grade level
-  const getSubjectsForGrade = (grade: string) => {
-    const gradeSubjects = {
-      'ป.1': [
-        { code: 'ท11101', name: 'ภาษาไทย' },
-        { code: 'ค11101', name: 'คณิตศาสตร์' },
-        { code: 'ว11101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
-        { code: 'ส11101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
-        { code: 'ส11102', name: 'ประวัติศาสตร์' },
-        { code: 'พ11101', name: 'สุขศึกษาและพลศึกษา' },
-        { code: 'ศ11101', name: 'ศิลปะ' },
-        { code: 'ง11101', name: 'การงานอาชีพ' },
-        { code: 'อ11101', name: 'ภาษาอังกฤษ' }
-      ],
-      'ป.2': [
-        { code: 'ท12101', name: 'ภาษาไทย' },
-        { code: 'ค12101', name: 'คณิตศาสตร์' },
-        { code: 'ว12101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
-        { code: 'ส12101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
-        { code: 'ส12102', name: 'ประวัติศาสตร์' },
-        { code: 'พ12101', name: 'สุขศึกษาและพลศึกษา' },
-        { code: 'ศ12101', name: 'ศิลปะ' },
-        { code: 'ง12101', name: 'การงานอาชีพ' },
-        { code: 'อ12101', name: 'ภาษาอังกฤษ' }
-      ],
-      'ป.3': [
-        { code: 'ท13101', name: 'ภาษาไทย' },
-        { code: 'ค13101', name: 'คณิตศาสตร์' },
-        { code: 'ว13101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
-        { code: 'ส13101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
-        { code: 'ส13102', name: 'ประวัติศาสตร์' },
-        { code: 'พ13101', name: 'สุขศึกษาและพลศึกษา' },
-        { code: 'ศ13101', name: 'ศิลปะ' },
-        { code: 'ง13101', name: 'การงานอาชีพ' },
-        { code: 'อ13101', name: 'ภาษาอังกฤษ' }
-      ],
-      'ป.4': [
-        { code: 'ท14101', name: 'ภาษาไทย' },
-        { code: 'ค14101', name: 'คณิตศาสตร์' },
-        { code: 'ว14101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
-        { code: 'ส14101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
-        { code: 'ส14102', name: 'ประวัติศาสตร์' },
-        { code: 'พ14101', name: 'สุขศึกษาและพลศึกษา' },
-        { code: 'ศ14101', name: 'ศิลปะ' },
-        { code: 'ง14101', name: 'การงานอาชีพ' },
-        { code: 'อ14101', name: 'ภาษาอังกฤษ' }
-      ],
-      'ป.5': [
-        { code: 'ท15101', name: 'ภาษาไทย' },
-        { code: 'ค15101', name: 'คณิตศาสตร์' },
-        { code: 'ว15101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
-        { code: 'ส15101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
-        { code: 'ส15102', name: 'ประวัติศาสตร์' },
-        { code: 'พ15101', name: 'สุขศึกษาและพลศึกษา' },
-        { code: 'ศ15101', name: 'ศิลปะ' },
-        { code: 'ง15101', name: 'การงานอาชีพ' },
-        { code: 'อ15101', name: 'ภาษาอังกฤษ' }
-      ],
-      'ป.6': [
-        { code: 'ท16101', name: 'ภาษาไทย' },
-        { code: 'ค16101', name: 'คณิตศาสตร์' },
-        { code: 'ว16101', name: 'วิทยาศาสตร์และเทคโนโลยี' },
-        { code: 'ส16101', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม' },
-        { code: 'ส16102', name: 'ประวัติศาสตร์' },
-        { code: 'พ16101', name: 'สุขศึกษาและพลศึกษา' },
-        { code: 'ศ16101', name: 'ศิลปะ' },
-        { code: 'ง16101', name: 'การงานอาชีพ' },
-        { code: 'อ16101', name: 'ภาษาอังกฤษ' }
-      ]
-    };
-    return gradeSubjects[grade as keyof typeof gradeSubjects] || [];
-  };
-
-  const subjects = getSubjectsForGrade(gradeLevel);
-
-  const getAdditionalSubjects = (grade: string) => {
-    const gradeNumber = grade.replace('ป.', '');
-    const baseSubjects = [
-      { code: `อ1${gradeNumber}201`, name: 'ภาษาอังกฤษเพื่อการสื่อสาร' },
-      { code: `ว1${gradeNumber}102`, name: 'วิทยาการคำนวณ' },
-      { code: `ส1${gradeNumber}202`, name: 'ป้องกันการทุจริต' }
-    ];
+  // Get unique subjects from actual scores data for this grade
+  const allSubjectsFromScores = useMemo(() => {
+    // Filter scores for the current grade level
+    const gradeScores = scores.filter(s => s.grade_level === gradeLevel);
     
-    // Add "วิทย์พลังสิบ" for grades 4-6
-    if (['4', '5', '6'].includes(gradeNumber)) {
-      baseSubjects.push({ code: `ว1${gradeNumber}202`, name: 'วิทย์พลังสิบ' });
-    }
+    // Get unique subjects
+    const uniqueSubjects = Array.from(
+      new Map(
+        gradeScores.map(s => [s.subject_code, { code: s.subject_code, name: s.subject_name }])
+      ).values()
+    );
     
-    return baseSubjects;
-  };
+    // Sort subjects: basic subjects (ending with 101 or 102) first, then additional subjects (201, 202, etc.)
+    return uniqueSubjects.sort((a, b) => {
+      const aCode = a.code.slice(-3);
+      const bCode = b.code.slice(-3);
+      
+      // Basic subjects: 101 or 102
+      const aIsBasic = aCode === '101' || aCode === '102';
+      const bIsBasic = bCode === '101' || bCode === '102';
+      
+      if (aIsBasic && !bIsBasic) return -1;
+      if (!aIsBasic && bIsBasic) return 1;
+      
+      // Within the same category, sort by code
+      return a.code.localeCompare(b.code);
+    });
+  }, [scores, gradeLevel]);
+
+  // Separate basic and additional subjects
+  const basicSubjects = allSubjectsFromScores.filter(s => {
+    const suffix = s.code.slice(-3);
+    return suffix === '101' || suffix === '102';
+  });
+
+  const additionalSubjects = allSubjectsFromScores.filter(s => {
+    const suffix = s.code.slice(-3);
+    return suffix !== '101' && suffix !== '102';
+  });
 
   if (scores.length === 0 && !gradeLevel) {
     return <div>ไม่มีข้อมูลที่จะพิมพ์</div>;
@@ -246,7 +195,8 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
           </tr>
         </thead>
         <tbody>
-          {subjects.map((subject) => {
+          {/* Basic subjects */}
+          {basicSubjects.length > 0 && basicSubjects.map((subject) => {
             // Find score for this subject and selected student
             const subjectScore = selectedStudent 
               ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
@@ -271,35 +221,38 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
           })}
           
           {/* Additional Learning Areas Section */}
-          <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <td colSpan={4} style={{ border: '1px solid black', padding: '6px', textAlign: 'center', fontWeight: 'bold' }}>
-              สาระการเรียนรู้เพิ่มเติม
-            </td>
-          </tr>
-          
-          {/* Additional subjects based on grade */}
-          {getAdditionalSubjects(gradeLevel).map((subject) => {
-            const subjectScore = selectedStudent 
-              ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
-              : scores.find(s => s.subject_code === subject.code);
-            
-            return (
-              <tr key={subject.code}>
-                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  {subject.code}
-                </td>
-                <td style={{ border: '1px solid black', padding: '8px' }}>
-                  {subject.name}
-                </td>
-                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  50
-                </td>
-                <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  {subjectScore ? subjectScore.score : '-'}
+          {additionalSubjects.length > 0 && (
+            <>
+              <tr style={{ backgroundColor: '#f0f0f0' }}>
+                <td colSpan={4} style={{ border: '1px solid black', padding: '6px', textAlign: 'center', fontWeight: 'bold' }}>
+                  สาระการเรียนรู้เพิ่มเติม
                 </td>
               </tr>
-            );
-          })}
+              
+              {additionalSubjects.map((subject) => {
+                const subjectScore = selectedStudent 
+                  ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
+                  : scores.find(s => s.subject_code === subject.code);
+                
+                return (
+                  <tr key={subject.code}>
+                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                      {subject.code}
+                    </td>
+                    <td style={{ border: '1px solid black', padding: '8px' }}>
+                      {subject.name}
+                    </td>
+                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                      50
+                    </td>
+                    <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
+                      {subjectScore ? subjectScore.score : '-'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </>
+          )}
         </tbody>
       </table>
 
