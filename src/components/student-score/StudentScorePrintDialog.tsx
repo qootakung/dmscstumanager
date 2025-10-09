@@ -108,6 +108,30 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     return filteredStudents[currentStudentIndex];
   }, [filteredStudents, currentStudentIndex]);
 
+  // Filter scores by selected grade and student
+  const filteredScores = useMemo(() => {
+    let filtered = scores;
+    
+    // Filter by grade level
+    if (selectedGrade !== 'all') {
+      filtered = filtered.filter(s => s.grade_level === selectedGrade);
+    }
+    
+    // Filter by selected student if viewing individual student
+    if (selectedStudent) {
+      filtered = filtered.filter(s => s.student_id === selectedStudent.id);
+    }
+    
+    console.log('Filtered scores:', {
+      originalCount: scores.length,
+      filteredCount: filtered.length,
+      selectedGrade,
+      selectedStudentId: selectedStudent?.id
+    });
+    
+    return filtered;
+  }, [scores, selectedGrade, selectedStudent]);
+
   // Navigation handlers
   const handlePrevious = () => {
     setCurrentStudentIndex(prev => Math.max(0, prev - 1));
@@ -313,7 +337,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
 
         <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', transform: 'scale(0.8)', transformOrigin: 'top center' }}>
           <StudentScorePrintPreview
-            scores={scores}
+            scores={filteredScores}
             students={filteredStudents}
             teachers={teachers}
             gradeLevel={selectedStudent?.grade || selectedGrade}
