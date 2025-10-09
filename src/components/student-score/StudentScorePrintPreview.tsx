@@ -93,8 +93,16 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
 
   // Get unique subjects from actual scores data for this grade
   const allSubjectsFromScores = useMemo(() => {
+    console.log('StudentScorePrintPreview - Processing subjects:', {
+      totalScores: scores.length,
+      gradeLevel,
+      scoresForGrade: scores.filter(s => s.grade_level === gradeLevel).length
+    });
+    
     // Filter scores for the current grade level
     const gradeScores = scores.filter(s => s.grade_level === gradeLevel);
+    
+    console.log('StudentScorePrintPreview - Grade scores:', gradeScores.slice(0, 5));
     
     // Get unique subjects
     const uniqueSubjects = Array.from(
@@ -103,14 +111,16 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       ).values()
     );
     
-    // Sort subjects: basic subjects (ending with 101 or 102) first, then additional subjects (201, 202, etc.)
+    console.log('StudentScorePrintPreview - Unique subjects found:', uniqueSubjects);
+    
+    // Sort subjects: basic subjects (ending with 101) first, then others
     return uniqueSubjects.sort((a, b) => {
       const aCode = a.code.slice(-3);
       const bCode = b.code.slice(-3);
       
-      // Basic subjects: 101 or 102
-      const aIsBasic = aCode === '101' || aCode === '102';
-      const bIsBasic = bCode === '101' || bCode === '102';
+      // Basic subjects: 101 (not 102, as 102 can be basic or additional)
+      const aIsBasic = aCode === '101';
+      const bIsBasic = bCode === '101';
       
       if (aIsBasic && !bIsBasic) return -1;
       if (!aIsBasic && bIsBasic) return 1;
@@ -123,12 +133,21 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   // Separate basic and additional subjects
   const basicSubjects = allSubjectsFromScores.filter(s => {
     const suffix = s.code.slice(-3);
-    return suffix === '101' || suffix === '102';
+    // Only 101 is definitely basic, 102 could be basic (history) or additional (computing)
+    return suffix === '101';
   });
 
   const additionalSubjects = allSubjectsFromScores.filter(s => {
     const suffix = s.code.slice(-3);
-    return suffix !== '101' && suffix !== '102';
+    return suffix !== '101';
+  });
+
+  console.log('StudentScorePrintPreview - Subject breakdown:', {
+    total: allSubjectsFromScores.length,
+    basic: basicSubjects.length,
+    additional: additionalSubjects.length,
+    basicSubjects: basicSubjects.map(s => s.code),
+    additionalSubjects: additionalSubjects.map(s => s.code)
   });
 
   if (scores.length === 0 && !gradeLevel) {
@@ -195,6 +214,15 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
           </tr>
         </thead>
         <tbody>
+          {/* Show message if no subjects found */}
+          {allSubjectsFromScores.length === 0 && (
+            <tr>
+              <td colSpan={4} style={{ border: '1px solid black', padding: '16px', textAlign: 'center', color: '#666' }}>
+                ไม่พบข้อมูลคะแนนสำหรับชั้น {gradeLevel} ปีการศึกษา {academicYear}
+              </td>
+            </tr>
+          )}
+          
           {/* Basic subjects */}
           {basicSubjects.length > 0 && basicSubjects.map((subject) => {
             // Find score for this subject and selected student
