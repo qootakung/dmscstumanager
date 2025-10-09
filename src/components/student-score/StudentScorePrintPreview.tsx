@@ -43,22 +43,40 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   logoUrl
 }) => {
   // Debug logs
-  console.log('StudentScorePrintPreview - All props:', {
+  console.log('StudentScorePrintPreview - Received props:', {
     scoresCount: scores.length,
     studentsCount: students.length,
     gradeLevel,
-    selectedStudent: selectedStudent ? { id: selectedStudent.id, name: `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}` } : null
+    academicYear,
+    selectedStudent: selectedStudent ? { 
+      id: selectedStudent.id, 
+      name: `${selectedStudent.titleTh}${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}`,
+      grade: selectedStudent.grade 
+    } : null
   });
-  console.log('StudentScorePrintPreview - All scores:', scores);
+  
+  // Log all scores
+  console.log('StudentScorePrintPreview - All scores:', scores.map(s => ({
+    student_id: s.student_id,
+    subject_code: s.subject_code,
+    score: s.score,
+    grade_level: s.grade_level
+  })));
   
   // Debug: Filter scores for selected student
   if (selectedStudent) {
     const studentScores = scores.filter(s => s.student_id === selectedStudent.id);
     console.log('StudentScorePrintPreview - Scores for selected student:', {
       studentId: selectedStudent.id,
-      studentName: `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}`,
+      studentName: `${selectedStudent.titleTh}${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}`,
+      studentGrade: selectedStudent.grade,
       scoresCount: studentScores.length,
-      scores: studentScores.map(s => ({ subject: s.subject_code, score: s.score }))
+      scores: studentScores.map(s => ({ 
+        subject_code: s.subject_code, 
+        subject_name: s.subject_name,
+        score: s.score,
+        grade_level: s.grade_level 
+      }))
     });
   }
   const getStudentData = (studentId: string) => {
@@ -246,7 +264,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                   50
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  {subjectScore ? subjectScore.score : ''}
+                  {subjectScore ? subjectScore.score : '-'}
                 </td>
               </tr>
             );
@@ -277,7 +295,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                   50
                 </td>
                 <td style={{ border: '1px solid black', padding: '8px', textAlign: 'center' }}>
-                  {subjectScore ? subjectScore.score : ''}
+                  {subjectScore ? subjectScore.score : '-'}
                 </td>
               </tr>
             );
