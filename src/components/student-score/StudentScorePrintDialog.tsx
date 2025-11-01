@@ -108,31 +108,21 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     return filteredStudents[currentStudentIndex];
   }, [filteredStudents, currentStudentIndex]);
 
-  // Filter scores by selected grade only (not by student)
-  // StudentScorePrintPreview will filter by student itself
+  // Filter scores by selected student's grade
   const filteredScores = useMemo(() => {
-    console.log('Filtering scores:', {
-      totalScores: scores.length,
-      selectedGrade,
-      scoresWithGrade: scores.map(s => ({ grade: s.grade_level, subject: s.subject_code, student: s.student_id }))
-    });
+    // Use the actual student's grade if selected, otherwise use selectedGrade
+    const targetGrade = selectedStudent?.grade || selectedGrade;
     
-    if (selectedGrade === 'all') {
+    if (targetGrade === 'all') {
       return scores;
     }
     
-    // Normalize grade strings for comparison (trim whitespace)
-    const normalizedSelectedGrade = selectedGrade.trim();
-    const filtered = scores.filter(s => s.grade_level?.trim() === normalizedSelectedGrade);
-    
-    console.log('Filtered scores result:', {
-      selectedGrade: normalizedSelectedGrade,
-      filteredCount: filtered.length,
-      filtered: filtered.map(s => ({ subject: s.subject_code, score: s.score, student: s.student_id }))
-    });
+    // Filter scores by the target grade and trim whitespace
+    const normalizedTargetGrade = targetGrade.trim();
+    const filtered = scores.filter(s => s.grade_level?.trim() === normalizedTargetGrade);
     
     return filtered;
-  }, [scores, selectedGrade]);
+  }, [scores, selectedGrade, selectedStudent]);
 
   // Navigation handlers
   const handlePrevious = () => {
@@ -342,7 +332,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             scores={filteredScores}
             students={filteredStudents}
             teachers={teachers}
-            gradeLevel={selectedGrade}
+            gradeLevel={selectedStudent?.grade || selectedGrade}
             academicYear={academicYear}
             principalName={editablePrincipalName}
             homeRoomTeacher={selectedTeacher}
