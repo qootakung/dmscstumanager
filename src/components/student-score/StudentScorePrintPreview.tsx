@@ -50,7 +50,12 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
       name: `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}`,
       grade: selectedStudent.grade
     } : null,
-    scoresPreview: scores.slice(0, 3).map(s => ({
+    scoresForThisStudent: selectedStudent ? scores.filter(s => s.student_id === selectedStudent.id).map(s => ({
+      subject: s.subject_code,
+      score: s.score,
+      grade: s.grade_level
+    })) : [],
+    allScoresSample: scores.slice(0, 3).map(s => ({
       subject: s.subject_code,
       score: s.score,
       student: s.student_id,
@@ -243,9 +248,31 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
           {/* Basic subjects */}
           {subjects.map((subject) => {
             // Find score for this subject and selected student
-            const subjectScore = selectedStudent 
-              ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
-              : scores.find(s => s.subject_code === subject.code);
+            let subjectScore;
+            if (selectedStudent) {
+              subjectScore = scores.find(s => 
+                s.subject_code === subject.code && 
+                s.student_id === selectedStudent.id &&
+                s.grade_level?.trim() === gradeLevel.trim()
+              );
+              
+              console.log('Finding score for subject:', {
+                subjectCode: subject.code,
+                studentId: selectedStudent.id,
+                gradeLevel,
+                foundScore: subjectScore ? subjectScore.score : 'not found',
+                allScoresForSubject: scores.filter(s => s.subject_code === subject.code).map(s => ({
+                  student: s.student_id,
+                  grade: s.grade_level,
+                  score: s.score
+                }))
+              });
+            } else {
+              subjectScore = scores.find(s => 
+                s.subject_code === subject.code &&
+                s.grade_level?.trim() === gradeLevel.trim()
+              );
+            }
             
             return (
               <tr key={subject.code}>
@@ -275,9 +302,19 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
               </tr>
               
               {additionalSubjects.map((subject) => {
-                const subjectScore = selectedStudent 
-                  ? scores.find(s => s.subject_code === subject.code && s.student_id === selectedStudent.id)
-                  : scores.find(s => s.subject_code === subject.code);
+                let subjectScore;
+                if (selectedStudent) {
+                  subjectScore = scores.find(s => 
+                    s.subject_code === subject.code && 
+                    s.student_id === selectedStudent.id &&
+                    s.grade_level?.trim() === gradeLevel.trim()
+                  );
+                } else {
+                  subjectScore = scores.find(s => 
+                    s.subject_code === subject.code &&
+                    s.grade_level?.trim() === gradeLevel.trim()
+                  );
+                }
                 
                 return (
                   <tr key={subject.code}>

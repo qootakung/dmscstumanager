@@ -113,6 +113,20 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     // Use the actual student's grade if selected, otherwise use selectedGrade
     const targetGrade = selectedStudent?.grade || selectedGrade;
     
+    console.log('filteredScores calculation:', {
+      targetGrade,
+      selectedStudent: selectedStudent ? `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}` : 'none',
+      selectedStudentGrade: selectedStudent?.grade,
+      selectedGrade,
+      totalScores: scores.length,
+      scoresSample: scores.slice(0, 2).map(s => ({
+        student: s.student_id,
+        grade: s.grade_level,
+        subject: s.subject_code,
+        score: s.score
+      }))
+    });
+    
     if (targetGrade === 'all') {
       return scores;
     }
@@ -120,6 +134,16 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     // Filter scores by the target grade and trim whitespace
     const normalizedTargetGrade = targetGrade.trim();
     const filtered = scores.filter(s => s.grade_level?.trim() === normalizedTargetGrade);
+    
+    console.log('filteredScores result:', {
+      targetGrade: normalizedTargetGrade,
+      filteredCount: filtered.length,
+      filteredSample: filtered.slice(0, 2).map(s => ({
+        subject: s.subject_code,
+        score: s.score,
+        student: s.student_id
+      }))
+    });
     
     return filtered;
   }, [scores, selectedGrade, selectedStudent]);
