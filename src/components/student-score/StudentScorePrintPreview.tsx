@@ -42,6 +42,22 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   selectedStudent,
   logoUrl
 }) => {
+  console.log('StudentScorePrintPreview received:', {
+    scoresCount: scores.length,
+    gradeLevel,
+    selectedStudent: selectedStudent ? {
+      id: selectedStudent.id,
+      name: `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}`,
+      grade: selectedStudent.grade
+    } : null,
+    scoresPreview: scores.slice(0, 3).map(s => ({
+      subject: s.subject_code,
+      score: s.score,
+      student: s.student_id,
+      grade: s.grade_level
+    }))
+  });
+  
   const getStudentData = (studentId: string) => {
     return students.find(s => s.id === studentId);
   };
@@ -146,7 +162,21 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   const subjects = getSubjectsForGrade(gradeLevel);
   const additionalSubjects = getAdditionalSubjects(gradeLevel);
 
+  console.log('Subjects for grade:', {
+    gradeLevel,
+    subjectsCount: subjects.length,
+    additionalSubjectsCount: additionalSubjects.length,
+    subjectsPreview: subjects.slice(0, 3).map(s => s.code)
+  });
+
+  // Debug: Check if we're rendering with proper data
+  if (subjects.length === 0) {
+    console.error('No subjects found for grade level:', gradeLevel);
+    return <div>ไม่พบรายวิชาสำหรับชั้น {gradeLevel}</div>;
+  }
+
   if (scores.length === 0 && !gradeLevel) {
+    console.warn('No scores and no grade level provided');
     return <div>ไม่มีข้อมูลที่จะพิมพ์</div>;
   }
 
