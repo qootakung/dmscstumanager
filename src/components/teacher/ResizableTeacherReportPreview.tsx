@@ -48,6 +48,7 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
+  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ 2');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
@@ -166,6 +167,9 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
                 )}
                 {reportOptions.additionalFields.signature && (
                   <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ')]}></ResizableTd>
+                )}
+                {reportOptions.additionalFields.signature2 && (
+                  <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ 2')]}></ResizableTd>
                 )}
                 {reportOptions.additionalFields.timeIn && (
                   <ResizableTd width={columnWidths[allColumns.indexOf('เวลามา')]}></ResizableTd>

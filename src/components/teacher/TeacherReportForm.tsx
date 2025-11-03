@@ -180,6 +180,14 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
+              id="signature2"
+              checked={reportOptions.additionalFields.signature2}
+              onCheckedChange={(checked) => onAdditionalFieldChange('signature2', Boolean(checked))}
+            />
+            <Label htmlFor="signature2">ลายมือชื่อ 2</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
               id="timeIn"
               checked={reportOptions.additionalFields.timeIn}
               onCheckedChange={(checked) => onAdditionalFieldChange('timeIn', Boolean(checked))}

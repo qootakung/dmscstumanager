@@ -29,6 +29,7 @@ const TeacherReports: React.FC = () => {
       lineId: false,
       appointmentDate: false,
       signature: false,
+      signature2: false,
       timeIn: false,
       timeOut: false,
       note: false,

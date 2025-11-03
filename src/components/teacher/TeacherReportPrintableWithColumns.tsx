@@ -35,6 +35,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
+  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ 2');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
@@ -146,6 +147,9 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
                 )}
                 {reportOptions.additionalFields.signature && (
                   <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ')]}px` }}></td>
+                )}
+                {reportOptions.additionalFields.signature2 && (
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ 2')]}px` }}></td>
                 )}
                 {reportOptions.additionalFields.timeIn && (
                   <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลามา')]}px` }}></td>
