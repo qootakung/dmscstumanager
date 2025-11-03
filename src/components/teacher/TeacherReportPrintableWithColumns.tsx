@@ -35,7 +35,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
-  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ 2');
+  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
@@ -109,69 +109,72 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
             </tr>
           </thead>
           <tbody>
-            {sortedTeachers.map((teacher, index) => (
+            {sortedTeachers.map((teacher, index) => {
+              let colIndex = 0;
+              
+              return (
               <tr key={teacher.id}>
-                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[0]}px` }}>{index + 1}</td>
-                <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[1]}px` }}>{teacher.firstName} {teacher.lastName}</td>
+                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{index + 1}</td>
+                <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.firstName} {teacher.lastName}</td>
                 
                 {/* Additional fields with respective widths */}
                 {reportOptions.additionalFields.position && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ตำแหน่ง')]}px` }}>{teacher.position}</td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.position}</td>
                 )}
                 {reportOptions.additionalFields.email && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('Email')]}px` }}>{teacher.email || ''}</td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.email || ''}</td>
                 )}
                 {reportOptions.additionalFields.citizenId && (
-                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เลขบัตรประจำตัวประชาชน')]}px` }}>{teacher.citizenId}</td>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.citizenId}</td>
                 )}
                 {reportOptions.additionalFields.salary && (
-                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เงินเดือน')]}px` }}>{teacher.salary}</td>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.salary}</td>
                 )}
                 {reportOptions.additionalFields.birthDate && (
-                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วัน/เดือน/ปีเกิด')]}px` }}>{formatThaiDate(teacher.birthDate)}</td>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{formatThaiDate(teacher.birthDate)}</td>
                 )}
                 {reportOptions.additionalFields.appointmentDate && (
-                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วันที่บรรจุ')]}px` }}>{formatThaiDate(teacher.appointmentDate)}</td>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{formatThaiDate(teacher.appointmentDate)}</td>
                 )}
                 {reportOptions.additionalFields.education && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('วุฒิการศึกษา')]}px` }}>{teacher.education}</td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.education}</td>
                 )}
                 {reportOptions.additionalFields.major && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('วิชาเอก')]}px` }}>{teacher.majorSubject}</td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.majorSubject}</td>
                 )}
                 {reportOptions.additionalFields.phone && (
-                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เบอร์โทร')]}px` }}>{teacher.phone}</td>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.phone}</td>
                 )}
                 {reportOptions.additionalFields.lineId && (
-                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('ID Line')]}px` }}>{teacher.lineId}</td>
+                  <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.lineId}</td>
                 )}
                 {reportOptions.additionalFields.signature && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ')]}px` }}></td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}></td>
                 )}
                 {reportOptions.additionalFields.signature2 && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ลายมือชื่อ 2')]}px` }}></td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}></td>
                 )}
                 {reportOptions.additionalFields.timeIn && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลามา')]}px` }}></td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}></td>
                 )}
                 {reportOptions.additionalFields.timeOut && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลากลับ')]}px` }}></td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}></td>
                 )}
                 
                 {/* Custom empty columns */}
-                {customColumns.map((_, colIndex) => {
-                  const columnIndex = baseColumns.length + additionalColumns.length + colIndex;
+                {customColumns.map((_, customColIndex) => {
                   return (
-                    <td key={`custom-${colIndex}`} className="border border-black px-2 py-1" style={{ width: `${columnWidths[columnIndex]}px` }}></td>
+                    <td key={`custom-${customColIndex}`} className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}></td>
                   );
                 })}
 
                 {/* Note column */}
                 {reportOptions.additionalFields.note && (
-                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.length - 1]}px` }}></td>
+                  <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}></td>
                 )}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

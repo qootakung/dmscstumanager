@@ -68,7 +68,7 @@ export const generateTeacherExcel = (
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
-  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ 2');
+  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
   
@@ -174,7 +174,7 @@ export const generateTeacherExcel = (
   if (reportOptions.additionalFields.phone) colWidths.push({ wch: 14 }); // เบอร์โทร with buffer
   if (reportOptions.additionalFields.lineId) colWidths.push({ wch: 14 }); // ID Line with buffer
   if (reportOptions.additionalFields.signature) colWidths.push({ wch: 18 }); // ลายมือชื่อ with buffer
-  if (reportOptions.additionalFields.signature2) colWidths.push({ wch: 18 }); // ลายมือชื่อ 2 with buffer
+  if (reportOptions.additionalFields.signature2) colWidths.push({ wch: 18 }); // ลายมือชื่อ with buffer
   if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 14 }); // เวลามา with buffer
   if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 14 }); // เวลากลับ with buffer
 

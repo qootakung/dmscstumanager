@@ -48,7 +48,7 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
-  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ 2');
+  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
@@ -128,70 +128,73 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
               ))}
             </tr>
           </thead>
-          <tbody>
-            {sortedTeachers.map((teacher, index) => (
+           <tbody>
+            {sortedTeachers.map((teacher, index) => {
+              let colIndex = 0;
+              
+              return (
               <tr key={teacher.id}>
-                <ResizableTd width={columnWidths[0]} className="text-center">{index + 1}</ResizableTd>
-                <ResizableTd width={columnWidths[1]}>{teacher.firstName} {teacher.lastName}</ResizableTd>
+                <ResizableTd width={columnWidths[colIndex++]} className="text-center">{index + 1}</ResizableTd>
+                <ResizableTd width={columnWidths[colIndex++]}>{teacher.firstName} {teacher.lastName}</ResizableTd>
                 
                 {/* Additional fields */}
                 {reportOptions.additionalFields.position && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('ตำแหน่ง')]}>{teacher.position}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.position}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.email && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('Email')]}>{teacher.email || ''}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.email || ''}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.citizenId && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เลขบัตรประจำตัวประชาชน')]} className="text-center">{teacher.citizenId}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.citizenId}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.salary && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เงินเดือน')]} className="text-center">{teacher.salary}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.salary}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.birthDate && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วัน/เดือน/ปีเกิด')]} className="text-center">{formatThaiDate(teacher.birthDate)}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{formatThaiDate(teacher.birthDate)}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.appointmentDate && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วันที่บรรจุ')]} className="text-center">{formatThaiDate(teacher.appointmentDate)}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{formatThaiDate(teacher.appointmentDate)}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.education && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วุฒิการศึกษา')]}>{teacher.education}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.education}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.major && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('วิชาเอก')]}>{teacher.majorSubject}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.majorSubject}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.phone && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เบอร์โทร')]} className="text-center">{teacher.phone}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.phone}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.lineId && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('ID Line')]} className="text-center">{teacher.lineId}</ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.lineId}</ResizableTd>
                 )}
                 {reportOptions.additionalFields.signature && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ')]}></ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
                 )}
                 {reportOptions.additionalFields.signature2 && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('ลายมือชื่อ 2')]}></ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
                 )}
                 {reportOptions.additionalFields.timeIn && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เวลามา')]}></ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
                 )}
                 {reportOptions.additionalFields.timeOut && (
-                  <ResizableTd width={columnWidths[allColumns.indexOf('เวลากลับ')]}></ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
                 )}
                 
                 {/* Custom empty columns */}
-                {customColumns.map((_, colIndex) => {
-                  const columnIndex = baseColumns.length + additionalColumns.length + colIndex;
+                {customColumns.map((_, customColIndex) => {
                   return (
-                    <ResizableTd key={`custom-${colIndex}`} width={columnWidths[columnIndex]}></ResizableTd>
+                    <ResizableTd key={`custom-${customColIndex}`} width={columnWidths[colIndex++]}></ResizableTd>
                   );
                 })}
 
                 {/* Note column */}
                 {reportOptions.additionalFields.note && (
-                  <ResizableTd width={columnWidths[allColumns.length - 1]}></ResizableTd>
+                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
                 )}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </ResizableTable>
       </div>
