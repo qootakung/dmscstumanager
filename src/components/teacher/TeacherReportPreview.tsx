@@ -47,6 +47,7 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
   if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
   if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
   if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
+  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
   if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
   if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
 
@@ -130,6 +131,9 @@ const TeacherReportPreview: React.FC<TeacherReportPreviewProps> = ({
                   <td className="border border-black px-2 py-1 text-center">{teacher.lineId}</td>
                 )}
                 {reportOptions.additionalFields.signature && (
+                  <td className="border border-black px-2 py-1"></td>
+                )}
+                {reportOptions.additionalFields.signature2 && (
                   <td className="border border-black px-2 py-1"></td>
                 )}
                 {reportOptions.additionalFields.timeIn && (
