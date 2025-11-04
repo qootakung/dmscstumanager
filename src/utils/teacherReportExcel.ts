@@ -56,21 +56,29 @@ export const generateTeacherExcel = (
 
   // Table Columns
   const baseColumns = ['ลำดับที่', 'ชื่อ - นามสกุล'];
-  const additionalColumns = [];
-  if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่ง');
-  if (reportOptions.additionalFields.email) additionalColumns.push('Email');
-  if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
-  if (reportOptions.additionalFields.salary) additionalColumns.push('เงินเดือน');
-  if (reportOptions.additionalFields.birthDate) additionalColumns.push('วัน/เดือน/ปีเกิด');
-  if (reportOptions.additionalFields.appointmentDate) additionalColumns.push('วันที่บรรจุ');
-  if (reportOptions.additionalFields.education) additionalColumns.push('วุฒิการศึกษา');
-  if (reportOptions.additionalFields.major) additionalColumns.push('วิชาเอก');
-  if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
-  if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
-  if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
-  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
-  if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
-  if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
+  
+  // แมป field name กับชื่อคอลัมน์
+  const fieldColumnMap: Record<string, string> = {
+    position: 'ตำแหน่ง',
+    email: 'Email',
+    citizenId: 'เลขบัตรประจำตัวประชาชน',
+    salary: 'เงินเดือน',
+    birthDate: 'วัน/เดือน/ปีเกิด',
+    appointmentDate: 'วันที่บรรจุ',
+    education: 'วุฒิการศึกษา',
+    major: 'วิชาเอก',
+    phone: 'เบอร์โทร',
+    lineId: 'ID Line',
+    signature: 'ลายมือชื่อ',
+    signature2: 'ลายมือชื่อ',
+    timeIn: 'เวลามา',
+    timeOut: 'เวลากลับ',
+  };
+
+  // สร้างคอลัมน์ตามลำดับที่เลือก
+  const additionalColumns = reportOptions.fieldOrder
+    .filter(field => field !== 'note' && reportOptions.additionalFields[field as keyof typeof reportOptions.additionalFields])
+    .map(field => fieldColumnMap[field] || '');
   
   const customColumnCount = reportOptions.customColumns || 0;
   const customColumns = Array.from({ length: customColumnCount }, () => '');
@@ -96,20 +104,29 @@ export const generateTeacherExcel = (
       index + 1,
       `${teacher.firstName} ${teacher.lastName}`,
     ];
-    if (reportOptions.additionalFields.position) row.push(teacher.position);
-    if (reportOptions.additionalFields.email) row.push(teacher.email || '');
-    if (reportOptions.additionalFields.citizenId) row.push(teacher.citizenId);
-    if (reportOptions.additionalFields.salary) row.push(teacher.salary || '');
-    if (reportOptions.additionalFields.birthDate) row.push(formatThaiDate(teacher.birthDate));
-    if (reportOptions.additionalFields.appointmentDate) row.push(formatThaiDate(teacher.appointmentDate));
-    if (reportOptions.additionalFields.education) row.push(teacher.education || '');
-    if (reportOptions.additionalFields.major) row.push(teacher.majorSubject || '');
-    if (reportOptions.additionalFields.phone) row.push(teacher.phone || '');
-    if (reportOptions.additionalFields.lineId) row.push(teacher.lineId || '');
-    if (reportOptions.additionalFields.signature) row.push('');
-    if (reportOptions.additionalFields.signature2) row.push('');
-    if (reportOptions.additionalFields.timeIn) row.push('');
-    if (reportOptions.additionalFields.timeOut) row.push('');
+    
+    // เพิ่มข้อมูลตามลำดับที่เลือก
+    reportOptions.fieldOrder
+      .filter(field => field !== 'note' && reportOptions.additionalFields[field as keyof typeof reportOptions.additionalFields])
+      .forEach(field => {
+        const fieldMap: Record<string, any> = {
+          position: teacher.position,
+          email: teacher.email || '',
+          citizenId: teacher.citizenId,
+          salary: teacher.salary || '',
+          birthDate: formatThaiDate(teacher.birthDate),
+          appointmentDate: formatThaiDate(teacher.appointmentDate),
+          education: teacher.education || '',
+          major: teacher.majorSubject || '',
+          phone: teacher.phone || '',
+          lineId: teacher.lineId || '',
+          signature: '',
+          signature2: '',
+          timeIn: '',
+          timeOut: '',
+        };
+        row.push(fieldMap[field]);
+      });
     
     for (let i = 0; i < customColumnCount; i++) { row.push(''); }
 
@@ -162,21 +179,30 @@ export const generateTeacherExcel = (
     { wch: nameColumnWidth } // ชื่อ - นามสกุล (dynamic width)
   ];
   
-  // Add spacing buffer (0.5-1 cm ≈ 2-4 character width buffer)
-  if (reportOptions.additionalFields.position) colWidths.push({ wch: 20 }); // ตำแหน่ง with buffer
-  if (reportOptions.additionalFields.email) colWidths.push({ wch: 24 }); // Email with buffer
-  if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 18 }); // บัตรประชาชน with buffer
-  if (reportOptions.additionalFields.salary) colWidths.push({ wch: 14 }); // เงินเดือน with buffer
-  if (reportOptions.additionalFields.birthDate) colWidths.push({ wch: 20 }); // วันเกิด with buffer
-  if (reportOptions.additionalFields.appointmentDate) colWidths.push({ wch: 20 }); // วันที่บรรจุ with buffer
-  if (reportOptions.additionalFields.education) colWidths.push({ wch: 20 }); // วุฒิการศึกษา with buffer
-  if (reportOptions.additionalFields.major) colWidths.push({ wch: 20 }); // วิชาเอก with buffer
-  if (reportOptions.additionalFields.phone) colWidths.push({ wch: 14 }); // เบอร์โทร with buffer
-  if (reportOptions.additionalFields.lineId) colWidths.push({ wch: 14 }); // ID Line with buffer
-  if (reportOptions.additionalFields.signature) colWidths.push({ wch: 18 }); // ลายมือชื่อ with buffer
-  if (reportOptions.additionalFields.signature2) colWidths.push({ wch: 18 }); // ลายมือชื่อ with buffer
-  if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 14 }); // เวลามา with buffer
-  if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 14 }); // เวลากลับ with buffer
+  // แมป field กับ column width
+  const fieldWidthMap: Record<string, number> = {
+    position: 20,
+    email: 24,
+    citizenId: 18,
+    salary: 14,
+    birthDate: 20,
+    appointmentDate: 20,
+    education: 20,
+    major: 20,
+    phone: 14,
+    lineId: 14,
+    signature: 18,
+    signature2: 18,
+    timeIn: 14,
+    timeOut: 14,
+  };
+
+  // เพิ่ม column width ตามลำดับที่เลือก
+  reportOptions.fieldOrder
+    .filter(field => field !== 'note' && reportOptions.additionalFields[field as keyof typeof reportOptions.additionalFields])
+    .forEach(field => {
+      colWidths.push({ wch: fieldWidthMap[field] || 14 });
+    });
 
   // Custom columns with minimum 1 inch width (~14.4 units)
   for (let i = 0; i < customColumnCount; i++) {

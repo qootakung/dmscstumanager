@@ -19,6 +19,7 @@ export interface TeacherReportOptions {
     timeOut: boolean;
     note: boolean;
   };
+  fieldOrder: string[];
   customColumns: number;
   showDate: boolean;
   selectedDate: string;

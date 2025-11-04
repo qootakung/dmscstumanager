@@ -35,22 +35,28 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
     'ชื่อ - นามสกุล',
   ];
 
-  // เพิ่มคอลัมน์เพิ่มเติมที่เลือก
-  const additionalColumns = [];
-  if (reportOptions.additionalFields.position) additionalColumns.push('ตำแหน่ง');
-  if (reportOptions.additionalFields.email) additionalColumns.push('Email');
-  if (reportOptions.additionalFields.citizenId) additionalColumns.push('เลขบัตรประจำตัวประชาชน');
-  if (reportOptions.additionalFields.salary) additionalColumns.push('เงินเดือน');
-  if (reportOptions.additionalFields.birthDate) additionalColumns.push('วัน/เดือน/ปีเกิด');
-  if (reportOptions.additionalFields.appointmentDate) additionalColumns.push('วันที่บรรจุ');
-  if (reportOptions.additionalFields.education) additionalColumns.push('วุฒิการศึกษา');
-  if (reportOptions.additionalFields.major) additionalColumns.push('วิชาเอก');
-  if (reportOptions.additionalFields.phone) additionalColumns.push('เบอร์โทร');
-  if (reportOptions.additionalFields.lineId) additionalColumns.push('ID Line');
-  if (reportOptions.additionalFields.signature) additionalColumns.push('ลายมือชื่อ');
-  if (reportOptions.additionalFields.signature2) additionalColumns.push('ลายมือชื่อ');
-  if (reportOptions.additionalFields.timeIn) additionalColumns.push('เวลามา');
-  if (reportOptions.additionalFields.timeOut) additionalColumns.push('เวลากลับ');
+  // แมป field name กับชื่อคอลัมน์
+  const fieldColumnMap: Record<string, string> = {
+    position: 'ตำแหน่ง',
+    email: 'Email',
+    citizenId: 'เลขบัตรประจำตัวประชาชน',
+    salary: 'เงินเดือน',
+    birthDate: 'วัน/เดือน/ปีเกิด',
+    appointmentDate: 'วันที่บรรจุ',
+    education: 'วุฒิการศึกษา',
+    major: 'วิชาเอก',
+    phone: 'เบอร์โทร',
+    lineId: 'ID Line',
+    signature: 'ลายมือชื่อ',
+    signature2: 'ลายมือชื่อ',
+    timeIn: 'เวลามา',
+    timeOut: 'เวลากลับ',
+  };
+
+  // สร้างคอลัมน์ตามลำดับที่เลือก
+  const additionalColumns = reportOptions.fieldOrder
+    .filter(field => field !== 'note' && reportOptions.additionalFields[field as keyof typeof reportOptions.additionalFields])
+    .map(field => fieldColumnMap[field] || '');
 
   // เพิ่มคอลัมน์ว่างตามจำนวนที่ระบุ
   const customColumns = [];
@@ -137,49 +143,35 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
                 <ResizableTd width={columnWidths[colIndex++]} className="text-center">{index + 1}</ResizableTd>
                 <ResizableTd width={columnWidths[colIndex++]}>{teacher.firstName} {teacher.lastName}</ResizableTd>
                 
-                {/* Additional fields */}
-                {reportOptions.additionalFields.position && (
-                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.position}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.email && (
-                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.email || ''}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.citizenId && (
-                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.citizenId}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.salary && (
-                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.salary}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.birthDate && (
-                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{formatThaiDate(teacher.birthDate)}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.appointmentDate && (
-                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{formatThaiDate(teacher.appointmentDate)}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.education && (
-                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.education}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.major && (
-                  <ResizableTd width={columnWidths[colIndex++]}>{teacher.majorSubject}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.phone && (
-                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.phone}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.lineId && (
-                  <ResizableTd width={columnWidths[colIndex++]} className="text-center">{teacher.lineId}</ResizableTd>
-                )}
-                {reportOptions.additionalFields.signature && (
-                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
-                )}
-                {reportOptions.additionalFields.signature2 && (
-                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
-                )}
-                {reportOptions.additionalFields.timeIn && (
-                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
-                )}
-                {reportOptions.additionalFields.timeOut && (
-                  <ResizableTd width={columnWidths[colIndex++]}></ResizableTd>
-                )}
+                {/* Additional fields ตามลำดับที่เลือก */}
+                {reportOptions.fieldOrder
+                  .filter(field => field !== 'note' && reportOptions.additionalFields[field as keyof typeof reportOptions.additionalFields])
+                  .map((field, fieldIndex) => {
+                    const fieldMap: Record<string, any> = {
+                      position: teacher.position,
+                      email: teacher.email || '',
+                      citizenId: teacher.citizenId,
+                      salary: teacher.salary,
+                      birthDate: formatThaiDate(teacher.birthDate),
+                      appointmentDate: formatThaiDate(teacher.appointmentDate),
+                      education: teacher.education,
+                      major: teacher.majorSubject,
+                      phone: teacher.phone,
+                      lineId: teacher.lineId,
+                      signature: '',
+                      signature2: '',
+                      timeIn: '',
+                      timeOut: '',
+                    };
+                    
+                    const isCenter = ['citizenId', 'salary', 'birthDate', 'appointmentDate', 'phone', 'lineId'].includes(field);
+                    
+                    return (
+                      <ResizableTd key={fieldIndex} width={columnWidths[colIndex++]} className={isCenter ? 'text-center' : ''}>
+                        {fieldMap[field]}
+                      </ResizableTd>
+                    );
+                  })}
                 
                 {/* Custom empty columns */}
                 {customColumns.map((_, customColIndex) => {

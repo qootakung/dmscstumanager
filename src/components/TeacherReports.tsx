@@ -34,6 +34,7 @@ const TeacherReports: React.FC = () => {
       timeOut: false,
       note: false,
     },
+    fieldOrder: [],
     customColumns: 0,
     showDate: false,
     selectedDate: '',
@@ -57,13 +58,20 @@ const TeacherReports: React.FC = () => {
   };
 
   const handleAdditionalFieldChange = (field: keyof TeacherReportOptions['additionalFields'], checked: boolean) => {
-    setReportOptions(prev => ({
-      ...prev,
-      additionalFields: {
-        ...prev.additionalFields,
-        [field]: checked,
-      },
-    }));
+    setReportOptions(prev => {
+      const newFieldOrder = checked 
+        ? [...prev.fieldOrder, field]
+        : prev.fieldOrder.filter(f => f !== field);
+      
+      return {
+        ...prev,
+        additionalFields: {
+          ...prev.additionalFields,
+          [field]: checked,
+        },
+        fieldOrder: newFieldOrder,
+      };
+    });
   };
 
   const handleGenerateExcel = () => {
