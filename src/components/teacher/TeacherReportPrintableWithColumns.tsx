@@ -92,9 +92,14 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
         <h3 className="text-base font-bold">
           {reportOptions.reportType === '1' 
             ? 'รายชื่อข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล' 
-            : 'แบบลงทะเบียนการประชุมข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล'
+            : reportOptions.reportType === '2'
+            ? 'แบบลงทะเบียนการประชุมข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล'
+            : reportOptions.customTitle1 || 'แบบลงทะเบียน'
           }
         </h3>
+        {reportOptions.reportType === '3' && reportOptions.customTitle2 && (
+          <p className="text-sm">{reportOptions.customTitle2}</p>
+        )}
         <p className="text-sm">ปีการศึกษา {reportOptions.academicYear}</p>
         {reportOptions.showDate && reportOptions.selectedDate && (
           <p className="text-sm">วันที่ {formatThaiDate(reportOptions.selectedDate)}</p>

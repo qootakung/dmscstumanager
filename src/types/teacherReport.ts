@@ -23,4 +23,6 @@ export interface TeacherReportOptions {
   customColumns: number;
   showDate: boolean;
   selectedDate: string;
+  customTitle1?: string;
+  customTitle2?: string;
 }

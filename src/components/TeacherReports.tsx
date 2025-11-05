@@ -38,6 +38,8 @@ const TeacherReports: React.FC = () => {
     customColumns: 0,
     showDate: false,
     selectedDate: '',
+    customTitle1: '',
+    customTitle2: '',
   });
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [isResizableMode, setIsResizableMode] = useState(false);

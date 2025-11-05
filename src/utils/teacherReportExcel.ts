@@ -38,21 +38,43 @@ export const generateTeacherExcel = (
   const ws = XLSX.utils.aoa_to_sheet([]);
 
   // Report Headers
-  const headerContent = [
-    [reportOptions.reportType === '1' 
-      ? 'รายชื่อข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล' 
-      : 'แบบลงทะเบียนการประชุมข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล'
-    ],
-    [`ปีการศึกษา ${reportOptions.academicYear}`],
-  ];
-  if (reportOptions.showDate && reportOptions.selectedDate) {
-    headerContent.push([`วันที่ ${formatThaiDate(reportOptions.selectedDate)}`]);
+  const headerRows: string[][] = [];
+  
+  // บรรทัดที่ 1: ชื่อรายงาน
+  if (reportOptions.reportType === '1') {
+    headerRows.push(['รายชื่อข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล']);
+  } else if (reportOptions.reportType === '2') {
+    headerRows.push(['แบบลงทะเบียนการประชุมข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล']);
+  } else if (reportOptions.reportType === '3') {
+    headerRows.push([reportOptions.customTitle1 || 'แบบลงทะเบียน']);
   }
   
-  XLSX.utils.sheet_add_aoa(ws, headerContent, { origin: 'A1' });
+  // บรรทัดที่ 2: customTitle2 (เฉพาะ reportType 3)
+  if (reportOptions.reportType === '3' && reportOptions.customTitle2) {
+    headerRows.push([reportOptions.customTitle2]);
+  }
+  
+  // บรรทัดถัดไป: ปีการศึกษา
+  headerRows.push([`ปีการศึกษา ${reportOptions.academicYear}`]);
+  
+  // บรรทัดถัดไป: วันที่ (ถ้ามี)
+  if (reportOptions.showDate && reportOptions.selectedDate) {
+    headerRows.push([`วันที่ ${formatThaiDate(reportOptions.selectedDate)}`]);
+  }
+  
+  XLSX.utils.sheet_add_aoa(ws, headerRows, { origin: 'A1' });
+  
+  // จัดรูปแบบ header
   if (ws['A1']) ws['A1'].s = titleStyle;
-  if (ws['A2']) ws['A2'].s = subtitleStyle;
-  if (ws['A3']) ws['A3'].s = subtitleStyle;
+  let rowIndex = 2;
+  if (reportOptions.reportType === '3' && reportOptions.customTitle2) {
+    if (ws['A2']) ws['A2'].s = subtitleStyle;
+    rowIndex = 3;
+  }
+  if (ws[`A${rowIndex}`]) ws[`A${rowIndex}`].s = subtitleStyle;
+  if (reportOptions.showDate && reportOptions.selectedDate) {
+    if (ws[`A${rowIndex + 1}`]) ws[`A${rowIndex + 1}`].s = subtitleStyle;
+  }
 
   // Table Columns
   const baseColumns = ['ลำดับที่', 'ชื่อ - นามสกุล'];
@@ -91,7 +113,7 @@ export const generateTeacherExcel = (
   const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
 
   // Table Header
-  const tableStartRow = headerContent.length + 2;
+  const tableStartRow = headerRows.length + 2;
   XLSX.utils.sheet_add_aoa(ws, [allColumns], { origin: `A${tableStartRow}` });
   allColumns.forEach((_, colIndex) => {
     const cellRef = XLSX.utils.encode_cell({ c: colIndex, r: tableStartRow - 1 });
@@ -154,7 +176,7 @@ export const generateTeacherExcel = (
 
   // Merges
   const merges = [];
-  for(let i = 0; i < headerContent.length; i++) {
+  for(let i = 0; i < headerRows.length; i++) {
     merges.push({ s: { r: i, c: 0 }, e: { r: i, c: allColumns.length - 1 } });
   }
   ws['!merges'] = merges;

@@ -88,6 +88,32 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
         </div>
       )}
 
+      {reportOptions.reportType === '3' && (
+        <div className="space-y-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h3 className="font-semibold text-blue-900">ข้อมูลเพิ่มเติมสำหรับแบบลงทะเบียนอื่นๆ</h3>
+          <div>
+            <Label htmlFor="customTitle1">หัวข้อบรรทัดที่ 1</Label>
+            <Input
+              type="text"
+              id="customTitle1"
+              placeholder="เช่น แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้"
+              value={reportOptions.customTitle1 || ''}
+              onChange={(e) => onOptionChange('customTitle1', e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="customTitle2">หัวข้อบรรทัดที่ 2</Label>
+            <Input
+              type="text"
+              id="customTitle2"
+              placeholder="เช่น กิจกรรม ส่งเสริมความเป็นเลิศทางวิชาการ"
+              value={reportOptions.customTitle2 || ''}
+              onChange={(e) => onOptionChange('customTitle2', e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label>คอลัมน์เพิ่มเติม</Label>
         <div className="flex flex-wrap gap-4">
