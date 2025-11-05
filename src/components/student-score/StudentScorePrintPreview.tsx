@@ -250,11 +250,18 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
             // Find score for this subject and selected student
             let subjectScore;
             if (selectedStudent) {
-              subjectScore = scores.find(s => 
+              // Get all matching scores and find the one with highest score (non-zero preferred)
+              const matchingScores = scores.filter(s => 
                 s.subject_code === subject.code && 
                 s.student_id === selectedStudent.id &&
                 s.grade_level?.trim() === gradeLevel.trim()
               );
+              
+              // Prefer non-zero scores, then get the latest one
+              const nonZeroScores = matchingScores.filter(s => s.score > 0);
+              subjectScore = nonZeroScores.length > 0 
+                ? nonZeroScores[nonZeroScores.length - 1] 
+                : matchingScores[matchingScores.length - 1];
               
               console.log('Finding score for subject:', {
                 subjectCode: subject.code,
@@ -268,10 +275,14 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
                 }))
               });
             } else {
-              subjectScore = scores.find(s => 
+              const matchingScores = scores.filter(s => 
                 s.subject_code === subject.code &&
                 s.grade_level?.trim() === gradeLevel.trim()
               );
+              const nonZeroScores = matchingScores.filter(s => s.score > 0);
+              subjectScore = nonZeroScores.length > 0 
+                ? nonZeroScores[nonZeroScores.length - 1] 
+                : matchingScores[matchingScores.length - 1];
             }
             
             return (
@@ -304,16 +315,24 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
               {additionalSubjects.map((subject) => {
                 let subjectScore;
                 if (selectedStudent) {
-                  subjectScore = scores.find(s => 
+                  const matchingScores = scores.filter(s => 
                     s.subject_code === subject.code && 
                     s.student_id === selectedStudent.id &&
                     s.grade_level?.trim() === gradeLevel.trim()
                   );
+                  const nonZeroScores = matchingScores.filter(s => s.score > 0);
+                  subjectScore = nonZeroScores.length > 0 
+                    ? nonZeroScores[nonZeroScores.length - 1] 
+                    : matchingScores[matchingScores.length - 1];
                 } else {
-                  subjectScore = scores.find(s => 
+                  const matchingScores = scores.filter(s => 
                     s.subject_code === subject.code &&
                     s.grade_level?.trim() === gradeLevel.trim()
                   );
+                  const nonZeroScores = matchingScores.filter(s => s.score > 0);
+                  subjectScore = nonZeroScores.length > 0 
+                    ? nonZeroScores[nonZeroScores.length - 1] 
+                    : matchingScores[matchingScores.length - 1];
                 }
                 
                 return (
