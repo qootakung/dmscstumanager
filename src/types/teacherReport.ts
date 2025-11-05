@@ -1,6 +1,6 @@
 
 export interface TeacherReportOptions {
-  reportType: '1' | '2';
+  reportType: '1' | '2' | '3';
   academicYear: string;
   additionalFields: {
     email: boolean;

@@ -37,7 +37,7 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
           <Label htmlFor="reportType">ประเภทรายงาน</Label>
           <Select 
             value={reportOptions.reportType} 
-            onValueChange={(value) => onOptionChange('reportType', value as '1' | '2')}
+            onValueChange={(value) => onOptionChange('reportType', value as '1' | '2' | '3')}
           >
             <SelectTrigger id="reportType">
               <SelectValue placeholder="เลือกประเภทรายงาน" />
@@ -45,6 +45,7 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
             <SelectContent>
               <SelectItem value="1">รายชื่อข้าราชการครูและบุคลากร</SelectItem>
               <SelectItem value="2">แบบลงทะเบียนการประชุม</SelectItem>
+              <SelectItem value="3">แบบลงทะเบียนอื่นๆ</SelectItem>
             </SelectContent>
           </Select>
         </div>

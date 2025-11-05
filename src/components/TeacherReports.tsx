@@ -54,7 +54,33 @@ const TeacherReports: React.FC = () => {
   const academicYears = useMemo(() => [...new Set(teachers.map(t => t.academicYear).filter(Boolean) as string[])].sort().reverse(), [teachers]);
 
   const handleOptionChange = (field: keyof TeacherReportOptions, value: any) => {
-    setReportOptions(prev => ({ ...prev, [field]: value }));
+    setReportOptions(prev => {
+      // ถ้าเปลี่ยน reportType เป็น 2 (แบบลงทะเบียนการประชุม) ให้เช็ค signature, timeIn, signature2, timeOut อัตโนมัติ
+      if (field === 'reportType' && value === '2') {
+        const fieldsToCheck = ['signature', 'timeIn', 'signature2', 'timeOut'];
+        const newFieldOrder = [...prev.fieldOrder];
+        const newAdditionalFields = { ...prev.additionalFields };
+        
+        fieldsToCheck.forEach(fieldName => {
+          const typedFieldName = fieldName as keyof TeacherReportOptions['additionalFields'];
+          if (!prev.additionalFields[typedFieldName]) {
+            newAdditionalFields[typedFieldName] = true;
+            if (!newFieldOrder.includes(fieldName)) {
+              newFieldOrder.push(fieldName);
+            }
+          }
+        });
+        
+        return {
+          ...prev,
+          [field]: value,
+          additionalFields: newAdditionalFields,
+          fieldOrder: newFieldOrder,
+        };
+      }
+      
+      return { ...prev, [field]: value };
+    });
   };
 
   const handleAdditionalFieldChange = (field: keyof TeacherReportOptions['additionalFields'], checked: boolean) => {
