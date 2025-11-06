@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, Download, Printer, Users, Activity, TrendingUp, CheckCircle2, XCircle, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -297,7 +298,7 @@ const DentalMilkTracking = () => {
           const isRecorded = recordedData[recordKey];
           
           printContent += `<td class="${isWeekend ? 'weekend' : ''}">${
-            isRecorded && !isWeekend ? (recordingMode === 'brushing' ? '🦷' : '🥛') : ''
+            isRecorded && !isWeekend ? '<span style="color: #059669; font-size: 16px; font-weight: bold;">✓</span>' : ''
           }</td>`;
         } else {
           printContent += `<td style="visibility: hidden;"></td>`;
@@ -333,6 +334,44 @@ const DentalMilkTracking = () => {
     toast({
       title: newValue ? "เพิ่มข้อมูลแล้ว" : "ลบข้อมูลแล้ว",
       description: `${recordingMode === 'brushing' ? 'การแปรงฟัน' : 'การดื่มนม'} วันที่ ${day}`,
+    });
+  };
+
+  const handleCheckAllDay = (day: number) => {
+    const filteredStudents = selectedGrade === 'all' 
+      ? students 
+      : students.filter(s => s.grade === selectedGrade);
+    
+    const gregorianYear = selectedYear - 543;
+    const date = new Date(gregorianYear, selectedMonth - 1, day);
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    
+    if (isWeekend) return;
+    
+    const newRecordedData = { ...recordedData };
+    let allChecked = true;
+    
+    // Check if all students for this day are already checked
+    filteredStudents.forEach((_, studentIndex) => {
+      const key = `${recordingMode}-${studentIndex}-${day}`;
+      if (!newRecordedData[key]) {
+        allChecked = false;
+      }
+    });
+    
+    // Toggle: if all checked, uncheck all; otherwise, check all
+    filteredStudents.forEach((_, studentIndex) => {
+      const key = `${recordingMode}-${studentIndex}-${day}`;
+      newRecordedData[key] = !allChecked;
+    });
+    
+    setRecordedData(newRecordedData);
+    setHasUnsavedChanges(true);
+    
+    toast({
+      title: allChecked ? "ยกเลิกการเช็คทั้งหมด" : "เช็คทั้งหมดแล้ว",
+      description: `วันที่ ${day} ${months.find(m => m.value === selectedMonth)?.label}`,
     });
   };
 
@@ -718,6 +757,57 @@ const DentalMilkTracking = () => {
                     </div>
                   </div>
 
+                  {/* Check All Row */}
+                  <div className="grid grid-cols-[60px_200px_repeat(31,40px)_80px] gap-1 mb-2">
+                    <div className="text-center text-xs p-2 bg-blue-50 rounded font-medium">
+                    </div>
+                    <div className="text-center text-xs p-2 bg-blue-50 rounded font-medium">
+                      เช็คทั้งหมด
+                    </div>
+                    {Array.from({ length: 31 }, (_, i) => {
+                      const day = i + 1;
+                      const gregorianYear = selectedYear - 543;
+                      const date = new Date(gregorianYear, selectedMonth - 1, day);
+                      const dayOfWeek = date.getDay();
+                      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                      const isValidDay = day <= getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
+                      const filteredStudents = selectedGrade === 'all' 
+                        ? students 
+                        : students.filter(s => s.grade === selectedGrade);
+                      
+                      // Check if all students for this day are checked
+                      const allChecked = isValidDay && !isWeekend && filteredStudents.every((_, studentIndex) => {
+                        const key = `${recordingMode}-${studentIndex}-${day}`;
+                        return recordedData[key];
+                      });
+                      
+                      return (
+                        <div 
+                          key={day}
+                          className={`flex items-center justify-center p-2 rounded cursor-pointer transition-colors min-h-[32px] ${
+                            !isValidDay ? 'invisible' :
+                            isWeekend ? 'bg-red-50 border border-red-200 cursor-not-allowed' :
+                            'bg-blue-50 border border-blue-300 hover:bg-blue-100'
+                          }`}
+                          onClick={() => {
+                            if (!isWeekend && isValidDay) {
+                              handleCheckAllDay(day);
+                            }
+                          }}
+                        >
+                          {isValidDay && !isWeekend && (
+                            <Checkbox 
+                              checked={allChecked} 
+                              className="pointer-events-none"
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                    <div className="text-center text-xs p-2 bg-blue-50 rounded">
+                    </div>
+                  </div>
+
                    {/* Student Rows */}
                    {(selectedGrade === 'all' ? students : students.filter(s => s.grade === selectedGrade))
                      .sort((a, b) => {
@@ -750,26 +840,27 @@ const DentalMilkTracking = () => {
                              const isRecorded = recordedData[recordKey];
                              
                              return (
-                               <div 
-                                 key={day}
-                                 className={`text-center text-sm p-2 rounded cursor-pointer transition-colors min-h-[32px] flex items-center justify-center ${
-                                   !isValidDay ? 'invisible' :
-                                   isWeekend ? 'bg-red-50 border border-red-200 cursor-not-allowed' :
-                                   isRecorded ? (recordingMode === 'brushing' ? 'bg-green-100 hover:bg-green-200 border border-green-300' : 'bg-purple-100 hover:bg-purple-200 border border-purple-300') :
-                                   'bg-white border border-gray-200 hover:bg-gray-50'
-                                 }`}
-                                 onClick={() => {
-                                   if (!isWeekend && isValidDay) {
-                                     handleCellClick(studentIndex, day);
-                                   }
-                                 }}
-                               >
-                                 {isValidDay && isRecorded && !isWeekend && (
-                                   <span className="text-base">
-                                     {recordingMode === 'brushing' ? '🦷' : '🥛'}
-                                   </span>
-                                 )}
-                               </div>
+                                <div 
+                                  key={day}
+                                  className={`flex items-center justify-center p-2 rounded cursor-pointer transition-colors min-h-[32px] ${
+                                    !isValidDay ? 'invisible' :
+                                    isWeekend ? 'bg-red-50 border border-red-200 cursor-not-allowed' :
+                                    isRecorded ? (recordingMode === 'brushing' ? 'bg-green-100 hover:bg-green-200 border border-green-300' : 'bg-purple-100 hover:bg-purple-200 border border-purple-300') :
+                                    'bg-white border border-gray-200 hover:bg-gray-50'
+                                  }`}
+                                  onClick={() => {
+                                    if (!isWeekend && isValidDay) {
+                                      handleCellClick(studentIndex, day);
+                                    }
+                                  }}
+                                >
+                                  {isValidDay && !isWeekend && (
+                                    <Checkbox 
+                                      checked={isRecorded} 
+                                      className="pointer-events-none"
+                                    />
+                                  )}
+                                </div>
                              );
                            })}
                            <div className="text-center text-sm p-2 bg-orange-50 rounded font-bold text-orange-700">
@@ -791,13 +882,13 @@ const DentalMilkTracking = () => {
                     <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
                     <span className="text-sm">วันหยุด (เสาร์-อาทิตย์)</span>
                   </div>
-                   <div className="flex items-center space-x-2">
-                     <div className={`w-4 h-4 rounded flex items-center justify-center text-xs ${recordingMode === 'brushing' ? 'bg-green-100 border border-green-200' : 'bg-purple-100 border border-purple-200'}`}>
-                       {recordingMode === 'brushing' ? '🦷' : '🥛'}
-                     </div>
-                     <span className="text-sm">
-                       {recordingMode === 'brushing' ? 'แปรงฟันแล้ว' : 'ดื่มนมแล้ว'}
-                     </span>
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-6 h-6 rounded flex items-center justify-center ${recordingMode === 'brushing' ? 'bg-green-100 border border-green-300' : 'bg-purple-100 border border-purple-300'}`}>
+                      <Checkbox checked={true} className="pointer-events-none" />
+                    </div>
+                    <span className="text-sm">
+                      {recordingMode === 'brushing' ? 'แปรงฟันแล้ว' : 'ดื่มนมแล้ว'}
+                    </span>
                    </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-white border border-gray-200 rounded"></div>
