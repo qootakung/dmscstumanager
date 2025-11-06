@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
+import DentalMilkPrintDialog from './DentalMilkPrintDialog';
 
 const DentalMilkTracking = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -22,6 +23,7 @@ const DentalMilkTracking = () => {
   const [recordedData, setRecordedData] = useState<{[key: string]: boolean}>({});
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
 
   // Load student data and dental/milk records from database
   useEffect(() => {
@@ -125,199 +127,7 @@ const DentalMilkTracking = () => {
   };
 
   const handlePrint = () => {
-    const filteredStudents = selectedGrade === 'all' 
-      ? students.sort((a, b) => {
-          const gradeOrder = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
-          if (a.grade !== b.grade) {
-            return gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade);
-          }
-          return parseInt(a.studentId) - parseInt(b.studentId);
-        })
-      : students.filter(s => s.grade === selectedGrade)
-          .sort((a, b) => parseInt(a.studentId) - parseInt(b.studentId));
-
-    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
-    
-    // Create print content matching the reference image
-    let printContent = `
-      <html>
-        <head>
-          <title>บันทึกข้อมูลการ${recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}</title>
-          <style>
-            @page { 
-              size: A4 landscape; 
-              margin: 15mm; 
-            }
-            body { 
-              font-family: 'Sarabun', Arial, sans-serif; 
-              font-size: 12px;
-              margin: 0;
-              padding: 0;
-            }
-            .header { 
-              text-align: center; 
-              margin-bottom: 15px; 
-            }
-            .header h1 { 
-              margin: 0; 
-              font-size: 18px; 
-              font-weight: bold;
-            }
-            .header p { 
-              margin: 5px 0; 
-              font-size: 14px; 
-            }
-            .controls {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin-bottom: 10px;
-            }
-            .switch-container {
-              display: inline-flex;
-              align-items: center;
-              background: #f0f0f0;
-              border-radius: 20px;
-              padding: 2px;
-            }
-            .switch-option {
-              padding: 4px 12px;
-              border-radius: 18px;
-              font-size: 12px;
-              background: ${recordingMode === 'brushing' ? '#4CAF50' : '#fff'};
-              color: ${recordingMode === 'brushing' ? '#fff' : '#333'};
-            }
-            .switch-option.active {
-              background: #4CAF50;
-              color: white;
-            }
-            table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              font-size: 10px;
-            }
-            th, td { 
-              border: 1px solid #000; 
-              padding: 4px 2px; 
-              text-align: center; 
-              vertical-align: middle;
-            }
-            th { 
-              background-color: #4CAF50; 
-              color: white;
-              font-weight: bold; 
-              font-size: 9px;
-            }
-            .student-no { 
-              width: 30px; 
-              background-color: #4CAF50;
-              color: white;
-              font-weight: bold;
-            }
-            .student-name { 
-              width: 120px; 
-              text-align: left; 
-              padding-left: 6px;
-              background-color: #4CAF50;
-              color: white;
-              font-weight: bold;
-            }
-            .day-header { 
-              width: 22px; 
-              font-size: 8px;
-            }
-            .weekend { 
-              background-color: #ffebee; 
-              color: #d32f2f;
-            }
-            .recorded { 
-              font-size: 14px; 
-            }
-            .total-col {
-              width: 40px;
-              background-color: #4CAF50;
-              color: white;
-              font-weight: bold;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>บันทึกข้อมูลการ${recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}</h1>
-            <p>${months.find(m => m.value === selectedMonth)?.label} ${selectedYear} ${selectedGrade !== 'all' ? `- ${selectedGrade}` : ''}</p>
-            <div class="controls">
-              <div class="switch-container">
-                <div class="switch-option ${recordingMode === 'brushing' ? 'active' : ''}">แปรงฟัน</div>
-                <div class="switch-option ${recordingMode === 'milk' ? 'active' : ''}">ดื่มนม</div>
-              </div>
-            </div>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th class="student-no">ที่</th>
-                <th class="student-name">ชื่อ</th>`;
-    
-    // Add day headers
-    for (let day = 1; day <= 31; day++) {
-      if (day <= daysInMonth) {
-        const gregorianYear = selectedYear - 543;
-        const date = new Date(gregorianYear, selectedMonth - 1, day);
-        const dayOfWeek = date.getDay();
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        
-        printContent += `<th class="day-header ${isWeekend ? 'weekend' : ''}">${day}</th>`;
-      } else {
-        printContent += `<th style="visibility: hidden; width: 22px;"></th>`;
-      }
-    }
-    
-    printContent += `<th class="total-col">รวม</th></tr></thead><tbody>`;
-    
-    // Add student rows
-    filteredStudents.forEach((student, studentIndex) => {
-      const totalRecords = Array.from({ length: daysInMonth }, (_, i) => {
-        const day = i + 1;
-        const recordKey = `${recordingMode}-${studentIndex}-${day}`;
-        return recordedData[recordKey] ? 1 : 0;
-      }).reduce((sum, val) => sum + val, 0);
-      
-      printContent += `
-        <tr>
-          <td class="student-no">${studentIndex + 1}</td>
-          <td class="student-name">${student.firstNameTh} ${student.lastNameTh}</td>`;
-      
-      // Add day cells
-      for (let day = 1; day <= 31; day++) {
-        if (day <= daysInMonth) {
-          const gregorianYear = selectedYear - 543;
-          const date = new Date(gregorianYear, selectedMonth - 1, day);
-          const dayOfWeek = date.getDay();
-          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-          const recordKey = `${recordingMode}-${studentIndex}-${day}`;
-          const isRecorded = recordedData[recordKey];
-          
-          printContent += `<td class="${isWeekend ? 'weekend' : ''}">${
-            isRecorded && !isWeekend ? '<span style="color: #059669; font-size: 16px; font-weight: bold;">✓</span>' : ''
-          }</td>`;
-        } else {
-          printContent += `<td style="visibility: hidden;"></td>`;
-        }
-      }
-      
-      printContent += `<td class="total-col">${totalRecords}</td></tr>`;
-    });
-    
-    printContent += `
-          </tbody>
-        </table>
-      </body>
-    </html>`;
-    
-    const printWindow = window.open('', '_blank');
-    printWindow?.document.write(printContent);
-    printWindow?.document.close();
-    printWindow?.print();
+    setIsPrintDialogOpen(true);
   };
 
   const handleCellClick = (studentIndex: number, day: number) => {
@@ -905,6 +715,17 @@ const DentalMilkTracking = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <DentalMilkPrintDialog
+        isOpen={isPrintDialogOpen}
+        onOpenChange={setIsPrintDialogOpen}
+        students={students}
+        recordedData={recordedData}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+        selectedGrade={selectedGrade}
+        recordingMode={recordingMode}
+      />
     </div>
   );
 };
