@@ -160,17 +160,17 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
           </tr>
         </thead>
         <tbody>
-          {filteredStudents.map((student, studentIndex) => {
+          {filteredStudents.map((student) => {
             const totalRecords = Array.from({ length: daysInMonth }, (_, i) => {
               const day = i + 1;
-              const recordKey = `${recordingMode}-${studentIndex}-${day}`;
+              const recordKey = `${recordingMode}-${student.id}-${day}`;
               return recordedData[recordKey] ? 1 : 0;
             }).reduce((sum, val) => sum + val, 0);
             
             return (
               <tr key={student.id}>
                 <td className="border border-gray-900 p-1 text-center bg-green-600 text-white font-bold">
-                  {studentIndex + 1}
+                  {filteredStudents.indexOf(student) + 1}
                 </td>
                 <td className="border border-gray-900 p-1 text-left pl-2 bg-green-600 text-white font-bold">
                   {student.firstNameTh} {student.lastNameTh}
@@ -182,7 +182,7 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
                     const date = new Date(gregorianYear, selectedMonth - 1, day);
                     const dayOfWeek = date.getDay();
                     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                    const recordKey = `${recordingMode}-${studentIndex}-${day}`;
+                    const recordKey = `${recordingMode}-${student.id}-${day}`;
                     const isRecorded = recordedData[recordKey];
                     
                     return (

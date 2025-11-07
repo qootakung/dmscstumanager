@@ -54,14 +54,11 @@ const DentalMilkTracking = () => {
       
       if (recordsError) throw recordsError;
       
-      // Convert records to recordedData format
+      // Convert records to recordedData format using student_id
       const newRecordedData: {[key: string]: boolean} = {};
       recordsData.forEach((record) => {
-        const studentIndex = studentsData.findIndex(s => s.id === record.student_id);
-        if (studentIndex !== -1) {
-          const key = `${recordingMode}-${studentIndex}-${record.day}`;
-          newRecordedData[key] = record.is_recorded;
-        }
+        const key = `${recordingMode}-${record.student_id}-${record.day}`;
+        newRecordedData[key] = record.is_recorded;
       });
       
       setRecordedData(newRecordedData);
@@ -130,8 +127,8 @@ const DentalMilkTracking = () => {
     setIsPrintDialogOpen(true);
   };
 
-  const handleCellClick = (studentIndex: number, day: number) => {
-    const key = `${recordingMode}-${studentIndex}-${day}`;
+  const handleCellClick = (studentId: string, day: number) => {
+    const key = `${recordingMode}-${studentId}-${day}`;
     const newValue = !recordedData[key];
     
     setRecordedData(prev => ({
@@ -163,16 +160,16 @@ const DentalMilkTracking = () => {
     let allChecked = true;
     
     // Check if all students for this day are already checked
-    filteredStudents.forEach((_, studentIndex) => {
-      const key = `${recordingMode}-${studentIndex}-${day}`;
+    filteredStudents.forEach((student) => {
+      const key = `${recordingMode}-${student.id}-${day}`;
       if (!newRecordedData[key]) {
         allChecked = false;
       }
     });
     
     // Toggle: if all checked, uncheck all; otherwise, check all
-    filteredStudents.forEach((_, studentIndex) => {
-      const key = `${recordingMode}-${studentIndex}-${day}`;
+    filteredStudents.forEach((student) => {
+      const key = `${recordingMode}-${student.id}-${day}`;
       newRecordedData[key] = !allChecked;
     });
     
@@ -196,28 +193,21 @@ const DentalMilkTracking = () => {
       
       // Prepare records to upsert
       const records = [];
-      const daysInMonth = getDaysInMonth(selectedMonth, selectedYear).filter(d => d !== null).length;
+      const calendarDaysData = getDaysInMonth(selectedMonth, selectedYear);
+      const actualDays = calendarDaysData.filter(d => d !== null && !d.isWeekend);
       
-      for (let studentIndex = 0; studentIndex < filteredStudents.length; studentIndex++) {
-        const student = filteredStudents[studentIndex];
-        
-        for (let day = 1; day <= daysInMonth; day++) {
-          const key = `${recordingMode}-${studentIndex}-${day}`;
-          const recorded = recordedData[key] || false;
-          
-          // Skip weekends
-          const gregorianYear = selectedYear - 543;
-          const date = new Date(gregorianYear, selectedMonth - 1, day);
-          const dayOfWeek = date.getDay();
-          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-          
-          if (!isWeekend) {
+      for (const student of filteredStudents) {
+        for (const dayData of actualDays) {
+          if (dayData) {
+            const key = `${recordingMode}-${student.id}-${dayData.day}`;
+            const recorded = recordedData[key] || false;
+            
             records.push({
               student_id: student.id,
               academic_year: `${selectedYear}`,
               month: selectedMonth,
               year: selectedYear,
-              day: day,
+              day: dayData.day,
               record_type: recordingMode,
               is_recorded: recorded
             });
@@ -586,8 +576,8 @@ const DentalMilkTracking = () => {
                         : students.filter(s => s.grade === selectedGrade);
                       
                       // Check if all students for this day are checked
-                      const allChecked = isValidDay && !isWeekend && filteredStudents.every((_, studentIndex) => {
-                        const key = `${recordingMode}-${studentIndex}-${day}`;
+                      const allChecked = isValidDay && !isWeekend && filteredStudents.every((student) => {
+                        const key = `${recordingMode}-${student.id}-${day}`;
                         return recordedData[key];
                       });
                       
@@ -644,26 +634,26 @@ const DentalMilkTracking = () => {
                              const gregorianYear = selectedYear - 543;
                              const date = new Date(gregorianYear, selectedMonth - 1, day);
                              const dayOfWeek = date.getDay();
-                             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                             const isValidDay = day <= daysInMonth;
-                             const recordKey = `${recordingMode}-${studentIndex}-${day}`;
-                             const isRecorded = recordedData[recordKey];
-                             
-                             return (
-                                <div 
-                                  key={day}
-                                  className={`flex items-center justify-center p-2 rounded cursor-pointer transition-colors min-h-[32px] ${
-                                    !isValidDay ? 'invisible' :
-                                    isWeekend ? 'bg-red-50 border border-red-200 cursor-not-allowed' :
-                                    isRecorded ? (recordingMode === 'brushing' ? 'bg-green-100 hover:bg-green-200 border border-green-300' : 'bg-purple-100 hover:bg-purple-200 border border-purple-300') :
-                                    'bg-white border border-gray-200 hover:bg-gray-50'
-                                  }`}
-                                  onClick={() => {
-                                    if (!isWeekend && isValidDay) {
-                                      handleCellClick(studentIndex, day);
-                                    }
-                                  }}
-                                >
+                              const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                              const isValidDay = day <= daysInMonth;
+                              const recordKey = `${recordingMode}-${student.id}-${day}`;
+                              const isRecorded = recordedData[recordKey];
+                              
+                              return (
+                                 <div 
+                                   key={day}
+                                   className={`flex items-center justify-center p-2 rounded cursor-pointer transition-colors min-h-[32px] ${
+                                     !isValidDay ? 'invisible' :
+                                     isWeekend ? 'bg-red-50 border border-red-200 cursor-not-allowed' :
+                                     isRecorded ? (recordingMode === 'brushing' ? 'bg-green-100 hover:bg-green-200 border border-green-300' : 'bg-purple-100 hover:bg-purple-200 border border-purple-300') :
+                                     'bg-white border border-gray-200 hover:bg-gray-50'
+                                   }`}
+                                   onClick={() => {
+                                     if (!isWeekend && isValidDay) {
+                                       handleCellClick(student.id, day);
+                                     }
+                                   }}
+                                 >
                                   {isValidDay && !isWeekend && (
                                     <Checkbox 
                                       checked={isRecorded} 
@@ -673,14 +663,14 @@ const DentalMilkTracking = () => {
                                 </div>
                              );
                            })}
-                           <div className="text-center text-sm p-2 bg-orange-50 rounded font-bold text-orange-700">
-                             {/* Calculate total from recorded data */}
-                             {Array.from({ length: daysInMonth }, (_, i) => {
-                               const day = i + 1;
-                               const recordKey = `${recordingMode}-${studentIndex}-${day}`;
-                               return recordedData[recordKey] ? 1 : 0;
-                             }).reduce((sum, val) => sum + val, 0)}
-                           </div>
+                            <div className="text-center text-sm p-2 bg-orange-50 rounded font-bold text-orange-700">
+                              {/* Calculate total from recorded data */}
+                              {Array.from({ length: daysInMonth }, (_, i) => {
+                                const day = i + 1;
+                                const recordKey = `${recordingMode}-${student.id}-${day}`;
+                                return recordedData[recordKey] ? 1 : 0;
+                              }).reduce((sum, val) => sum + val, 0)}
+                            </div>
                          </div>
                        );
                      })}
