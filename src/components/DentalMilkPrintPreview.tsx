@@ -100,9 +100,6 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
             width: 120px !important; 
             text-align: left !important; 
             padding-left: 6px !important;
-            background-color: #4CAF50 !important;
-            color: white !important;
-            font-weight: bold !important;
           }
           .day-header { 
             width: 22px !important; 
@@ -134,7 +131,7 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
         <thead>
           <tr>
             <th className="border border-gray-900 p-1 bg-green-600 text-white font-bold" style={{width: '30px'}}>ที่</th>
-            <th className="border border-gray-900 p-1 bg-green-600 text-white font-bold text-left pl-2" style={{width: '120px'}}>ชื่อ</th>
+            <th className="border border-gray-900 p-1 bg-green-600 text-white font-bold text-left pl-2" style={{width: '150px'}}>ชื่อ-สกุล</th>
             {Array.from({ length: 31 }, (_, i) => {
               const day = i + 1;
               if (day <= daysInMonth) {
@@ -172,8 +169,8 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
                 <td className="border border-gray-900 p-1 text-center bg-green-600 text-white font-bold">
                   {filteredStudents.indexOf(student) + 1}
                 </td>
-                <td className="border border-gray-900 p-1 text-left pl-2 bg-green-600 text-white font-bold">
-                  {student.firstNameTh} {student.lastNameTh}
+                <td className="border border-gray-900 p-1 text-left pl-2">
+                  {student.titleTh || (student.gender === 'ชาย' || student.gender === 'ช' ? 'ด.ช.' : 'ด.ญ.')} {student.firstNameTh} {student.lastNameTh}
                 </td>
                 {Array.from({ length: 31 }, (_, i) => {
                   const day = i + 1;
