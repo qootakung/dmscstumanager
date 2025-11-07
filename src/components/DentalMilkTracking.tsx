@@ -24,6 +24,33 @@ const DentalMilkTracking = () => {
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [directorName, setDirectorName] = useState('');
+  const [selectedTeacherId, setSelectedTeacherId] = useState('');
+  const [teachers, setTeachers] = useState<any[]>([]);
+
+  // Load teachers from database
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const { data: teachersData, error } = await supabase
+          .from('teachers')
+          .select('id, firstName, lastName')
+          .order('firstName');
+
+        if (error) throw error;
+        setTeachers(teachersData || []);
+        
+        // Set first teacher as default if available
+        if (teachersData && teachersData.length > 0) {
+          setSelectedTeacherId(teachersData[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching teachers:', error);
+      }
+    };
+
+    fetchTeachers();
+  }, []);
 
   // Load student data and dental/milk records from database
   useEffect(() => {
@@ -715,6 +742,11 @@ const DentalMilkTracking = () => {
         selectedYear={selectedYear}
         selectedGrade={selectedGrade}
         recordingMode={recordingMode}
+        directorName={directorName}
+        selectedTeacherId={selectedTeacherId}
+        teachers={teachers}
+        onDirectorNameChange={setDirectorName}
+        onTeacherChange={setSelectedTeacherId}
       />
     </div>
   );

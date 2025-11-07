@@ -8,6 +8,8 @@ interface DentalMilkPrintPreviewProps {
   selectedYear: number;
   selectedGrade: string;
   recordingMode: 'brushing' | 'milk';
+  directorName: string;
+  teacherName: string;
 }
 
 const months = [
@@ -38,6 +40,8 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
   selectedYear,
   selectedGrade,
   recordingMode,
+  directorName,
+  teacherName,
 }, ref) => {
   const filteredStudents = selectedGrade === 'all' 
     ? students.sort((a, b) => {
@@ -204,6 +208,38 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
           })}
         </tbody>
       </table>
+
+      {/* Signature Section */}
+      <div className="mt-8 flex justify-between items-start" style={{ fontSize: '12px' }}>
+        <div className="text-center">
+          <p className="mb-6">รับรองข้อมูลถูกต้อง</p>
+          <div className="mb-2">
+            <span style={{ 
+              borderBottom: '1px dotted #000',
+              minWidth: '200px',
+              display: 'inline-block',
+              paddingBottom: '2px'
+            }}>
+              {directorName ? ` ${directorName} ` : ' ................................. '}
+            </span>
+          </div>
+          <p>ผู้อำนวยการโรงเรียนบ้านดอนมูล</p>
+        </div>
+        <div className="text-center">
+          <p className="mb-6">ตรวจสอบข้อมูลถูกต้อง</p>
+          <div className="mb-2">
+            <span style={{ 
+              borderBottom: '1px dotted #000',
+              minWidth: '200px',
+              display: 'inline-block',
+              paddingBottom: '2px'
+            }}>
+              {teacherName ? ` ${teacherName} ` : ' ................................. '}
+            </span>
+          </div>
+          <p>ครูประจำชั้น</p>
+        </div>
+      </div>
     </div>
   );
 });
