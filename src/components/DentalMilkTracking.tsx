@@ -17,6 +17,7 @@ const DentalMilkTracking = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(2568);
   const [selectedGrade, setSelectedGrade] = useState('all');
+  const [selectedSemester, setSelectedSemester] = useState('1');
   const [students, setStudents] = useState<Student[]>([]);
   const [gradeData, setGradeData] = useState<any[]>([]);
   const [recordingMode, setRecordingMode] = useState<'brushing' | 'milk'>('brushing');
@@ -55,29 +56,41 @@ const DentalMilkTracking = () => {
   // Load student data and dental/milk records from database
   useEffect(() => {
     loadData();
-  }, [selectedMonth, selectedYear, recordingMode]);
+  }, [selectedMonth, selectedYear, selectedSemester, recordingMode]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       
-      // Load students
-      const { data: studentsData, error: studentsError } = await supabase
+      // Load students with semester filter
+      let studentsQuery = supabase
         .from('students')
-        .select('*')
+        .select('*');
+      
+      if (selectedSemester !== 'all') {
+        studentsQuery = studentsQuery.eq('semester', selectedSemester);
+      }
+      
+      const { data: studentsData, error: studentsError } = await studentsQuery
         .order('grade', { ascending: true });
       
       if (studentsError) throw studentsError;
       
       setStudents(studentsData as Student[] || []);
       
-      // Load dental/milk records for the selected month
-      const { data: recordsData, error: recordsError } = await supabase
+      // Load dental/milk records for the selected month and semester
+      let recordsQuery = supabase
         .from('dental_milk_records')
         .select('*')
         .eq('month', selectedMonth)
         .eq('year', selectedYear)
         .eq('record_type', recordingMode);
+      
+      if (selectedSemester !== 'all') {
+        recordsQuery = recordsQuery.eq('semester', selectedSemester);
+      }
+      
+      const { data: recordsData, error: recordsError } = await recordsQuery;
       
       if (recordsError) throw recordsError;
       
@@ -232,6 +245,7 @@ const DentalMilkTracking = () => {
             records.push({
               student_id: student.id,
               academic_year: `${selectedYear}`,
+              semester: selectedSemester === 'all' ? '1' : selectedSemester,
               month: selectedMonth,
               year: selectedYear,
               day: dayData.day,
@@ -379,6 +393,18 @@ const DentalMilkTracking = () => {
                   {year}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex-1">
+          <label className="block text-sm font-medium mb-2">ภาคเรียน</label>
+          <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+              <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
             </SelectContent>
           </Select>
         </div>

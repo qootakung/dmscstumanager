@@ -90,6 +90,7 @@ export type Database = {
           item_3_score: number
           item_4_score: number
           item_5_score: number
+          semester: string
           student_id: string
           total_score: number
           updated_at: string
@@ -106,6 +107,7 @@ export type Database = {
           item_3_score?: number
           item_4_score?: number
           item_5_score?: number
+          semester?: string
           student_id: string
           total_score?: number
           updated_at?: string
@@ -122,6 +124,7 @@ export type Database = {
           item_3_score?: number
           item_4_score?: number
           item_5_score?: number
+          semester?: string
           student_id?: string
           total_score?: number
           updated_at?: string
@@ -137,6 +140,7 @@ export type Database = {
           is_recorded: boolean
           month: number
           record_type: string
+          semester: string
           student_id: string
           updated_at: string
           year: number
@@ -149,6 +153,7 @@ export type Database = {
           is_recorded?: boolean
           month: number
           record_type: string
+          semester?: string
           student_id: string
           updated_at?: string
           year: number
@@ -161,6 +166,7 @@ export type Database = {
           is_recorded?: boolean
           month?: number
           record_type?: string
+          semester?: string
           student_id?: string
           updated_at?: string
           year?: number
@@ -182,6 +188,7 @@ export type Database = {
           height_cm: number | null
           id: string
           measurement_date: string
+          semester: string
           student_id: string
           updated_at: string
           weight_kg: number | null
@@ -192,6 +199,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           measurement_date: string
+          semester?: string
           student_id: string
           updated_at?: string
           weight_kg?: number | null
@@ -202,6 +210,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           measurement_date?: string
+          semester?: string
           student_id?: string
           updated_at?: string
           weight_kg?: number | null
@@ -224,6 +233,7 @@ export type Database = {
           id: string
           max_score: number
           score: number
+          semester: string
           student_id: string
           subject_code: string
           subject_name: string
@@ -237,6 +247,7 @@ export type Database = {
           id?: string
           max_score?: number
           score?: number
+          semester?: string
           student_id: string
           subject_code: string
           subject_name: string
@@ -250,6 +261,7 @@ export type Database = {
           id?: string
           max_score?: number
           score?: number
+          semester?: string
           student_id?: string
           subject_code?: string
           subject_name?: string
