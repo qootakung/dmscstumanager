@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { getStudentStatistics } from '@/utils/storage';
 import { getTeacherStatistics } from '@/utils/teacherStorage';
 import { Users, GraduationCap, Calendar, BookOpen, UserCheck, UserCog } from 'lucide-react';
@@ -13,12 +15,21 @@ const Dashboard: React.FC = () => {
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
   const [teacherStats, setTeacherStats] = useState<TeacherStats | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Calculate current semester based on month (June-October = Semester 1, November-May = Semester 2)
+  const getCurrentSemester = () => {
+    const currentMonth = new Date().getMonth() + 1; // 1-12
+    return currentMonth >= 6 && currentMonth <= 10 ? '1' : '2';
+  };
+  
+  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
 
   useEffect(() => {
     const fetchStatistics = async () => {
+      setLoading(true);
       try {
         const [sStats, tStats] = await Promise.all([
-          getStudentStatistics(),
+          getStudentStatistics(selectedSemester),
           getTeacherStatistics(),
         ]);
         setStudentStats(sStats);
@@ -30,7 +41,7 @@ const Dashboard: React.FC = () => {
       }
     };
     fetchStatistics();
-  }, []);
+  }, [selectedSemester]);
 
   if (loading || !studentStats || !teacherStats) {
     return (
@@ -128,6 +139,29 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Semester Selection */}
+      <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-4">
+            <Label htmlFor="semester" className="text-lg font-semibold whitespace-nowrap">
+              ภาคเรียน:
+            </Label>
+            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+              <SelectTrigger id="semester" className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground ml-2">
+              (ปัจจุบัน: ภาคเรียนที่ {getCurrentSemester()})
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Statistics Cards with vibrant colors */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
