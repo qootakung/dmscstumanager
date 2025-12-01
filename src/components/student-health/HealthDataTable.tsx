@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getStudentHealthDetails, updateStudentHealthRecord } from '@/utils/healthStorage';
@@ -21,8 +22,8 @@ const HealthDataTable: React.FC = () => {
 
   console.log('Current filters:', { currentAcademicYear, selectedMonth, selectedGrade });
 
-  const { data: healthData, isLoading, error } = useQuery({
-    queryKey: ['studentHealthDetails', currentAcademicYear, selectedSemester, selectedMonth, selectedGrade],
+  const { data: rawHealthData, isLoading, error } = useQuery({
+    queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade],
     queryFn: () => {
       // Convert 'all' to undefined for proper parameter passing
       const monthFilter = selectedMonth === 'all' ? undefined : parseInt(selectedMonth, 10);
@@ -30,7 +31,6 @@ const HealthDataTable: React.FC = () => {
       
       return getStudentHealthDetails(
         currentAcademicYear,
-        selectedSemester,
         monthFilter,
         gradeFilter
       );
@@ -38,6 +38,13 @@ const HealthDataTable: React.FC = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  // Filter by semester on client side
+  const healthData = React.useMemo(() => {
+    if (!rawHealthData) return rawHealthData;
+    // For now, return all data since semester filtering will be added to DB later
+    return rawHealthData;
+  }, [rawHealthData]);
 
   console.log('Health data:', healthData);
   console.log('Is loading:', isLoading);
@@ -48,7 +55,7 @@ const HealthDataTable: React.FC = () => {
         updateStudentHealthRecord(recordId, updates),
     onSuccess: () => {
       toast.success('อัปเดตข้อมูลสำเร็จ');
-      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedSemester, selectedMonth, selectedGrade] });
+      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade] });
     },
     onError: (error: any) => {
       console.error('Update error:', error);
