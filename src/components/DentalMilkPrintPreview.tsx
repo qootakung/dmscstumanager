@@ -173,7 +173,7 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
                 <td className="border border-gray-900 p-1 text-center bg-green-600 text-white font-bold">
                   {filteredStudents.indexOf(student) + 1}
                 </td>
-                <td className="border border-gray-900 p-1 text-left pl-2">
+                <td className="border border-gray-900 p-1 text-left pl-2 student-name">
                   {student.titleTh || (student.gender === 'ชาย' || student.gender === 'ช' ? 'ด.ช.' : 'ด.ญ.')} {student.firstNameTh} {student.lastNameTh}
                 </td>
                 {Array.from({ length: 31 }, (_, i) => {
