@@ -9,6 +9,7 @@ export const useStudentReport = () => {
     reportType: '1',
     classLevel: 'all',
     academicYear: new Date().getFullYear().toString(),
+    semester: '1',
     additionalFields: {
       gender: false,
       citizenId: false,
@@ -67,6 +68,9 @@ export const useStudentReport = () => {
     }
     if (reportOptions.classLevel !== 'all') {
       filtered = filtered.filter(student => student.grade === reportOptions.classLevel);
+    }
+    if (reportOptions.semester !== 'all') {
+      filtered = filtered.filter(student => student.semester === reportOptions.semester);
     }
     
     // Sort by studentId: 3 digits first, then 4 digits

@@ -20,6 +20,7 @@ const Reports: React.FC = () => {
     reportType: '1',
     classLevel: 'all',
     academicYear: '2568',
+    semester: '1',
     additionalFields: {
       gender: false,
       citizenId: false,
@@ -73,9 +74,10 @@ const Reports: React.FC = () => {
     return students.filter(student => {
       const matchesClass = reportOptions.classLevel === 'all' || student.grade === reportOptions.classLevel;
       const matchesYear = student.academicYear === reportOptions.academicYear;
-      return matchesClass && matchesYear;
+      const matchesSemester = reportOptions.semester === 'all' || student.semester === reportOptions.semester;
+      return matchesClass && matchesYear && matchesSemester;
     });
-  }, [students, reportOptions.classLevel, reportOptions.academicYear]);
+  }, [students, reportOptions.classLevel, reportOptions.academicYear, reportOptions.semester]);
 
   const handleGenerateExcel = () => {
     if (isPaginatedMode) {

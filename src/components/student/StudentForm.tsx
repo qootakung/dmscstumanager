@@ -50,6 +50,19 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
+
+            <div>
+              <Label htmlFor="semester">ภาคเรียน</Label>
+              <Select value={formData.semester} onValueChange={(value) => onInputChange('semester', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกภาคเรียน" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                  <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             <div>
               <Label htmlFor="grade">ระดับชั้น</Label>

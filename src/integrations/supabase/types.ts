@@ -301,6 +301,7 @@ export type Database = {
           motherTitle: string | null
           postalCode: string | null
           province: string | null
+          semester: string
           studentId: string | null
           subDistrict: string | null
           titleTh: string | null
@@ -333,6 +334,7 @@ export type Database = {
           motherTitle?: string | null
           postalCode?: string | null
           province?: string | null
+          semester?: string
           studentId?: string | null
           subDistrict?: string | null
           titleTh?: string | null
@@ -365,6 +367,7 @@ export type Database = {
           motherTitle?: string | null
           postalCode?: string | null
           province?: string | null
+          semester?: string
           studentId?: string | null
           subDistrict?: string | null
           titleTh?: string | null
