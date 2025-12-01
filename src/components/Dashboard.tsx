@@ -16,10 +16,26 @@ const Dashboard: React.FC = () => {
   const [teacherStats, setTeacherStats] = useState<TeacherStats | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Calculate current semester based on month (June-October = Semester 1, November-May = Semester 2)
+  // Calculate current semester based on date
+  // Semester 1: May 16 - October 31
+  // Semester 2: November 1 - May 15 (next year)
   const getCurrentSemester = () => {
-    const currentMonth = new Date().getMonth() + 1; // 1-12
-    return currentMonth >= 6 && currentMonth <= 10 ? '1' : '2';
+    const now = new Date();
+    const month = now.getMonth() + 1; // 1-12
+    const day = now.getDate();
+    
+    // May (month 5)
+    if (month === 5) {
+      return day >= 16 ? '1' : '2';
+    }
+    
+    // June to October (months 6-10): Semester 1
+    if (month >= 6 && month <= 10) {
+      return '1';
+    }
+    
+    // November to April (months 11-12, 1-4): Semester 2
+    return '2';
   };
   
   const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
