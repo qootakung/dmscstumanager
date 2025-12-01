@@ -17,6 +17,7 @@ const StudentManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('form');
   const [formData, setFormData] = useState<Partial<Student>>({
     academicYear: '2568',
+    semester: '1',
     grade: 'อ.1',
     gender: 'ชาย'
   });

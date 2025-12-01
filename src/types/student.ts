@@ -1,6 +1,7 @@
 export interface Student {
   id: string;
   academicYear: string;
+  semester: string;
   citizenId: string;
   studentId: string;
   grade: string;
@@ -52,6 +53,7 @@ export interface ReportOptions {
   reportType: '1' | '2' | '3';
   classLevel: string;
   academicYear: string;
+  semester: string;
   additionalFields: {
     gender: boolean;
     citizenId: boolean;

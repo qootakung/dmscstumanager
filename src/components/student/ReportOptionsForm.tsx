@@ -89,6 +89,23 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
         </div>
 
         <div>
+          <Label className="text-base font-medium">ภาคเรียน</Label>
+          <Select
+            value={reportOptions.semester}
+            onValueChange={(value) => onOptionChange('semester', value)}
+          >
+            <SelectTrigger className="mt-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">ทุกภาคเรียน</SelectItem>
+              <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+              <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
           <Label className="text-base font-medium">ระดับชั้น</Label>
           <Select
             value={reportOptions.classLevel}
