@@ -102,6 +102,7 @@ const getGradeColor = (grade: string): string => {
 const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title }) => {
   const [selectedGrade, setSelectedGrade] = useState<string>('');
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('');
+  const [selectedSemester, setSelectedSemester] = useState<string>('1');
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [assessments, setAssessments] = useState<StudentAssessment[]>([]);
@@ -367,7 +368,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
       </div>
 
       {/* Academic Year and Grade Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -386,6 +387,26 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
                     {year}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              เลือกภาคเรียน
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="เลือกภาคเรียน" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
               </SelectContent>
             </Select>
           </CardContent>
@@ -522,6 +543,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
         competencyNumber={competencyNumber}
         title={title}
         academicYear={selectedAcademicYear}
+        semester={selectedSemester}
         grade={selectedGrade}
         students={assessments
           .filter(assessment => assessment.totalScore > 0 || assessment.scores.some(score => score > 0))

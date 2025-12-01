@@ -74,7 +74,7 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
         )}
         
         <p className="text-sm">
-          {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ปีการศึกษา {reportOptions.academicYear}
+          {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ภาคเรียนที่ {reportOptions.semester} ปีการศึกษา {reportOptions.academicYear}
         </p>
       </div>
 

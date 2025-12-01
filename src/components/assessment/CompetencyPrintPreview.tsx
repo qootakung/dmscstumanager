@@ -26,6 +26,7 @@ interface CompetencyPrintPreviewProps {
   competencyNumber: number;
   title: string;
   academicYear: string;
+  semester: string;
   students: Student[];
   grade: string; // Add grade as prop
 }
@@ -36,6 +37,7 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   competencyNumber,
   title,
   academicYear,
+  semester,
   students,
   grade
 }) => {
@@ -254,7 +256,7 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
             <h2 className="text-sm font-semibold mb-1">
               สมรรถนะด้านที่ {competencyNumber} {competencyTitles[competencyNumber]}
             </h2>
-            <p className="text-sm">ปีการศึกษา {academicYear}</p>
+            <p className="text-sm">ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}</p>
           </div>
 
           {/* Assessment Table */}

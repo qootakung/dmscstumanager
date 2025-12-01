@@ -25,6 +25,7 @@ interface StudentScorePrintPreviewProps {
   teachers: Teacher[];
   gradeLevel: string;
   academicYear: string;
+  semester?: string;
   principalName?: string;
   homeRoomTeacher?: Teacher;
   selectedStudent?: Student;
@@ -37,6 +38,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
   teachers,
   gradeLevel,
   academicYear,
+  semester,
   principalName = "นายธนภูมิ ต๊ะสินธุ",
   homeRoomTeacher,
   selectedStudent,
@@ -209,7 +211,7 @@ export const StudentScorePrintPreview: React.FC<StudentScorePrintPreviewProps> =
           รายงานผลคะแนนผู้เรียนรายบุคคล
         </div>
         <div style={{ fontSize: '21px', marginBottom: '4px' }}>
-          โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่{gradeLevel.replace('ป.', '')} ปีการศึกษา {academicYear}
+          โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่{gradeLevel.replace('ป.', '')} {semester ? `ภาคเรียนที่ ${semester} ` : ''}ปีการศึกษา {academicYear}
         </div>
         {selectedStudent && (
           <div style={{ fontSize: '21px', marginBottom: '16px', fontWeight: 'bold' }}>
