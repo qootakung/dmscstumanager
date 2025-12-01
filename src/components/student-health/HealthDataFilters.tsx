@@ -6,16 +6,20 @@ import { gradeOptions as allGradeOptionsList } from '@/utils/data';
 interface HealthDataFiltersProps {
   selectedGrade: string;
   selectedMonth: string;
+  selectedSemester: string;
   onGradeChange: (value: string) => void;
   onMonthChange: (value: string) => void;
+  onSemesterChange: (value: string) => void;
   isLoading: boolean;
 }
 
 const HealthDataFilters: React.FC<HealthDataFiltersProps> = ({
   selectedGrade,
   selectedMonth,
+  selectedSemester,
   onGradeChange,
   onMonthChange,
+  onSemesterChange,
   isLoading
 }) => {
   const monthOptions = [
@@ -40,6 +44,16 @@ const HealthDataFilters: React.FC<HealthDataFiltersProps> = ({
             {gradeOptions.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="w-[200px]">
+        <Select value={selectedSemester} onValueChange={onSemesterChange} disabled={isLoading}>
+          <SelectTrigger><SelectValue placeholder="เลือกภาคเรียน" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">ทุกภาคเรียน</SelectItem>
+            <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+            <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
           </SelectContent>
         </Select>
       </div>

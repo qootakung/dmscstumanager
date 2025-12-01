@@ -13,6 +13,7 @@ const HealthDataTable: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
+  const [selectedSemester, setSelectedSemester] = useState<string>('1');
   const currentAcademicYear = (new Date().getFullYear() + 543).toString();
   
   const [editingCell, setEditingCell] = useState<{ recordId: string; column: 'weight' | 'height' } | null>(null);
@@ -21,7 +22,7 @@ const HealthDataTable: React.FC = () => {
   console.log('Current filters:', { currentAcademicYear, selectedMonth, selectedGrade });
 
   const { data: healthData, isLoading, error } = useQuery({
-    queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade],
+    queryKey: ['studentHealthDetails', currentAcademicYear, selectedSemester, selectedMonth, selectedGrade],
     queryFn: () => {
       // Convert 'all' to undefined for proper parameter passing
       const monthFilter = selectedMonth === 'all' ? undefined : parseInt(selectedMonth, 10);
@@ -29,6 +30,7 @@ const HealthDataTable: React.FC = () => {
       
       return getStudentHealthDetails(
         currentAcademicYear,
+        selectedSemester,
         monthFilter,
         gradeFilter
       );
@@ -46,7 +48,7 @@ const HealthDataTable: React.FC = () => {
         updateStudentHealthRecord(recordId, updates),
     onSuccess: () => {
       toast.success('อัปเดตข้อมูลสำเร็จ');
-      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade] });
+      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedSemester, selectedMonth, selectedGrade] });
     },
     onError: (error: any) => {
       console.error('Update error:', error);
@@ -128,8 +130,10 @@ const HealthDataTable: React.FC = () => {
           <HealthDataFilters
             selectedGrade={selectedGrade}
             selectedMonth={selectedMonth}
+            selectedSemester={selectedSemester}
             onGradeChange={setSelectedGrade}
             onMonthChange={setSelectedMonth}
+            onSemesterChange={setSelectedSemester}
             isLoading={isLoading}
           />
         </div>
