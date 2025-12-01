@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { importFromExcel, exportToExcel } from '@/utils/excel';
 import { addStudent } from '@/utils/storage';
 import Swal from 'sweetalert2';
@@ -13,6 +15,7 @@ import { ImportResult } from './import/types';
 const StudentImport: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [selectedSemester, setSelectedSemester] = useState<string>('1');
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -40,7 +43,10 @@ const StudentImport: React.FC = () => {
 
       for (let i = 0; i < studentsData.length; i++) {
         try {
-          const studentData = studentsData[i];
+          const studentData = {
+            ...studentsData[i],
+            semester: selectedSemester
+          };
           
           if (!studentData.citizenId || !studentData.studentId || !studentData.firstNameTh || !studentData.lastNameTh) {
             failedCount++;
@@ -132,6 +138,20 @@ const StudentImport: React.FC = () => {
           <p className="text-muted-foreground">
             อัปโหลดไฟล์ Excel เพื่อนำเข้าข้อมูลนักเรียนจำนวนมาก
           </p>
+          
+          <div className="space-y-2">
+            <Label htmlFor="semester">ภาคเรียน</Label>
+            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+              <SelectTrigger id="semester">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <ImportTemplate onDownload={downloadTemplate} />
           <ImportUploader onFileUpload={handleFileUpload} isUploading={isUploading} />
           <ImportResults result={importResult} />
