@@ -127,7 +127,7 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
           บันทึกข้อมูลการ{recordingMode === 'brushing' ? 'แปรงฟัน' : 'ดื่มนม'}
         </h1>
         <p className="text-sm">
-          {monthLabel} {selectedYear} {selectedGrade !== 'all' ? `- ${selectedGrade}` : ''}
+          ประจำเดือน {monthLabel} {selectedYear} ระดับชั้น {selectedGrade !== 'all' ? selectedGrade : 'ทุกชั้น'}
         </p>
       </div>
       
