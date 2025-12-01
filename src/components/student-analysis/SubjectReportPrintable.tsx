@@ -6,10 +6,11 @@ interface SubjectReportPrintableProps {
   students: StudentScore[];
   selectedSubject: string;
   academicYear: string;
+  semester?: string;
 }
 
 const SubjectReportPrintable = React.forwardRef<HTMLDivElement, SubjectReportPrintableProps>(
-  ({ students, selectedSubject, academicYear }, ref) => {
+  ({ students, selectedSubject, academicYear, semester }, ref) => {
     if (students.length === 0 || !selectedSubject) {
       return <div ref={ref} className="hidden"></div>;
     }
@@ -58,7 +59,7 @@ const SubjectReportPrintable = React.forwardRef<HTMLDivElement, SubjectReportPri
           <div key={grade} className={pageIndex < sortedGrades.length - 1 ? 'break-after-page' : ''}>
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold mb-2">รายงานการวิเคราะห์ผู้เรียนรายวิชา</h2>
-              <p className="text-lg mb-1">ปีการศึกษา {academicYear || '.........'} โรงเรียนบ้านดอนมูล</p>
+              <p className="text-lg mb-1">{semester ? `ภาคเรียนที่ ${semester} ` : ''}ปีการศึกษา {academicYear || '.........'} โรงเรียนบ้านดอนมูล</p>
               <p className="text-lg mb-1">วิชา: {selectedSubject}</p>
               <p className="text-lg">ระดับชั้น {grade}</p>
             </div>

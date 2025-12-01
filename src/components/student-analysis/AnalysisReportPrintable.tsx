@@ -5,9 +5,10 @@ import type { StudentScore } from '@/types/studentAnalysis';
 interface AnalysisReportPrintableProps {
   students: StudentScore[];
   academicYear: string;
+  semester?: string;
 }
 
-const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportPrintableProps>(({ students, academicYear }, ref) => {
+const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportPrintableProps>(({ students, academicYear, semester }, ref) => {
   if (students.length === 0) {
     return <div ref={ref} className="hidden"></div>;
   }
@@ -51,7 +52,7 @@ const AnalysisReportPrintable = React.forwardRef<HTMLDivElement, AnalysisReportP
         <div key={grade} className={pageIndex < sortedGrades.length - 1 ? 'break-after-page' : ''}>
           <div className="text-center mb-4">
             <h2 className="text-xl font-bold">สรุปผลการวิเคราะห์ผู้เรียนรายบุคคล</h2>
-            <p className="text-lg">ปีการศึกษา {academicYear || '.........'} โรงเรียนบ้านดอนมูล</p>
+            <p className="text-lg">{semester ? `ภาคเรียนที่ ${semester} ` : ''}ปีการศึกษา {academicYear || '.........'} โรงเรียนบ้านดอนมูล</p>
           </div>
           
           <div className="flex justify-between items-center mb-2">

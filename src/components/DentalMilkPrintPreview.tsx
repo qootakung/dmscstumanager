@@ -10,6 +10,8 @@ interface DentalMilkPrintPreviewProps {
   recordingMode: 'brushing' | 'milk';
   directorName: string;
   teacherName: string;
+  academicYear?: string;
+  semester?: string;
 }
 
 const months = [
@@ -42,6 +44,8 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
   recordingMode,
   directorName,
   teacherName,
+  academicYear,
+  semester,
 }, ref) => {
   const filteredStudents = selectedGrade === 'all' 
     ? students.sort((a, b) => {
@@ -129,6 +133,11 @@ const DentalMilkPrintPreview = forwardRef<HTMLDivElement, DentalMilkPrintPreview
         <p className="text-sm">
           ประจำเดือน {monthLabel} {selectedYear} ระดับชั้น {selectedGrade !== 'all' ? selectedGrade : 'ทุกชั้น'}
         </p>
+        {(semester || academicYear) && (
+          <p className="text-sm">
+            {semester ? `ภาคเรียนที่ ${semester} ` : ''}{academicYear ? `ปีการศึกษา ${academicYear}` : ''}
+          </p>
+        )}
       </div>
       
       <table className="w-full border-collapse text-xs">

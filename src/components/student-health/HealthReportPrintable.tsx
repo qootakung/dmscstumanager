@@ -8,9 +8,10 @@ interface HealthReportPrintableProps {
   grade: string;
   month: string;
   academicYear: string;
+  semester?: string;
 }
 
-const HealthReportPrintable: React.FC<HealthReportPrintableProps> = ({ data, grade, month, academicYear }) => {
+const HealthReportPrintable: React.FC<HealthReportPrintableProps> = ({ data, grade, month, academicYear, semester }) => {
   return (
     <div className="p-4 font-sarabun">
       <style>{`
@@ -61,7 +62,7 @@ const HealthReportPrintable: React.FC<HealthReportPrintableProps> = ({ data, gra
       <header className="text-center mb-4">
         <h1 className="text-base font-bold">ข้อมูลน้ำหนักและส่วนสูง</h1>
         <h2 className="text-base font-bold">ระดับชั้น {grade} โรงเรียนบ้านดอนมูล</h2>
-        <h3 className="text-base font-bold">ประจำเดือน {month} ปีการศึกษา {academicYear}</h3>
+        <h3 className="text-base font-bold">ประจำเดือน {month} {semester ? `ภาคเรียนที่ ${semester} ` : ''}ปีการศึกษา {academicYear}</h3>
       </header>
       <Table>
         <TableHeader>
