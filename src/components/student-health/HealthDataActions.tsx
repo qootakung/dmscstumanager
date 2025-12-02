@@ -4,6 +4,8 @@ import { Download, FileSpreadsheet, Printer } from 'lucide-react';
 import { StudentHealthDetails } from '@/types/student';
 import { Teacher } from '@/types/teacher';
 import { useReactToPrint } from 'react-to-print';
+import { exportToExcel } from '@/utils/excel';
+import { toast } from 'sonner';
 import HealthReportPrintable from './HealthReportPrintable';
 import HealthReportAdvanced from './HealthReportAdvanced';
 import HealthReportStatistics from './HealthReportStatistics';
@@ -71,8 +73,35 @@ const HealthDataActions: React.FC<HealthDataActionsProps> = ({
   };
 
   const handleExportExcel = () => {
-    // TODO: Implement Excel export functionality
-    console.log('Export Excel functionality to be implemented');
+    if (!data || data.length === 0) {
+      toast.error('ไม่มีข้อมูลให้ส่งออก');
+      return;
+    }
+
+    try {
+      // Prepare data for Excel export
+      const exportData = data.map((record, index) => ({
+        'ลำดับที่': index + 1,
+        'รหัสนักเรียน': record.student_code || '-',
+        'ชื่อ-สกุล': record.full_name || '-',
+        'อายุ (ปี)': record.age_years || 0,
+        'อายุ (เดือน)': record.age_months || 0,
+        'น้ำหนัก (กก.)': record.weight_kg?.toFixed(2) || '-',
+        'ส่วนสูง (ซม.)': record.height_cm?.toFixed(2) || '-',
+        'วันที่วัด': record.measurement_date ? new Date(record.measurement_date).toLocaleDateString('th-TH') : '-',
+      }));
+
+      // Generate filename
+      const gradeName = getGradeName(selectedGrade);
+      const monthName = getMonthName(selectedMonth);
+      const filename = `ข้อมูลสุขภาพนักเรียน_${gradeName}_${monthName}_${currentAcademicYear}`;
+
+      exportToExcel(exportData, filename);
+      toast.success('ส่งออกข้อมูลสำเร็จ');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('เกิดข้อผิดพลาดในการส่งออกข้อมูล');
+    }
   };
 
   const hasData = data && data.length > 0;
