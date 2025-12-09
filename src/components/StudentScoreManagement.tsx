@@ -147,21 +147,23 @@ export const StudentScoreManagement: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedGrade) {
-      const filtered = students.filter(student => student.grade === selectedGrade);
+    if (selectedGrade && selectedSemester) {
+      const filtered = students.filter(student => 
+        student.grade === selectedGrade && student.semester === selectedSemester
+      );
       setFilteredStudents(filtered);
     } else {
       setFilteredStudents([]);
     }
-  }, [selectedGrade, students]);
+  }, [selectedGrade, selectedSemester, students]);
 
   useEffect(() => {
-    if (selectedTeacher && selectedGrade && selectedSubject) {
+    if (selectedTeacher && selectedGrade && selectedSubject && selectedSemester) {
       loadStudentScores();
     } else {
       setStudentScores([]);
     }
-  }, [selectedTeacher, selectedGrade, selectedSubject]);
+  }, [selectedTeacher, selectedGrade, selectedSubject, selectedSemester]);
 
   useEffect(() => {
     if (selectedGrade) {
