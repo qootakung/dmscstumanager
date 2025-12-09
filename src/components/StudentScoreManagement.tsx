@@ -25,6 +25,7 @@ interface StudentScore {
   max_score: number;
   score: number;
   academic_year: string;
+  semester: string;
 }
 
 interface Subject {
@@ -131,6 +132,7 @@ export const StudentScoreManagement: React.FC = () => {
   const [selectedGrade, setSelectedGrade] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [academicYear, setAcademicYear] = useState<string>(new Date().getFullYear() + 543 + '');
+  const [selectedSemester, setSelectedSemester] = useState<string>('1');
   const [studentScores, setStudentScores] = useState<StudentScore[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [allScoresForGrade, setAllScoresForGrade] = useState<StudentScore[]>([]);
@@ -167,7 +169,7 @@ export const StudentScoreManagement: React.FC = () => {
     } else {
       setAllScoresForGrade([]);
     }
-  }, [selectedGrade, academicYear]);
+  }, [selectedGrade, academicYear, selectedSemester]);
 
   const loadTeachers = async () => {
     const teacherData = await getTeachers();
@@ -193,7 +195,8 @@ export const StudentScoreManagement: React.FC = () => {
         .from('student_scores')
         .select('*')
         .eq('grade_level', selectedGrade)
-        .eq('academic_year', academicYear);
+        .eq('academic_year', academicYear)
+        .eq('semester', selectedSemester);
 
       if (error) {
         console.error('Error loading all scores for grade:', error);
@@ -227,7 +230,8 @@ export const StudentScoreManagement: React.FC = () => {
         .eq('teacher_id', selectedTeacher)
         .eq('grade_level', selectedGrade)
         .eq('subject_code', selectedSubject.code)
-        .eq('academic_year', academicYear);
+        .eq('academic_year', academicYear)
+        .eq('semester', selectedSemester);
 
       if (error) {
         console.error('Error loading student scores:', error);
@@ -263,6 +267,7 @@ export const StudentScoreManagement: React.FC = () => {
           max_score: 50,
           score: 0,
           academic_year: academicYear,
+          semester: selectedSemester,
         };
       });
 
@@ -378,7 +383,7 @@ export const StudentScoreManagement: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <Label htmlFor="academicYear">ปีการศึกษา</Label>
               <Input
@@ -387,6 +392,19 @@ export const StudentScoreManagement: React.FC = () => {
                 onChange={(e) => setAcademicYear(e.target.value)}
                 placeholder="2567"
               />
+            </div>
+
+            <div>
+              <Label htmlFor="semester">ภาคเรียน</Label>
+              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกภาคเรียน" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                  <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
