@@ -21,12 +21,27 @@ const getCurrentSemester = () => {
   return '2';
 };
 
+// Calculate current academic year based on Thai school calendar
+// Academic year starts May 16, so before May 16 we're still in previous academic year
+const getCurrentAcademicYear = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  
+  // If before May 16, we're in semester 2 of previous academic year
+  if (month < 5 || (month === 5 && day < 16)) {
+    return (year + 543 - 1).toString();
+  }
+  return (year + 543).toString();
+};
+
 const HealthDataTable: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
   const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
-  const currentAcademicYear = (new Date().getFullYear() + 543).toString();
+  const currentAcademicYear = getCurrentAcademicYear();
   
   const [editingCell, setEditingCell] = useState<{ recordId: string; column: 'weight' | 'height' } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
