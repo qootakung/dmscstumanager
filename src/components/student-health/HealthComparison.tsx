@@ -1,12 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Minus, Scale, Ruler } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { TrendingUp, TrendingDown, Minus, Scale, Ruler, Printer } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { StudentHealthDetails } from '@/types/student';
 
@@ -32,6 +35,12 @@ const HealthComparison: React.FC = () => {
   const currentYear = new Date().getFullYear() + 543;
   const [selectedYear, setSelectedYear] = useState<string>(currentYear.toString());
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `รายงานเปรียบเทียบสุขภาพ_${selectedYear}_${selectedGrade === 'all' ? 'ทุกชั้น' : selectedGrade}`,
+  });
 
   // Fetch semester 1 data
   const { data: semester1Data, isLoading: loading1 } = useQuery({
@@ -153,6 +162,19 @@ const HealthComparison: React.FC = () => {
     const validWeightDiffs = comparisonData.filter(d => d.weightDiff !== null).map(d => d.weightDiff!);
     const validHeightDiffs = comparisonData.filter(d => d.heightDiff !== null).map(d => d.heightDiff!);
 
+    const avgSem1Weight = comparisonData.filter(d => d.semester1.weight !== null).length > 0
+      ? comparisonData.filter(d => d.semester1.weight !== null).reduce((a, b) => a + (b.semester1.weight || 0), 0) / comparisonData.filter(d => d.semester1.weight !== null).length
+      : 0;
+    const avgSem2Weight = comparisonData.filter(d => d.semester2.weight !== null).length > 0
+      ? comparisonData.filter(d => d.semester2.weight !== null).reduce((a, b) => a + (b.semester2.weight || 0), 0) / comparisonData.filter(d => d.semester2.weight !== null).length
+      : 0;
+    const avgSem1Height = comparisonData.filter(d => d.semester1.height !== null).length > 0
+      ? comparisonData.filter(d => d.semester1.height !== null).reduce((a, b) => a + (b.semester1.height || 0), 0) / comparisonData.filter(d => d.semester1.height !== null).length
+      : 0;
+    const avgSem2Height = comparisonData.filter(d => d.semester2.height !== null).length > 0
+      ? comparisonData.filter(d => d.semester2.height !== null).reduce((a, b) => a + (b.semester2.height || 0), 0) / comparisonData.filter(d => d.semester2.height !== null).length
+      : 0;
+
     return {
       totalStudents: comparisonData.length,
       studentsWithBothSemesters: comparisonData.filter(d => d.semester1.weight !== null && d.semester2.weight !== null).length,
@@ -165,7 +187,48 @@ const HealthComparison: React.FC = () => {
       weightGained: validWeightDiffs.filter(d => d > 0).length,
       weightLost: validWeightDiffs.filter(d => d < 0).length,
       heightGained: validHeightDiffs.filter(d => d > 0).length,
+      avgSem1Weight: avgSem1Weight.toFixed(2),
+      avgSem2Weight: avgSem2Weight.toFixed(2),
+      avgSem1Height: avgSem1Height.toFixed(2),
+      avgSem2Height: avgSem2Height.toFixed(2),
     };
+  }, [comparisonData]);
+
+  // Chart data
+  const chartData = React.useMemo(() => {
+    return [
+      {
+        name: 'น้ำหนักเฉลี่ย (กก.)',
+        'เทอม 1': parseFloat(summaryStats.avgSem1Weight),
+        'เทอม 2': parseFloat(summaryStats.avgSem2Weight),
+      },
+      {
+        name: 'ส่วนสูงเฉลี่ย (ซม.)',
+        'เทอม 1': parseFloat(summaryStats.avgSem1Height),
+        'เทอม 2': parseFloat(summaryStats.avgSem2Height),
+      },
+    ];
+  }, [summaryStats]);
+
+  // Change distribution chart data
+  const changeDistributionData = React.useMemo(() => {
+    const validWeightDiffs = comparisonData.filter(d => d.weightDiff !== null).map(d => d.weightDiff!);
+    const validHeightDiffs = comparisonData.filter(d => d.heightDiff !== null).map(d => d.heightDiff!);
+
+    return [
+      {
+        name: 'น้ำหนัก',
+        เพิ่มขึ้น: validWeightDiffs.filter(d => d > 0).length,
+        คงที่: validWeightDiffs.filter(d => d === 0).length,
+        ลดลง: validWeightDiffs.filter(d => d < 0).length,
+      },
+      {
+        name: 'ส่วนสูง',
+        เพิ่มขึ้น: validHeightDiffs.filter(d => d > 0).length,
+        คงที่: validHeightDiffs.filter(d => d === 0).length,
+        ลดลง: validHeightDiffs.filter(d => d < 0).length,
+      },
+    ];
   }, [comparisonData]);
 
   const renderDiffBadge = (diff: number | null, unit: string) => {
@@ -202,10 +265,20 @@ const HealthComparison: React.FC = () => {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Scale className="w-5 h-5" />
-            เปรียบเทียบข้อมูลสุขภาพระหว่างเทอม
-          </CardTitle>
+          <div className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Scale className="w-5 h-5" />
+              เปรียบเทียบข้อมูลสุขภาพระหว่างเทอม
+            </CardTitle>
+            <Button 
+              onClick={() => handlePrint()} 
+              disabled={isLoading || comparisonData.length === 0}
+              className="flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              พิมพ์รายงาน
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
@@ -287,6 +360,55 @@ const HealthComparison: React.FC = () => {
         </Card>
       </div>
 
+      {/* Charts */}
+      {!isLoading && comparisonData.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Average Comparison Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">เปรียบเทียบค่าเฉลี่ยระหว่างเทอม</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={120} />
+                  <Tooltip 
+                    formatter={(value: number) => value.toFixed(2)}
+                    contentStyle={{ backgroundColor: 'white', border: '1px solid #ccc' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="เทอม 1" fill="#8884d8" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="เทอม 2" fill="#82ca9d" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Change Distribution Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">การกระจายตัวของการเปลี่ยนแปลง</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={changeDistributionData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #ccc' }} />
+                  <Legend />
+                  <Bar dataKey="เพิ่มขึ้น" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="คงที่" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="ลดลง" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Comparison Table */}
       <Card>
         <CardHeader>
@@ -355,6 +477,91 @@ const HealthComparison: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Hidden Print Content */}
+      <div className="hidden">
+        <div ref={printRef} className="p-8 bg-white">
+          <style>
+            {`
+              @media print {
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                table { border-collapse: collapse; width: 100%; font-size: 10px; }
+                th, td { border: 1px solid #000; padding: 4px; text-align: center; }
+                .print-header { text-align: center; margin-bottom: 20px; }
+                .print-stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
+                .stat-box { text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+                .positive { color: green; }
+                .negative { color: red; }
+              }
+            `}
+          </style>
+          <div className="print-header">
+            <h1 className="text-xl font-bold mb-2">รายงานเปรียบเทียบข้อมูลสุขภาพระหว่างภาคเรียน</h1>
+            <p className="text-sm">ปีการศึกษา {selectedYear} | ระดับชั้น: {selectedGrade === 'all' ? 'ทุกชั้น' : selectedGrade}</p>
+          </div>
+
+          <div className="print-stats mb-4">
+            <div className="grid grid-cols-4 gap-4 text-center text-sm mb-4">
+              <div className="stat-box">
+                <p className="font-medium">จำนวนนักเรียน</p>
+                <p className="text-lg font-bold">{summaryStats.totalStudents} คน</p>
+              </div>
+              <div className="stat-box">
+                <p className="font-medium">ข้อมูลครบ 2 เทอม</p>
+                <p className="text-lg font-bold">{summaryStats.studentsWithBothSemesters} คน</p>
+              </div>
+              <div className="stat-box">
+                <p className="font-medium">น้ำหนักเฉลี่ยเปลี่ยนแปลง</p>
+                <p className="text-lg font-bold">{summaryStats.avgWeightChange} กก.</p>
+              </div>
+              <div className="stat-box">
+                <p className="font-medium">ส่วนสูงเฉลี่ยเปลี่ยนแปลง</p>
+                <p className="text-lg font-bold">{summaryStats.avgHeightChange} ซม.</p>
+              </div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th rowSpan={2}>ลำดับ</th>
+                <th rowSpan={2}>รหัส</th>
+                <th rowSpan={2}>ชื่อ-นามสกุล</th>
+                <th colSpan={2}>เทอม 1</th>
+                <th colSpan={2}>เทอม 2</th>
+                <th colSpan={2}>การเปลี่ยนแปลง</th>
+              </tr>
+              <tr>
+                <th>น้ำหนัก (กก.)</th>
+                <th>ส่วนสูง (ซม.)</th>
+                <th>น้ำหนัก (กก.)</th>
+                <th>ส่วนสูง (ซม.)</th>
+                <th>น้ำหนัก</th>
+                <th>ส่วนสูง</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonData.map((student, index) => (
+                <tr key={student.studentId}>
+                  <td>{index + 1}</td>
+                  <td>{student.studentCode}</td>
+                  <td style={{ textAlign: 'left' }}>{student.fullName}</td>
+                  <td>{student.semester1.weight ?? '-'}</td>
+                  <td>{student.semester1.height ?? '-'}</td>
+                  <td>{student.semester2.weight ?? '-'}</td>
+                  <td>{student.semester2.height ?? '-'}</td>
+                  <td className={student.weightDiff !== null ? (student.weightDiff > 0 ? 'positive' : student.weightDiff < 0 ? 'negative' : '') : ''}>
+                    {student.weightDiff !== null ? (student.weightDiff > 0 ? `+${student.weightDiff}` : student.weightDiff) : '-'}
+                  </td>
+                  <td className={student.heightDiff !== null ? (student.heightDiff > 0 ? 'positive' : student.heightDiff < 0 ? 'negative' : '') : ''}>
+                    {student.heightDiff !== null ? (student.heightDiff > 0 ? `+${student.heightDiff}` : student.heightDiff) : '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
