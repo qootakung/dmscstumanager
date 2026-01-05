@@ -3,6 +3,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import HealthImportExport from './student-health/HealthImportExport';
 import HealthDataTable from './student-health/HealthDataTable';
+import HealthComparison from './student-health/HealthComparison';
 
 const StudentHealth: React.FC = () => {
   return (
@@ -35,7 +36,7 @@ const StudentHealth: React.FC = () => {
         {/* Enhanced Tabs with Beautiful Styling */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6">
           <Tabs defaultValue="data-table" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+            <TabsList className="grid w-full grid-cols-3 mb-8 bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 rounded-xl overflow-hidden">
               <TabsTrigger 
                 value="data-table" 
                 className="relative overflow-hidden group data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg mx-1 my-1"
@@ -43,6 +44,15 @@ const StudentHealth: React.FC = () => {
                 <div className="flex items-center gap-2 relative z-10">
                   <span className="text-lg">📋</span>
                   <span className="font-medium">ข้อมูลสุขภาพนักเรียน</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="comparison"
+                className="relative overflow-hidden group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg mx-1 my-1"
+              >
+                <div className="flex items-center gap-2 relative z-10">
+                  <span className="text-lg">📊</span>
+                  <span className="font-medium">เปรียบเทียบเทอม 1-2</span>
                 </div>
               </TabsTrigger>
               <TabsTrigger 
@@ -59,6 +69,12 @@ const StudentHealth: React.FC = () => {
             <TabsContent value="data-table" className="animate-fade-in">
               <div className="bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-xl p-6 border border-blue-100">
                 <HealthDataTable />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="comparison" className="animate-fade-in">
+              <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-xl p-6 border border-purple-100">
+                <HealthComparison />
               </div>
             </TabsContent>
             
