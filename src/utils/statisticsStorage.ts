@@ -3,11 +3,25 @@ import { getStudents } from './studentStorage';
 import { gradeOptions } from './data';
 import { Student } from '@/types/student';
 
+// Get current academic year based on Thai school calendar
+// Academic year starts May 16, so before that it's previous year
+const getCurrentAcademicYear = () => {
+  const now = new Date();
+  const year = now.getFullYear() + 543; // Convert to Buddhist year
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  
+  // If before May 16, still previous academic year
+  if (month < 5 || (month === 5 && day < 16)) {
+    return (year - 1).toString();
+  }
+  return year.toString();
+};
+
 // Statistics
 export const getStudentStatistics = async (semester?: string) => {
   const students: Student[] = await getStudents();
-  const currentYear = new Date().getFullYear() + 543; // Convert to Buddhist year
-  const currentAcademicYear = currentYear.toString();
+  const currentAcademicYear = getCurrentAcademicYear();
   
   // Filter by current academic year and semester if provided
   let filteredStudents = students.filter(s => s.academicYear === currentAcademicYear);
