@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { getStudents, addStudent, updateStudent, deleteStudent } from '@/utils/storage';
 import type { Student } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -10,14 +12,27 @@ import StudentImport from './student/StudentImport';
 import { Users, UserPlus, FileText, Upload, GraduationCap, BookOpen, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
+// Calculate current semester based on date
+const getCurrentSemester = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  
+  if (month === 5) return day >= 16 ? '1' : '2';
+  if (month >= 6 && month <= 10) return '1';
+  return '2';
+};
+
 const StudentManagement: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
   const [formData, setFormData] = useState<Partial<Student>>({
     academicYear: '2568',
-    semester: '1',
+    semester: selectedSemester,
     grade: 'อ.1',
     gender: 'ชาย'
   });
@@ -46,6 +61,12 @@ const StudentManagement: React.FC = () => {
   useEffect(() => {
     loadStudents();
   }, []);
+
+  // Filter students by selected semester
+  useEffect(() => {
+    const filtered = students.filter(s => s.semester === selectedSemester);
+    setFilteredStudents(filtered);
+  }, [students, selectedSemester]);
 
   // Reload students when tab changes to list (helpful after import)
   useEffect(() => {
@@ -135,6 +156,7 @@ const StudentManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       academicYear: '2568',
+      semester: selectedSemester,
       grade: 'อ.1',
       gender: 'ชาย'
     });
@@ -142,9 +164,9 @@ const StudentManagement: React.FC = () => {
     setIsEditing(false);
   };
 
-  // Calculate statistics
-  const totalStudents = students.length;
-  const gradeStats = students.reduce((acc, student) => {
+  // Calculate statistics based on filtered students
+  const totalStudents = filteredStudents.length;
+  const gradeStats = filteredStudents.reduce((acc, student) => {
     acc[student.grade] = (acc[student.grade] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -175,6 +197,29 @@ const StudentManagement: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Semester Selection */}
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="semester" className="text-lg font-semibold whitespace-nowrap">
+                ภาคเรียน:
+              </Label>
+              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                <SelectTrigger id="semester" className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                  <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground ml-2">
+                (ปัจจุบัน: ภาคเรียนที่ {getCurrentSemester()})
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -278,7 +323,7 @@ const StudentManagement: React.FC = () => {
 
               <TabsContent value="list" className="mt-6">
                 <StudentList
-                  students={students}
+                  students={filteredStudents}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
