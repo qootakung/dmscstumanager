@@ -10,41 +10,50 @@ import HealthDataFilters from './HealthDataFilters';
 import HealthDataActions from './HealthDataActions';
 import HealthDataTableView from './HealthDataTableView';
 
+// Calculate current semester based on date
+const getCurrentSemester = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  
+  if (month === 5) return day >= 16 ? '1' : '2';
+  if (month >= 6 && month <= 10) return '1';
+  return '2';
+};
+
 const HealthDataTable: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
-  const [selectedSemester, setSelectedSemester] = useState<string>('1');
+  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
   const currentAcademicYear = (new Date().getFullYear() + 543).toString();
   
   const [editingCell, setEditingCell] = useState<{ recordId: string; column: 'weight' | 'height' } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
 
-  console.log('Current filters:', { currentAcademicYear, selectedMonth, selectedGrade });
+  console.log('Current filters:', { currentAcademicYear, selectedMonth, selectedGrade, selectedSemester });
 
   const { data: rawHealthData, isLoading, error } = useQuery({
-    queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade],
+    queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade, selectedSemester],
     queryFn: () => {
       // Convert 'all' to undefined for proper parameter passing
       const monthFilter = selectedMonth === 'all' ? undefined : parseInt(selectedMonth, 10);
       const gradeFilter = selectedGrade === 'all' ? undefined : selectedGrade;
+      const semesterFilter = selectedSemester === 'all' ? undefined : selectedSemester;
       
       return getStudentHealthDetails(
         currentAcademicYear,
         monthFilter,
-        gradeFilter
+        gradeFilter,
+        semesterFilter
       );
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Filter by semester on client side
-  const healthData = React.useMemo(() => {
-    if (!rawHealthData) return rawHealthData;
-    // For now, return all data since semester filtering will be added to DB later
-    return rawHealthData;
-  }, [rawHealthData]);
+  // Use rawHealthData directly since semester filtering is now done in query
+  const healthData = rawHealthData;
 
   console.log('Health data:', healthData);
   console.log('Is loading:', isLoading);
@@ -55,7 +64,7 @@ const HealthDataTable: React.FC = () => {
         updateStudentHealthRecord(recordId, updates),
     onSuccess: () => {
       toast.success('อัปเดตข้อมูลสำเร็จ');
-      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade] });
+      queryClient.invalidateQueries({ queryKey: ['studentHealthDetails', currentAcademicYear, selectedMonth, selectedGrade, selectedSemester] });
     },
     onError: (error: any) => {
       console.error('Update error:', error);

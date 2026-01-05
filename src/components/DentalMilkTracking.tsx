@@ -13,11 +13,22 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
 import DentalMilkPrintDialog from './DentalMilkPrintDialog';
 
+// Calculate current semester based on date
+const getCurrentSemester = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  
+  if (month === 5) return day >= 16 ? '1' : '2';
+  if (month >= 6 && month <= 10) return '1';
+  return '2';
+};
+
 const DentalMilkTracking = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(2568);
   const [selectedGrade, setSelectedGrade] = useState('all');
-  const [selectedSemester, setSelectedSemester] = useState('1');
+  const [selectedSemester, setSelectedSemester] = useState(getCurrentSemester());
   const [students, setStudents] = useState<Student[]>([]);
   const [gradeData, setGradeData] = useState<any[]>([]);
   const [recordingMode, setRecordingMode] = useState<'brushing' | 'milk'>('brushing');
