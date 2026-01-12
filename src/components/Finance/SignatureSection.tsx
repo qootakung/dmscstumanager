@@ -10,29 +10,17 @@ interface SignatureSectionProps {
 const signatureLineStyle: React.CSSProperties = {
   display: 'inline-block',
   borderBottom: '1px dotted black',
-  width: '200px',
-  margin: '0 8px',
+  width: '120px',
+  margin: '0 4px',
   verticalAlign: 'middle'
 };
 
 const nameStyle: React.CSSProperties = {
   display: 'inline-block',
-  width: '240px',
-  margin: '0 4px',
-  textAlign: 'center'
-};
-
-const containerStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  gap: '12px',
-  margin: '24px 0 12px 0'
-};
-
-const signatureBoxStyle: React.CSSProperties = {
+  width: '140px',
+  margin: '0 2px',
   textAlign: 'center',
+  fontSize: '10px'
 };
 
 const SignatureSection: React.FC<SignatureSectionProps> = ({
@@ -40,50 +28,51 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
   teacherName,
   principalName,
 }) => (
-  <div style={{ marginTop: '24px' }}>
-    <div style={containerStyle}>
-      <div style={signatureBoxStyle}>
-        <div>
+  <div style={{ marginTop: '12px' }}>
+    {/* Row 1: Payer, Teacher, and Principal signatures in one row */}
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
+      alignItems: 'flex-start',
+      gap: '8px',
+      marginBottom: '8px'
+    }}>
+      {/* Payer */}
+      <div style={{ textAlign: 'center', flex: 1 }}>
+        <div style={{ fontSize: '10px' }}>
           <span>ลงชื่อ</span>
           <span style={signatureLineStyle}></span>
           <span>ผู้จ่ายเงิน</span>
         </div>
-        <div style={{ marginTop: '8px' }}>
-          (
-          <span style={nameStyle}>
-            {payerName || "........................................"}
-          </span>
-          )
+        <div style={{ marginTop: '4px', fontSize: '10px' }}>
+          (<span style={nameStyle}>{payerName || ".............................."}</span>)
         </div>
       </div>
-      <div style={signatureBoxStyle}>
-        <div>
+      
+      {/* Teacher */}
+      <div style={{ textAlign: 'center', flex: 1 }}>
+        <div style={{ fontSize: '10px' }}>
           <span>ลงชื่อ</span>
           <span style={signatureLineStyle}></span>
           <span>ครูประจำชั้น</span>
         </div>
-        <div style={{ marginTop: '8px' }}>
-          (
-          <span style={nameStyle}>
-            {teacherName || "........................................"}
-          </span>
-          )
+        <div style={{ marginTop: '4px', fontSize: '10px' }}>
+          (<span style={nameStyle}>{teacherName || ".............................."}</span>)
         </div>
       </div>
-    </div>
-    <div style={{ textAlign: 'center', marginTop: '48px' }}> 
-      <div style={{ marginBottom: '24px' }}>ตรวจสอบแล้วถูกต้อง</div>
-      <div>
-        <span>ลงชื่อ</span>
-        <span style={signatureLineStyle}></span>
-        <span>ผู้อำนวยการโรงเรียน</span>
-      </div>
-      <div style={{ marginTop: '8px' }}>
-        (
-        <span style={nameStyle}>
-          {principalName || "........................................"}
-        </span>
-        )
+
+      {/* Principal - moved to same row */}
+      <div style={{ textAlign: 'center', flex: 1 }}>
+        <div style={{ fontSize: '10px', marginBottom: '2px' }}>ตรวจสอบแล้วถูกต้อง</div>
+        <div style={{ fontSize: '10px' }}>
+          <span>ลงชื่อ</span>
+          <span style={signatureLineStyle}></span>
+          <span>ผู้อำนวยการ</span>
+        </div>
+        <div style={{ marginTop: '4px', fontSize: '10px' }}>
+          (<span style={nameStyle}>{principalName || ".............................."}</span>)
+        </div>
       </div>
     </div>
   </div>

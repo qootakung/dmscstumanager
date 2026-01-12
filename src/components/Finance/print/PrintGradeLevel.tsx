@@ -111,10 +111,6 @@ const GradeLevelRow: React.FC<{
       {checked ? gradeNumbers : ""}
     </span>
 
-    {/* Student count */}
-    <span style={{ marginLeft: 4, fontSize: 10, color: "#333" }}>
-      {checked && studentCount > 0 ? `(${studentCount} คน)` : ""}
-    </span>
   </div>
 );
 
