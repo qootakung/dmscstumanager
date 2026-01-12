@@ -28,18 +28,17 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
   teacherName,
   principalName,
 }) => (
-  <div style={{ marginTop: '12px' }}>
-    {/* Row 1: Payer, Teacher, and Principal signatures in one row */}
+  <div style={{ marginTop: '8px' }}>
+    {/* Row 1: Payer and Teacher signatures */}
     <div style={{ 
       display: 'flex', 
       flexDirection: 'row', 
-      justifyContent: 'space-between', 
+      justifyContent: 'space-around', 
       alignItems: 'flex-start',
-      gap: '8px',
       marginBottom: '8px'
     }}>
       {/* Payer */}
-      <div style={{ textAlign: 'center', flex: 1 }}>
+      <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '10px' }}>
           <span>ลงชื่อ</span>
           <span style={signatureLineStyle}></span>
@@ -51,7 +50,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
       </div>
       
       {/* Teacher */}
-      <div style={{ textAlign: 'center', flex: 1 }}>
+      <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '10px' }}>
           <span>ลงชื่อ</span>
           <span style={signatureLineStyle}></span>
@@ -61,18 +60,18 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
           (<span style={nameStyle}>{teacherName || ".............................."}</span>)
         </div>
       </div>
+    </div>
 
-      {/* Principal - moved to same row */}
-      <div style={{ textAlign: 'center', flex: 1 }}>
-        <div style={{ fontSize: '10px', marginBottom: '2px' }}>ตรวจสอบแล้วถูกต้อง</div>
-        <div style={{ fontSize: '10px' }}>
-          <span>ลงชื่อ</span>
-          <span style={signatureLineStyle}></span>
-          <span>ผู้อำนวยการ</span>
-        </div>
-        <div style={{ marginTop: '4px', fontSize: '10px' }}>
-          (<span style={nameStyle}>{principalName || ".............................."}</span>)
-        </div>
+    {/* Row 2: Principal signature at bottom center */}
+    <div style={{ textAlign: 'center', marginTop: '12px' }}>
+      <div style={{ fontSize: '10px', marginBottom: '4px' }}>ตรวจสอบแล้วถูกต้อง</div>
+      <div style={{ fontSize: '10px' }}>
+        <span>ลงชื่อ</span>
+        <span style={signatureLineStyle}></span>
+        <span>ผู้อำนวยการโรงเรียน</span>
+      </div>
+      <div style={{ marginTop: '4px', fontSize: '10px' }}>
+        (<span style={nameStyle}>{principalName || ".............................."}</span>)
       </div>
     </div>
   </div>
