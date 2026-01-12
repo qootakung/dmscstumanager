@@ -20,19 +20,8 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
   const [printing, setPrinting] = useState(false);
   const [hasTriggeredPrint, setHasTriggeredPrint] = useState(false);
 
-  // @ts-ignore
   const handlePrint = useReactToPrint({
-    // @ts-ignore
-    content: () => {
-      if (!componentRef.current) {
-        toast({
-          title: "ไม่พบเนื้อหาเอกสาร",
-          description: "เนื้อหาสำหรับพิมพ์ไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง",
-          variant: "destructive",
-        });
-      }
-      return componentRef.current;
-    },
+    contentRef: componentRef,
     documentTitle: `หลักฐานการจ่ายเงิน-${voucherData.grade}-${voucherData.academicYear}_${voucherData.semester}`,
     pageStyle: `
       @page {
@@ -56,11 +45,9 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
           font-size: 14px !important;
           font-weight: bold !important;
         }
-        /* Ensure consistent font sizes */
         * {
           font-size: inherit !important;
         }
-        /* Header styling */
         div[style*="18px"] {
           font-size: 18px !important;
         }
@@ -72,7 +59,7 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
         }
       }
     `,
-    onBeforeGetContent: () => {
+    onBeforePrint: () => {
       setPrinting(true);
       return Promise.resolve();
     },
@@ -83,25 +70,15 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
         description: "สามารถนำเอกสารไปใช้งานต่อได้",
       });
     },
-    onPrintError: (error: any) => {
-      setPrinting(false);
-      toast({
-        title: "เกิดข้อผิดพลาดขณะพิมพ์",
-        description: "ไม่สามารถพิมพ์เอกสารได้ โปรดลองใหม่ หรือใช้เบราว์เซอร์อื่น",
-        variant: "destructive",
-      });
-      console.error("Print Error:", error);
-    }
   });
 
   // Auto-trigger print when dialog opens
   useEffect(() => {
     if (isOpen && !hasTriggeredPrint && componentRef.current) {
-      // Small delay to ensure content is rendered
       const timer = setTimeout(() => {
         handlePrint();
         setHasTriggeredPrint(true);
-      }, 100);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [isOpen, hasTriggeredPrint, handlePrint]);
