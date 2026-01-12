@@ -50,12 +50,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
     {/* Row 2: Principal signature at bottom center */}
     <div style={{ textAlign: 'center', marginTop: '12px' }}>
       <div style={{ fontSize: '10px', marginBottom: '4px' }}>ตรวจสอบแล้วถูกต้อง</div>
-      <div style={{ 
-        display: 'inline-block',
-        border: '1px solid black',
-        padding: '4px 16px',
-        fontSize: '10px'
-      }}>
+      <div style={{ fontSize: '10px' }}>
         <span>ลงชื่อ</span>
         <span>............................................................</span>
         <span>ผู้อำนวยการโรงเรียน</span>

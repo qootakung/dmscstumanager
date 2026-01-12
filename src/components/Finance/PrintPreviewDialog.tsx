@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ interface PrintPreviewDialogProps {
 const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenChange, voucherData, paymentOptions }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   const [printing, setPrinting] = useState(false);
+  const [hasTriggeredPrint, setHasTriggeredPrint] = useState(false);
 
   // @ts-ignore
   const handlePrint = useReactToPrint({
@@ -92,6 +93,25 @@ const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({ isOpen, onOpenC
       console.error("Print Error:", error);
     }
   });
+
+  // Auto-trigger print when dialog opens
+  useEffect(() => {
+    if (isOpen && !hasTriggeredPrint && componentRef.current) {
+      // Small delay to ensure content is rendered
+      const timer = setTimeout(() => {
+        handlePrint();
+        setHasTriggeredPrint(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, hasTriggeredPrint, handlePrint]);
+
+  // Reset trigger flag when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      setHasTriggeredPrint(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
