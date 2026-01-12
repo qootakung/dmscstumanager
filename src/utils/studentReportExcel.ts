@@ -178,7 +178,7 @@ export const generateStudentExcel = (filteredStudents: Student[], reportOptions:
       if (reportOptions.additionalFields.citizenId) colWidths.push({ wch: 16 }); // บัตรประชาชน - compact
       if (reportOptions.additionalFields.signature) colWidths.push({ wch: 16 }); // ลายมือชื่อ
       if (reportOptions.additionalFields.signature2) colWidths.push({ wch: 16 }); // ลายมือชื่อ 2
-      if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 16 }); // ลายมือชื่อผู้รับเงิน
+      if (reportOptions.additionalFields.guardianSignature) colWidths.push({ wch: 16 }); // ลายมือชื่อผู้ปกครอง
       if (reportOptions.additionalFields.timeIn) colWidths.push({ wch: 12 }); // เวลามา - compact
     if (reportOptions.additionalFields.timeOut) colWidths.push({ wch: 12 }); // เวลากลับ - compact
     if (reportOptions.additionalFields.phone) colWidths.push({ wch: 14 }); // เบอร์โทร

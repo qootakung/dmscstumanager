@@ -166,7 +166,7 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
                     checked={reportOptions.additionalFields.guardianSignature}
                     onCheckedChange={(checked) => onAdditionalFieldChange('guardianSignature', !!checked)}
                   />
-                  <Label htmlFor="guardianSignature" className="text-sm">ลายมือชื่อผู้รับเงิน</Label>
+                  <Label htmlFor="guardianSignature" className="text-sm">ลายเซ็นผู้ปกครอง</Label>
                 </div>
                 {reportOptions.reportType === '2' && (
                   <>
