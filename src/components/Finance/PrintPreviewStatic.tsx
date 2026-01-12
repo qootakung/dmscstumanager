@@ -38,7 +38,7 @@ const PrintPreviewStatic = React.forwardRef<HTMLDivElement, PrintPreviewStaticPr
       {/* Divider */}
       <div style={{ width: "100%", borderBottom: "2px dashed #444", margin: "6px 0" }}></div>
 
-      <PrintGradeLevel grade={voucherData.grade} />
+      <PrintGradeLevel grade={voucherData.grade} students={voucherData.students} />
       
       <PrintStudentSummary 
         studentCount={voucherData.students.length}
