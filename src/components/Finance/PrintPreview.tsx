@@ -87,7 +87,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ voucherData, paymentOptions
         <div className="w-full border-b border-dashed border-black my-2"></div>
       </div>
       {/* ข้อมูลระดับชั้น */}
-      <GradeLevelRow selectedLevel={selectedLevel} studentsCount={voucherData.students.length} />
+      <GradeLevelRow students={voucherData.students} />
 
       {/* จำนวนนักเรียน */}
       <div className="mb-2">
