@@ -12,14 +12,14 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
   teacherName,
   principalName,
 }) => (
-  <div style={{ marginTop: '8px' }}>
+<div style={{ marginTop: '16px' }}>
     {/* Row 1: Payer and Teacher signatures */}
     <div style={{ 
       display: 'flex', 
       flexDirection: 'row', 
       justifyContent: 'space-between', 
       alignItems: 'flex-start',
-      marginBottom: '8px',
+      marginBottom: '16px',
       padding: '0 20px'
     }}>
       {/* Payer */}
@@ -48,8 +48,8 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
     </div>
 
     {/* Row 2: Principal signature at bottom center */}
-    <div style={{ textAlign: 'center', marginTop: '12px' }}>
-      <div style={{ fontSize: '10px', marginBottom: '4px' }}>ตรวจสอบแล้วถูกต้อง</div>
+    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <div style={{ fontSize: '10px', marginBottom: '8px' }}>ตรวจสอบแล้วถูกต้อง</div>
       <div style={{ fontSize: '10px' }}>
         <span>ลงชื่อ</span>
         <span>............................................................</span>

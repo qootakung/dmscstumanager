@@ -93,7 +93,7 @@ const StudentTable: React.FC<StudentTableProps> = ({
             <th style={{ ...thStyle, width: "120px" }}>เลขประจำตัว<br />ประชาชน</th>
             <th style={{ ...thStyle, width: "70px" }}>จำนวนเงิน<br />(บาท)</th>
             <th style={{ ...thStyle, width: "110px" }}>วันที่รับเงิน</th>
-            <th style={{ ...thStyle, width: "140px" }}>ลายมือชื่อ<br />ผู้ปกครอง</th>
+            <th style={{ ...thStyle, width: "140px" }}>ลายมือชื่อ<br />ผู้รับเงิน</th>
             <th style={{ ...thStyle, width: "60px" }}>หมายเหตุ</th>
           </tr>
         </thead>
