@@ -27,7 +27,7 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
         <div style={{ fontSize: '10px' }}>
           <span>ลงชื่อ</span>
           <span>..............................................</span>
-          <span>ผู้จ่ายเงิน</span>
+          <span>ผู้รับเงิน</span>
         </div>
         <div style={{ marginTop: '4px', fontSize: '10px' }}>
           ({payerName || "........................................"})
