@@ -7,6 +7,35 @@ import type { Student } from '@/types/student';
 import type { Teacher } from '@/types/teacher';
 import type { PaymentVoucherData } from '@/types/finance';
 
+// Calculate current academic year based on Thai school calendar
+// Academic year starts May 16, so before May 16 we're still in previous academic year
+const getCurrentAcademicYear = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  
+  // If before May 16, we're in semester 2 of previous academic year
+  if (month < 5 || (month === 5 && day < 16)) {
+    return (year + 543 - 1).toString();
+  }
+  return (year + 543).toString();
+};
+
+// Get current semester based on Thai school calendar
+const getCurrentSemester = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  
+  // Semester 1: May 16 - October 31
+  // Semester 2: November 1 - May 15
+  if ((month >= 5 && (month > 5 || day >= 16)) && month <= 10) {
+    return '1';
+  }
+  return '2';
+};
+
 export const useFinancialVoucher = () => {
   const { toast } = useToast();
   const [students, setStudents] = useState<Student[]>([]);
@@ -14,8 +43,8 @@ export const useFinancialVoucher = () => {
   const [selectedGrade, setSelectedGrade] = useState('');
   const [voucherData, setVoucherData] = useState<PaymentVoucherData>({
     paymentTypes: [],
-    academicYear: '2567',
-    semester: '1',
+    academicYear: getCurrentAcademicYear(),
+    semester: getCurrentSemester(),
     grade: '',
     students: [],
     schoolName: 'โรงเรียนบ้านดอนมูล',
@@ -40,7 +69,7 @@ export const useFinancialVoucher = () => {
   useEffect(() => {
     loadStudents();
     loadTeachers();
-  }, []);
+  }, [voucherData.academicYear, voucherData.semester]);
 
   useEffect(() => {
     if (teachers.length > 0) {
@@ -56,8 +85,12 @@ export const useFinancialVoucher = () => {
   }, [teachers]);
 
   const loadStudents = async () => {
-    const studentData = await getStudents();
-    setStudents(studentData);
+    const allStudents = await getStudents();
+    // Filter students by current academic year and semester
+    const filteredStudents = allStudents.filter(
+      s => s.academicYear === voucherData.academicYear && s.semester === voucherData.semester
+    );
+    setStudents(filteredStudents);
   };
 
   const loadTeachers = async () => {
