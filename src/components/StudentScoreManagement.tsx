@@ -131,7 +131,8 @@ export const StudentScoreManagement: React.FC = () => {
   const [selectedTeacher, setSelectedTeacher] = useState<string>('');
   const [selectedGrade, setSelectedGrade] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [academicYear, setAcademicYear] = useState<string>('2568');
+  const [academicYear, setAcademicYear] = useState<string>('');
+  const [availableAcademicYears, setAvailableAcademicYears] = useState<string[]>([]);
   const [selectedSemester, setSelectedSemester] = useState<string>('1');
   const [studentScores, setStudentScores] = useState<StudentScore[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
@@ -144,6 +145,7 @@ export const StudentScoreManagement: React.FC = () => {
   useEffect(() => {
     loadTeachers();
     loadStudents();
+    loadAvailableAcademicYears();
   }, []);
 
   useEffect(() => {
@@ -187,6 +189,51 @@ export const StudentScoreManagement: React.FC = () => {
   const loadStudents = async () => {
     const studentData = await getStudents();
     setStudents(studentData);
+  };
+
+  const loadAvailableAcademicYears = async () => {
+    try {
+      // Get unique academic years from student_scores
+      const { data: scoreYears, error: scoreError } = await supabase
+        .from('student_scores')
+        .select('academic_year')
+        .order('academic_year', { ascending: false });
+
+      if (scoreError) {
+        console.error('Error loading academic years from scores:', scoreError);
+        return;
+      }
+
+      // Get unique academic years from students
+      const { data: studentData, error: studentError } = await supabase
+        .from('students')
+        .select('academicYear')
+        .order('academicYear', { ascending: false });
+
+      if (studentError) {
+        console.error('Error loading academic years from students:', studentError);
+        return;
+      }
+
+      // Combine and get unique years
+      const allYears = new Set<string>();
+      scoreYears?.forEach(item => {
+        if (item.academic_year) allYears.add(item.academic_year);
+      });
+      studentData?.forEach(item => {
+        if (item.academicYear) allYears.add(item.academicYear);
+      });
+
+      const sortedYears = Array.from(allYears).sort((a, b) => parseInt(b) - parseInt(a));
+      setAvailableAcademicYears(sortedYears);
+
+      // Set default to the first (most recent) year if available
+      if (sortedYears.length > 0 && !academicYear) {
+        setAcademicYear(sortedYears[0]);
+      }
+    } catch (error) {
+      console.error('Error loading available academic years:', error);
+    }
   };
 
   const loadAllScoresForGrade = async () => {
@@ -388,12 +435,18 @@ export const StudentScoreManagement: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <Label htmlFor="academicYear">ปีการศึกษา</Label>
-              <Input
-                id="academicYear"
-                value={academicYear}
-                onChange={(e) => setAcademicYear(e.target.value)}
-                placeholder="2567"
-              />
+              <Select value={academicYear} onValueChange={setAcademicYear}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกปีการศึกษา" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableAcademicYears.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
