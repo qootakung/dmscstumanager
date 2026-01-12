@@ -131,7 +131,7 @@ export const StudentScoreManagement: React.FC = () => {
   const [selectedTeacher, setSelectedTeacher] = useState<string>('');
   const [selectedGrade, setSelectedGrade] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [academicYear, setAcademicYear] = useState<string>(new Date().getFullYear() + 543 + '');
+  const [academicYear, setAcademicYear] = useState<string>('2568');
   const [selectedSemester, setSelectedSemester] = useState<string>('1');
   const [studentScores, setStudentScores] = useState<StudentScore[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
