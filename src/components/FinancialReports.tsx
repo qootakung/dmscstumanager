@@ -133,9 +133,12 @@ const FinancialReports = () => {
     
     students.forEach(student => {
       if (student.grade) {
-        if (student.grade.startsWith('อนุบาล')) {
+        // Kindergarten can be stored as "อ.1" or "อนุบาล 1"
+        if (student.grade.startsWith('อนุบาล') || student.grade.startsWith('อ.')) {
           if (!gradeGroups['อนุบาล']) gradeGroups['อนุบาล'] = [];
-          const number = student.grade.replace('อนุบาล ', '');
+          const number = student.grade.startsWith('อ.')
+            ? student.grade.replace('อ.', '')
+            : student.grade.replace('อนุบาล ', '');
           if (!gradeGroups['อนุบาล'].includes(number)) {
             gradeGroups['อนุบาล'].push(number);
           }
