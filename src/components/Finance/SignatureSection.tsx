@@ -7,22 +7,6 @@ interface SignatureSectionProps {
   principalName: string;
 }
 
-const signatureLineStyle: React.CSSProperties = {
-  display: 'inline-block',
-  borderBottom: '1px dotted black',
-  width: '120px',
-  margin: '0 4px',
-  verticalAlign: 'middle'
-};
-
-const nameStyle: React.CSSProperties = {
-  display: 'inline-block',
-  width: '140px',
-  margin: '0 2px',
-  textAlign: 'center',
-  fontSize: '10px'
-};
-
 const SignatureSection: React.FC<SignatureSectionProps> = ({
   payerName,
   teacherName,
@@ -33,31 +17,32 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
     <div style={{ 
       display: 'flex', 
       flexDirection: 'row', 
-      justifyContent: 'space-around', 
+      justifyContent: 'space-between', 
       alignItems: 'flex-start',
-      marginBottom: '8px'
+      marginBottom: '8px',
+      padding: '0 20px'
     }}>
       {/* Payer */}
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '10px' }}>
           <span>ลงชื่อ</span>
-          <span style={signatureLineStyle}></span>
+          <span>..............................................</span>
           <span>ผู้จ่ายเงิน</span>
         </div>
         <div style={{ marginTop: '4px', fontSize: '10px' }}>
-          (<span style={nameStyle}>{payerName || ".............................."}</span>)
+          ({payerName || "........................................"})
         </div>
       </div>
       
       {/* Teacher */}
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '10px' }}>
-          <span>ลงชื่อ</span>
-          <span style={signatureLineStyle}></span>
-          <span>ครูประจำชั้น</span>
+          <span>ลงชื่อครู</span>
+          <span>..............................................</span>
+          <span>ประจำชั้น</span>
         </div>
         <div style={{ marginTop: '4px', fontSize: '10px' }}>
-          (<span style={nameStyle}>{teacherName || ".............................."}</span>)
+          ({teacherName || "........................................"})
         </div>
       </div>
     </div>
@@ -65,13 +50,18 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
     {/* Row 2: Principal signature at bottom center */}
     <div style={{ textAlign: 'center', marginTop: '12px' }}>
       <div style={{ fontSize: '10px', marginBottom: '4px' }}>ตรวจสอบแล้วถูกต้อง</div>
-      <div style={{ fontSize: '10px' }}>
+      <div style={{ 
+        display: 'inline-block',
+        border: '1px solid black',
+        padding: '4px 16px',
+        fontSize: '10px'
+      }}>
         <span>ลงชื่อ</span>
-        <span style={signatureLineStyle}></span>
+        <span>............................................................</span>
         <span>ผู้อำนวยการโรงเรียน</span>
       </div>
       <div style={{ marginTop: '4px', fontSize: '10px' }}>
-        (<span style={nameStyle}>{principalName || ".............................."}</span>)
+        ({principalName || "........................................"})
       </div>
     </div>
   </div>
