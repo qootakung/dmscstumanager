@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Users, UserPlus } from 'lucide-react';
 import type { Student } from '@/types/student';
-import { getStudents } from '@/utils/storage';
+import { getStudents } from '@/utils/studentStorage';
 
 interface StudentSelectionDialogProps {
   isOpen: boolean;
@@ -32,9 +32,21 @@ const StudentSelectionDialog: React.FC<StudentSelectionDialogProps> = ({
   const [gradeFilter, setGradeFilter] = useState<string>(selectedGrade || 'all');
   const [academicYearFilter, setAcademicYearFilter] = useState<string>('all');
 
-  const grades = ['อนุบาล 1', 'อนุบาล 2', 'อนุบาล 3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6', 'ม.1', 'ม.2', 'ม.3'];
-  const currentYear = new Date().getFullYear();
-  const academicYears = Array.from({ length: 5 }, (_, i) => (currentYear - 2 + i).toString());
+  const grades = ['อ.1', 'อ.2', 'อ.3', 'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6', 'ม.1', 'ม.2', 'ม.3'];
+
+  // Thai academic year (B.E.) starts May 16
+  const getCurrentAcademicYear = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+
+    if (month < 5 || (month === 5 && day < 16)) return (year + 543 - 1).toString();
+    return (year + 543).toString();
+  };
+
+  const currentThaiYear = parseInt(getCurrentAcademicYear(), 10);
+  const academicYears = Array.from({ length: 5 }, (_, i) => (currentThaiYear - 2 + i).toString());
 
   useEffect(() => {
     const loadStudents = async () => {
