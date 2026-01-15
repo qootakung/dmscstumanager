@@ -103,7 +103,8 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
           .print-table {
             width: 100% !important;
             table-layout: auto !important;
-            font-size: 11px !important;
+            font-size: 16pt !important;
+            font-family: 'TH SarabunPSK', 'TH Sarabun', 'Sarabun', sans-serif !important;
           }
           .print-table th,
           .print-table td {
@@ -135,8 +136,8 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
         }
       `}</style>
       
-      <div className="text-center mb-4 font-sarabun report-header">
-        <h3 className="text-base font-bold">
+      <div className="text-center mb-4 font-sarabun report-header print:text-[18pt] print:font-['TH_SarabunPSK','TH_Sarabun','Sarabun',sans-serif]">
+        <h3 className="text-base font-bold print:text-[18pt]">
           {reportOptions.reportType === '1' 
             ? 'รายชื่อข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล' 
             : reportOptions.reportType === '2'
@@ -145,11 +146,11 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
           }
         </h3>
         {reportOptions.reportType === '3' && reportOptions.customTitle2 && (
-          <p className="text-sm">{reportOptions.customTitle2}</p>
+          <p className="text-sm print:text-[16pt]">{reportOptions.customTitle2}</p>
         )}
-        <p className="text-sm">ปีการศึกษา {reportOptions.academicYear}</p>
+        <p className="text-sm print:text-[16pt]">ปีการศึกษา {reportOptions.academicYear}</p>
         {reportOptions.showDate && reportOptions.selectedDate && (
-          <p className="text-sm">วันที่ {formatThaiDate(reportOptions.selectedDate)}</p>
+          <p className="text-sm print:text-[16pt]">วันที่ {formatThaiDate(reportOptions.selectedDate)}</p>
         )}
       </div>
       
