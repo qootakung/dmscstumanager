@@ -56,7 +56,8 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
           }
           td {
             overflow: hidden !important;
-            word-break: break-all !important;
+            word-break: keep-all !important;
+            overflow-wrap: break-word !important;
           }
           thead {
             display: table-header-group !important;
