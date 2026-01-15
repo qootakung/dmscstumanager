@@ -46,18 +46,38 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
+        @page {
+          size: A4 portrait;
+          margin: 10mm;
+        }
         @media print {
+          .print-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: visible !important;
+          }
+          .print-table {
+            width: 100% !important;
+            table-layout: auto !important;
+            font-size: 12px !important;
+          }
+          .print-table th,
+          .print-table td {
+            width: auto !important;
+            min-width: unset !important;
+            max-width: none !important;
+            padding: 4px 6px !important;
+            white-space: normal !important;
+            word-break: keep-all !important;
+            overflow-wrap: break-word !important;
+            hyphens: none !important;
+          }
           table, th, td {
             border: 1px solid #000 !important;
             border-collapse: collapse !important;
           }
           th {
             background-color: #f3f4f6 !important;
-          }
-          td {
-            overflow: hidden !important;
-            word-break: keep-all !important;
-            overflow-wrap: break-word !important;
           }
           thead {
             display: table-header-group !important;
@@ -109,8 +129,8 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
         <span>รวม {students.length} คน</span>
       </div>
 
-      <div className="overflow-auto">
-        <table className="w-full border-collapse border border-black text-sm" style={{ tableLayout: 'fixed' }}>
+      <div className="overflow-auto print-container">
+        <table className="w-full border-collapse border border-black text-sm print-table" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100">
               {allColumns.map((column, index) => (
