@@ -43,6 +43,10 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
           th {
             background-color: #f3f4f6 !important;
           }
+          td {
+            overflow: hidden !important;
+            word-break: break-all !important;
+          }
         }
       `}</style>
       
@@ -102,9 +106,9 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
           <tbody>
             {students.map((student, index) => (
               <tr key={student.id}>
-                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[0]}px` }}>{index + 1}</td>
-                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[1]}px` }}>{student.studentId}</td>
-                <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[2]}px` }}>{(student.titleTh || '')}{student.firstNameTh} {student.lastNameTh}</td>
+                <td className="border border-black px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths[0]}px`, wordBreak: 'break-all' }}>{index + 1}</td>
+                <td className="border border-black px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths[1]}px`, wordBreak: 'break-all' }}>{student.studentId}</td>
+                <td className="border border-black px-2 py-1 overflow-hidden" style={{ width: `${columnWidths[2]}px`, wordBreak: 'break-all' }}>{(student.titleTh || '')}{student.firstNameTh} {student.lastNameTh}</td>
                 
                 {/* For type 3, add the fixed columns */}
                 {reportOptions.reportType === '3' && (
@@ -143,13 +147,13 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
                       <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('เวลากลับ')]}px` }}></td>
                     )}
                     {reportOptions.additionalFields.phone && (
-                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('เบอร์โทร')]}px` }}>{student.guardianPhone}</td>
+                      <td className="border border-black px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths[allColumns.indexOf('เบอร์โทร')]}px`, wordBreak: 'break-all' }}>{student.guardianPhone}</td>
                     )}
                     {reportOptions.additionalFields.gradeLevel && (
                       <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('ระดับชั้น')]}px` }}>{student.grade}</td>
                     )}
                     {reportOptions.additionalFields.address && (
-                      <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[allColumns.indexOf('ที่อยู่')]}px` }}>{formatAddress(student)}</td>
+                      <td className="border border-black px-2 py-1 overflow-hidden" style={{ width: `${columnWidths[allColumns.indexOf('ที่อยู่')]}px`, wordBreak: 'break-all' }}>{formatAddress(student)}</td>
                     )}
                     {reportOptions.additionalFields.age && (
                       <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('อายุ')]}px` }}>{calculateAge(student.birthDate)}</td>
