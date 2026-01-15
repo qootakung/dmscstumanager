@@ -58,10 +58,19 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
             overflow: hidden !important;
             word-break: break-all !important;
           }
+          thead {
+            display: table-header-group !important;
+          }
+          .report-header {
+            display: block !important;
+          }
+          tr {
+            page-break-inside: avoid !important;
+          }
         }
       `}</style>
       
-      <div className="text-center mb-2 font-sarabun">
+      <div className="text-center mb-2 font-sarabun report-header">
         {reportOptions.reportType === '3' ? (
           <>
             {reportOptions.customColumn1?.trim() && (
