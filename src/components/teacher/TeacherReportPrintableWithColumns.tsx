@@ -61,12 +61,20 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
 
   const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
   
-  // โหลดขนาดคอลัมน์ที่บันทึกไว้
+  // โหลดขนาดคอลัมน์ที่บันทึกไว้ - ค่าเริ่มต้นที่เหมาะสมกับเนื้อหา
   const reportKey = `teacher_${reportOptions.reportType}_${reportOptions.academicYear}`;
-  const defaultWidths = allColumns.map((_, index) => {
-    if (index === 0) return 80; // ลำดับที่
-    if (index === 1) return 200; // ชื่อ-สกุล
-    return 120; // คอลัมน์อื่นๆ
+  const defaultWidths = allColumns.map((column, index) => {
+    if (index === 0) return 45; // ลำดับที่ - บีบให้แคบ
+    if (index === 1) return 180; // ชื่อ-สกุล
+    if (column === 'ลายมือชื่อ') return 90;
+    if (column === 'เวลามา' || column === 'เวลากลับ') return 60;
+    if (column === 'เบอร์โทร') return 90;
+    if (column === 'เลขบัตรประจำตัวประชาชน') return 120;
+    if (column === 'ตำแหน่ง') return 100;
+    if (column === 'วุฒิการศึกษา') return 100;
+    if (column === 'วิชาเอก') return 100;
+    if (column === 'หมายเหตุ') return 80;
+    return 100; // คอลัมน์อื่นๆ
   });
   const columnWidths = loadColumnWidths(reportKey, defaultWidths);
 
@@ -85,10 +93,23 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
           th {
             background-color: #f3f4f6 !important;
           }
+          td {
+            overflow: hidden !important;
+            word-break: break-all !important;
+          }
+          thead {
+            display: table-header-group !important;
+          }
+          .report-header {
+            display: block !important;
+          }
+          tr {
+            page-break-inside: avoid !important;
+          }
         }
       `}</style>
       
-      <div className="text-center mb-4 font-sarabun">
+      <div className="text-center mb-4 font-sarabun report-header">
         <h3 className="text-base font-bold">
           {reportOptions.reportType === '1' 
             ? 'รายชื่อข้าราชการครูและบุคลากรทางการศึกษาโรงเรียนบ้านดอนมูล' 
@@ -127,8 +148,8 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
               
               return (
               <tr key={teacher.id}>
-                <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[colIndex++]}px` }}>{index + 1}</td>
-                <td className="border border-black px-2 py-1" style={{ width: `${columnWidths[colIndex++]}px` }}>{teacher.firstName} {teacher.lastName}</td>
+                <td className="border border-black px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths[colIndex++]}px`, wordBreak: 'break-all' }}>{index + 1}</td>
+                <td className="border border-black px-2 py-1 overflow-hidden" style={{ width: `${columnWidths[colIndex++]}px`, wordBreak: 'break-all' }}>{teacher.firstName} {teacher.lastName}</td>
                 
                 {/* Additional fields ตามลำดับที่เลือก */}
                 {reportOptions.fieldOrder
@@ -154,7 +175,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
                     const isCenter = ['citizenId', 'salary', 'birthDate', 'appointmentDate', 'phone', 'lineId'].includes(field);
                     
                     return (
-                      <td key={fieldIndex} className={`border border-black px-2 py-1 ${isCenter ? 'text-center' : ''}`} style={{ width: `${columnWidths[colIndex++]}px` }}>
+                      <td key={fieldIndex} className={`border border-black px-2 py-1 overflow-hidden ${isCenter ? 'text-center' : ''}`} style={{ width: `${columnWidths[colIndex++]}px`, wordBreak: 'break-all' }}>
                         {fieldMap[field]}
                       </td>
                     );
