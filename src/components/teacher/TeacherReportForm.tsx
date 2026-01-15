@@ -115,6 +115,28 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
       )}
 
       <div className="space-y-2">
+        <Label className="text-base font-medium">แนวกระดาษ</Label>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="portrait"
+              checked={reportOptions.pageOrientation === 'portrait'}
+              onCheckedChange={(checked) => checked && onOptionChange('pageOrientation', 'portrait')}
+            />
+            <Label htmlFor="portrait">แนวตั้ง (Portrait)</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="landscape"
+              checked={reportOptions.pageOrientation === 'landscape'}
+              onCheckedChange={(checked) => checked && onOptionChange('pageOrientation', 'landscape')}
+            />
+            <Label htmlFor="landscape">แนวนอน (Landscape)</Label>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
         <Label>คอลัมน์เพิ่มเติม</Label>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center space-x-2">

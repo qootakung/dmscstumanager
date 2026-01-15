@@ -123,6 +123,28 @@ const ReportOptionsForm: React.FC<ReportOptionsFormProps> = ({
           </Select>
         </div>
 
+        <div>
+          <Label className="text-base font-medium mb-3 block">แนวกระดาษ</Label>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="portrait"
+                checked={reportOptions.pageOrientation === 'portrait'}
+                onCheckedChange={(checked) => checked && onOptionChange('pageOrientation', 'portrait')}
+              />
+              <Label htmlFor="portrait" className="text-sm">แนวตั้ง (Portrait)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="landscape"
+                checked={reportOptions.pageOrientation === 'landscape'}
+                onCheckedChange={(checked) => checked && onOptionChange('pageOrientation', 'landscape')}
+              />
+              <Label htmlFor="landscape" className="text-sm">แนวนอน (Landscape)</Label>
+            </div>
+          </div>
+        </div>
+
         {(reportOptions.reportType === '1' || reportOptions.reportType === '2') && (
           <>
             <div>

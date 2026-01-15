@@ -83,6 +83,8 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
   });
   const columnWidths = loadColumnWidths(reportKey, defaultWidths);
 
+  const pageSize = reportOptions.pageOrientation === 'landscape' ? 'A4 landscape' : 'A4 portrait';
+
   return (
     <div className="p-4 font-sarabun">
       <style>{`
@@ -91,7 +93,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
           print-color-adjust: exact !important;
         }
         @page {
-          size: A4 landscape;
+          size: ${pageSize};
           margin: 10mm;
         }
         @media print {
