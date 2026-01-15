@@ -5,7 +5,7 @@ import { getReportColumns, calculateAge, formatAddress, formatBirthDate } from '
 import { ResizableTable, ResizableTh, ResizableTd } from '@/components/ui/resizable-table';
 import { saveColumnWidths, loadColumnWidths, saveColumnsLocked, loadColumnsLocked } from '@/utils/columnWidthStorage';
 import { Button } from '@/components/ui/button';
-import { Lock, Unlock } from 'lucide-react';
+import { Lock, Unlock, RotateCcw } from 'lucide-react';
 
 interface ResizableReportPreviewProps {
   students: Student[];
@@ -16,11 +16,24 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
   if (!reportOptions.classLevel || !reportOptions.academicYear) return null;
 
   const allColumns = getReportColumns(reportOptions);
-  const getDefaultWidths = () => allColumns.map((_, index) => {
-    if (index === 0) return 80; // ลำดับที่
-    if (index === 1) return 120; // รหัสนักเรียน
-    if (index === 2) return 200; // ชื่อ-สกุล
-    return 120; // คอลัมน์อื่นๆ
+  
+  // กำหนดความกว้างเริ่มต้นตามชนิดของคอลัมน์
+  const getDefaultWidths = () => allColumns.map((column) => {
+    if (column === 'ลำดับที่') return 45; // บีบคอลัมน์ลำดับให้แคบ
+    if (column === 'รหัสนักเรียน') return 70; // รหัสนักเรียน
+    if (column === 'ชื่อ - นามสกุล') return 180; // ชื่อ-สกุล
+    if (column === 'เพศ') return 35; // บีบคอลัมน์เพศให้แคบมาก (แค่ ช/ญ)
+    if (column === 'ลายมือชื่อ') return 90; // ลายเซ็น
+    if (column === 'ลายเซ็นผู้ปกครอง') return 100; // ลายเซ็นผู้ปกครอง
+    if (column === 'เบอร์โทร') return 90; // เบอร์โทร
+    if (column === 'ระดับชั้น') return 70; // ระดับชั้น
+    if (column === 'อายุ') return 45; // อายุ
+    if (column === 'เวลามา' || column === 'เวลากลับ') return 60; // เวลา
+    if (column === 'เลขบัตรประจำตัวประชาชน') return 120; // เลขบัตร
+    if (column === 'ที่อยู่') return 150; // ที่อยู่
+    if (column === 'วันเดือนปีเกิด') return 90; // วันเกิด
+    if (column === 'หมายเหตุ') return 80; // หมายเหตุ
+    return 80; // คอลัมน์อื่นๆ
   });
 
   const reportKey = `student_${reportOptions.reportType}_${reportOptions.classLevel}_${reportOptions.academicYear}`;
@@ -42,6 +55,12 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
     const newLockState = !isLocked;
     setIsLocked(newLockState);
     saveColumnsLocked(reportKey, newLockState);
+  };
+
+  const resetColumnWidths = () => {
+    const defaultWidths = getDefaultWidths();
+    setColumnWidths(defaultWidths);
+    saveColumnWidths(reportKey, defaultWidths);
   };
 
   const handleColumnResize = (columnIndex: number, newWidth: number) => {
@@ -105,24 +124,35 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
             '💡 เลื่อนขอบคอลัมน์เพื่อปรับขนาด (ค่าจะถูกบันทึกอัตโนมัติ)'
           )}
         </div>
-        <Button
-          variant={isLocked ? "default" : "outline"}
-          size="sm"
-          onClick={toggleLock}
-          className={isLocked ? "bg-green-600 hover:bg-green-700" : ""}
-        >
-          {isLocked ? (
-            <>
-              <Lock className="w-4 h-4 mr-1" />
-              ปลดล็อกคอลัมน์
-            </>
-          ) : (
-            <>
-              <Unlock className="w-4 h-4 mr-1" />
-              ล็อกคอลัมน์
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetColumnWidths}
+            className="text-orange-600 border-orange-300 hover:bg-orange-50"
+          >
+            <RotateCcw className="w-4 h-4 mr-1" />
+            รีเซ็ตคอลัมน์
+          </Button>
+          <Button
+            variant={isLocked ? "default" : "outline"}
+            size="sm"
+            onClick={toggleLock}
+            className={isLocked ? "bg-green-600 hover:bg-green-700" : ""}
+          >
+            {isLocked ? (
+              <>
+                <Lock className="w-4 h-4 mr-1" />
+                ปลดล็อกคอลัมน์
+              </>
+            ) : (
+              <>
+                <Unlock className="w-4 h-4 mr-1" />
+                ล็อกคอลัมน์
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="overflow-auto max-h-96">
