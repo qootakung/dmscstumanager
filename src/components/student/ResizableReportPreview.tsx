@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import type { Student, ReportOptions } from '@/types/student';
 import { getReportColumns, calculateAge, formatAddress, formatBirthDate } from '@/utils/studentReportUtils';
 import { ResizableTable, ResizableTh, ResizableTd } from '@/components/ui/resizable-table';
-import { saveColumnWidths, loadColumnWidths } from '@/utils/columnWidthStorage';
+import { saveColumnWidths, loadColumnWidths, saveColumnsLocked, loadColumnsLocked } from '@/utils/columnWidthStorage';
+import { Button } from '@/components/ui/button';
+import { Lock, Unlock } from 'lucide-react';
 
 interface ResizableReportPreviewProps {
   students: Student[];
@@ -25,12 +27,22 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
   const [columnWidths, setColumnWidths] = useState<number[]>(() => 
     loadColumnWidths(reportKey, getDefaultWidths())
   );
+  const [isLocked, setIsLocked] = useState<boolean>(() => 
+    loadColumnsLocked(reportKey)
+  );
 
   useEffect(() => {
     const defaultWidths = getDefaultWidths();
     const savedWidths = loadColumnWidths(reportKey, defaultWidths);
     setColumnWidths(savedWidths);
+    setIsLocked(loadColumnsLocked(reportKey));
   }, [reportOptions.reportType, reportOptions.classLevel, reportOptions.academicYear, allColumns.length]);
+
+  const toggleLock = () => {
+    const newLockState = !isLocked;
+    setIsLocked(newLockState);
+    saveColumnsLocked(reportKey, newLockState);
+  };
 
   const handleColumnResize = (columnIndex: number, newWidth: number) => {
     setColumnWidths(prev => {
@@ -85,8 +97,32 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
         <span>รวม {totalCount} คน</span>
       </div>
 
-      <div className="mb-2 text-sm text-blue-600 font-sarabun">
-        💡 เลื่อนขอบคอลัมน์เพื่อปรับขนาด (ค่าจะถูกบันทึกอัตโนมัติ)
+      <div className="mb-2 flex items-center justify-between font-sarabun">
+        <div className="text-sm text-blue-600">
+          {isLocked ? (
+            '🔒 คอลัมน์ถูกล็อกแล้ว ขนาดจะคงที่เมื่อพิมพ์'
+          ) : (
+            '💡 เลื่อนขอบคอลัมน์เพื่อปรับขนาด (ค่าจะถูกบันทึกอัตโนมัติ)'
+          )}
+        </div>
+        <Button
+          variant={isLocked ? "default" : "outline"}
+          size="sm"
+          onClick={toggleLock}
+          className={isLocked ? "bg-green-600 hover:bg-green-700" : ""}
+        >
+          {isLocked ? (
+            <>
+              <Lock className="w-4 h-4 mr-1" />
+              ปลดล็อกคอลัมน์
+            </>
+          ) : (
+            <>
+              <Unlock className="w-4 h-4 mr-1" />
+              ล็อกคอลัมน์
+            </>
+          )}
+        </Button>
       </div>
 
       <div className="overflow-auto max-h-96">
@@ -98,6 +134,7 @@ const ResizableReportPreview: React.FC<ResizableReportPreviewProps> = ({ student
                   key={index}
                   width={columnWidths[index]}
                   onResize={(width) => handleColumnResize(index, width)}
+                  isLocked={isLocked}
                 >
                   {column}
                 </ResizableTh>
