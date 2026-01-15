@@ -64,17 +64,22 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
   // โหลดขนาดคอลัมน์ที่บันทึกไว้ - ค่าเริ่มต้นที่เหมาะสมกับเนื้อหา
   const reportKey = `teacher_${reportOptions.reportType}_${reportOptions.academicYear}`;
   const defaultWidths = allColumns.map((column, index) => {
-    if (index === 0) return 45; // ลำดับที่ - บีบให้แคบ
-    if (index === 1) return 180; // ชื่อ-สกุล
-    if (column === 'ลายมือชื่อ') return 90;
-    if (column === 'เวลามา' || column === 'เวลากลับ') return 60;
-    if (column === 'เบอร์โทร') return 90;
-    if (column === 'เลขบัตรประจำตัวประชาชน') return 120;
-    if (column === 'ตำแหน่ง') return 100;
-    if (column === 'วุฒิการศึกษา') return 100;
+    if (index === 0) return 40; // ลำดับที่ - บีบให้แคบมาก
+    if (index === 1) return 140; // ชื่อ-สกุล - บีบลง
+    if (column === 'ตำแหน่ง') return 140; // ตำแหน่ง - ขยายให้กว้างขึ้น
+    if (column === 'ลายมือชื่อ') return 80;
+    if (column === 'เวลามา' || column === 'เวลากลับ') return 55;
+    if (column === 'เบอร์โทร') return 85;
+    if (column === 'เลขบัตรประจำตัวประชาชน') return 115;
+    if (column === 'Email') return 130;
+    if (column === 'วุฒิการศึกษา') return 110;
     if (column === 'วิชาเอก') return 100;
-    if (column === 'หมายเหตุ') return 80;
-    return 100; // คอลัมน์อื่นๆ
+    if (column === 'วัน/เดือน/ปีเกิด') return 90;
+    if (column === 'วันที่บรรจุ') return 85;
+    if (column === 'เงินเดือน') return 70;
+    if (column === 'ID Line') return 80;
+    if (column === 'หมายเหตุ') return 70;
+    return 90; // คอลัมน์อื่นๆ
   });
   const columnWidths = loadColumnWidths(reportKey, defaultWidths);
 
