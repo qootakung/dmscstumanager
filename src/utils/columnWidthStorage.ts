@@ -25,3 +25,26 @@ export const loadColumnWidths = (reportType: string, defaultWidths: number[]): n
   }
   return defaultWidths;
 };
+
+// Utility functions for storing and retrieving column lock state
+export const saveColumnsLocked = (reportType: string, isLocked: boolean) => {
+  try {
+    const key = `columnsLocked_${reportType}`;
+    localStorage.setItem(key, JSON.stringify(isLocked));
+  } catch (error) {
+    console.error('Failed to save column lock state:', error);
+  }
+};
+
+export const loadColumnsLocked = (reportType: string): boolean => {
+  try {
+    const key = `columnsLocked_${reportType}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      return JSON.parse(saved) === true;
+    }
+  } catch (error) {
+    console.error('Failed to load column lock state:', error);
+  }
+  return false;
+};

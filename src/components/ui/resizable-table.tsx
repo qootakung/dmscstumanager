@@ -12,6 +12,7 @@ interface ResizableThProps {
   className?: string;
   width?: number;
   onResize?: (width: number) => void;
+  isLocked?: boolean;
 }
 
 interface ResizableTdProps {
@@ -34,7 +35,8 @@ export const ResizableTh: React.FC<ResizableThProps> = ({
   children, 
   className, 
   width = 150,
-  onResize 
+  onResize,
+  isLocked = false
 }) => {
   const [currentWidth, setCurrentWidth] = useState(width);
   const [isResizing, setIsResizing] = useState(false);
@@ -43,6 +45,8 @@ export const ResizableTh: React.FC<ResizableThProps> = ({
   const startWidth = useRef(0);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (isLocked) return; // ไม่อนุญาตให้ปรับขนาดเมื่อล็อก
+    
     e.preventDefault();
     setIsResizing(true);
     startX.current = e.clientX;
@@ -63,25 +67,28 @@ export const ResizableTh: React.FC<ResizableThProps> = ({
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [currentWidth, onResize]);
+  }, [currentWidth, onResize, isLocked]);
 
   return (
     <th
       ref={thRef}
       className={cn(
         "border border-black px-2 py-1 text-center font-medium bg-gray-100 relative",
+        isLocked && "bg-green-50",
         className
       )}
       style={{ width: `${currentWidth}px`, minWidth: `${currentWidth}px` }}
     >
       {children}
-      <div
-        className={cn(
-          "absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 transition-colors",
-          isResizing && "bg-blue-500"
-        )}
-        onMouseDown={handleMouseDown}
-      />
+      {!isLocked && (
+        <div
+          className={cn(
+            "absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 transition-colors",
+            isResizing && "bg-blue-500"
+          )}
+          onMouseDown={handleMouseDown}
+        />
+      )}
     </th>
   );
 };
