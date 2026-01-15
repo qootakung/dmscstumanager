@@ -21,6 +21,7 @@ const Reports: React.FC = () => {
     classLevel: 'all',
     academicYear: '2568',
     semester: '1',
+    pageOrientation: 'portrait',
     additionalFields: {
       gender: false,
       citizenId: false,

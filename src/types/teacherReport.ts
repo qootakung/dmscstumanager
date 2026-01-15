@@ -2,6 +2,7 @@
 export interface TeacherReportOptions {
   reportType: '1' | '2' | '3';
   academicYear: string;
+  pageOrientation: 'portrait' | 'landscape';
   additionalFields: {
     email: boolean;
     citizenId: boolean;

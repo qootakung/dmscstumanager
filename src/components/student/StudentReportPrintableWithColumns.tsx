@@ -39,6 +39,8 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
   const maleCount = students.filter(s => s.gender === 'ชาย').length;
   const femaleCount = students.filter(s => s.gender === 'หญิง').length;
 
+  const pageSize = reportOptions.pageOrientation === 'landscape' ? 'A4 landscape' : 'A4 portrait';
+
   return (
     <div className="p-4 font-sarabun">
       <style>{`
@@ -47,7 +49,7 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
           print-color-adjust: exact !important;
         }
         @page {
-          size: A4 portrait;
+          size: ${pageSize};
           margin: 10mm;
         }
         @media print {
@@ -59,7 +61,8 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
           .print-table {
             width: 100% !important;
             table-layout: auto !important;
-            font-size: 12px !important;
+            font-size: 16pt !important;
+            font-family: 'TH SarabunPSK', 'TH Sarabun', 'Sarabun', sans-serif !important;
           }
           .print-table th,
           .print-table td {
@@ -91,39 +94,39 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
         }
       `}</style>
       
-      <div className="text-center mb-2 font-sarabun report-header">
+      <div className="text-center mb-2 font-sarabun report-header print:text-[18pt] print:font-['TH_SarabunPSK','TH_Sarabun','Sarabun',sans-serif]">
         {reportOptions.reportType === '3' ? (
           <>
             {reportOptions.customColumn1?.trim() && (
-              <h3 className="text-lg font-bold">
+              <h3 className="text-lg font-bold print:text-[18pt]">
                 {reportOptions.customColumn1}
               </h3>
             )}
             {reportOptions.customColumn2?.trim() && (
-              <p className="text-lg">
+              <p className="text-lg print:text-[16pt]">
                 {reportOptions.customColumn2}
               </p>
             )}
           </>
         ) : reportOptions.reportType === '2' ? (
           <>
-            <h3 className="text-lg font-bold">
+            <h3 className="text-lg font-bold print:text-[18pt]">
               แบบลงทะเบียนโครงการยกระดับผลสัมฤทธิ์ทางการเรียนรู้
             </h3>
-            <p className="text-base">โรงเรียนบ้านดอนมูล</p>
+            <p className="text-base print:text-[16pt]">โรงเรียนบ้านดอนมูล</p>
           </>
         ) : (
-          <h3 className="text-lg font-bold">
+          <h3 className="text-lg font-bold print:text-[18pt]">
             รายชื่อนักเรียนโรงเรียนบ้านดอนมูล
           </h3>
         )}
         
-        <p className="text-sm">
+        <p className="text-sm print:text-[16pt]">
           {reportOptions.classLevel === 'all' ? 'ทุกระดับชั้น' : `ระดับชั้น ${reportOptions.classLevel}`} ภาคเรียนที่ {reportOptions.semester} ปีการศึกษา {reportOptions.academicYear}
         </p>
       </div>
 
-      <div className="text-sm flex justify-start gap-x-4 mb-2 font-sarabun">
+      <div className="text-sm flex justify-start gap-x-4 mb-2 font-sarabun print:text-[16pt] print:font-['TH_SarabunPSK','TH_Sarabun','Sarabun',sans-serif]">
         <span>จำนวนเพศชาย {maleCount} คน</span>
         <span>เพศหญิง {femaleCount} คน</span>
         <span>รวม {students.length} คน</span>

@@ -17,6 +17,7 @@ const TeacherReports: React.FC = () => {
   const [reportOptions, setReportOptions] = useState<TeacherReportOptions>({
     reportType: '1',
     academicYear: '2568',
+    pageOrientation: 'landscape',
     additionalFields: {
       email: false,
       citizenId: false,

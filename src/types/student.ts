@@ -54,6 +54,7 @@ export interface ReportOptions {
   classLevel: string;
   academicYear: string;
   semester: string;
+  pageOrientation: 'portrait' | 'landscape';
   additionalFields: {
     gender: boolean;
     citizenId: boolean;

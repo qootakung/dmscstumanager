@@ -10,6 +10,7 @@ export const useStudentReport = () => {
     classLevel: 'all',
     academicYear: new Date().getFullYear().toString(),
     semester: '1',
+    pageOrientation: 'portrait',
     additionalFields: {
       gender: false,
       citizenId: false,
