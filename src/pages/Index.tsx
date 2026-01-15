@@ -182,7 +182,7 @@ const Index = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         className="cursor-pointer"
-                        onClick={() => window.open('https://donmul-grades-hub.lovable.app/', '_blank')}
+                        onClick={() => window.open('https://dmgsc.lovable.app/', '_blank')}
                       >
                         คะแนนและใบงาน
                       </DropdownMenuItem>
