@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 import type { Teacher } from '@/types/teacher';
 import type { TeacherReportOptions } from '@/types/teacherReport';
 import { ResizableTable, ResizableTh, ResizableTd } from '@/components/ui/resizable-table';
-import { saveColumnWidths, loadColumnWidths } from '@/utils/columnWidthStorage';
+import { saveColumnWidths, loadColumnWidths, saveColumnsLocked, loadColumnsLocked } from '@/utils/columnWidthStorage';
 import { sortTeachersByPosition } from '@/utils/teacherSortUtils';
 import { cn } from '@/lib/utils';
+import { Lock, Unlock, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ResizableTeacherReportPreviewProps {
   reportOptions: TeacherReportOptions;
@@ -74,30 +76,55 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
 
   const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
   
-  const getDefaultWidths = () => allColumns.map((_, index) => {
-    if (index === 0) return 80; // ลำดับที่
-    if (index === 1) return 200; // ชื่อ-สกุล
-    return 120; // คอลัมน์อื่นๆ
+  const getDefaultWidths = () => allColumns.map((column, index) => {
+    if (index === 0) return 45; // ลำดับที่ - บีบให้แคบ
+    if (index === 1) return 180; // ชื่อ-สกุล
+    if (column === 'ลายมือชื่อ') return 90;
+    if (column === 'เวลามา' || column === 'เวลากลับ') return 60;
+    if (column === 'เบอร์โทร') return 90;
+    if (column === 'เลขบัตรประจำตัวประชาชน') return 120;
+    if (column === 'ตำแหน่ง') return 100;
+    if (column === 'วุฒิการศึกษา') return 100;
+    if (column === 'วิชาเอก') return 100;
+    if (column === 'หมายเหตุ') return 80;
+    return 100; // คอลัมน์อื่นๆ
   });
 
   const reportKey = `teacher_${reportOptions.reportType}_${reportOptions.academicYear}`;
   const [columnWidths, setColumnWidths] = useState<number[]>(() => 
     loadColumnWidths(reportKey, getDefaultWidths())
   );
+  const [isLocked, setIsLocked] = useState<boolean>(() => 
+    loadColumnsLocked(reportKey)
+  );
 
   useEffect(() => {
     const defaultWidths = getDefaultWidths();
     const savedWidths = loadColumnWidths(reportKey, defaultWidths);
     setColumnWidths(savedWidths);
+    setIsLocked(loadColumnsLocked(reportKey));
   }, [reportOptions.reportType, reportOptions.academicYear, allColumns.length]);
 
   const handleColumnResize = (columnIndex: number, newWidth: number) => {
+    if (isLocked) return;
     setColumnWidths(prev => {
       const updated = [...prev];
       updated[columnIndex] = newWidth;
       saveColumnWidths(reportKey, updated);
       return updated;
     });
+  };
+
+  const toggleLock = () => {
+    const newLocked = !isLocked;
+    setIsLocked(newLocked);
+    saveColumnsLocked(reportKey, newLocked);
+  };
+
+  const resetColumnWidths = () => {
+    const defaultWidths = getDefaultWidths();
+    setColumnWidths(defaultWidths);
+    saveColumnWidths(reportKey, defaultWidths);
   };
 
   return (
@@ -120,8 +147,27 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
         )}
       </div>
 
-      <div className="mb-2 text-sm text-blue-600 font-sarabun print:hidden">
-        💡 เลื่อนขอบคอลัมน์เพื่อปรับขนาด (ค่าจะถูกบันทึกอัตโนมัติ)
+      <div className="mb-2 flex items-center gap-2 print:hidden">
+        <span className="text-sm text-blue-600 font-sarabun">
+          💡 เลื่อนขอบคอลัมน์เพื่อปรับขนาด (ค่าจะถูกบันทึกอัตโนมัติ)
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleLock}
+          className={cn("ml-auto", isLocked && "bg-green-100 border-green-500")}
+        >
+          {isLocked ? <Lock className="h-4 w-4 mr-1" /> : <Unlock className="h-4 w-4 mr-1" />}
+          {isLocked ? 'ปลดล็อก' : 'ล็อกคอลัมน์'}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={resetColumnWidths}
+        >
+          <RotateCcw className="h-4 w-4 mr-1" />
+          รีเซ็ตคอลัมน์
+        </Button>
       </div>
       
       <div className="overflow-x-auto">
@@ -133,6 +179,7 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
                   key={index}
                   width={columnWidths[index]}
                   onResize={(width) => handleColumnResize(index, width)}
+                  isLocked={isLocked}
                 >
                   {column}
                 </ResizableTh>
