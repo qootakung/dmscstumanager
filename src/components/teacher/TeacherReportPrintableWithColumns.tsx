@@ -36,6 +36,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
     major: 'วิชาเอก',
     phone: 'เบอร์โทร',
     lineId: 'ID Line',
+    scoutLevel: 'วุฒิทางลูกเสือ',
     signature: 'ลายมือชื่อ',
     signature2: 'ลายมือชื่อ',
     timeIn: 'เวลามา',
@@ -61,7 +62,6 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
 
   const allColumns = [...baseColumns, ...additionalColumns, ...customColumns, ...noteColumn];
   
-  // โหลดขนาดคอลัมน์ที่บันทึกไว้ - ค่าเริ่มต้นที่เหมาะสมกับเนื้อหา
   const reportKey = `teacher_${reportOptions.reportType}_${reportOptions.academicYear}`;
   const defaultWidths = allColumns.map((column, index) => {
     if (index === 0) return 40; // ลำดับที่ - บีบให้แคบมาก
@@ -78,6 +78,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
     if (column === 'วันที่บรรจุ') return 85;
     if (column === 'เงินเดือน') return 70;
     if (column === 'ID Line') return 80;
+    if (column === 'วุฒิทางลูกเสือ') return 120;
     if (column === 'หมายเหตุ') return 70;
     return 90; // คอลัมน์อื่นๆ
   });
@@ -195,6 +196,7 @@ const TeacherReportPrintableWithColumns: React.FC<TeacherReportPrintableWithColu
                       major: teacher.majorSubject,
                       phone: teacher.phone,
                       lineId: teacher.lineId,
+                      scoutLevel: teacher.scoutLevel || '',
                       signature: '',
                       signature2: '',
                       timeIn: '',
