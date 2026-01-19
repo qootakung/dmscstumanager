@@ -49,6 +49,7 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
     major: 'วิชาเอก',
     phone: 'เบอร์โทร',
     lineId: 'ID Line',
+    scoutLevel: 'วุฒิทางลูกเสือ',
     signature: 'ลายมือชื่อ',
     signature2: 'ลายมือชื่อ',
     timeIn: 'เวลามา',
@@ -91,6 +92,7 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
     if (column === 'วันที่บรรจุ') return 85;
     if (column === 'เงินเดือน') return 70;
     if (column === 'ID Line') return 80;
+    if (column === 'วุฒิทางลูกเสือ') return 120;
     if (column === 'หมายเหตุ') return 70;
     return 90; // คอลัมน์อื่นๆ
   });
@@ -215,6 +217,7 @@ const ResizableTeacherReportPreview: React.FC<ResizableTeacherReportPreviewProps
                       major: teacher.majorSubject,
                       phone: teacher.phone,
                       lineId: teacher.lineId,
+                      scoutLevel: teacher.scoutLevel || '',
                       signature: '',
                       signature2: '',
                       timeIn: '',

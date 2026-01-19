@@ -14,6 +14,7 @@ export interface TeacherReportOptions {
     phone: boolean;
     lineId: boolean;
     appointmentDate: boolean;
+    scoutLevel: boolean;
     signature: boolean;
     signature2: boolean;
     timeIn: boolean;

@@ -221,6 +221,14 @@ const TeacherReportForm: React.FC<TeacherReportFormProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
+              id="scoutLevel"
+              checked={reportOptions.additionalFields.scoutLevel}
+              onCheckedChange={(checked) => onAdditionalFieldChange('scoutLevel', Boolean(checked))}
+            />
+            <Label htmlFor="scoutLevel">วุฒิทางลูกเสือ</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
               id="signature"
               checked={reportOptions.additionalFields.signature}
               onCheckedChange={(checked) => onAdditionalFieldChange('signature', Boolean(checked))}
