@@ -25,9 +25,11 @@ import {
   CheckSquare,
   Edit3,
   BookMarked,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ArrowLeft
 } from 'lucide-react';
 import { generateAcademicYears, gradeOptions } from '@/utils/data';
+import BasicInfoEntry from './pp5/BasicInfoEntry';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -167,6 +169,22 @@ const PP5Management: React.FC = () => {
     setActiveSection(`${categoryId}-${itemId}`);
     console.log(`Selected: ${categoryId} -> ${itemId}`);
   };
+
+  const handleBack = () => {
+    setActiveSection(null);
+  };
+
+  // Show BasicInfoEntry when selected
+  if (activeSection === 'basic-info-basic-data') {
+    return (
+      <BasicInfoEntry
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
