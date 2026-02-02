@@ -16,6 +16,7 @@ import FinancialReports from '@/components/FinancialReports';
 import Assessment from '@/components/Assessment';
 import DentalMilkTracking from '@/components/DentalMilkTracking';
 import { StudentScoreManagement } from '@/components/StudentScoreManagement';
+import PP5Management from '@/components/PP5Management';
 import { getCurrentUser, logout } from '@/utils/userStorage';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -186,6 +187,12 @@ const Index = () => {
                       >
                         คะแนนและใบงาน
                       </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => setActiveTab('pp5')}
+                      >
+                        แบบ ปพ.5
+                      </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
                   
@@ -269,6 +276,7 @@ const Index = () => {
           {activeTab === 'assessment' && <Assessment />}
           {activeTab === 'dental-milk' && <DentalMilkTracking />}
           {activeTab === 'student-scores' && <StudentScoreManagement />}
+          {activeTab === 'pp5' && <PP5Management />}
           {activeTab === 'student-reports' && <Reports />}
           {activeTab === 'teacher-reports' && <TeacherReports />}
           {activeTab === 'financial-reports' && <FinancialReports />}
