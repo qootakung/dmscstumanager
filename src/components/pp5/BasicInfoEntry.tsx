@@ -199,7 +199,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Row 1 - Only ระดับ and ภาคเรียนที่ */}
+                {/* Row 1 - ระดับ and ภาคเรียนที่ */}
                 <div className="space-y-2">
                   <Label className="text-pink-600 font-medium">ระดับ</Label>
                   <Select 
@@ -232,6 +232,65 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
                       <SelectItem value="2">2</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Row 2 - ปีการศึกษา and วันที่อนุมัติผลการเรียน */}
+                <div className="space-y-2">
+                  <Label className="text-pink-600 font-medium">ปีการศึกษา</Label>
+                  <Select 
+                    value={basicInfo.academicYear} 
+                    onValueChange={(v) => setBasicInfo(prev => ({ ...prev, academicYear: v }))}
+                  >
+                    <SelectTrigger className="bg-pink-50 border-pink-200">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {generateAcademicYears().map(year => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-pink-600 font-medium">วันที่อนุมัติผลการเรียน</Label>
+                  <Input 
+                    type="date"
+                    value={basicInfo.approvalDate} 
+                    onChange={(e) => setBasicInfo(prev => ({ ...prev, approvalDate: e.target.value }))}
+                    className="bg-pink-50 border-pink-200"
+                  />
+                </div>
+
+                {/* Row 3 - ครูประจำชั้น */}
+                <div className="space-y-2">
+                  <Label className="text-pink-600 font-medium">ครูประจำชั้นคนที่ 1</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={basicInfo.homeTeacher1} 
+                      onChange={(e) => setBasicInfo(prev => ({ ...prev, homeTeacher1: e.target.value }))}
+                      className="bg-pink-50 border-pink-200 flex-1"
+                      placeholder="เลือกครูประจำชั้น"
+                    />
+                    <Button variant="outline" size="icon" onClick={() => openTeacherDialog('homeTeacher1')}>
+                      <UserPlus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-pink-600 font-medium">ครูประจำชั้นคนที่ 2</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={basicInfo.homeTeacher2} 
+                      onChange={(e) => setBasicInfo(prev => ({ ...prev, homeTeacher2: e.target.value }))}
+                      className="bg-pink-50 border-pink-200 flex-1"
+                      placeholder="เลือกครูประจำชั้น"
+                    />
+                    <Button variant="outline" size="icon" onClick={() => openTeacherDialog('homeTeacher2')}>
+                      <UserPlus className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
