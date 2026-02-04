@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { 
   School, 
-  User, 
   Calendar, 
   BookOpen, 
   Building, 
@@ -17,7 +16,7 @@ import {
   Edit3,
   ArrowLeft
 } from 'lucide-react';
-import { generateAcademicYears, gradeOptions } from '@/utils/data';
+import { generateAcademicYears } from '@/utils/data';
 import { getTeachers } from '@/utils/teacherStorage';
 import type { Teacher } from '@/types/teacher';
 import TeacherSelectDialog from './TeacherSelectDialog';
@@ -25,9 +24,10 @@ import SubjectInfoTable from './SubjectInfoTable';
 import { 
   PP5BasicInfo, 
   SubjectInfo, 
-  DEFAULT_SUBJECTS, 
   DEFAULT_CALENDAR,
-  AcademicCalendar 
+  AcademicCalendar,
+  GRADE_LEVEL_OPTIONS,
+  getDefaultSubjectsForGrade
 } from './types';
 import { toast } from 'sonner';
 
@@ -44,10 +44,12 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
   selectedAcademicYear,
   onBack,
 }) => {
+  // Extract grade number from selectedGrade (e.g., "ป.1" -> "1")
+  const getGradeNumber = (grade: string) => grade.replace('ป.', '');
+  
   const [basicInfo, setBasicInfo] = useState<PP5BasicInfo>({
-    level: 'ประถมศึกษา',
+    gradeLevel: getGradeNumber(selectedGrade),
     semester: selectedSemester,
-    yearNumber: selectedGrade.replace('ป.', ''),
     room: '',
     academicYear: selectedAcademicYear,
     approvalDate: '',
@@ -74,16 +76,19 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
 
   useEffect(() => {
     loadTeachers();
-    initializeSubjects();
+    initializeSubjects(getGradeNumber(selectedGrade));
   }, []);
 
   useEffect(() => {
+    const gradeNum = getGradeNumber(selectedGrade);
     setBasicInfo(prev => ({
       ...prev,
       semester: selectedSemester,
-      yearNumber: selectedGrade.replace('ป.', ''),
+      gradeLevel: gradeNum,
       academicYear: selectedAcademicYear,
     }));
+    // Update subjects when grade changes
+    initializeSubjects(gradeNum);
   }, [selectedGrade, selectedSemester, selectedAcademicYear]);
 
   const loadTeachers = async () => {
@@ -100,13 +105,20 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
     }
   };
 
-  const initializeSubjects = () => {
-    const initialSubjects: SubjectInfo[] = DEFAULT_SUBJECTS.map(subject => ({
+  const initializeSubjects = (gradeLevel: string) => {
+    const gradeSubjects = getDefaultSubjectsForGrade(gradeLevel);
+    const initialSubjects: SubjectInfo[] = gradeSubjects.map(subject => ({
       ...subject,
       teacherId: '',
       teacherName: '',
     }));
     setSubjects(initialSubjects);
+  };
+  
+  const handleGradeLevelChange = (newGradeLevel: string) => {
+    setBasicInfo(prev => ({ ...prev, gradeLevel: newGradeLevel }));
+    initializeSubjects(newGradeLevel);
+    toast.info(`อัพเดทรหัสวิชาสำหรับประถมศึกษาปีที่ ${newGradeLevel}`);
   };
 
   const handleTeacherSelect = (teacher: Teacher) => {
@@ -164,7 +176,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
               กรอกข้อมูลพื้นฐาน ปพ.5
             </h2>
             <p className="text-muted-foreground">
-              ชั้น {selectedGrade} ภาคเรียนที่ {selectedSemester} ปีการศึกษา {selectedAcademicYear}
+              ประถมศึกษาปีที่ {basicInfo.gradeLevel} ภาคเรียนที่ {basicInfo.semester} ปีการศึกษา {selectedAcademicYear}
             </p>
           </div>
         </div>
@@ -187,14 +199,24 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Row 1 */}
+                {/* Row 1 - Only ระดับ and ภาคเรียนที่ */}
                 <div className="space-y-2">
                   <Label className="text-pink-600 font-medium">ระดับ</Label>
-                  <Input 
-                    value={basicInfo.level} 
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, level: e.target.value }))}
-                    className="bg-pink-50 border-pink-200"
-                  />
+                  <Select 
+                    value={basicInfo.gradeLevel} 
+                    onValueChange={handleGradeLevelChange}
+                  >
+                    <SelectTrigger className="bg-pink-50 border-pink-200">
+                      <SelectValue placeholder="เลือกระดับชั้น" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GRADE_LEVEL_OPTIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-pink-600 font-medium">ภาคเรียนที่</Label>
@@ -210,92 +232,6 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
                       <SelectItem value="2">2</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-
-                {/* Row 2 */}
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">ปีที่</Label>
-                  <Input 
-                    value={basicInfo.yearNumber} 
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, yearNumber: e.target.value }))}
-                    className="bg-pink-50 border-pink-200"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">ห้องที่</Label>
-                  <Input 
-                    value={basicInfo.room} 
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, room: e.target.value }))}
-                    className="bg-cyan-50 border-cyan-200"
-                    placeholder="เช่น 1"
-                  />
-                </div>
-
-                {/* Row 3 */}
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">ปีการศึกษา</Label>
-                  <Select 
-                    value={basicInfo.academicYear} 
-                    onValueChange={(v) => setBasicInfo(prev => ({ ...prev, academicYear: v }))}
-                  >
-                    <SelectTrigger className="bg-cyan-50 border-cyan-200">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {generateAcademicYears().map(year => (
-                        <SelectItem key={year} value={year}>{year}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">วันที่อนุมัติผลการเรียน</Label>
-                  <Input 
-                    type="date"
-                    value={basicInfo.approvalDate} 
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, approvalDate: e.target.value }))}
-                    className="bg-cyan-50 border-cyan-200"
-                  />
-                </div>
-
-                {/* Row 4 - Teachers */}
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">ครูประจำชั้นคนที่ 1</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      value={basicInfo.homeTeacher1} 
-                      onChange={(e) => setBasicInfo(prev => ({ ...prev, homeTeacher1: e.target.value }))}
-                      className="bg-cyan-50 border-cyan-200 flex-1"
-                      placeholder="เลือกครูประจำชั้น"
-                    />
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => openTeacherDialog('homeTeacher1')}
-                      className="shrink-0"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">ครูประจำชั้นคนที่ 2</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      value={basicInfo.homeTeacher2} 
-                      onChange={(e) => setBasicInfo(prev => ({ ...prev, homeTeacher2: e.target.value }))}
-                      className="bg-cyan-50 border-cyan-200 flex-1"
-                      placeholder="เลือกครูประจำชั้น (ถ้ามี)"
-                    />
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => openTeacherDialog('homeTeacher2')}
-                      className="shrink-0"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                    </Button>
-                  </div>
                 </div>
               </div>
             </CardContent>
