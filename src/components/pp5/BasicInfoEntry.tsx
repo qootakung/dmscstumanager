@@ -76,19 +76,29 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
 
   useEffect(() => {
     loadTeachers();
-    initializeSubjects(getGradeNumber(selectedGrade));
-  }, []);
-
-  useEffect(() => {
+    // Try to load saved data on initial mount
     const gradeNum = getGradeNumber(selectedGrade);
-    setBasicInfo(prev => ({
-      ...prev,
-      semester: selectedSemester,
-      gradeLevel: gradeNum,
-      academicYear: selectedAcademicYear,
-    }));
-    // Update subjects when grade changes
-    initializeSubjects(gradeNum);
+    const storageKey = `pp5-basic-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`;
+    const saved = localStorage.getItem(storageKey);
+    
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.basicInfo) {
+          setBasicInfo(prev => ({ ...prev, ...data.basicInfo }));
+        }
+        if (data.subjects && data.subjects.length > 0) {
+          setSubjects(data.subjects);
+        } else {
+          initializeSubjects(gradeNum);
+        }
+      } catch (e) {
+        console.error('Error loading saved data:', e);
+        initializeSubjects(gradeNum);
+      }
+    } else {
+      initializeSubjects(gradeNum);
+    }
   }, [selectedGrade, selectedSemester, selectedAcademicYear]);
 
   const loadTeachers = async () => {
@@ -115,10 +125,52 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
     setSubjects(initialSubjects);
   };
   
+  // Load saved data for specific grade level
+  const loadSavedDataForGrade = (gradeLevel: string, academicYear: string, semester: string) => {
+    const storageKey = `pp5-basic-ป.${gradeLevel}-${academicYear}-${semester}`;
+    const saved = localStorage.getItem(storageKey);
+    
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        // Load saved basicInfo (homeTeachers, approvalDate, etc.)
+        if (data.basicInfo) {
+          setBasicInfo(prev => ({
+            ...prev,
+            ...data.basicInfo,
+            gradeLevel, // Keep the new grade level
+          }));
+        }
+        // Load saved subjects (including teacher assignments)
+        if (data.subjects && data.subjects.length > 0) {
+          setSubjects(data.subjects);
+          return true; // Data was loaded
+        }
+      } catch (e) {
+        console.error('Error loading saved data:', e);
+      }
+    }
+    return false; // No data found
+  };
+
   const handleGradeLevelChange = (newGradeLevel: string) => {
-    setBasicInfo(prev => ({ ...prev, gradeLevel: newGradeLevel }));
-    initializeSubjects(newGradeLevel);
-    toast.info(`อัพเดทรหัสวิชาสำหรับประถมศึกษาปีที่ ${newGradeLevel}`);
+    // First, try to load saved data for the new grade level
+    const dataLoaded = loadSavedDataForGrade(newGradeLevel, basicInfo.academicYear, basicInfo.semester);
+    
+    if (dataLoaded) {
+      toast.success(`โหลดข้อมูลที่บันทึกไว้ของประถมศึกษาปีที่ ${newGradeLevel}`);
+    } else {
+      // If no saved data, reset to default with new grade and clear homeroom teachers
+      setBasicInfo(prev => ({ 
+        ...prev, 
+        gradeLevel: newGradeLevel,
+        homeTeacher1: '',
+        homeTeacher2: '',
+        approvalDate: '',
+      }));
+      initializeSubjects(newGradeLevel);
+      toast.info(`อัพเดทรหัสวิชาสำหรับประถมศึกษาปีที่ ${newGradeLevel} (ยังไม่มีข้อมูลบันทึก)`);
+    }
   };
 
   const handleTeacherSelect = (teacher: Teacher) => {
