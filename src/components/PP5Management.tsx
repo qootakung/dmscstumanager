@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { generateAcademicYears, gradeOptions } from '@/utils/data';
 import BasicInfoEntry from './pp5/BasicInfoEntry';
+import PP5StudentInfo from './pp5/PP5StudentInfo';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -178,6 +179,18 @@ const PP5Management: React.FC = () => {
   if (activeSection === 'basic-info-basic-data') {
     return (
       <BasicInfoEntry
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show PP5StudentInfo when selected
+  if (activeSection === 'basic-info-student-info') {
+    return (
+      <PP5StudentInfo
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
