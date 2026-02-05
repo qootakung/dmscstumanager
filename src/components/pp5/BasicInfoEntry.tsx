@@ -46,12 +46,15 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
 }) => {
   // Extract grade number from selectedGrade (e.g., "ป.1" -> "1")
   const getGradeNumber = (grade: string) => grade.replace('ป.', '');
-  
-  const [basicInfo, setBasicInfo] = useState<PP5BasicInfo>({
-    gradeLevel: getGradeNumber(selectedGrade),
-    semester: selectedSemester,
+
+  const makeStorageKey = (gradeLevel: string, academicYear: string, semester: string) =>
+    `pp5-basic-ป.${gradeLevel}-${academicYear}-${semester}`;
+
+  const buildDefaultBasicInfo = (gradeLevel: string, semester: string, academicYear: string): PP5BasicInfo => ({
+    gradeLevel,
+    semester,
     room: '',
-    academicYear: selectedAcademicYear,
+    academicYear,
     approvalDate: '',
     homeTeacher1: '',
     homeTeacher2: '',
@@ -67,6 +70,10 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
     administratorName: '',
     administratorPosition: 'ผู้อำนวยการโรงเรียนบ้านดอนมูล',
   });
+  
+  const [basicInfo, setBasicInfo] = useState<PP5BasicInfo>(() =>
+    buildDefaultBasicInfo(getGradeNumber(selectedGrade), selectedSemester, selectedAcademicYear)
+  );
 
   const [subjects, setSubjects] = useState<SubjectInfo[]>([]);
   const [calendar] = useState<AcademicCalendar>(DEFAULT_CALENDAR);
@@ -74,31 +81,47 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
   const [currentTeacherField, setCurrentTeacherField] = useState<string>('');
   const [teachers, setTeachers] = useState<Teacher[]>([]);
 
-  useEffect(() => {
-    loadTeachers();
-    // Try to load saved data on initial mount
-    const gradeNum = getGradeNumber(selectedGrade);
-    const storageKey = `pp5-basic-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`;
+  const loadOrInitializeForContext = (gradeLevel: string, academicYear: string, semester: string) => {
+    const storageKey = makeStorageKey(gradeLevel, academicYear, semester);
     const saved = localStorage.getItem(storageKey);
-    
+
     if (saved) {
       try {
         const data = JSON.parse(saved);
-        if (data.basicInfo) {
-          setBasicInfo(prev => ({ ...prev, ...data.basicInfo }));
-        }
-        if (data.subjects && data.subjects.length > 0) {
+
+        const nextBasicInfo: PP5BasicInfo = {
+          ...buildDefaultBasicInfo(gradeLevel, semester, academicYear),
+          ...(data.basicInfo ?? {}),
+          // lock context to the key we loaded
+          gradeLevel,
+          semester,
+          academicYear,
+        };
+
+        setBasicInfo(nextBasicInfo);
+
+        if (data.subjects && Array.isArray(data.subjects) && data.subjects.length > 0) {
           setSubjects(data.subjects);
         } else {
-          initializeSubjects(gradeNum);
+          initializeSubjects(gradeLevel);
         }
+        return true;
       } catch (e) {
         console.error('Error loading saved data:', e);
-        initializeSubjects(gradeNum);
       }
-    } else {
-      initializeSubjects(gradeNum);
     }
+
+    // no saved data
+    setBasicInfo(buildDefaultBasicInfo(gradeLevel, semester, academicYear));
+    initializeSubjects(gradeLevel);
+    return false;
+  };
+
+  useEffect(() => {
+    loadTeachers();
+
+    const gradeLevel = getGradeNumber(selectedGrade);
+    loadOrInitializeForContext(gradeLevel, selectedAcademicYear, selectedSemester);
   }, [selectedGrade, selectedSemester, selectedAcademicYear]);
 
   const loadTeachers = async () => {
@@ -110,7 +133,8 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
     if (principal) {
       setBasicInfo(prev => ({
         ...prev,
-        administratorName: `${principal.firstName} ${principal.lastName}`,
+        // don't overwrite user's saved/typed value
+        administratorName: prev.administratorName || `${principal.firstName} ${principal.lastName}`,
       }));
     }
   };
@@ -125,52 +149,22 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
     setSubjects(initialSubjects);
   };
   
-  // Load saved data for specific grade level
-  const loadSavedDataForGrade = (gradeLevel: string, academicYear: string, semester: string) => {
-    const storageKey = `pp5-basic-ป.${gradeLevel}-${academicYear}-${semester}`;
-    const saved = localStorage.getItem(storageKey);
-    
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        // Load saved basicInfo (homeTeachers, approvalDate, etc.)
-        if (data.basicInfo) {
-          setBasicInfo(prev => ({
-            ...prev,
-            ...data.basicInfo,
-            gradeLevel, // Keep the new grade level
-          }));
-        }
-        // Load saved subjects (including teacher assignments)
-        if (data.subjects && data.subjects.length > 0) {
-          setSubjects(data.subjects);
-          return true; // Data was loaded
-        }
-      } catch (e) {
-        console.error('Error loading saved data:', e);
-      }
-    }
-    return false; // No data found
+  const handleGradeLevelChange = (newGradeLevel: string) => {
+    const loaded = loadOrInitializeForContext(newGradeLevel, basicInfo.academicYear, basicInfo.semester);
+    if (loaded) toast.success(`โหลดข้อมูลที่บันทึกไว้ของประถมศึกษาปีที่ ${newGradeLevel}`);
+    else toast.info(`ประถมศึกษาปีที่ ${newGradeLevel}: ยังไม่มีข้อมูลบันทึก`);
   };
 
-  const handleGradeLevelChange = (newGradeLevel: string) => {
-    // First, try to load saved data for the new grade level
-    const dataLoaded = loadSavedDataForGrade(newGradeLevel, basicInfo.academicYear, basicInfo.semester);
-    
-    if (dataLoaded) {
-      toast.success(`โหลดข้อมูลที่บันทึกไว้ของประถมศึกษาปีที่ ${newGradeLevel}`);
-    } else {
-      // If no saved data, reset to default with new grade and clear homeroom teachers
-      setBasicInfo(prev => ({ 
-        ...prev, 
-        gradeLevel: newGradeLevel,
-        homeTeacher1: '',
-        homeTeacher2: '',
-        approvalDate: '',
-      }));
-      initializeSubjects(newGradeLevel);
-      toast.info(`อัพเดทรหัสวิชาสำหรับประถมศึกษาปีที่ ${newGradeLevel} (ยังไม่มีข้อมูลบันทึก)`);
-    }
+  const handleSemesterChange = (newSemester: string) => {
+    const loaded = loadOrInitializeForContext(basicInfo.gradeLevel, basicInfo.academicYear, newSemester);
+    if (loaded) toast.success(`โหลดข้อมูล ภาคเรียนที่ ${newSemester}`);
+    else toast.info(`ภาคเรียนที่ ${newSemester}: ยังไม่มีข้อมูลบันทึก`);
+  };
+
+  const handleAcademicYearChange = (newAcademicYear: string) => {
+    const loaded = loadOrInitializeForContext(basicInfo.gradeLevel, newAcademicYear, basicInfo.semester);
+    if (loaded) toast.success(`โหลดข้อมูล ปีการศึกษา ${newAcademicYear}`);
+    else toast.info(`ปีการศึกษา ${newAcademicYear}: ยังไม่มีข้อมูลบันทึก`);
   };
 
   const handleTeacherSelect = (teacher: Teacher) => {
@@ -198,14 +192,15 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
 
   const handleSave = () => {
     // Save to localStorage for now
+    const storageKey = makeStorageKey(basicInfo.gradeLevel, basicInfo.academicYear, basicInfo.semester);
     const data = {
       basicInfo,
       subjects,
       calendar,
       savedAt: new Date().toISOString(),
     };
-    localStorage.setItem(`pp5-basic-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`, JSON.stringify(data));
-    toast.success('บันทึกข้อมูลพื้นฐานเรียบร้อยแล้ว');
+    localStorage.setItem(storageKey, JSON.stringify(data));
+    toast.success(`บันทึกข้อมูลพื้นฐานแล้ว (ป.${basicInfo.gradeLevel}/${basicInfo.academicYear}/ภาค ${basicInfo.semester})`);
   };
 
   const updateSubject = (id: string, updates: Partial<SubjectInfo>) => {
@@ -228,7 +223,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
               กรอกข้อมูลพื้นฐาน ปพ.5
             </h2>
             <p className="text-muted-foreground">
-              ประถมศึกษาปีที่ {basicInfo.gradeLevel} ภาคเรียนที่ {basicInfo.semester} ปีการศึกษา {selectedAcademicYear}
+                ประถมศึกษาปีที่ {basicInfo.gradeLevel} ภาคเรียนที่ {basicInfo.semester} ปีการศึกษา {basicInfo.academicYear}
             </p>
           </div>
         </div>
@@ -274,7 +269,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
                   <Label className="text-pink-600 font-medium">ภาคเรียนที่</Label>
                   <Select 
                     value={basicInfo.semester} 
-                    onValueChange={(v) => setBasicInfo(prev => ({ ...prev, semester: v }))}
+                    onValueChange={handleSemesterChange}
                   >
                     <SelectTrigger className="bg-pink-50 border-pink-200">
                       <SelectValue />
@@ -291,7 +286,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
                   <Label className="text-pink-600 font-medium">ปีการศึกษา</Label>
                   <Select 
                     value={basicInfo.academicYear} 
-                    onValueChange={(v) => setBasicInfo(prev => ({ ...prev, academicYear: v }))}
+                    onValueChange={handleAcademicYearChange}
                   >
                     <SelectTrigger className="bg-pink-50 border-pink-200">
                       <SelectValue />
