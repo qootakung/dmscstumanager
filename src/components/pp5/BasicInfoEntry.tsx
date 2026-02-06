@@ -265,21 +265,6 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">ภาคเรียนที่</Label>
-                  <Select 
-                    value={basicInfo.semester} 
-                    onValueChange={handleSemesterChange}
-                  >
-                    <SelectTrigger className="bg-pink-50 border-pink-200">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
                 {/* Row 2 - ปีการศึกษา and วันที่อนุมัติผลการเรียน */}
                 <div className="space-y-2">
@@ -407,19 +392,6 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
 
                 <Separator className="col-span-full my-2" />
 
-                <div className="space-y-2">
-                  <Label className="text-pink-600 font-medium">หัวหน้าระดับประถมศึกษา</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      value={basicInfo.supervisor} 
-                      onChange={(e) => setBasicInfo(prev => ({ ...prev, supervisor: e.target.value }))}
-                      className="bg-cyan-50 border-cyan-200 flex-1"
-                    />
-                    <Button variant="outline" size="icon" onClick={() => openTeacherDialog('supervisor')}>
-                      <UserPlus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
                 <div className="space-y-2">
                   <Label className="text-pink-600 font-medium">ฝ่ายวัดผลประเมินผล</Label>
                   <div className="flex gap-2">
