@@ -70,9 +70,7 @@ export const useStudentReport = () => {
     if (reportOptions.classLevel !== 'all') {
       filtered = filtered.filter(student => student.grade === reportOptions.classLevel);
     }
-    if (reportOptions.semester !== 'all') {
-      filtered = filtered.filter(student => student.semester === reportOptions.semester);
-    }
+    // Don't filter by semester - students attend both semesters in the same academic year
     
     // Sort by studentId: 3 digits first, then 4 digits
     filtered.sort((a, b) => {

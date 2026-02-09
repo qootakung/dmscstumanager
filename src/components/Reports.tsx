@@ -75,10 +75,10 @@ const Reports: React.FC = () => {
     return students.filter(student => {
       const matchesClass = reportOptions.classLevel === 'all' || student.grade === reportOptions.classLevel;
       const matchesYear = student.academicYear === reportOptions.academicYear;
-      const matchesSemester = reportOptions.semester === 'all' || student.semester === reportOptions.semester;
-      return matchesClass && matchesYear && matchesSemester;
+      // Don't filter by semester - students attend both semesters in the same academic year
+      return matchesClass && matchesYear;
     });
-  }, [students, reportOptions.classLevel, reportOptions.academicYear, reportOptions.semester]);
+  }, [students, reportOptions.classLevel, reportOptions.academicYear]);
 
   const handleGenerateExcel = () => {
     if (isPaginatedMode) {
