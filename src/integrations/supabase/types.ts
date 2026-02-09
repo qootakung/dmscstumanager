@@ -77,6 +77,50 @@ export type Database = {
         }
         Relationships: []
       }
+      attendance_records: {
+        Row: {
+          academic_year: string
+          attendance_date: string
+          created_at: string
+          grade: string
+          id: string
+          semester: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          attendance_date: string
+          created_at?: string
+          grade: string
+          id?: string
+          semester?: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          attendance_date?: string
+          created_at?: string
+          grade?: string
+          id?: string
+          semester?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competency_assessments: {
         Row: {
           academic_year: string

@@ -31,6 +31,7 @@ import {
 import { generateAcademicYears, gradeOptions } from '@/utils/data';
 import BasicInfoEntry from './pp5/BasicInfoEntry';
 import PP5StudentInfo from './pp5/PP5StudentInfo';
+import PP5Attendance from './pp5/PP5Attendance';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -191,6 +192,18 @@ const PP5Management: React.FC = () => {
   if (activeSection === 'basic-info-student-info') {
     return (
       <PP5StudentInfo
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show PP5Attendance when selected
+  if (activeSection === 'basic-info-study-time') {
+    return (
+      <PP5Attendance
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
