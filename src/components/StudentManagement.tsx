@@ -62,9 +62,9 @@ const StudentManagement: React.FC = () => {
     loadStudents();
   }, []);
 
-  // Filter students by selected semester
+  // Show all students for the academic year - students attend both semesters
   useEffect(() => {
-    const filtered = students.filter(s => s.semester === selectedSemester);
+    const filtered = students;
     setFilteredStudents(filtered);
   }, [students, selectedSemester]);
 
