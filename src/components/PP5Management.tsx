@@ -32,6 +32,7 @@ import { generateAcademicYears, gradeOptions } from '@/utils/data';
 import BasicInfoEntry from './pp5/BasicInfoEntry';
 import PP5StudentInfo from './pp5/PP5StudentInfo';
 import PP5Attendance from './pp5/PP5Attendance';
+import PP5AttendanceHoursSummary from './pp5/PP5AttendanceHoursSummary';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -200,7 +201,19 @@ const PP5Management: React.FC = () => {
     );
   }
 
-  // Show PP5Attendance when selected
+  // Show PP5AttendanceHoursSummary when selected
+  if (activeSection === 'basic-info-study-time-hour') {
+    return (
+      <PP5AttendanceHoursSummary
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+
   if (activeSection === 'basic-info-study-time') {
     return (
       <PP5Attendance
