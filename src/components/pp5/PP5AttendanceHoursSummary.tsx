@@ -103,8 +103,10 @@ const PP5AttendanceHoursSummary: React.FC<PP5AttendanceHoursSummaryProps> = ({
     const loadStudents = async () => {
       setLoading(true);
       const allStudents = await getStudents();
+      const semesterFilter = reportType === 'semester1' ? '1' : reportType === 'semester2' ? '2' : null;
       const filtered = allStudents.filter(
-        s => s.grade === currentGrade && s.academicYear === selectedAcademicYear
+        s => s.grade === currentGrade && s.academicYear === selectedAcademicYear &&
+          (semesterFilter ? s.semester === semesterFilter : true)
       );
       filtered.sort((a, b) => {
         const aId = a.studentId || '';
@@ -119,7 +121,7 @@ const PP5AttendanceHoursSummary: React.FC<PP5AttendanceHoursSummaryProps> = ({
       setLoading(false);
     };
     loadStudents();
-  }, [currentGrade, selectedAcademicYear]);
+  }, [currentGrade, selectedAcademicYear, reportType]);
 
   // Load all attendance data for the relevant months
   useEffect(() => {

@@ -61,7 +61,8 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
       const allStudents = await getStudents();
       const filtered = allStudents.filter(s =>
         s.grade === currentGrade &&
-        s.academicYear === selectedAcademicYear
+        s.academicYear === selectedAcademicYear &&
+        s.semester === selectedSemester
       );
       filtered.sort((a, b) => {
         const aId = a.studentId || '';
@@ -76,7 +77,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
       setLoading(false);
     };
     loadStudents();
-  }, [currentGrade, selectedAcademicYear]);
+  }, [currentGrade, selectedAcademicYear, selectedSemester]);
 
   // Load attendance data for current month
   useEffect(() => {
