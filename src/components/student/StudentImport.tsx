@@ -11,11 +11,13 @@ import ImportUploader from './import/ImportUploader';
 import ImportResults from './import/ImportResults';
 import ImportInstructions from './import/ImportInstructions';
 import { ImportResult } from './import/types';
+import { generateAcademicYears } from '@/utils/data';
 
 const StudentImport: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<string>('1');
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('2568');
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -35,7 +37,7 @@ const StudentImport: React.FC = () => {
     setImportResult(null);
 
     try {
-      const studentsData = await importFromExcel(file);
+      const studentsData = await importFromExcel(file, selectedAcademicYear);
       
       let successCount = 0;
       let failedCount = 0;
@@ -45,7 +47,8 @@ const StudentImport: React.FC = () => {
         try {
           const studentData = {
             ...studentsData[i],
-            semester: selectedSemester
+            semester: selectedSemester,
+            academicYear: selectedAcademicYear
           };
           
           if (!studentData.citizenId || !studentData.studentId || !studentData.firstNameTh || !studentData.lastNameTh) {
@@ -139,17 +142,32 @@ const StudentImport: React.FC = () => {
             อัปโหลดไฟล์ Excel เพื่อนำเข้าข้อมูลนักเรียนจำนวนมาก
           </p>
           
-          <div className="space-y-2">
-            <Label htmlFor="semester">ภาคเรียน</Label>
-            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-              <SelectTrigger id="semester">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
-                <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap gap-4">
+            <div className="space-y-2 flex-1 min-w-[200px]">
+              <Label htmlFor="academicYear">ปีการศึกษา</Label>
+              <Select value={selectedAcademicYear} onValueChange={setSelectedAcademicYear}>
+                <SelectTrigger id="academicYear">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {generateAcademicYears().map((year) => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 flex-1 min-w-[200px]">
+              <Label htmlFor="semester">ภาคเรียน</Label>
+              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                <SelectTrigger id="semester">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                  <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <ImportTemplate onDownload={downloadTemplate} />
