@@ -63,7 +63,7 @@ export const exportStudentsForHealthImport = (students: Student[]) => {
   XLSX.writeFile(workbook, `template-health-import.xlsx`);
 };
 
-export const importFromExcel = (file: File): Promise<any[]> => {
+export const importFromExcel = (file: File, academicYear?: string): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -148,8 +148,8 @@ export const importFromExcel = (file: File): Promise<any[]> => {
             province: row['จังหวัด (ที่อยู่ปัจจุบัน)'] || '',
             postalCode: row['รหัสไปรษณีย์ (ที่อยู่ปัจจุบัน)'] || '',
             
-            // Set default academic year to current year
-            academicYear: (new Date().getFullYear() + 543).toString(),
+            // Use provided academic year or fall back to current year
+            academicYear: academicYear || (new Date().getFullYear() + 543).toString(),
           };
           
           return student;
