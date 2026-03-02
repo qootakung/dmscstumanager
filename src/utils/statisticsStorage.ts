@@ -23,8 +23,14 @@ export const getStudentStatistics = async (semester?: string) => {
   const students: Student[] = await getStudents();
   const currentAcademicYear = getCurrentAcademicYear();
   
-  // Filter by current academic year only - students attend both semesters
-  let filteredStudents = students.filter(s => s.academicYear === currentAcademicYear);
+  // Filter by current academic year and semester
+  let filteredStudents = students.filter(s => {
+    const matchYear = s.academicYear === currentAcademicYear;
+    if (semester) {
+      return matchYear && s.semester === semester;
+    }
+    return matchYear;
+  });
   
   const gradeStats = gradeOptions.reduce((acc, grade) => {
     acc[grade] = filteredStudents.filter(s => s.grade === grade).length;
