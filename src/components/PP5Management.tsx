@@ -33,6 +33,7 @@ import BasicInfoEntry from './pp5/BasicInfoEntry';
 import PP5StudentInfo from './pp5/PP5StudentInfo';
 import PP5Attendance from './pp5/PP5Attendance';
 import PP5AttendanceHoursSummary from './pp5/PP5AttendanceHoursSummary';
+import CurriculumIndicators from './pp5/CurriculumIndicators';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -220,6 +221,17 @@ const PP5Management: React.FC = () => {
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+  // Show Curriculum Indicators when selected
+  const indicatorMatch = activeSection?.match(/^curriculum-indicators-indicator-p(\d)$/);
+  if (indicatorMatch) {
+    const grade = `ป.${indicatorMatch[1]}`;
+    return (
+      <CurriculumIndicators
+        gradeLevel={grade}
         onBack={handleBack}
       />
     );
