@@ -34,6 +34,7 @@ import PP5StudentInfo from './pp5/PP5StudentInfo';
 import PP5Attendance from './pp5/PP5Attendance';
 import PP5AttendanceHoursSummary from './pp5/PP5AttendanceHoursSummary';
 import CurriculumIndicators from './pp5/CurriculumIndicators';
+import ScoreRatioConfig from './pp5/ScoreRatioConfig';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -225,6 +226,18 @@ const PP5Management: React.FC = () => {
       />
     );
   }
+  // Show Score Ratio Config when selected
+  if (activeSection === 'basic-info-score-ratio') {
+    return (
+      <ScoreRatioConfig
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
   // Show Curriculum Indicators when selected
   const indicatorMatch = activeSection?.match(/^curriculum-indicators-indicator-p(\d)$/);
   if (indicatorMatch) {
