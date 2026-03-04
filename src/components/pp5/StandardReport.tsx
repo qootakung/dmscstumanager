@@ -215,6 +215,9 @@ const StandardReport: React.FC<StandardReportProps> = ({
       return { name: s.strandName, strandIndex: s.strandIndex, weight: strandWeight, stdCodes, standards: s.standards };
     });
 
+    // Build per-standard columns grouped by strand for header spanning
+    const allStandards = columnGroupsWithWeights.groups;
+
     let page1Html = `
       <div class="page">
         <div class="title-box">${title}</div>
@@ -224,15 +227,15 @@ const StandardReport: React.FC<StandardReportProps> = ({
             <tr>
               <th rowspan="3" style="width:25px">ที่</th>
               <th rowspan="3" style="min-width:100px">ชื่อ-นามสกุล</th>
-              ${strandHeaders.map(s => `<th>สาระที่ ${s.strandIndex}</th>`).join('')}
+              ${strandHeaders.map(s => `<th colspan="${s.standards.length}">สาระที่ ${s.strandIndex}</th>`).join('')}
               <th rowspan="2">ระหว่าง<br/>ปี</th>
               <th rowspan="2">สอบ<br/>ปลายปี</th>
             </tr>
             <tr>
-              ${strandHeaders.map(s => `<th style="font-size:9pt">${s.standards.map(st => st.standardCode).join(', ')}</th>`).join('')}
+              ${allStandards.map(st => `<th style="font-size:9pt">${st.standardCode}</th>`).join('')}
             </tr>
             <tr>
-              ${strandHeaders.map(s => `<th>คะแนนเต็ม<br/>${s.weight.toFixed(1)}</th>`).join('')}
+              ${allStandards.map(st => `<th>${st.standardWeight.toFixed(1)}</th>`).join('')}
               <th>${midYearWeight}</th>
               <th>${endYearWeight}</th>
             </tr>
@@ -245,9 +248,9 @@ const StandardReport: React.FC<StandardReportProps> = ({
                 <tr class="${idx % 2 === 0 ? 'even' : ''}">
                   <td class="text-center">${idx + 1}</td>
                   <td class="name-cell">${student.titleTh || ''}${student.firstNameTh || ''} ${student.lastNameTh || ''}</td>
-                  ${strandHeaders.map(s => {
-                    const strandScore = parseFloat(calcStrandTotal(student.id, s.standards).toFixed(1));
-                    return `<td class="text-center">${strandScore.toFixed(1)}</td>`;
+                  ${allStandards.map(st => {
+                    const score = parseFloat(calcStandardSummary(student.id, st).toFixed(1));
+                    return `<td class="text-center">${score.toFixed(1)}</td>`;
                   }).join('')}
                   <td class="text-center font-bold">${midYear.toFixed(1)}</td>
                   <td class="text-center">${endYear}</td>
@@ -385,7 +388,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
                       <th rowSpan={3} className="border border-gray-300 px-2 py-1 text-center w-8">ที่</th>
                       <th rowSpan={3} className="border border-gray-300 px-2 py-1 text-left min-w-[120px]">ชื่อ-นามสกุล</th>
                       {strandSummaries.map((s, i) => (
-                        <th key={i} className="border border-gray-300 px-2 py-1 text-center bg-blue-100 text-blue-800">
+                        <th key={i} colSpan={s.standards.length} className="border border-gray-300 px-2 py-1 text-center bg-blue-100 text-blue-800">
                           สาระที่ {s.strandIndex}
                         </th>
                       ))}
@@ -393,17 +396,16 @@ const StandardReport: React.FC<StandardReportProps> = ({
                       <th rowSpan={3} className="border border-gray-300 px-2 py-1 text-center bg-orange-100 text-orange-800 w-14">สอบ<br/>ปลายปี</th>
                     </tr>
                     <tr className="bg-cyan-50">
-                      {strandSummaries.map((s, i) => (
+                      {columnGroupsWithWeights.groups.map((st, i) => (
                         <th key={i} className="border border-gray-300 px-1 py-1 text-center text-[10px]">
-                          {s.standards.map(st => st.standardCode).join(', ')}
+                          {st.standardCode}
                         </th>
                       ))}
                     </tr>
                     <tr className="bg-gray-100">
-                      {strandSummaries.map((s, i) => {
-                        const weight = s.standards.reduce((sum, st) => sum + st.standardWeight, 0);
-                        return <th key={i} className="border border-gray-300 px-1 py-1 text-center text-[10px]">{weight.toFixed(1)}</th>;
-                      })}
+                      {columnGroupsWithWeights.groups.map((st, i) => (
+                        <th key={i} className="border border-gray-300 px-1 py-1 text-center text-[10px]">{st.standardWeight.toFixed(1)}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -416,11 +418,11 @@ const StandardReport: React.FC<StandardReportProps> = ({
                           <td className="border border-gray-300 px-1 py-0.5 whitespace-nowrap">
                             {student.titleTh}{student.firstNameTh} {student.lastNameTh}
                           </td>
-                          {strandSummaries.map((s, i) => {
-                            const strandScore = parseFloat(calcStrandTotal(student.id, s.standards).toFixed(1));
+                          {columnGroupsWithWeights.groups.map((st, i) => {
+                            const score = parseFloat(calcStandardSummary(student.id, st).toFixed(1));
                             return (
                               <td key={i} className="border border-gray-300 px-1 py-0.5 text-center">
-                                {strandScore.toFixed(1)}
+                                {score.toFixed(1)}
                               </td>
                             );
                           })}
