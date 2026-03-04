@@ -36,6 +36,7 @@ import PP5AttendanceHoursSummary from './pp5/PP5AttendanceHoursSummary';
 import CurriculumIndicators from './pp5/CurriculumIndicators';
 import ScoreRatioConfig from './pp5/ScoreRatioConfig';
 import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
+import StandardReport from './pp5/StandardReport';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -245,6 +246,21 @@ const PP5Management: React.FC = () => {
     const subjectKey = scoreEntryMatch[1];
     return (
       <IndicatorScoreEntry
+        subjectMenuId={subjectKey}
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Standard Report when selected
+  const reportMatch = activeSection?.match(/^learning-reports-report-(.+)$/);
+  if (reportMatch) {
+    const subjectKey = reportMatch[1];
+    return (
+      <StandardReport
         subjectMenuId={subjectKey}
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
