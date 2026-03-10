@@ -328,6 +328,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                   }).join('')}
                 </tr>
               `).join('')}
+              ${generateEmptyRowsHtml(students.length, pageGroups.reduce((sum, g) => sum + g.indicators.length + 1, 0) + 2, true)}
             </tbody>
           </table>
         </div>
