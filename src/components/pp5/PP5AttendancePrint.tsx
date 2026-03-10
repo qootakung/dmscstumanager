@@ -176,6 +176,28 @@ const PP5AttendancePrint: React.FC<PP5AttendancePrintProps> = ({
               })}
             </tr>
           ))}
+          {/* Empty rows to fill A4 */}
+          {Array.from({ length: getEmptyRowData(students.length).count }).map((_, i) => (
+            <tr key={`empty-${i}`}>
+              <td style={{ border: '1px solid #000', padding: '1px 4px', textAlign: 'center', fontSize: '12pt', color: '#ccc' }}>
+                {students.length + i + 1}
+              </td>
+              <td style={{ border: '1px solid #000', padding: '1px 4px', fontSize: '12pt' }}>&nbsp;</td>
+              <td style={{ border: '1px solid #000', padding: '1px', textAlign: 'center' }}></td>
+              {dayColumns.map(({ day, weekend, holiday }) => (
+                <td
+                  key={day}
+                  className={weekend ? 'weekend-col' : holiday ? 'holiday-col' : ''}
+                  style={{
+                    border: '1px solid #000',
+                    padding: '0',
+                    textAlign: 'center',
+                    backgroundColor: weekend ? '#e0e0e0' : holiday ? '#ffebee' : undefined,
+                  }}
+                ></td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
