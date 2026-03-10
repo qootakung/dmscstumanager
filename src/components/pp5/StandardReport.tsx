@@ -6,6 +6,7 @@ import { ArrowLeft, Printer } from 'lucide-react';
 import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
+import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
 
 interface StandardReportProps {
   subjectMenuId: string;

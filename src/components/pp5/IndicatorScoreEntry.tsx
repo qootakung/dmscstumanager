@@ -8,6 +8,7 @@ import { allSubjectGroups, SubjectGroup } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
 import { toast } from 'sonner';
+import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
 
 // ============ Types ============
 interface IndicatorScoreEntryProps {
