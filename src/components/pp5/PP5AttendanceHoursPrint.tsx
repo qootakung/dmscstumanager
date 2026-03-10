@@ -125,11 +125,20 @@ const PP5AttendanceHoursPrint: React.FC<PP5AttendanceHoursPrintProps> = ({
                 <td style={tdStyle({ textAlign: 'center' as const, fontWeight: 'bold' })}>{pct}</td>
               </tr>
             );
+          {/* Empty rows to fill A4 */}
+          {Array.from({ length: getEmptyRowData(students.length).count }).map((_, i) => {
+            const totalCols = 4 + monthSummaries.length * 4 + 5;
+            return (
+              <tr key={`empty-${i}`}>
+                <td style={tdStyle({ textAlign: 'center' as const, color: '#ccc' })}>{students.length + i + 1}</td>
+                <td style={tdStyle({ whiteSpace: 'nowrap' as const })}>&nbsp;</td>
+                {Array.from({ length: totalCols - 2 }).map((_, j) => (
+                  <td key={j} style={tdStyle({ textAlign: 'center' as const })}></td>
+                ))}
+              </tr>
+            );
           })}
         </tbody>
-      </table>
-    );
-  };
 
   const renderFullYearReport = () => {
     const sem1Months = getSemesterMonths('1', academicYear);
