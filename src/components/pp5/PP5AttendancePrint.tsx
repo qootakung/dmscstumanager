@@ -1,6 +1,7 @@
 
 import React from 'react';
 import type { Student } from '@/types/student';
+import { getEmptyRowData } from '@/utils/pp5PrintUtils';
 
 interface DayColumn {
   day: number;
