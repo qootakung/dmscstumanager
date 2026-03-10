@@ -37,6 +37,7 @@ import CurriculumIndicators from './pp5/CurriculumIndicators';
 import ScoreRatioConfig from './pp5/ScoreRatioConfig';
 import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
 import StandardReport from './pp5/StandardReport';
+import AchievementSummaryReport from './pp5/AchievementSummaryReport';
 
 // Types for PP5 system
 interface PP5MenuCategory {
