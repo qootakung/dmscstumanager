@@ -372,6 +372,7 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
                   <td></td>
                 </tr>
                 ${gradeRows}
+                ${gradeEmptyRows}
               </tbody>
             </table>
           </div>
