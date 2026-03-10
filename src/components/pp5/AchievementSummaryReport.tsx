@@ -271,6 +271,8 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
       </tr>`;
     }).join('');
 
+    const gradeEmptyRows = generateEmptyRowsHtml(students.length, subjectResults.length + 5, true);
+
     // Page 2: Scores  
     const maxScoreRow = subjectResults.map(() => `<td class="text-center">100</td>`).join('');
     
