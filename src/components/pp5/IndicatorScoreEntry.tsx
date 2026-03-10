@@ -415,6 +415,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                 </tr>
               `;
             }).join('')}
+            ${generateEmptyRowsHtml(students.length, 4, true)}
           </tbody>
         </table>
       </div>
