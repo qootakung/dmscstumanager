@@ -256,6 +256,18 @@ const PP5Management: React.FC = () => {
     );
   }
 
+  // Show Achievement Summary Report
+  if (activeSection === 'learning-reports-summary-result') {
+    return (
+      <AchievementSummaryReport
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
   // Show Standard Report when selected
   const reportMatch = activeSection?.match(/^learning-reports-report-(.+)$/);
   if (reportMatch) {
