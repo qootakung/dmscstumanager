@@ -6,6 +6,7 @@ import { ArrowLeft, Printer } from 'lucide-react';
 import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
+import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
 
 interface StandardReportProps {
   subjectMenuId: string;
@@ -257,6 +258,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
                 </tr>
               `;
             }).join('')}
+            ${generateEmptyRowsHtml(students.length, allStandards.length + 4, true)}
           </tbody>
         </table>
       </div>
@@ -299,6 +301,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
                 </tr>
               `;
             }).join('')}
+            ${generateEmptyRowsHtml(students.length, 6, true)}
           </tbody>
         </table>
       </div>

@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Student } from '@/types/student';
 import type { MonthSummary, StudentMonthAttendance, ReportType } from './PP5AttendanceHoursSummary';
+import { getEmptyRowData } from '@/utils/pp5PrintUtils';
 import { getSemesterMonths, getThaiMonthName } from '@/utils/thaiHolidays';
 
 interface ThaiHoliday {
@@ -125,6 +126,19 @@ const PP5AttendanceHoursPrint: React.FC<PP5AttendanceHoursPrintProps> = ({
               </tr>
             );
           })}
+          {/* Empty rows to fill A4 */}
+          {Array.from({ length: getEmptyRowData(students.length).count }).map((_, i) => {
+            const totalCols = 4 + monthSummaries.length * 4 + 5;
+            return (
+              <tr key={`empty-${i}`}>
+                <td style={tdStyle({ textAlign: 'center' as const, color: '#ccc' })}>{students.length + i + 1}</td>
+                <td style={tdStyle({ whiteSpace: 'nowrap' as const })}>&nbsp;</td>
+                {Array.from({ length: totalCols - 2 }).map((_, j) => (
+                  <td key={j} style={tdStyle({ textAlign: 'center' as const })}></td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     );
@@ -216,6 +230,16 @@ const PP5AttendanceHoursPrint: React.FC<PP5AttendanceHoursPrintProps> = ({
               </tr>
             );
           })}
+          {/* Empty rows to fill A4 */}
+          {Array.from({ length: getEmptyRowData(students.length).count }).map((_, i) => (
+            <tr key={`empty-${i}`}>
+              <td style={tdStyle({ textAlign: 'center' as const, color: '#ccc' })}>{students.length + i + 1}</td>
+              <td style={tdStyle({ whiteSpace: 'nowrap' as const })}>&nbsp;</td>
+              {Array.from({ length: 16 }).map((_, j) => (
+                <td key={j} style={tdStyle({ textAlign: 'center' as const })}></td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     );

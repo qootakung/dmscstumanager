@@ -8,6 +8,7 @@ import { allSubjectGroups, SubjectGroup } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
 import { toast } from 'sonner';
+import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
 
 // ============ Types ============
 interface IndicatorScoreEntryProps {
@@ -327,6 +328,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                   }).join('')}
                 </tr>
               `).join('')}
+              ${generateEmptyRowsHtml(students.length, pageGroups.reduce((sum, g) => sum + g.indicators.length + 1, 0) + 2, true)}
             </tbody>
           </table>
         </div>
@@ -373,6 +375,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                 </tr>
               `;
             }).join('')}
+            ${generateEmptyRowsHtml(students.length, 6, true)}
           </tbody>
         </table>
       </div>
@@ -412,6 +415,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                 </tr>
               `;
             }).join('')}
+            ${generateEmptyRowsHtml(students.length, 4, true)}
           </tbody>
         </table>
       </div>

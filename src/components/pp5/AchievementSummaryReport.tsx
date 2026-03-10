@@ -6,6 +6,7 @@ import { ArrowLeft, Printer } from 'lucide-react';
 import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
+import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
 
 interface AchievementSummaryReportProps {
   selectedGrade: string;
@@ -270,6 +271,8 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
       </tr>`;
     }).join('');
 
+    const gradeEmptyRows = generateEmptyRowsHtml(students.length, subjectResults.length + 5, true);
+
     // Page 2: Scores  
     const maxScoreRow = subjectResults.map(() => `<td class="text-center">100</td>`).join('');
     
@@ -285,6 +288,8 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
         <td class="text-center">${summary.scoreRank}</td>
       </tr>`;
     }).join('');
+
+    const scoreEmptyRows = generateEmptyRowsHtml(students.length, subjectResults.length + 5, true);
 
     const avgRow = subjectScoreAverages.map(a => `<td class="text-center font-bold">${a.toFixed(1)}</td>`).join('');
     const totalScoreAvg = subjectScoreAverages.length > 0 
@@ -367,6 +372,7 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
                   <td></td>
                 </tr>
                 ${gradeRows}
+                ${gradeEmptyRows}
               </tbody>
             </table>
           </div>
@@ -397,6 +403,7 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
                   <td></td>
                 </tr>
                 ${scoreRows}
+                ${scoreEmptyRows}
                 <tr style="font-weight:bold; background:#e2e8f0">
                   <td colspan="3" class="text-center">คะแนนเฉลี่ย</td>
                   ${avgRow}
