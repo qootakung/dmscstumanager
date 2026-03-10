@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Student } from '@/types/student';
 import type { MonthSummary, StudentMonthAttendance, ReportType } from './PP5AttendanceHoursSummary';
+import { getEmptyRowData } from '@/utils/pp5PrintUtils';
 import { getSemesterMonths, getThaiMonthName } from '@/utils/thaiHolidays';
 
 interface ThaiHoliday {

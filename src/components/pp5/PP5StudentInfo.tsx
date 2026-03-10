@@ -301,9 +301,21 @@ const PP5StudentInfo: React.FC<PP5StudentInfoProps> = ({
                <td className="border border-black px-2 py-1 text-center">{student.citizenId}</td>
                <td className="border border-black px-2 py-1 text-center">{calculateAge(student.birthDate)}</td>
                <td className="border border-black px-2 py-1 text-center">{formatBirthDate(student.birthDate)}</td>
-             </tr>
-           ))}
-         </tbody>
+              </tr>
+            ))}
+            {/* Empty rows to fill A4 */}
+            {Array.from({ length: getEmptyRowData(students.length).count }).map((_, i) => (
+              <tr key={`empty-${i}`}>
+                <td className="border border-black px-2 py-1 text-center" style={{ color: '#ccc' }}>{students.length + i + 1}</td>
+                <td className="border border-black px-2 py-1 text-center">&nbsp;</td>
+                <td className="border border-black px-2 py-1">&nbsp;</td>
+                <td className="border border-black px-2 py-1 text-center">&nbsp;</td>
+                <td className="border border-black px-2 py-1 text-center">&nbsp;</td>
+                <td className="border border-black px-2 py-1 text-center">&nbsp;</td>
+                <td className="border border-black px-2 py-1 text-center">&nbsp;</td>
+              </tr>
+            ))}
+          </tbody>
        </table>
      </div>
    );
