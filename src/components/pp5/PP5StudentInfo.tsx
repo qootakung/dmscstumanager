@@ -6,6 +6,7 @@ import { getStudents } from '@/utils/studentStorage';
 import type { Student } from '@/types/student';
 import { calculateAge, formatBirthDate } from '@/utils/studentReportUtils';
 import { createRoot } from 'react-dom/client';
+import { getEmptyRowData } from '@/utils/pp5PrintUtils';
 import { toast } from '@/components/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
