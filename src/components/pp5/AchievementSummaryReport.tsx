@@ -289,6 +289,8 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
       </tr>`;
     }).join('');
 
+    const scoreEmptyRows = generateEmptyRowsHtml(students.length, subjectResults.length + 5, true);
+
     const avgRow = subjectScoreAverages.map(a => `<td class="text-center font-bold">${a.toFixed(1)}</td>`).join('');
     const totalScoreAvg = subjectScoreAverages.length > 0 
       ? (subjectScoreAverages.reduce((a, b) => a + b, 0) / subjectScoreAverages.length).toFixed(1) 
