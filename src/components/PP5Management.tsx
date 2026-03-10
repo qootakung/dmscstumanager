@@ -37,6 +37,7 @@ import CurriculumIndicators from './pp5/CurriculumIndicators';
 import ScoreRatioConfig from './pp5/ScoreRatioConfig';
 import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
 import StandardReport from './pp5/StandardReport';
+import AchievementSummaryReport from './pp5/AchievementSummaryReport';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -247,6 +248,18 @@ const PP5Management: React.FC = () => {
     return (
       <IndicatorScoreEntry
         subjectMenuId={subjectKey}
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Achievement Summary Report
+  if (activeSection === 'learning-reports-summary-result') {
+    return (
+      <AchievementSummaryReport
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
