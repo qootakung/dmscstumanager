@@ -230,6 +230,16 @@ const PP5AttendanceHoursPrint: React.FC<PP5AttendanceHoursPrintProps> = ({
               </tr>
             );
           })}
+          {/* Empty rows to fill A4 */}
+          {Array.from({ length: getEmptyRowData(students.length).count }).map((_, i) => (
+            <tr key={`empty-${i}`}>
+              <td style={tdStyle({ textAlign: 'center' as const, color: '#ccc' })}>{students.length + i + 1}</td>
+              <td style={tdStyle({ whiteSpace: 'nowrap' as const })}>&nbsp;</td>
+              {Array.from({ length: 16 }).map((_, j) => (
+                <td key={j} style={tdStyle({ textAlign: 'center' as const })}></td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     );
