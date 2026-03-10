@@ -258,6 +258,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
                 </tr>
               `;
             }).join('')}
+            ${generateEmptyRowsHtml(students.length, allStandards.length + 4, true)}
           </tbody>
         </table>
       </div>
