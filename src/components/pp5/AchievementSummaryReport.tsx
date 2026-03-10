@@ -403,6 +403,7 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
                   <td></td>
                 </tr>
                 ${scoreRows}
+                ${scoreEmptyRows}
                 <tr style="font-weight:bold; background:#e2e8f0">
                   <td colspan="3" class="text-center">คะแนนเฉลี่ย</td>
                   ${avgRow}
