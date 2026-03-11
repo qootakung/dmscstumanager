@@ -269,7 +269,18 @@ const PP5Management: React.FC = () => {
     );
   }
 
-  // Show Standard Report when selected
+  // Show Achievement Chart Report
+  if (activeSection === 'learning-reports-achievement-map') {
+    return (
+      <AchievementChartReport
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
   const reportMatch = activeSection?.match(/^learning-reports-report-(.+)$/);
   if (reportMatch) {
     const subjectKey = reportMatch[1];
