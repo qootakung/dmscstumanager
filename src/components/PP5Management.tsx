@@ -39,6 +39,7 @@ import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
 import StandardReport from './pp5/StandardReport';
 import AchievementSummaryReport from './pp5/AchievementSummaryReport';
 import AchievementChartReport from './pp5/AchievementChartReport';
+import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -273,6 +274,18 @@ const PP5Management: React.FC = () => {
   if (activeSection === 'learning-reports-achievement-map') {
     return (
       <AchievementChartReport
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Achievement Analysis Report
+  if (activeSection === 'learning-reports-analysis-result') {
+    return (
+      <AchievementAnalysisReport
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
