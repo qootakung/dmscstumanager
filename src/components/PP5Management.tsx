@@ -39,6 +39,7 @@ import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
 import StandardReport from './pp5/StandardReport';
 import AchievementSummaryReport from './pp5/AchievementSummaryReport';
 import AchievementChartReport from './pp5/AchievementChartReport';
+import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
 
 // Types for PP5 system
 interface PP5MenuCategory {
