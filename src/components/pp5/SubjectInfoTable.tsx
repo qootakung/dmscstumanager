@@ -69,6 +69,7 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
       endTermRatio: 0,
       midTermRatio: 0,
       category: 'elective',
+      learningOutcomes: newSubject.learningOutcomes,
     };
     onAddSubject?.(subject);
     setAddDialogOpen(false);
