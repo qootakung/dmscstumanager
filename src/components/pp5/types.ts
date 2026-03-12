@@ -37,6 +37,7 @@ export interface SubjectInfo {
   endTermRatio: number;
   midTermRatio: number;
   category: 'core' | 'elective' | 'activity';
+  learningOutcomes?: number; // จำนวนผลการเรียนรู้ (สำหรับวิชาเพิ่มเติม)
 }
 
 export interface AcademicCalendar {
