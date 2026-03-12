@@ -281,6 +281,23 @@ const PP5Management: React.FC = () => {
   const scoreEntryMatch = activeSection?.match(/^score-entry-(.+)$/);
   if (scoreEntryMatch) {
     const subjectKey = scoreEntryMatch[1];
+    
+    // Check if it's a custom elective subject
+    if (subjectKey.startsWith('custom-elective-')) {
+      const electiveSubject = customElectives.find(s => s.id === subjectKey);
+      if (electiveSubject) {
+        return (
+          <ElectiveScoreEntry
+            subjectInfo={electiveSubject}
+            selectedGrade={selectedGrade}
+            selectedSemester={selectedSemester}
+            selectedAcademicYear={selectedAcademicYear}
+            onBack={handleBack}
+          />
+        );
+      }
+    }
+    
     return (
       <IndicatorScoreEntry
         subjectMenuId={subjectKey}
