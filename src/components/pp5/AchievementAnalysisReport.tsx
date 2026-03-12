@@ -240,12 +240,12 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
     const pages = subjectAnalyses.map((subj, pageIdx) => {
       const strandRows = subj.strands.map((s, i) => `
         <tr>
-          <td style="padding:4px 8px; text-align:left;">${i + 1} ${s.name}</td>
-          <td style="padding:4px 8px; text-align:center;">-</td>
-          <td style="padding:4px 8px; text-align:center;">-</td>
-          <td style="padding:4px 8px; text-align:center;">${s.avgPercent.toFixed(2)}</td>
-          <td style="padding:4px 8px; text-align:center;">${s.cv.toFixed(2)}</td>
-          <td style="padding:4px 8px; text-align:center;">${s.index}</td>
+          <td style="padding:2px 6px; text-align:left;">${i + 1} ${s.name}</td>
+          <td style="padding:2px 6px; text-align:center;">-</td>
+          <td style="padding:2px 6px; text-align:center;">-</td>
+          <td style="padding:2px 6px; text-align:center;">${s.avgPercent.toFixed(2)}</td>
+          <td style="padding:2px 6px; text-align:center;">${s.cv.toFixed(2)}</td>
+          <td style="padding:2px 6px; text-align:center;">${s.index}</td>
         </tr>
       `).join('');
 
@@ -258,108 +258,98 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
 
       return `
         <div class="page" style="${pageIdx < subjectAnalyses.length - 1 ? 'page-break-after: always;' : ''}">
-          <div style="text-align:center; margin-bottom:16px; line-height:1.6;">
+          <div style="text-align:center; margin-bottom:8px; line-height:1.2;">
             <div style="font-size:16pt; font-weight:bold;">วิเคราะห์ผลสัมฤทธิ์ทางการเรียน</div>
             <div style="font-size:16pt; font-weight:bold;">${subj.displayName}</div>
             <div style="font-size:16pt; font-weight:bold;">ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}</div>
-            <div style="font-size:14pt; margin-top:8px;">โรงเรียนบ้านดอนมูล</div>
+            <div style="font-size:14pt;">โรงเรียนบ้านดอนมูล</div>
             <div style="font-size:14pt;">ศูนย์พัฒนาคุณภาพการศึกษา</div>
             <div style="font-size:14pt;">สำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูน เขต 2</div>
           </div>
 
           <!-- ตารางผลการทดสอบ -->
-          <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:14pt;">
+          <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:14pt;">
             <thead>
               <tr>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:left; width:28%;">ผลการทดสอบ</th>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:center; width:14%;">เฉลี่ยร้อยละ</th>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:center; width:10%;">C.V.</th>
-                <th colspan="3" style="border:1px solid #000; padding:6px; text-align:center;">ร้อยละนักเรียนตามเกณฑ์ประเมิน</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:left; width:28%;">ผลการทดสอบ</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center; width:14%;">เฉลี่ยร้อยละ</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center; width:10%;">C.V.</th>
+                <th colspan="3" style="border:1px solid #000; padding:2px 6px; text-align:center;">ร้อยละนักเรียนตามเกณฑ์ประเมิน</th>
               </tr>
               <tr>
-                <th style="border:1px solid #000; padding:6px; text-align:center; width:16%;">ปรับปรุง</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center; width:16%;">พอใช้</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center; width:16%;">ดี</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center; width:16%;">ปรับปรุง</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center; width:16%;">พอใช้</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center; width:16%;">ดี</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">ข้อสอบระดับโรงเรียน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.avgPercent.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.cv.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">ข้อสอบระดับโรงเรียน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.avgPercent.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.cv.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
               </tr>
               <tr>
-                <td colspan="2" style="border:1px solid #000; padding:6px; text-align:right;">จำนวนนักเรียนที่อยู่ในกลุ่มปรับปรุง</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.groupImprove}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
+                <td colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:right;">จำนวนนักเรียนที่อยู่ในกลุ่มปรับปรุง</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.groupImprove}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
               </tr>
               <tr>
-                <td colspan="2" style="border:1px solid #000; padding:6px; text-align:right;">พอใช้</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.groupFair}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
+                <td colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:right;">พอใช้</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.groupFair}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
               </tr>
               <tr>
-                <td colspan="2" style="border:1px solid #000; padding:6px; text-align:right;">ดี</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.groupGood}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
+                <td colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:right;">ดี</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.groupGood}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>
 
           <!-- ตารางสาระการเรียนรู้ -->
-          <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:14pt;">
+          <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:14pt;">
             <thead>
               <tr>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:left; width:30%;">สาระการเรียนรู้</th>
-                <th colspan="2" style="border:1px solid #000; padding:6px; text-align:center;">ระดับศูนย์ฯ</th>
-                <th colspan="2" style="border:1px solid #000; padding:6px; text-align:center;">ระดับชั้น</th>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:center; width:12%;">ลำดับที่<br/>การพัฒนา</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:left; width:30%;">สาระการเรียนรู้</th>
+                <th colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center;">ระดับศูนย์ฯ</th>
+                <th colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center;">ระดับชั้น</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center; width:12%;">ลำดับที่<br/>การพัฒนา</th>
               </tr>
               <tr>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">เฉลี่ยร้อยละ</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">C.V.</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">เฉลี่ยร้อยละ</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">C.V.</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">เฉลี่ยร้อยละ</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">C.V.</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">เฉลี่ยร้อยละ</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">C.V.</th>
               </tr>
             </thead>
             <tbody>
               ${strandRows}
               <tr style="font-weight:bold;">
-                <td style="border:1px solid #000; padding:6px; text-align:right;">ค่าเฉลี่ย</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;"></td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;"></td>
-                <td style="border:1px solid #000; padding:6px; text-align:center; font-weight:bold;">${subj.overallAvg.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center; font-weight:bold;">${subj.overallCV.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px;"></td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:right;">ค่าเฉลี่ย</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;"></td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;"></td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center; font-weight:bold;">${subj.overallAvg.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center; font-weight:bold;">${subj.overallCV.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px;"></td>
               </tr>
             </tbody>
           </table>
 
           <!-- ผลการวิเคราะห์ข้อมูล -->
-          <div style="font-size:14pt; line-height:1.8; margin-top:16px;">
-            <div style="font-weight:bold; margin-bottom:8px;">ผลการวิเคราะห์ข้อมูล</div>
-            <p style="text-indent:40px; margin:0 0 8px 0;">
-              ผลการประเมินคุณภาพการศึกษาขั้นพื้นฐาน ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}
-              ในสำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูน เขต 2 พบว่านักเรียนมีค่าคะแนนเฉลี่ยทุกสาระการเรียนรู้ร้อยละ ${subj.overallAvg.toFixed(2)}
-              และค่าเฉลี่ยสัมประสิทธิ์การกระจาย (C.V.) เท่ากับ ${subj.overallCV.toFixed(2)}
-            </p>
-            <p style="text-indent:40px; margin:0 0 8px 0;">
-              เมื่อวิเคราะห์ผลการเรียนรู้เป็นรายสาระการเรียนรู้ พบว่า ค่าคะแนนเฉลี่ยสาระการเรียนรู้ที่มีค่าน้อยที่สุด
-              คือ สาระที่ ${lowestIdx} ${lowestName} มีค่าเฉลี่ยร้อยละ ${lowestAvg}
-            </p>
-            <p style="text-indent:40px; margin:0;">
-              ดังนั้นใน${subj.displayName} จึงควรพัฒนาการเรียนการสอนในสาระการเรียนรู้ ที่มีค่าเฉลี่ยร้อยละ
-              น้อยที่สุดเป็นอันดับแรกคือ สาระที่ ${lowestIdx} ${lowestName} ซึ่งมีค่าเฉลี่ยร้อยละ ${lowestAvg}
-            </p>
+          <div style="font-size:16pt; line-height:1.2; margin-top:10px;">
+            <p style="font-weight:bold; margin:0 0 2px 0;">ผลการวิเคราะห์ข้อมูล</p>
+            <p style="text-indent:2.5cm; margin:0;">ผลการประเมินคุณภาพการศึกษาขั้นพื้นฐาน ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear} ในสำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูน เขต 2 พบว่านักเรียนมีค่าคะแนนเฉลี่ยทุกสาระการเรียนรู้ร้อยละ ${subj.overallAvg.toFixed(2)} และค่าเฉลี่ยสัมประสิทธิ์การกระจาย (C.V.) เท่ากับ ${subj.overallCV.toFixed(2)}</p>
+            <p style="text-indent:2.5cm; margin:0;">เมื่อวิเคราะห์ผลการเรียนรู้เป็นรายสาระการเรียนรู้ พบว่า ค่าคะแนนเฉลี่ยสาระการเรียนรู้ที่มีค่าน้อยที่สุด คือ สาระที่ ${lowestIdx} ${lowestName} มีค่าเฉลี่ยร้อยละ ${lowestAvg}</p>
+            <p style="text-indent:2.5cm; margin:0;">ดังนั้นใน${subj.displayName} จึงควรพัฒนาการเรียนการสอนในสาระการเรียนรู้ ที่มีค่าเฉลี่ยร้อยละน้อยที่สุดเป็นอันดับแรกคือ สาระที่ ${lowestIdx} ${lowestName} ซึ่งมีค่าเฉลี่ยร้อยละ ${lowestAvg}</p>
           </div>
         </div>
       `;
