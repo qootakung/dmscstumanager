@@ -316,30 +316,30 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
           </table>
 
           <!-- ตารางสาระการเรียนรู้ -->
-          <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:14pt;">
+          <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:14pt;">
             <thead>
               <tr>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:left; width:30%;">สาระการเรียนรู้</th>
-                <th colspan="2" style="border:1px solid #000; padding:6px; text-align:center;">ระดับศูนย์ฯ</th>
-                <th colspan="2" style="border:1px solid #000; padding:6px; text-align:center;">ระดับชั้น</th>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:center; width:12%;">ลำดับที่<br/>การพัฒนา</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:left; width:30%;">สาระการเรียนรู้</th>
+                <th colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center;">ระดับศูนย์ฯ</th>
+                <th colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center;">ระดับชั้น</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center; width:12%;">ลำดับที่<br/>การพัฒนา</th>
               </tr>
               <tr>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">เฉลี่ยร้อยละ</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">C.V.</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">เฉลี่ยร้อยละ</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center;">C.V.</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">เฉลี่ยร้อยละ</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">C.V.</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">เฉลี่ยร้อยละ</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center;">C.V.</th>
               </tr>
             </thead>
             <tbody>
               ${strandRows}
               <tr style="font-weight:bold;">
-                <td style="border:1px solid #000; padding:6px; text-align:right;">ค่าเฉลี่ย</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;"></td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;"></td>
-                <td style="border:1px solid #000; padding:6px; text-align:center; font-weight:bold;">${subj.overallAvg.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center; font-weight:bold;">${subj.overallCV.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px;"></td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:right;">ค่าเฉลี่ย</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;"></td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;"></td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center; font-weight:bold;">${subj.overallAvg.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center; font-weight:bold;">${subj.overallCV.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px;"></td>
               </tr>
             </tbody>
           </table>
