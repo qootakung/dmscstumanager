@@ -345,21 +345,11 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
           </table>
 
           <!-- ผลการวิเคราะห์ข้อมูล -->
-          <div style="font-size:14pt; line-height:1.8; margin-top:16px;">
-            <div style="font-weight:bold; margin-bottom:8px;">ผลการวิเคราะห์ข้อมูล</div>
-            <p style="text-indent:40px; margin:0 0 8px 0;">
-              ผลการประเมินคุณภาพการศึกษาขั้นพื้นฐาน ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}
-              ในสำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูน เขต 2 พบว่านักเรียนมีค่าคะแนนเฉลี่ยทุกสาระการเรียนรู้ร้อยละ ${subj.overallAvg.toFixed(2)}
-              และค่าเฉลี่ยสัมประสิทธิ์การกระจาย (C.V.) เท่ากับ ${subj.overallCV.toFixed(2)}
-            </p>
-            <p style="text-indent:40px; margin:0 0 8px 0;">
-              เมื่อวิเคราะห์ผลการเรียนรู้เป็นรายสาระการเรียนรู้ พบว่า ค่าคะแนนเฉลี่ยสาระการเรียนรู้ที่มีค่าน้อยที่สุด
-              คือ สาระที่ ${lowestIdx} ${lowestName} มีค่าเฉลี่ยร้อยละ ${lowestAvg}
-            </p>
-            <p style="text-indent:40px; margin:0;">
-              ดังนั้นใน${subj.displayName} จึงควรพัฒนาการเรียนการสอนในสาระการเรียนรู้ ที่มีค่าเฉลี่ยร้อยละ
-              น้อยที่สุดเป็นอันดับแรกคือ สาระที่ ${lowestIdx} ${lowestName} ซึ่งมีค่าเฉลี่ยร้อยละ ${lowestAvg}
-            </p>
+          <div style="font-size:16pt; line-height:1.2; margin-top:10px;">
+            <p style="font-weight:bold; margin:0 0 2px 0;">ผลการวิเคราะห์ข้อมูล</p>
+            <p style="text-indent:2.5cm; margin:0;">ผลการประเมินคุณภาพการศึกษาขั้นพื้นฐาน ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear} ในสำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูน เขต 2 พบว่านักเรียนมีค่าคะแนนเฉลี่ยทุกสาระการเรียนรู้ร้อยละ ${subj.overallAvg.toFixed(2)} และค่าเฉลี่ยสัมประสิทธิ์การกระจาย (C.V.) เท่ากับ ${subj.overallCV.toFixed(2)}</p>
+            <p style="text-indent:2.5cm; margin:0;">เมื่อวิเคราะห์ผลการเรียนรู้เป็นรายสาระการเรียนรู้ พบว่า ค่าคะแนนเฉลี่ยสาระการเรียนรู้ที่มีค่าน้อยที่สุด คือ สาระที่ ${lowestIdx} ${lowestName} มีค่าเฉลี่ยร้อยละ ${lowestAvg}</p>
+            <p style="text-indent:2.5cm; margin:0;">ดังนั้นใน${subj.displayName} จึงควรพัฒนาการเรียนการสอนในสาระการเรียนรู้ ที่มีค่าเฉลี่ยร้อยละน้อยที่สุดเป็นอันดับแรกคือ สาระที่ ${lowestIdx} ${lowestName} ซึ่งมีค่าเฉลี่ยร้อยละ ${lowestAvg}</p>
           </div>
         </div>
       `;
