@@ -207,6 +207,19 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
     setSubjects(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
   };
 
+  const addSubject = (subject: SubjectInfo) => {
+    setSubjects(prev => {
+      // Insert before activity subjects
+      const coreAndElective = prev.filter(s => s.category !== 'activity');
+      const activities = prev.filter(s => s.category === 'activity');
+      return [...coreAndElective, subject, ...activities];
+    });
+  };
+
+  const removeSubject = (subjectId: string) => {
+    setSubjects(prev => prev.filter(s => s.id !== subjectId));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
