@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -36,10 +36,12 @@ import PP5AttendanceHoursSummary from './pp5/PP5AttendanceHoursSummary';
 import CurriculumIndicators from './pp5/CurriculumIndicators';
 import ScoreRatioConfig from './pp5/ScoreRatioConfig';
 import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
+import ElectiveScoreEntry from './pp5/ElectiveScoreEntry';
 import StandardReport from './pp5/StandardReport';
 import AchievementSummaryReport from './pp5/AchievementSummaryReport';
 import AchievementChartReport from './pp5/AchievementChartReport';
 import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
+import type { SubjectInfo } from './pp5/types';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -58,6 +60,21 @@ interface PP5MenuItem {
   action?: () => void;
 }
 
+// Helper to load custom elective subjects from localStorage
+const getCustomElectives = (grade: string, academicYear: string, semester: string): SubjectInfo[] => {
+  const gradeNum = grade.replace('ป.', '');
+  const storageKey = `pp5-basic-ป.${gradeNum}-${academicYear}-${semester}`;
+  const saved = localStorage.getItem(storageKey);
+  if (!saved) return [];
+  try {
+    const data = JSON.parse(saved);
+    if (data.subjects && Array.isArray(data.subjects)) {
+      return data.subjects.filter((s: SubjectInfo) => s.id.startsWith('custom-elective-'));
+    }
+  } catch {}
+  return [];
+};
+
 const PP5Management: React.FC = () => {
   const [selectedGrade, setSelectedGrade] = useState<string>('ป.1');
   const [selectedSemester, setSelectedSemester] = useState<string>('1');
@@ -66,6 +83,25 @@ const PP5Management: React.FC = () => {
 
   const academicYears = generateAcademicYears();
   const primaryGrades = gradeOptions.filter(g => g.startsWith('ป.'));
+
+  // Load custom elective subjects dynamically
+  const customElectives = useMemo(() => 
+    getCustomElectives(selectedGrade, selectedAcademicYear, selectedSemester),
+    [selectedGrade, selectedAcademicYear, selectedSemester, activeSection] // re-check when returning to menu
+  );
+
+  // Build dynamic elective menu items
+  const electiveMenuItems: PP5MenuItem[] = useMemo(() => {
+    const items: PP5MenuItem[] = [];
+    customElectives.forEach((subj) => {
+      items.push({
+        id: subj.id,
+        label: subj.shortName || subj.name,
+        icon: PlusCircle,
+      });
+    });
+    return items;
+  }, [customElectives]);
 
   // Define menu categories with colorful styling based on reference images
   const menuCategories: PP5MenuCategory[] = [
@@ -86,9 +122,7 @@ const PP5Management: React.FC = () => {
         { id: 'career', label: 'การงานอาชีพ', icon: Briefcase },
         { id: 'english', label: 'ภาษาต่างประเทศ', icon: Globe },
         { id: 'anti-corruption', label: 'ป้องกันการทุจริต', icon: Shield },
-        { id: 'elective1', label: 'วิชาเพิ่มเติม 1', icon: PlusCircle },
-        { id: 'elective2', label: 'วิชาเพิ่มเติม 2', icon: PlusCircle },
-        { id: 'elective3', label: 'วิชาเพิ่มเติม 3', icon: PlusCircle },
+        ...electiveMenuItems,
       ]
     },
     {
