@@ -268,49 +268,49 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
           </div>
 
           <!-- ตารางผลการทดสอบ -->
-          <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:14pt;">
+          <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:14pt;">
             <thead>
               <tr>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:left; width:28%;">ผลการทดสอบ</th>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:center; width:14%;">เฉลี่ยร้อยละ</th>
-                <th rowspan="2" style="border:1px solid #000; padding:6px; text-align:center; width:10%;">C.V.</th>
-                <th colspan="3" style="border:1px solid #000; padding:6px; text-align:center;">ร้อยละนักเรียนตามเกณฑ์ประเมิน</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:left; width:28%;">ผลการทดสอบ</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center; width:14%;">เฉลี่ยร้อยละ</th>
+                <th rowspan="2" style="border:1px solid #000; padding:2px 6px; text-align:center; width:10%;">C.V.</th>
+                <th colspan="3" style="border:1px solid #000; padding:2px 6px; text-align:center;">ร้อยละนักเรียนตามเกณฑ์ประเมิน</th>
               </tr>
               <tr>
-                <th style="border:1px solid #000; padding:6px; text-align:center; width:16%;">ปรับปรุง</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center; width:16%;">พอใช้</th>
-                <th style="border:1px solid #000; padding:6px; text-align:center; width:16%;">ดี</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center; width:16%;">ปรับปรุง</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center; width:16%;">พอใช้</th>
+                <th style="border:1px solid #000; padding:2px 6px; text-align:center; width:16%;">ดี</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">ข้อสอบระดับโรงเรียน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.avgPercent.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.cv.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">ข้อสอบระดับโรงเรียน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.avgPercent.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.cv.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
               </tr>
               <tr>
-                <td colspan="2" style="border:1px solid #000; padding:6px; text-align:right;">จำนวนนักเรียนที่อยู่ในกลุ่มปรับปรุง</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.groupImprove}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
+                <td colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:right;">จำนวนนักเรียนที่อยู่ในกลุ่มปรับปรุง</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.groupImprove}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentImprove.toFixed(2)}</td>
               </tr>
               <tr>
-                <td colspan="2" style="border:1px solid #000; padding:6px; text-align:right;">พอใช้</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.groupFair}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
+                <td colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:right;">พอใช้</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.groupFair}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentFair.toFixed(2)}</td>
               </tr>
               <tr>
-                <td colspan="2" style="border:1px solid #000; padding:6px; text-align:right;">ดี</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.groupGood}</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คน</td>
-                <td style="border:1px solid #000; padding:6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
-                <td style="border:1px solid #000; padding:6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
+                <td colspan="2" style="border:1px solid #000; padding:2px 6px; text-align:right;">ดี</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.groupGood}</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คน</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:left;">คิดเป็นจำนวนร้อยละ</td>
+                <td style="border:1px solid #000; padding:2px 6px; text-align:center;">${subj.percentGood.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>
