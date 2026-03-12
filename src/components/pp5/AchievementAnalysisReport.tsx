@@ -240,12 +240,12 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
     const pages = subjectAnalyses.map((subj, pageIdx) => {
       const strandRows = subj.strands.map((s, i) => `
         <tr>
-          <td style="padding:4px 8px; text-align:left;">${i + 1} ${s.name}</td>
-          <td style="padding:4px 8px; text-align:center;">-</td>
-          <td style="padding:4px 8px; text-align:center;">-</td>
-          <td style="padding:4px 8px; text-align:center;">${s.avgPercent.toFixed(2)}</td>
-          <td style="padding:4px 8px; text-align:center;">${s.cv.toFixed(2)}</td>
-          <td style="padding:4px 8px; text-align:center;">${s.index}</td>
+          <td style="padding:2px 6px; text-align:left;">${i + 1} ${s.name}</td>
+          <td style="padding:2px 6px; text-align:center;">-</td>
+          <td style="padding:2px 6px; text-align:center;">-</td>
+          <td style="padding:2px 6px; text-align:center;">${s.avgPercent.toFixed(2)}</td>
+          <td style="padding:2px 6px; text-align:center;">${s.cv.toFixed(2)}</td>
+          <td style="padding:2px 6px; text-align:center;">${s.index}</td>
         </tr>
       `).join('');
 
