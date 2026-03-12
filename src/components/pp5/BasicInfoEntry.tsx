@@ -533,6 +533,8 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
         subjects={subjects}
         onUpdateSubject={updateSubject}
         onSelectTeacher={(subjectId) => openTeacherDialog(`subject-${subjectId}`)}
+        onAddSubject={addSubject}
+        onRemoveSubject={removeSubject}
       />
 
       {/* Teacher Select Dialog */}
