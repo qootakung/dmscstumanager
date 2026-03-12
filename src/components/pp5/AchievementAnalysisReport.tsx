@@ -258,11 +258,11 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
 
       return `
         <div class="page" style="${pageIdx < subjectAnalyses.length - 1 ? 'page-break-after: always;' : ''}">
-          <div style="text-align:center; margin-bottom:16px; line-height:1.6;">
+          <div style="text-align:center; margin-bottom:8px; line-height:1.2;">
             <div style="font-size:16pt; font-weight:bold;">วิเคราะห์ผลสัมฤทธิ์ทางการเรียน</div>
             <div style="font-size:16pt; font-weight:bold;">${subj.displayName}</div>
             <div style="font-size:16pt; font-weight:bold;">ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}</div>
-            <div style="font-size:14pt; margin-top:8px;">โรงเรียนบ้านดอนมูล</div>
+            <div style="font-size:14pt;">โรงเรียนบ้านดอนมูล</div>
             <div style="font-size:14pt;">ศูนย์พัฒนาคุณภาพการศึกษา</div>
             <div style="font-size:14pt;">สำนักงานเขตพื้นที่การศึกษาประถมศึกษาลำพูน เขต 2</div>
           </div>
