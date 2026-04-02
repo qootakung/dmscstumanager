@@ -163,6 +163,14 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
         s.grade === selectedGrade &&
         s.academicYear === selectedAcademicYear
       );
+      // Deduplicate by studentId (students may exist in both semesters)
+      const seen = new Set<string>();
+      const unique = filtered.filter(s => {
+        const key = s.studentId || s.id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
       setStudents(filtered);
       setLoading(false);
     };
