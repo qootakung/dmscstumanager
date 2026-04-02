@@ -75,9 +75,21 @@ const getCustomElectives = (grade: string, academicYear: string, semester: strin
   return [];
 };
 
+// Calculate current semester based on Thai school calendar
+const getCurrentSemester = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  // Semester 1: May 16 - October 31, Semester 2: November 1 - May 15
+  if ((month === 5 && day >= 16) || (month > 5 && month <= 10)) {
+    return '1';
+  }
+  return '2';
+};
+
 const PP5Management: React.FC = () => {
   const [selectedGrade, setSelectedGrade] = useState<string>('ป.1');
-  const [selectedSemester, setSelectedSemester] = useState<string>('1');
+  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('2568');
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
