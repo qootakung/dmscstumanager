@@ -32,6 +32,15 @@ export const getStudentStatistics = async (semester?: string) => {
     return matchYear;
   });
   
+  // Deduplicate by studentId (students may exist in both semesters)
+  const seen = new Set<string>();
+  filteredStudents = filteredStudents.filter(s => {
+    const key = s.studentId || s.id;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  
   const gradeStats = gradeOptions.reduce((acc, grade) => {
     acc[grade] = filteredStudents.filter(s => s.grade === grade).length;
     return acc;

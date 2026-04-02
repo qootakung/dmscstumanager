@@ -43,19 +43,21 @@ const StudentManagement: React.FC = () => {
     const sortedStudents = studentData.sort((a, b) => {
       const aId = a.studentId;
       const bId = b.studentId;
-      
-      // Check if studentId is 3 digits or 4 digits
       const aIs3Digit = aId.length === 3;
       const bIs3Digit = bId.length === 3;
-      
-      // If one is 3 digits and other is 4 digits, 3 digits comes first
       if (aIs3Digit && !bIs3Digit) return -1;
       if (!aIs3Digit && bIs3Digit) return 1;
-      
-      // If both are same length, sort numerically
       return parseInt(aId) - parseInt(bId);
     });
-    setStudents(sortedStudents);
+    // Deduplicate by studentId (students may exist in both semesters)
+    const seen = new Set<string>();
+    const unique = sortedStudents.filter(s => {
+      const key = s.studentId || s.id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    setStudents(unique);
   };
 
   useEffect(() => {
