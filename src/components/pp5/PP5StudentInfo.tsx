@@ -40,8 +40,16 @@ const PP5StudentInfo: React.FC<PP5StudentInfoProps> = ({
         s.grade === currentGrade && 
         s.academicYear === selectedAcademicYear
       );
+      // Deduplicate by studentId (students may exist in both semesters)
+      const seen = new Set<string>();
+      const unique = filtered.filter(s => {
+        const key = s.studentId || s.id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
       // Sort by studentId
-      filtered.sort((a, b) => {
+      unique.sort((a, b) => {
         const aId = a.studentId || '';
         const bId = b.studentId || '';
         const aIs3Digit = aId.length === 3;
@@ -50,7 +58,7 @@ const PP5StudentInfo: React.FC<PP5StudentInfoProps> = ({
         if (!aIs3Digit && bIs3Digit) return 1;
         return parseInt(aId) - parseInt(bId);
       });
-      setStudents(filtered);
+      setStudents(unique);
       setLoading(false);
     };
     loadStudents();
