@@ -171,7 +171,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
         seen.add(key);
         return true;
       });
-      setStudents(filtered);
+      setStudents(unique);
       setLoading(false);
     };
     loadStudents();
