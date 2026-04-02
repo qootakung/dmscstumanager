@@ -81,7 +81,7 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
     const load = async () => {
       setLoading(true);
       const all = await getStudents();
-      setStudents(all.filter(s => s.grade === selectedGrade && s.academicYear === selectedAcademicYear && s.semester === selectedSemester));
+      setStudents(all.filter(s => s.grade === selectedGrade && s.academicYear === selectedAcademicYear));
       setLoading(false);
     };
     load();

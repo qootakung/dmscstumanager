@@ -161,7 +161,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
       setLoading(true);
       const allStudents = await getStudents();
       const filtered = allStudents.filter(s =>
-        s.grade === selectedGrade && s.academicYear === selectedAcademicYear && s.semester === selectedSemester
+        s.grade === selectedGrade && s.academicYear === selectedAcademicYear
       );
       setStudents(filtered);
       setLoading(false);
