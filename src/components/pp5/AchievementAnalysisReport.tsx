@@ -80,9 +80,9 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const all = await getStudents();
-      setStudents(all.filter(s => s.grade === selectedGrade && s.academicYear === selectedAcademicYear));
-      setLoading(false);
+      const filtered = all.filter(s => s.grade === selectedGrade && s.academicYear === selectedAcademicYear);
+      const seen = new Set<string>();
+      setStudents(filtered.filter(s => { const k = s.studentId || s.id; if (seen.has(k)) return false; seen.add(k); return true; }));
     };
     load();
   }, [selectedGrade, selectedAcademicYear, selectedSemester]);

@@ -99,7 +99,9 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
         s.grade === selectedGrade &&
         s.academicYear === selectedAcademicYear
       );
-      setStudents(filtered);
+      const seen = new Set<string>();
+      const unique = filtered.filter(s => { const k = s.studentId || s.id; if (seen.has(k)) return false; seen.add(k); return true; });
+      setStudents(unique);
       setLoading(false);
     };
     loadStudents();
