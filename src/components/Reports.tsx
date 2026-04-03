@@ -72,13 +72,26 @@ const Reports: React.FC = () => {
   };
 
   const filteredStudents = useMemo(() => {
-    return students.filter(student => {
+    const seen = new Set<string>();
+
+    return students.filter((student) => {
       const matchesClass = reportOptions.classLevel === 'all' || student.grade === reportOptions.classLevel;
       const matchesYear = student.academicYear === reportOptions.academicYear;
-      // Don't filter by semester - students attend both semesters in the same academic year
-      return matchesClass && matchesYear;
+      const matchesSemester = student.semester === reportOptions.semester;
+
+      if (!matchesClass || !matchesYear || !matchesSemester) {
+        return false;
+      }
+
+      const key = student.studentId || student.id;
+      if (seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
     });
-  }, [students, reportOptions.classLevel, reportOptions.academicYear]);
+  }, [students, reportOptions.classLevel, reportOptions.academicYear, reportOptions.semester]);
 
   const handleGenerateExcel = () => {
     if (isPaginatedMode) {
