@@ -18,6 +18,7 @@ interface Student {
   titleTh: string;
   grade: string;
   academicYear: string;
+  semester: string;
 }
 
 interface CompetencyAssessment {
@@ -41,9 +42,25 @@ interface StudentWithAssessment {
   grade: string;
 }
 
+function getUniqueStudents<T extends { id: string; studentId?: string | null }>(studentList: T[]): T[] {
+  const seen = new Set<string>();
+
+  return studentList.filter((student) => {
+    const key = student.studentId || student.id;
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
 export const StudentReportPage = () => {
   const [academicYear, setAcademicYear] = useState('');
   const [gradeLevel, setGradeLevel] = useState('');
+  const [semester, setSemester] = useState('1');
   const [students, setStudents] = useState<Student[]>([]);
   const [assessments, setAssessments] = useState<CompetencyAssessment[]>([]);
   const [availableYears, setAvailableYears] = useState<string[]>([]);
@@ -87,6 +104,7 @@ export const StudentReportPage = () => {
           .from('students')
           .select('grade')
           .eq('academicYear', academicYear)
+          .eq('semester', semester)
           .not('grade', 'is', null);
         
         if (error) throw error;
@@ -102,7 +120,7 @@ export const StudentReportPage = () => {
     };
     
     fetchGrades();
-  }, [academicYear]);
+  }, [academicYear, semester]);
 
   // Fetch students and assessments when both year and grade are selected
   useEffect(() => {
@@ -118,22 +136,27 @@ export const StudentReportPage = () => {
         // Fetch students
         const { data: studentsData, error: studentsError } = await supabase
           .from('students')
-          .select('id, studentId, firstNameTh, lastNameTh, titleTh, grade, academicYear')
+          .select('id, studentId, firstNameTh, lastNameTh, titleTh, grade, academicYear, semester')
           .eq('academicYear', academicYear)
           .eq('grade', gradeLevel)
+          .eq('semester', semester)
           .order('studentId');
 
         if (studentsError) throw studentsError;
 
+        const uniqueStudents = getUniqueStudents((studentsData || []) as Student[]);
+
         // Fetch competency assessments for these students
-        const studentIds = studentsData.map(s => s.id);
+        const studentIds = uniqueStudents.map(s => s.id);
         
         if (studentIds.length > 0) {
           const { data: assessmentsData, error: assessmentsError } = await supabase
             .from('competency_assessments')
             .select('student_id, competency_number, item_1_score, item_2_score, item_3_score, item_4_score, item_5_score, total_score, grade')
             .in('student_id', studentIds)
-            .eq('academic_year', academicYear);
+            .eq('academic_year', academicYear)
+            .order('student_id')
+            .order('competency_number');
 
           if (assessmentsError) throw assessmentsError;
 
@@ -142,7 +165,7 @@ export const StudentReportPage = () => {
           setAssessments([]);
         }
 
-        setStudents(studentsData || []);
+        setStudents(uniqueStudents);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -152,11 +175,11 @@ export const StudentReportPage = () => {
     };
 
     fetchData();
-  }, [academicYear, gradeLevel]);
+  }, [academicYear, gradeLevel, semester]);
 
   // Combine students with their assessments
   const studentsWithAssessments = useMemo(() => {
-    return students.map(student => {
+    return getUniqueStudents(students).map(student => {
       // Find all competency assessments for this student
       const studentAssessments = assessments.filter(a => a.student_id === student.id);
       
@@ -397,7 +420,7 @@ export const StudentReportPage = () => {
             <div class="report-subtitle">
               ชั้น${gradeLevel.startsWith('ป.') ? `ประถมศึกษาปีที่ ${gradeLevel.slice(2)}` : gradeLevel}
             </div>
-            <div class="report-subtitle">ปีการศึกษา ${academicYear}</div>
+            <div class="report-subtitle">ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}</div>
           </div>
 
           <table>
@@ -507,6 +530,18 @@ export const StudentReportPage = () => {
               </Select>
             </div>
             <div>
+              <Label htmlFor="semester">ภาคเรียน</Label>
+              <Select value={semester} onValueChange={setSemester}>
+                <SelectTrigger id="semester">
+                  <SelectValue placeholder="เลือกภาคเรียน" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                  <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label htmlFor="grade-level">ชั้น</Label>
               <Select value={gradeLevel} onValueChange={setGradeLevel} disabled={!academicYear}>
                 <SelectTrigger id="grade-level">
@@ -535,7 +570,7 @@ export const StudentReportPage = () => {
               <p className="text-lg mb-1">
                 ชั้น{gradeLevel.startsWith('ป.') ? `ประถมศึกษาปีที่ ${gradeLevel.slice(2)}` : gradeLevel}
               </p>
-              <p className="text-lg">ปีการศึกษา {academicYear}</p>
+              <p className="text-lg">ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}</p>
             </div>
 
             {loading ? (
@@ -726,6 +761,7 @@ export const StudentReportPage = () => {
             onOpenChange={setShowPreviewDialog}
             studentsWithAssessments={studentsWithAssessments}
             academicYear={academicYear}
+            semester={semester}
             gradeLevel={gradeLevel}
           />
     </div>

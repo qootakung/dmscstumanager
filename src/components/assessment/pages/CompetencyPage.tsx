@@ -39,6 +39,7 @@ interface CompetencyAssessmentData {
   total_score: number;
   grade: string;
   academic_year: string;
+  semester?: string;
   assessed_by?: string;
   created_at: string;
   updated_at: string;
@@ -82,6 +83,21 @@ const competencyItems = {
   ]
 };
 
+function getUniqueStudents<T extends { id: string; studentId?: string | null }>(studentList: T[]): T[] {
+  const seen = new Set<string>();
+
+  return studentList.filter((student) => {
+    const key = student.studentId || student.id;
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
 const getGradeFromScore = (score: number): string => {
   if (score >= 13) return 'ดีเยี่ยม';
   if (score >= 9) return 'ดี';
@@ -119,6 +135,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
     const fetchStudents = async () => {
       if (!selectedAcademicYear) {
         setStudents([]);
+        setFilteredStudents([]);
         return;
       }
 
@@ -127,10 +144,13 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
         const { data: studentData, error } = await supabase
           .from('students')
           .select('*')
-          .eq('academicYear', selectedAcademicYear);
+          .eq('academicYear', selectedAcademicYear)
+          .eq('semester', selectedSemester)
+          .order('studentId');
 
         if (error) throw error;
-        setStudents((studentData || []) as Student[]);
+
+        setStudents(getUniqueStudents((studentData || []) as Student[]));
       } catch (error) {
         console.error('Error fetching students:', error);
         toast({
@@ -144,7 +164,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
     };
 
     fetchStudents();
-  }, [selectedAcademicYear]);
+  }, [selectedAcademicYear, selectedSemester]);
 
   // Filter students by grade and load existing assessments
   useEffect(() => {
@@ -155,8 +175,13 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
         return;
       }
 
-      const filtered = students.filter(student => student.grade === selectedGrade);
+      const filtered = getUniqueStudents(students.filter(student => student.grade === selectedGrade));
       setFilteredStudents(filtered);
+
+      if (filtered.length === 0) {
+        setAssessments([]);
+        return;
+      }
 
       // Load existing assessments from database
       try {
@@ -165,6 +190,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
           .select('*')
           .eq('competency_number', competencyNumber)
           .eq('academic_year', selectedAcademicYear)
+          .order('updated_at', { ascending: false })
           .in('student_id', filtered.map(s => s.id));
 
         if (error) throw error;
@@ -212,7 +238,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
     };
 
     loadAssessments();
-  }, [selectedGrade, students, selectedAcademicYear, competencyNumber]);
+  }, [selectedGrade, students, selectedAcademicYear, selectedSemester, competencyNumber]);
 
   // Get unique grades from students, limited to ป.1-6 only
   const primaryGrades = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
@@ -263,6 +289,7 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
         item_4_score: assessment.scores[3],
         item_5_score: assessment.scores[4],
         academic_year: selectedAcademicYear,
+        semester: selectedSemester,
         assessed_by: 'ครู' // You can modify this to get actual user info
       }));
 
@@ -281,12 +308,19 @@ const CompetencyPage: React.FC<CompetencyPageProps> = ({ competencyNumber, title
       });
 
       // Reload assessments to get updated data with auto-calculated totals
-      const filtered = students.filter(student => student.grade === selectedGrade);
+      const filtered = getUniqueStudents(students.filter(student => student.grade === selectedGrade));
+
+      if (filtered.length === 0) {
+        setAssessments([]);
+        return;
+      }
+
       const { data: updatedAssessments, error: fetchError } = await (supabase as any)
         .from('competency_assessments')
         .select('*')
         .eq('competency_number', competencyNumber)
         .eq('academic_year', selectedAcademicYear)
+        .order('updated_at', { ascending: false })
         .in('student_id', filtered.map(s => s.id));
 
       if (fetchError) throw fetchError;

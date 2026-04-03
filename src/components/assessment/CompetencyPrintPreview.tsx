@@ -152,8 +152,20 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   };
 
   // Generate student list with actual students + empty rows to fill up to 12
-  const displayStudents = [...students];
-  const emptyRowsNeeded = Math.max(0, 12 - students.length);
+  const seenStudentKeys = new Set<string>();
+  const uniqueStudents = students.filter((student) => {
+    const key = student.id || student.name;
+
+    if (seenStudentKeys.has(key)) {
+      return false;
+    }
+
+    seenStudentKeys.add(key);
+    return true;
+  });
+
+  const displayStudents = [...uniqueStudents];
+  const emptyRowsNeeded = Math.max(0, 12 - uniqueStudents.length);
   for (let i = 0; i < emptyRowsNeeded; i++) {
     displayStudents.push({
       id: `empty-${i}`,

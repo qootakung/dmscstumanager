@@ -23,7 +23,26 @@ interface CompetencyPrintPreviewDialogProps {
   onOpenChange: (isOpen: boolean) => void;
   studentsWithAssessments: StudentWithAssessment[];
   academicYear: string;
+  semester: string;
   gradeLevel: string;
+}
+
+function getUniqueAssessmentRows(rows: StudentWithAssessment[]) {
+  const seen = new Set<string>();
+
+  return rows.filter((student) => {
+    if (!student.studentName?.trim()) {
+      return false;
+    }
+
+    const key = student.studentId || student.id;
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
 }
 
 const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> = ({
@@ -31,6 +50,7 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
   onOpenChange,
   studentsWithAssessments,
   academicYear,
+  semester,
   gradeLevel,
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
@@ -55,15 +75,15 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
     }
   }, [isOpen]);
 
-  const getGradeStats = () => {
+  const getGradeStats = (rows: StudentWithAssessment[]) => {
     const stats = {
-      excellent: studentsWithAssessments.filter(s => s.grade === 'ดีเยี่ยม').length,
-      good: studentsWithAssessments.filter(s => s.grade === 'ดี').length,
-      pass: studentsWithAssessments.filter(s => s.grade === 'ผ่าน').length,
-      fail: studentsWithAssessments.filter(s => s.grade === 'ไม่ผ่าน').length,
+      excellent: rows.filter(s => s.grade === 'ดีเยี่ยม').length,
+      good: rows.filter(s => s.grade === 'ดี').length,
+      pass: rows.filter(s => s.grade === 'ผ่าน').length,
+      fail: rows.filter(s => s.grade === 'ไม่ผ่าน').length,
     };
     
-    const total = studentsWithAssessments.length;
+    const total = rows.length;
     return {
       ...stats,
       total,
@@ -74,19 +94,21 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
     };
   };
 
-  const stats = getGradeStats();
+  const allRows = getUniqueAssessmentRows(studentsWithAssessments);
+
+  const stats = getGradeStats(allRows);
 
   const totalScores = [
-    studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[0] || 0), 0),
-    studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[1] || 0), 0),
-    studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[2] || 0), 0),
-    studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[3] || 0), 0),
-    studentsWithAssessments.reduce((sum, s) => sum + (s.competencyScores[4] || 0), 0)
+    allRows.reduce((sum, s) => sum + (s.competencyScores[0] || 0), 0),
+    allRows.reduce((sum, s) => sum + (s.competencyScores[1] || 0), 0),
+    allRows.reduce((sum, s) => sum + (s.competencyScores[2] || 0), 0),
+    allRows.reduce((sum, s) => sum + (s.competencyScores[3] || 0), 0),
+    allRows.reduce((sum, s) => sum + (s.competencyScores[4] || 0), 0)
   ];
 
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
-    documentTitle: `สรุปผลการประเมินรายชั้นเรียน-${gradeLevel}-${academicYear}`,
+    documentTitle: `สรุปผลการประเมินรายชั้นเรียน-${gradeLevel}-${academicYear}-ภาคเรียนที่-${semester}`,
     pageStyle: `
       @page {
         size: A4;
@@ -147,9 +169,6 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
     }
   };
 
-  // Only use students with actual data, filter out empty rows
-  const allRows = studentsWithAssessments.filter(student => student.studentName && student.studentName.trim() !== '');
-
   if (!isOpen) {
     return null;
   }
@@ -203,7 +222,7 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
                 <div style={{ fontSize: '14px', marginBottom: '4px' }}>
                   ชั้น{gradeLevel.startsWith('ป.') ? `ประถมศึกษาปีที่ ${gradeLevel.slice(2)}` : gradeLevel}
                 </div>
-                <div style={{ fontSize: '14px' }}>ปีการศึกษา {academicYear}</div>
+                <div style={{ fontSize: '14px' }}>ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}</div>
               </div>
 
               {/* Table */}
