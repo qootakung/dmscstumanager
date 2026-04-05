@@ -135,12 +135,37 @@ export const StudentScoreManagement: React.FC = () => {
   const [availableAcademicYears, setAvailableAcademicYears] = useState<string[]>([]);
   const [selectedSemester, setSelectedSemester] = useState<string>('1');
   const [studentScores, setStudentScores] = useState<StudentScore[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [allScoresForGrade, setAllScoresForGrade] = useState<StudentScore[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [principalName, setPrincipalName] = useState<string>('');
+
+  const filteredStudents = React.useMemo(() => {
+    if (!selectedGrade || !selectedSemester || !academicYear) {
+      return [];
+    }
+
+    const seen = new Set<string>();
+
+    return students.filter((student) => {
+      const matchesGrade = student.grade === selectedGrade;
+      const matchesSemester = student.semester === selectedSemester;
+      const matchesAcademicYear = student.academicYear === academicYear;
+
+      if (!matchesGrade || !matchesSemester || !matchesAcademicYear) {
+        return false;
+      }
+
+      const key = student.studentId || student.id;
+      if (seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
+    });
+  }, [students, selectedGrade, selectedSemester, academicYear]);
 
   useEffect(() => {
     loadTeachers();
@@ -149,26 +174,15 @@ export const StudentScoreManagement: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedGrade && selectedSemester) {
-      const filtered = students.filter(student => 
-        student.grade === selectedGrade && student.semester === selectedSemester
-      );
-      setFilteredStudents(filtered);
-    } else {
-      setFilteredStudents([]);
-    }
-  }, [selectedGrade, selectedSemester, students]);
-
-  useEffect(() => {
-    if (selectedTeacher && selectedGrade && selectedSubject && selectedSemester) {
+    if (selectedTeacher && selectedGrade && selectedSubject && selectedSemester && academicYear) {
       loadStudentScores();
     } else {
       setStudentScores([]);
     }
-  }, [selectedTeacher, selectedGrade, selectedSubject, selectedSemester]);
+  }, [selectedTeacher, selectedGrade, selectedSubject, selectedSemester, academicYear, filteredStudents]);
 
   useEffect(() => {
-    if (selectedGrade) {
+    if (selectedGrade && academicYear) {
       loadAllScoresForGrade();
     } else {
       setAllScoresForGrade([]);
@@ -237,7 +251,7 @@ export const StudentScoreManagement: React.FC = () => {
   };
 
   const loadAllScoresForGrade = async () => {
-    if (!selectedGrade) return;
+    if (!selectedGrade || !academicYear) return;
 
     try {
       const { data, error } = await supabase
@@ -252,7 +266,7 @@ export const StudentScoreManagement: React.FC = () => {
         return;
       }
 
-      console.log('loadAllScoresForGrade - Query params:', { selectedGrade, academicYear });
+      console.log('loadAllScoresForGrade - Query params:', { selectedGrade, academicYear, selectedSemester });
       console.log('loadAllScoresForGrade - Data received:', data);
       console.log('loadAllScoresForGrade - Data count:', data?.length || 0);
       
@@ -269,10 +283,17 @@ export const StudentScoreManagement: React.FC = () => {
   };
 
   const loadStudentScores = async () => {
-    if (!selectedTeacher || !selectedGrade || !selectedSubject) return;
+    if (!selectedTeacher || !selectedGrade || !selectedSubject || !academicYear) return;
+
+    if (filteredStudents.length === 0) {
+      setStudentScores([]);
+      return;
+    }
 
     setLoading(true);
     try {
+      const currentStudentIds = filteredStudents.map((student) => student.id);
+
       const { data, error } = await supabase
         .from('student_scores')
         .select('*')
@@ -280,7 +301,8 @@ export const StudentScoreManagement: React.FC = () => {
         .eq('grade_level', selectedGrade)
         .eq('subject_code', selectedSubject.code)
         .eq('academic_year', academicYear)
-        .eq('semester', selectedSemester);
+        .eq('semester', selectedSemester)
+        .in('student_id', currentStudentIds);
 
       if (error) {
         console.error('Error loading student scores:', error);
@@ -292,21 +314,24 @@ export const StudentScoreManagement: React.FC = () => {
         return;
       }
 
-      // Create scores for all students in the grade if they don't exist
       const existingScores = data || [];
       const scoresMap = existingScores.reduce((acc, score) => {
-        acc[score.student_id] = score;
+        if (!acc[score.student_id]) {
+          acc[score.student_id] = score;
+        }
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, StudentScore>);
 
-      const allScores = filteredStudents.map(student => {
+      const allScores = filteredStudents.map((student) => {
         const existingScore = scoresMap[student.id];
+
         if (existingScore) {
           return {
             ...existingScore,
-            max_score: 50  // Override to always show 50
+            max_score: 50,
           };
         }
+
         return {
           student_id: student.id,
           teacher_id: selectedTeacher,
@@ -321,6 +346,7 @@ export const StudentScoreManagement: React.FC = () => {
       });
 
       setStudentScores(allScores);
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error loading student scores:', error);
       toast({
