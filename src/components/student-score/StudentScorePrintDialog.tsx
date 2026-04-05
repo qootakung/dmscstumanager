@@ -14,7 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Student } from '@/types/student';
 import { Teacher } from '@/types/teacher';
 import { StudentScorePrintPreview } from './StudentScorePrintPreview';
-import { Printer, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Printer, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StudentScore {
   id?: string;
@@ -26,11 +27,6 @@ interface StudentScore {
   max_score: number;
   score: number;
   academic_year: string;
-}
-
-interface Subject {
-  code: string;
-  name: string;
 }
 
 interface StudentScorePrintDialogProps {
@@ -48,107 +44,178 @@ interface StudentScorePrintDialogProps {
 export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = ({
   open,
   onOpenChange,
-  scores,
+  scores: propScores,
   students,
   teachers,
   gradeLevel,
-  academicYear,
+  academicYear: propAcademicYear,
   principalName = "นายธนภูมิ ต๊ะสินธุ",
   homeRoomTeacher
 }) => {
-  console.log('StudentScorePrintDialog props:', {
-    scoresCount: scores.length,
-    studentsCount: students.length,
-    gradeLevel,
-    academicYear,
-    scoresPreview: scores.slice(0, 3)
-  });
   const [editablePrincipalName, setEditablePrincipalName] = useState(principalName);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | undefined>(homeRoomTeacher);
   const [selectedGrade, setSelectedGrade] = useState<string>(gradeLevel || 'all');
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const [logoUrl, setLogoUrl] = useState<string>('');
+  const [selectedSemester, setSelectedSemester] = useState<string>('1');
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(propAcademicYear || '');
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
+  
+  // DB-loaded scores
+  const [dbScores, setDbScores] = useState<StudentScore[]>([]);
+  const [loadingScores, setLoadingScores] = useState(false);
 
-  // Update principal name when prop changes
+  // Load available academic years when dialog opens
+  useEffect(() => {
+    if (open) {
+      loadAvailableYears();
+    }
+  }, [open]);
+
+  // Load scores from DB when filters change
+  useEffect(() => {
+    if (open && selectedAcademicYear) {
+      loadScoresFromDB();
+    }
+  }, [open, selectedGrade, selectedAcademicYear, selectedSemester]);
+
+  const loadAvailableYears = async () => {
+    try {
+      const { data: scoreYears } = await supabase
+        .from('student_scores')
+        .select('academic_year')
+        .order('academic_year', { ascending: false });
+
+      const { data: studentYears } = await supabase
+        .from('students')
+        .select('academicYear')
+        .order('academicYear', { ascending: false });
+
+      const allYears = new Set<string>();
+      scoreYears?.forEach(item => { if (item.academic_year) allYears.add(item.academic_year); });
+      studentYears?.forEach(item => { if (item.academicYear) allYears.add(item.academicYear); });
+
+      const sorted = Array.from(allYears).sort((a, b) => parseInt(b) - parseInt(a));
+      setAvailableYears(sorted);
+
+      if (!selectedAcademicYear && sorted.length > 0) {
+        setSelectedAcademicYear(sorted[0]);
+      }
+    } catch (error) {
+      console.error('Error loading academic years:', error);
+    }
+  };
+
+  const loadScoresFromDB = async () => {
+    setLoadingScores(true);
+    try {
+      let query = supabase
+        .from('student_scores')
+        .select('*')
+        .eq('academic_year', selectedAcademicYear)
+        .eq('semester', selectedSemester);
+
+      if (selectedGrade && selectedGrade !== 'all') {
+        query = query.eq('grade_level', selectedGrade);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error loading scores from DB:', error);
+        return;
+      }
+
+      const scoresWithFixedMax = (data || []).map(score => ({
+        ...score,
+        max_score: 50
+      }));
+
+      console.log('Loaded scores from DB:', {
+        count: scoresWithFixedMax.length,
+        grade: selectedGrade,
+        year: selectedAcademicYear,
+        semester: selectedSemester,
+        sample: scoresWithFixedMax.slice(0, 3).map(s => ({
+          subject: s.subject_code,
+          score: s.score,
+          student: s.student_id
+        }))
+      });
+
+      setDbScores(scoresWithFixedMax);
+    } catch (error) {
+      console.error('Error loading scores:', error);
+    } finally {
+      setLoadingScores(false);
+    }
+  };
+
+  // Use DB scores if available, otherwise fall back to prop scores
+  const scores = dbScores.length > 0 ? dbScores : propScores;
+
   useEffect(() => {
     if (principalName) {
       setEditablePrincipalName(principalName);
     }
   }, [principalName]);
 
+  useEffect(() => {
+    if (propAcademicYear && !selectedAcademicYear) {
+      setSelectedAcademicYear(propAcademicYear);
+    }
+  }, [propAcademicYear]);
+
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target?.result as string;
-          setLogoUrl(result);
-        };
-        reader.readAsDataURL(file);
-      }
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => setLogoUrl(e.target?.result as string);
+      reader.readAsDataURL(file);
     }
   };
 
-  // Get unique grade levels from students
+  // Get unique grade levels from students - filter by semester and year
   const availableGrades = useMemo(() => {
-    const grades = [...new Set(students.map(s => s.grade))].sort();
+    const filtered = students.filter(s => 
+      s.semester === selectedSemester && 
+      s.academicYear === selectedAcademicYear
+    );
+    const grades = [...new Set(filtered.map(s => s.grade))].filter(Boolean).sort();
     return grades;
-  }, [students]);
+  }, [students, selectedSemester, selectedAcademicYear]);
 
-  // Filter students by selected grade
+  // Filter students by selected grade, semester, and year - deduplicate
   const filteredStudents = useMemo(() => {
-    if (selectedGrade === 'all') return students;
-    return students.filter(s => s.grade === selectedGrade);
-  }, [students, selectedGrade]);
+    let filtered = students.filter(s => 
+      s.semester === selectedSemester &&
+      s.academicYear === selectedAcademicYear
+    );
+    if (selectedGrade !== 'all') {
+      filtered = filtered.filter(s => s.grade === selectedGrade);
+    }
+    // Deduplicate by studentId
+    const seen = new Set<string>();
+    return filtered.filter(s => {
+      const key = s.studentId || s.id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [students, selectedGrade, selectedSemester, selectedAcademicYear]);
 
-  // Get current student
   const selectedStudent = useMemo(() => {
     if (filteredStudents.length === 0) return undefined;
     return filteredStudents[currentStudentIndex];
   }, [filteredStudents, currentStudentIndex]);
 
-  // Filter scores by selected student's grade
   const filteredScores = useMemo(() => {
-    // Use the actual student's grade if selected, otherwise use selectedGrade
     const targetGrade = selectedStudent?.grade || selectedGrade;
-    
-    console.log('filteredScores calculation:', {
-      targetGrade,
-      selectedStudent: selectedStudent ? `${selectedStudent.firstNameTh} ${selectedStudent.lastNameTh}` : 'none',
-      selectedStudentGrade: selectedStudent?.grade,
-      selectedGrade,
-      totalScores: scores.length,
-      scoresSample: scores.slice(0, 2).map(s => ({
-        student: s.student_id,
-        grade: s.grade_level,
-        subject: s.subject_code,
-        score: s.score
-      }))
-    });
-    
-    if (targetGrade === 'all') {
-      return scores;
-    }
-    
-    // Filter scores by the target grade and trim whitespace
+    if (targetGrade === 'all') return scores;
     const normalizedTargetGrade = targetGrade.trim();
-    const filtered = scores.filter(s => s.grade_level?.trim() === normalizedTargetGrade);
-    
-    console.log('filteredScores result:', {
-      targetGrade: normalizedTargetGrade,
-      filteredCount: filtered.length,
-      filteredSample: filtered.slice(0, 2).map(s => ({
-        subject: s.subject_code,
-        score: s.score,
-        student: s.student_id
-      }))
-    });
-    
-    return filtered;
+    return scores.filter(s => s.grade_level?.trim() === normalizedTargetGrade);
   }, [scores, selectedGrade, selectedStudent]);
 
-  // Navigation handlers
   const handlePrevious = () => {
     setCurrentStudentIndex(prev => Math.max(0, prev - 1));
   };
@@ -157,11 +224,11 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     setCurrentStudentIndex(prev => Math.min(filteredStudents.length - 1, prev + 1));
   };
 
-  // Reset index when grade changes
   const handleGradeChange = (grade: string) => {
     setSelectedGrade(grade);
     setCurrentStudentIndex(0);
   };
+
   const handlePrint = () => {
     const printContent = document.querySelector('.print-content');
     if (!printContent) return;
@@ -245,6 +312,35 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
         </DialogHeader>
 
         <div className="space-y-4 mb-4">
+          {/* Academic Year and Semester Selection */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>ปีการศึกษา</Label>
+              <Select value={selectedAcademicYear} onValueChange={setSelectedAcademicYear}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกปีการศึกษา" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>ภาคเรียน</Label>
+              <Select value={selectedSemester} onValueChange={(val) => { setSelectedSemester(val); setCurrentStudentIndex(0); }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกภาคเรียน" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                  <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="principalName">ชื่อผู้อำนวยการ</Label>
@@ -291,7 +387,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
               <SelectContent>
                 <SelectItem value="all">ทุกชั้น</SelectItem>
                 {availableGrades.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
+                  <SelectItem key={grade} value={grade!}>
                     {grade}
                   </SelectItem>
                 ))}
@@ -320,7 +416,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           </div>
 
           <div className="space-y-2">
-            <Label>เลือกนักเรียน ({currentStudentIndex + 1} / {filteredStudents.length})</Label>
+            <Label>เลือกนักเรียน ({filteredStudents.length > 0 ? `${currentStudentIndex + 1} / ${filteredStudents.length}` : '0 / 0'})</Label>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
@@ -349,6 +445,19 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
               </Button>
             </div>
           </div>
+
+          {loadingScores && (
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>กำลังโหลดข้อมูลคะแนน...</span>
+            </div>
+          )}
+
+          {!loadingScores && scores.length === 0 && selectedGrade !== 'all' && (
+            <div className="text-center text-amber-600 text-sm">
+              ไม่พบข้อมูลคะแนนสำหรับชั้น {selectedGrade} ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester}
+            </div>
+          )}
         </div>
 
         <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', transform: 'scale(0.8)', transformOrigin: 'top center' }}>
@@ -357,7 +466,8 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             students={filteredStudents}
             teachers={teachers}
             gradeLevel={selectedStudent?.grade || selectedGrade}
-            academicYear={academicYear}
+            academicYear={selectedAcademicYear}
+            semester={selectedSemester}
             principalName={editablePrincipalName}
             homeRoomTeacher={selectedTeacher}
             selectedStudent={selectedStudent}
