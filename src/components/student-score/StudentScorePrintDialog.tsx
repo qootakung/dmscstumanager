@@ -37,6 +37,7 @@ interface StudentScorePrintDialogProps {
   teachers: Teacher[];
   gradeLevel: string;
   academicYear: string;
+  semester?: string;
   principalName?: string;
   homeRoomTeacher?: Teacher;
 }
@@ -49,6 +50,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   teachers,
   gradeLevel,
   academicYear: propAcademicYear,
+  semester: propSemester = '1',
   principalName = "นายธนภูมิ ต๊ะสินธุ",
   homeRoomTeacher
 }) => {
@@ -57,7 +59,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   const [selectedGrade, setSelectedGrade] = useState<string>(gradeLevel || 'all');
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const [logoUrl, setLogoUrl] = useState<string>('');
-  const [selectedSemester, setSelectedSemester] = useState<string>('1');
+  const [selectedSemester, setSelectedSemester] = useState<string>(propSemester);
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(propAcademicYear || '');
   const [availableYears, setAvailableYears] = useState<string[]>([]);
   
@@ -151,8 +153,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     }
   };
 
-  // Use DB scores if available, otherwise fall back to prop scores
-  const scores = dbScores.length > 0 ? dbScores : propScores;
+  const scores = dbScores.length > 0 || loadingScores ? dbScores : propScores;
 
   useEffect(() => {
     if (principalName) {
@@ -161,10 +162,20 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
   }, [principalName]);
 
   useEffect(() => {
-    if (propAcademicYear && !selectedAcademicYear) {
-      setSelectedAcademicYear(propAcademicYear);
-    }
+    setSelectedGrade(gradeLevel || 'all');
+  }, [gradeLevel]);
+
+  useEffect(() => {
+    setSelectedAcademicYear(propAcademicYear || '');
   }, [propAcademicYear]);
+
+  useEffect(() => {
+    setSelectedSemester(propSemester);
+  }, [propSemester]);
+
+  useEffect(() => {
+    setCurrentStudentIndex(0);
+  }, [selectedGrade, selectedSemester, selectedAcademicYear]);
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -194,7 +205,6 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     if (selectedGrade !== 'all') {
       filtered = filtered.filter(s => s.grade === selectedGrade);
     }
-    // Deduplicate by studentId
     const seen = new Set<string>();
     return filtered.filter(s => {
       const key = s.studentId || s.id;
@@ -206,7 +216,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
 
   const selectedStudent = useMemo(() => {
     if (filteredStudents.length === 0) return undefined;
-    return filteredStudents[currentStudentIndex];
+    return filteredStudents[Math.min(currentStudentIndex, filteredStudents.length - 1)];
   }, [filteredStudents, currentStudentIndex]);
 
   const filteredScores = useMemo(() => {

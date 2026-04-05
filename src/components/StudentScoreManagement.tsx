@@ -563,7 +563,7 @@ export const StudentScoreManagement: React.FC = () => {
                 onClick={() => setShowPrintDialog(true)}
                 variant="outline"
                 className="flex items-center gap-2"
-                disabled={allScoresForGrade.length === 0}
+                disabled={filteredStudents.length === 0}
               >
                 <Printer className="h-4 w-4" />
                 ตัวอย่างก่อนพิมพ์
@@ -652,6 +652,7 @@ export const StudentScoreManagement: React.FC = () => {
         teachers={teachers}
         gradeLevel={selectedGrade}
         academicYear={academicYear}
+        semester={selectedSemester}
         principalName={principalName}
         homeRoomTeacher={teachers.find(t => t.position?.includes('ครูประจำชั้น'))}
       />
