@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileSpreadsheet, Download, Users, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import * as XLSX from 'xlsx';
-import { getStudents } from '@/utils/studentStorage';
+import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
 
 const ImportTemplate: React.FC = () => {
