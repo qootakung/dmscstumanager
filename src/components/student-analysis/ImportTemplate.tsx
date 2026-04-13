@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileSpreadsheet, Download, Users, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import * as XLSX from 'xlsx';
-import { getStudents } from '@/utils/studentStorage';
+import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
 
 const ImportTemplate: React.FC = () => {
@@ -33,9 +33,24 @@ const ImportTemplate: React.FC = () => {
     const fetchStudents = async () => {
       try {
         setIsLoading(true);
-        const studentData = await getStudents();
-        setStudents(studentData);
-        console.log('Fetched students:', studentData.length);
+        const { data, error } = await supabase
+          .from('students')
+          .select('*')
+          .eq('semester', '2');
+        
+        if (error) throw error;
+        
+        // Deduplicate by studentId
+        const seen = new Set<string>();
+        const uniqueStudents = (data as Student[]).filter(student => {
+          const key = student.studentId || student.id;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        
+        setStudents(uniqueStudents);
+        console.log('Fetched semester 2 students:', uniqueStudents.length);
       } catch (error) {
         console.error('Error fetching students:', error);
         toast({
