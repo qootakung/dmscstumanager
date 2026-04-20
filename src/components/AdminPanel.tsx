@@ -155,7 +155,25 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleClearAllStudents = async () => {
+  const handleTogglePermission = async (user: User, canEdit: boolean) => {
+    if (currentUser?.username !== 'dmsc@') {
+      await Swal.fire({
+        title: 'ไม่มีสิทธิ์!',
+        text: 'เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถแก้ไขสิทธิ์ผู้ใช้ได้',
+        icon: 'error',
+        confirmButtonText: 'ตกลง'
+      });
+      return;
+    }
+    const ok = await updateUserPermission(user.id, canEdit);
+    if (ok) {
+      window.dispatchEvent(new Event('dmsc:user-changed'));
+      await loadUsers();
+    } else {
+      await Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถอัปเดตสิทธิ์ได้', icon: 'error' });
+    }
+  };
+
     // Only allow the main admin (dmsc@) to delete all data
     if (currentUser?.username !== 'dmsc@') {
       await Swal.fire({
@@ -418,8 +436,19 @@ const AdminPanel: React.FC = () => {
                               </div>
                               <div>
                                 <p className="font-medium text-gray-900">{user.username}</p>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-gray-600 flex items-center gap-1">
                                   {user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้ทั่วไป'}
+                                  {user.role !== 'admin' && (
+                                    user.canEdit ? (
+                                      <span className="inline-flex items-center gap-1 ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full">
+                                        <Pencil className="w-3 h-3" /> แก้ไขได้
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                        <Eye className="w-3 h-3" /> อ่านอย่างเดียว
+                                      </span>
+                                    )
+                                  )}
                                 </p>
                               </div>
                             </div>
@@ -433,6 +462,15 @@ const AdminPanel: React.FC = () => {
                                 <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-blue-500 text-white text-xs rounded-full font-medium">
                                   คุณ
                                 </span>
+                              )}
+                              {isMainAdmin && user.role !== 'admin' && (
+                                <div className="flex items-center gap-1.5 mr-1" title="อนุญาตให้แก้ไข/ลบข้อมูล">
+                                  <Switch
+                                    checked={Boolean(user.canEdit)}
+                                    onCheckedChange={(checked) => handleTogglePermission(user, checked)}
+                                  />
+                                  <span className="text-xs text-gray-500">แก้ไข</span>
+                                </div>
                               )}
                               {isMainAdmin && user.username !== 'dmsc@' && user.id !== currentUser?.id && (
                                 <Button
