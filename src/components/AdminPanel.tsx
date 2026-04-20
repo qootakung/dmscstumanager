@@ -174,6 +174,7 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  const handleClearAllStudents = async () => {
     // Only allow the main admin (dmsc@) to delete all data
     if (currentUser?.username !== 'dmsc@') {
       await Swal.fire({
