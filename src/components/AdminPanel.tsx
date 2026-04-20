@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle } from 'lucide-react';
+import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye } from 'lucide-react';
 import { getUsers, addUser, clearAllStudents, getCurrentUser } from '@/utils/storage';
+import { updateUserPermission } from '@/utils/userStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -17,7 +20,8 @@ const AdminPanel: React.FC = () => {
   const [newUser, setNewUser] = useState({
     username: '',
     password: '',
-    role: 'user' as 'admin' | 'user'
+    role: 'user' as 'admin' | 'user',
+    canEdit: false,
   });
   const currentUser = getCurrentUser();
 
@@ -66,7 +70,7 @@ const AdminPanel: React.FC = () => {
         showConfirmButton: false
       });
       
-      setNewUser({ username: '', password: '', role: 'user' });
+      setNewUser({ username: '', password: '', role: 'user', canEdit: false });
       await loadUsers();
     } catch (error) {
       await Swal.fire({
