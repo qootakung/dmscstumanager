@@ -46,6 +46,7 @@ export interface User {
   username: string;
   password: string;
   role: 'admin' | 'user';
+  canEdit?: boolean;
   createdAt: string;
 }
 
