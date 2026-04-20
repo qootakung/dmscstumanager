@@ -344,7 +344,7 @@ const AdminPanel: React.FC = () => {
                           <Label htmlFor="role" className="text-gray-700 font-medium">สิทธิ์ผู้ใช้</Label>
                           <Select
                             value={newUser.role}
-                            onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value as 'admin' | 'user' }))}
+                            onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value as 'admin' | 'user', canEdit: value === 'admin' ? true : prev.canEdit }))}
                           >
                             <SelectTrigger className="border-2 border-blue-200 focus:border-blue-500 rounded-xl">
                               <SelectValue placeholder="เลือกสิทธิ์ผู้ใช้" />
@@ -355,8 +355,26 @@ const AdminPanel: React.FC = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        
-                        <Button 
+
+                        <div className="flex items-start gap-3 p-4 bg-white/70 border-2 border-blue-200 rounded-xl">
+                          <Checkbox
+                            id="canEdit"
+                            checked={newUser.role === 'admin' ? true : newUser.canEdit}
+                            disabled={newUser.role === 'admin'}
+                            onCheckedChange={(checked) => setNewUser(prev => ({ ...prev, canEdit: Boolean(checked) }))}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <Label htmlFor="canEdit" className="text-gray-800 font-medium cursor-pointer flex items-center gap-2">
+                              <Pencil className="w-4 h-4 text-blue-600" />
+                              อนุญาตให้แก้ไข/ลบข้อมูลในระบบ
+                            </Label>
+                            <p className="text-xs text-gray-600 mt-1">
+                              หากไม่ติ๊ก ผู้ใช้คนนี้จะดูข้อมูลได้อย่างเดียว ไม่สามารถแก้ไขหรือลบได้
+                              {newUser.role === 'admin' && ' (ผู้ดูแลระบบมีสิทธิ์เต็มโดยอัตโนมัติ)'}
+                            </p>
+                          </div>
+                        </div>
                           type="submit" 
                           className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 transform hover:scale-105 rounded-xl"
                         >
