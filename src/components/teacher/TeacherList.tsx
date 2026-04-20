@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Search } from 'lucide-react';
 import type { Teacher } from '@/types/teacher';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface TeacherListProps {
   teachers: Teacher[];
@@ -15,6 +16,7 @@ interface TeacherListProps {
 
 const TeacherList: React.FC<TeacherListProps> = ({ teachers, onEdit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { canEdit } = usePermissions();
 
   const filteredTeachers = teachers.filter(teacher =>
     teacher.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -72,22 +74,28 @@ const TeacherList: React.FC<TeacherListProps> = ({ teachers, onEdit, onDelete })
                     <TableCell>{teacher.academicYear}</TableCell>
                     <TableCell>
                       <div className="flex gap-2 justify-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onEdit(teacher)}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onDelete(teacher)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {canEdit ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onEdit(teacher)}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onDelete(teacher)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">อ่านอย่างเดียว</span>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

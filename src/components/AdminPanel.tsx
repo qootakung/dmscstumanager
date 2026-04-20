@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle } from 'lucide-react';
+import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye } from 'lucide-react';
 import { getUsers, addUser, clearAllStudents, getCurrentUser } from '@/utils/storage';
+import { updateUserPermission } from '@/utils/userStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -17,7 +20,8 @@ const AdminPanel: React.FC = () => {
   const [newUser, setNewUser] = useState({
     username: '',
     password: '',
-    role: 'user' as 'admin' | 'user'
+    role: 'user' as 'admin' | 'user',
+    canEdit: false,
   });
   const currentUser = getCurrentUser();
 
@@ -66,7 +70,7 @@ const AdminPanel: React.FC = () => {
         showConfirmButton: false
       });
       
-      setNewUser({ username: '', password: '', role: 'user' });
+      setNewUser({ username: '', password: '', role: 'user', canEdit: false });
       await loadUsers();
     } catch (error) {
       await Swal.fire({
@@ -148,6 +152,25 @@ const AdminPanel: React.FC = () => {
           confirmButtonText: 'ตกลง'
         });
       }
+    }
+  };
+
+  const handleTogglePermission = async (user: User, canEdit: boolean) => {
+    if (currentUser?.username !== 'dmsc@') {
+      await Swal.fire({
+        title: 'ไม่มีสิทธิ์!',
+        text: 'เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถแก้ไขสิทธิ์ผู้ใช้ได้',
+        icon: 'error',
+        confirmButtonText: 'ตกลง'
+      });
+      return;
+    }
+    const ok = await updateUserPermission(user.id, canEdit);
+    if (ok) {
+      window.dispatchEvent(new Event('dmsc:user-changed'));
+      await loadUsers();
+    } else {
+      await Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถอัปเดตสิทธิ์ได้', icon: 'error' });
     }
   };
 
@@ -340,7 +363,7 @@ const AdminPanel: React.FC = () => {
                           <Label htmlFor="role" className="text-gray-700 font-medium">สิทธิ์ผู้ใช้</Label>
                           <Select
                             value={newUser.role}
-                            onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value as 'admin' | 'user' }))}
+                            onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value as 'admin' | 'user', canEdit: value === 'admin' ? true : prev.canEdit }))}
                           >
                             <SelectTrigger className="border-2 border-blue-200 focus:border-blue-500 rounded-xl">
                               <SelectValue placeholder="เลือกสิทธิ์ผู้ใช้" />
@@ -351,9 +374,29 @@ const AdminPanel: React.FC = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        
-                        <Button 
-                          type="submit" 
+
+                        <div className="flex items-start gap-3 p-4 bg-white/70 border-2 border-blue-200 rounded-xl">
+                          <Checkbox
+                            id="canEdit"
+                            checked={newUser.role === 'admin' ? true : newUser.canEdit}
+                            disabled={newUser.role === 'admin'}
+                            onCheckedChange={(checked) => setNewUser(prev => ({ ...prev, canEdit: Boolean(checked) }))}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <Label htmlFor="canEdit" className="text-gray-800 font-medium cursor-pointer flex items-center gap-2">
+                              <Pencil className="w-4 h-4 text-blue-600" />
+                              อนุญาตให้แก้ไข/ลบข้อมูลในระบบ
+                            </Label>
+                            <p className="text-xs text-gray-600 mt-1">
+                              หากไม่ติ๊ก ผู้ใช้คนนี้จะดูข้อมูลได้อย่างเดียว ไม่สามารถแก้ไขหรือลบได้
+                              {newUser.role === 'admin' && ' (ผู้ดูแลระบบมีสิทธิ์เต็มโดยอัตโนมัติ)'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <Button
+                          type="submit"
                           className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 transform hover:scale-105 rounded-xl"
                         >
                           <UserPlus className="w-4 h-4 mr-2" />
@@ -394,8 +437,19 @@ const AdminPanel: React.FC = () => {
                               </div>
                               <div>
                                 <p className="font-medium text-gray-900">{user.username}</p>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-gray-600 flex items-center gap-1">
                                   {user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้ทั่วไป'}
+                                  {user.role !== 'admin' && (
+                                    user.canEdit ? (
+                                      <span className="inline-flex items-center gap-1 ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full">
+                                        <Pencil className="w-3 h-3" /> แก้ไขได้
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                        <Eye className="w-3 h-3" /> อ่านอย่างเดียว
+                                      </span>
+                                    )
+                                  )}
                                 </p>
                               </div>
                             </div>
@@ -409,6 +463,15 @@ const AdminPanel: React.FC = () => {
                                 <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-blue-500 text-white text-xs rounded-full font-medium">
                                   คุณ
                                 </span>
+                              )}
+                              {isMainAdmin && user.role !== 'admin' && (
+                                <div className="flex items-center gap-1.5 mr-1" title="อนุญาตให้แก้ไข/ลบข้อมูล">
+                                  <Switch
+                                    checked={Boolean(user.canEdit)}
+                                    onCheckedChange={(checked) => handleTogglePermission(user, checked)}
+                                  />
+                                  <span className="text-xs text-gray-500">แก้ไข</span>
+                                </div>
                               )}
                               {isMainAdmin && user.username !== 'dmsc@' && user.id !== currentUser?.id && (
                                 <Button

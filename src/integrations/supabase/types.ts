@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       app_users: {
         Row: {
+          can_edit: boolean
           created_at: string
           id: string
           password: string
@@ -23,6 +24,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          can_edit?: boolean
           created_at?: string
           id?: string
           password: string
@@ -30,6 +32,7 @@ export type Database = {
           username: string
         }
         Update: {
+          can_edit?: boolean
           created_at?: string
           id?: string
           password?: string

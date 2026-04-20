@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Users, GraduationCap, Calendar, Hash } from 'lucide-react';
 import type { Student } from '@/types/student';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface StudentListProps {
   students: Student[];
@@ -16,6 +17,7 @@ const StudentList: React.FC<StudentListProps> = ({
   onEdit,
   onDelete
 }) => {
+  const { canEdit } = usePermissions();
   return (
     <Card className="shadow-2xl border-0 rounded-3xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 text-white p-6">
@@ -100,22 +102,28 @@ const StudentList: React.FC<StudentListProps> = ({
                   </td>
                   <td className="p-4">
                     <div className="flex justify-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onEdit(student)}
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 hover:from-blue-600 hover:to-purple-600 shadow-lg transition-all duration-300 transform hover:scale-105"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onDelete(student)}
-                        className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 hover:from-red-600 hover:to-pink-600 shadow-lg transition-all duration-300 transform hover:scale-105"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {canEdit ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onEdit(student)}
+                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 hover:from-blue-600 hover:to-purple-600 shadow-lg transition-all duration-300 transform hover:scale-105"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onDelete(student)}
+                            className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 hover:from-red-600 hover:to-pink-600 shadow-lg transition-all duration-300 transform hover:scale-105"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">อ่านอย่างเดียว</span>
+                      )}
                     </div>
                   </td>
                 </tr>
