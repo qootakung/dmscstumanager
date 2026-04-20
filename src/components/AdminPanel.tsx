@@ -375,7 +375,9 @@ const AdminPanel: React.FC = () => {
                             </p>
                           </div>
                         </div>
-                          type="submit" 
+
+                        <Button
+                          type="submit"
                           className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 transform hover:scale-105 rounded-xl"
                         >
                           <UserPlus className="w-4 h-4 mr-2" />
