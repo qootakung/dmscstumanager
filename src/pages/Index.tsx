@@ -47,6 +47,7 @@ const Index = () => {
     const user = getCurrentUser();
     console.log('User after login:', user);
     setCurrentUser(user);
+    window.dispatchEvent(new Event('dmsc:user-changed'));
   };
 
   const handleLogout = async () => {
@@ -92,6 +93,11 @@ const Index = () => {
             <span className="text-sm text-muted-foreground">
               สวัสดี, {currentUser.username}
             </span>
+            {!isAdmin && (
+              <span className={`text-xs px-2 py-1 rounded-full font-medium ${currentUser.canEdit ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                {currentUser.canEdit ? 'สิทธิ์: แก้ไขได้' : 'สิทธิ์: อ่านอย่างเดียว'}
+              </span>
+            )}
             {isAdmin && (
               <Button
                 variant="outline"
