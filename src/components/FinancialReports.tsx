@@ -2,6 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PaymentTypeSelection from './Finance/form/PaymentTypeSelection';
 import AcademicInfoSection from './Finance/form/AcademicInfoSection';
 import GradeSelection from './Finance/form/GradeSelection';
@@ -16,6 +17,7 @@ import { Printer, Eye, UserPlus } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import PrintPreviewDialog from './Finance/PrintPreviewDialog';
 import StudentSelectionDialog from './Finance/StudentSelectionDialog';
+import ManualStudentUpload from './Finance/form/ManualStudentUpload';
 import type { Student } from '@/types/student';
 
 const FinancialReports = () => {
@@ -36,6 +38,7 @@ const FinancialReports = () => {
   const printRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showStudentSelection, setShowStudentSelection] = useState(false);
+  const [isManualMode, setIsManualMode] = useState(false);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -178,6 +181,14 @@ const FinancialReports = () => {
     return gradeTexts.join(', ');
   };
 
+  const handleManualStudentsLoaded = (loadedStudents: Student[]) => {
+    setVoucherData(prev => ({
+      ...prev,
+      students: loadedStudents,
+      grade: getGradeDisplayFromStudents(loadedStudents) || prev.grade
+    }));
+  };
+
   const handlePaymentTypeChangeWrapper = (paymentTypes: string[]) => {
     setVoucherData(prev => ({ ...prev, paymentTypes }));
     
@@ -222,12 +233,6 @@ const FinancialReports = () => {
             onSemesterChange={(value) => setVoucherData(prev => ({ ...prev, semester: value }))}
           />
 
-          <GradeSelection
-            grades={grades}
-            selectedGrade={selectedGrade}
-            onGradeChange={handleGradeChange}
-          />
-
           <PaymentDetailsSection
             paymentDate={voucherData.paymentDate}
             amountPerStudent={voucherData.amountPerStudent}
@@ -235,55 +240,88 @@ const FinancialReports = () => {
             onAmountPerStudentChange={(value) => setVoucherData(prev => ({ ...prev, amountPerStudent: value }))}
           />
 
-          <StudentCountInfo 
-            grade={voucherData.grade}
-            studentCount={voucherData.students.length}
-          />
-
-          {/* Student Selection Button */}
-          <div className="border-t pt-4">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-lg font-medium">รายชื่อนักเรียน</h3>
-                <p className="text-sm text-gray-600">
-                  {voucherData.students.length > 0 
-                    ? `เลือกนักเรียนแล้ว ${voucherData.students.length} คน`
-                    : 'ยังไม่ได้เลือกนักเรียน'
-                  }
-                </p>
-              </div>
-              <Button 
-                onClick={() => setShowStudentSelection(true)}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <UserPlus className="w-4 h-4" />
-                เลือกนักเรียนเพิ่มเติม
-              </Button>
-            </div>
+          <Tabs 
+            defaultValue="system" 
+            onValueChange={(v) => {
+              const isManual = v === 'manual';
+              setIsManualMode(isManual);
+              if (isManual) {
+                setVoucherData(prev => ({ ...prev, students: [], grade: '' }));
+              } else {
+                handleGradeChange(selectedGrade);
+              }
+            }} 
+            className="w-full mt-6"
+          >
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="system">ดึงข้อมูลจากระบบ</TabsTrigger>
+              <TabsTrigger value="manual">นำเข้าข้อมูลเอง (Manual Mode)</TabsTrigger>
+            </TabsList>
             
-            {voucherData.students.length > 0 && (
-              <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
-                <div className="grid gap-2">
-                  {voucherData.students.slice(0, 10).map((student, index) => (
-                    <div key={student.id} className="flex justify-between items-center text-sm">
-                      <span>
-                        {index + 1}. {student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}
-                      </span>
-                      <span className="text-gray-500">
-                        {student.grade} ({student.academicYear})
-                      </span>
-                    </div>
-                  ))}
-                  {voucherData.students.length > 10 && (
-                    <div className="text-sm text-gray-500 text-center pt-2">
-                      และอีก {voucherData.students.length - 10} คน
-                    </div>
-                  )}
+            <TabsContent value="system" className="space-y-6 border rounded-lg p-6 bg-gray-50/30">
+              <GradeSelection
+                grades={grades}
+                selectedGrade={selectedGrade}
+                onGradeChange={handleGradeChange}
+              />
+
+              <StudentCountInfo 
+                grade={voucherData.grade}
+                studentCount={voucherData.students.length}
+              />
+
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-medium">รายชื่อนักเรียน</h3>
+                    <p className="text-sm text-gray-600">
+                      {voucherData.students.length > 0 
+                        ? `เลือกนักเรียนแล้ว ${voucherData.students.length} คน`
+                        : 'ยังไม่ได้เลือกนักเรียน'
+                      }
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => setShowStudentSelection(true)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    เลือกนักเรียนเพิ่มเติม
+                  </Button>
                 </div>
+                
+                {voucherData.students.length > 0 && (
+                  <div className="bg-white border rounded-lg p-4 max-h-48 overflow-y-auto">
+                    <div className="grid gap-2">
+                      {voucherData.students.slice(0, 10).map((student, index) => (
+                        <div key={student.id} className="flex justify-between items-center text-sm">
+                          <span>
+                            {index + 1}. {student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}
+                          </span>
+                          <span className="text-gray-500">
+                            {student.grade} ({student.academicYear})
+                          </span>
+                        </div>
+                      ))}
+                      {voucherData.students.length > 10 && (
+                        <div className="text-sm text-gray-500 text-center pt-2">
+                          และอีก {voucherData.students.length - 10} คน
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="manual" className="space-y-6 border rounded-lg p-6 bg-gray-50/30">
+               <ManualStudentUpload 
+                 onStudentsLoaded={handleManualStudentsLoaded} 
+                 currentStudentsCount={voucherData.students.length} 
+               />
+            </TabsContent>
+          </Tabs>
 
           <SignatureFields
             teachers={teachers}
