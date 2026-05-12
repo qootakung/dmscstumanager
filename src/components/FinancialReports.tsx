@@ -184,10 +184,28 @@ const FinancialReports = () => {
   };
 
   const handleManualStudentsLoaded = (loadedStudents: Student[]) => {
+    setManualAllStudents(loadedStudents);
+    const filtered = manualSelectedGrade && manualSelectedGrade !== 'ทุกระดับชั้น'
+      ? loadedStudents.filter(s => s.grade === manualSelectedGrade)
+      : loadedStudents;
     setVoucherData(prev => ({
       ...prev,
-      students: loadedStudents,
-      grade: getGradeDisplayFromStudents(loadedStudents) || prev.grade
+      students: filtered,
+      grade: manualSelectedGrade && manualSelectedGrade !== 'ทุกระดับชั้น' 
+        ? manualSelectedGrade 
+        : getGradeDisplayFromStudents(filtered) || prev.grade
+    }));
+  };
+
+  const handleManualGradeChange = (grade: string) => {
+    setManualSelectedGrade(grade);
+    const filtered = grade === 'ทุกระดับชั้น'
+      ? manualAllStudents
+      : manualAllStudents.filter(s => s.grade === grade);
+    setVoucherData(prev => ({
+      ...prev,
+      students: filtered,
+      grade: grade === 'ทุกระดับชั้น' ? getGradeDisplayFromStudents(filtered) : grade
     }));
   };
 
