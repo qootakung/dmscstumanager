@@ -39,6 +39,8 @@ const FinancialReports = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [showStudentSelection, setShowStudentSelection] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
+  const [manualAllStudents, setManualAllStudents] = useState<Student[]>([]);
+  const [manualSelectedGrade, setManualSelectedGrade] = useState('');
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
