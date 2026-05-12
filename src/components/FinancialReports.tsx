@@ -267,7 +267,11 @@ const FinancialReports = () => {
               setIsManualMode(isManual);
               if (isManual) {
                 setVoucherData(prev => ({ ...prev, students: [], grade: '' }));
+                setManualAllStudents([]);
+                setManualSelectedGrade('');
               } else {
+                setManualAllStudents([]);
+                setManualSelectedGrade('');
                 handleGradeChange(selectedGrade);
               }
             }} 
@@ -336,10 +340,61 @@ const FinancialReports = () => {
             </TabsContent>
 
             <TabsContent value="manual" className="space-y-6 border rounded-lg p-6 bg-gray-50/30">
-               <ManualStudentUpload 
-                 onStudentsLoaded={handleManualStudentsLoaded} 
-                 currentStudentsCount={voucherData.students.length} 
-               />
+              <ManualStudentUpload 
+                onStudentsLoaded={handleManualStudentsLoaded} 
+                currentStudentsCount={voucherData.students.length} 
+              />
+
+              {manualAllStudents.length > 0 && (
+                <>
+                  <GradeSelection
+                    grades={grades}
+                    selectedGrade={manualSelectedGrade}
+                    onGradeChange={handleManualGradeChange}
+                  />
+
+                  <StudentCountInfo 
+                    grade={voucherData.grade}
+                    studentCount={voucherData.students.length}
+                  />
+
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="text-lg font-medium">รายชื่อนักเรียน</h3>
+                        <p className="text-sm text-gray-600">
+                          {voucherData.students.length > 0 
+                            ? `เลือกนักเรียนแล้ว ${voucherData.students.length} คน`
+                            : 'ยังไม่ได้เลือกนักเรียน'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {voucherData.students.length > 0 && (
+                      <div className="bg-white border rounded-lg p-4 max-h-48 overflow-y-auto">
+                        <div className="grid gap-2">
+                          {voucherData.students.slice(0, 10).map((student, index) => (
+                            <div key={student.id} className="flex justify-between items-center text-sm">
+                              <span>
+                                {index + 1}. {student.titleTh || ''} {student.firstNameTh} {student.lastNameTh}
+                              </span>
+                              <span className="text-gray-500">
+                                {student.grade}
+                              </span>
+                            </div>
+                          ))}
+                          {voucherData.students.length > 10 && (
+                            <div className="text-sm text-gray-500 text-center pt-2">
+                              และอีก {voucherData.students.length - 10} คน
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </TabsContent>
           </Tabs>
 
