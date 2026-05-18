@@ -15,6 +15,7 @@ const Dashboard: React.FC = () => {
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
   const [teacherStats, setTeacherStats] = useState<TeacherStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   
   // Calculate current semester based on date
   // Semester 1: May 16 - October 31
@@ -38,18 +39,32 @@ const Dashboard: React.FC = () => {
     return '2';
   };
   
+  const getCurrentAcademicYear = () => {
+    const now = new Date();
+    const year = now.getFullYear() + 543;
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    if (month < 5 || (month === 5 && day < 16)) return (year - 1).toString();
+    return year.toString();
+  };
+
   const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
+  const [selectedYear, setSelectedYear] = useState<string>(getCurrentAcademicYear());
 
   useEffect(() => {
     const fetchStatistics = async () => {
       setLoading(true);
       try {
         const [sStats, tStats] = await Promise.all([
-          getStudentStatistics(selectedSemester),
+          getStudentStatistics(selectedSemester, selectedYear),
           getTeacherStatistics(),
         ]);
         setStudentStats(sStats);
         setTeacherStats(tStats);
+        setAvailableYears(sStats.academicYears);
+        if (sStats.academicYears.length > 0 && !sStats.academicYears.includes(selectedYear)) {
+          setSelectedYear(sStats.academicYears[0]);
+        }
       } catch (error) {
         console.error("Error fetching dashboard statistics:", error);
       } finally {
@@ -57,7 +72,7 @@ const Dashboard: React.FC = () => {
       }
     };
     fetchStatistics();
-  }, [selectedSemester]);
+  }, [selectedSemester, selectedYear]);
 
   if (loading || !studentStats || !teacherStats) {
     return (
@@ -158,7 +173,20 @@ const Dashboard: React.FC = () => {
       {/* Semester Selection */}
       <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <Label className="text-lg font-semibold whitespace-nowrap">
+              ปีการศึกษา:
+            </Label>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(availableYears.length > 0 ? availableYears : [selectedYear]).map(y => (
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Label htmlFor="semester" className="text-lg font-semibold whitespace-nowrap">
               ภาคเรียน:
             </Label>

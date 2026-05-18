@@ -19,13 +19,13 @@ const getCurrentAcademicYear = () => {
 };
 
 // Statistics
-export const getStudentStatistics = async (semester?: string) => {
+export const getStudentStatistics = async (semester?: string, academicYear?: string) => {
   const students: Student[] = await getStudents();
-  const currentAcademicYear = getCurrentAcademicYear();
-  
-  // Filter by current academic year and semester
+  const targetYear = academicYear || getCurrentAcademicYear();
+
+  // Filter by academic year and semester
   let filteredStudents = students.filter(s => {
-    const matchYear = s.academicYear === currentAcademicYear;
+    const matchYear = s.academicYear === targetYear;
     if (semester) {
       return matchYear && s.semester === semester;
     }
