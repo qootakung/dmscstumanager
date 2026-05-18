@@ -9,7 +9,8 @@ import Swal from 'sweetalert2';
 import StudentForm from './student/StudentForm';
 import StudentList from './student/StudentList';
 import StudentImport from './student/StudentImport';
-import { Users, UserPlus, FileText, Upload, GraduationCap, BookOpen, TrendingUp } from 'lucide-react';
+import IndividualStudentInfo from './student/IndividualStudentInfo';
+import { Users, UserPlus, FileText, Upload, GraduationCap, BookOpen, TrendingUp, IdCard } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 // Calculate current semester based on date
@@ -287,7 +288,7 @@ const StudentManagement: React.FC = () => {
 
           <div className="p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-2 border border-blue-100">
+              <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-2 border border-blue-100">
                 <TabsTrigger 
                   value="form" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl transition-all duration-300 flex items-center gap-2"
@@ -308,6 +309,13 @@ const StudentManagement: React.FC = () => {
                 >
                   <Upload className="w-4 h-4" />
                   นำเข้าข้อมูล
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="individual" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl transition-all duration-300 flex items-center gap-2"
+                >
+                  <IdCard className="w-4 h-4" />
+                  ข้อมูลนักเรียนรายบุคคล
                 </TabsTrigger>
               </TabsList>
 
@@ -335,6 +343,10 @@ const StudentManagement: React.FC = () => {
                 <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 border border-green-100">
                   <StudentImport />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="individual" className="mt-6">
+                <IndividualStudentInfo />
               </TabsContent>
             </Tabs>
           </div>
