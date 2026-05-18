@@ -173,7 +173,20 @@ const Dashboard: React.FC = () => {
       {/* Semester Selection */}
       <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <Label className="text-lg font-semibold whitespace-nowrap">
+              ปีการศึกษา:
+            </Label>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(availableYears.length > 0 ? availableYears : [selectedYear]).map(y => (
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Label htmlFor="semester" className="text-lg font-semibold whitespace-nowrap">
               ภาคเรียน:
             </Label>
