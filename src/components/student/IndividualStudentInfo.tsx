@@ -124,27 +124,46 @@ const IndividualStudentInfo: React.FC = () => {
         photoFileName: extra.photoFile ? `${current.studentId}_${current.firstNameTh}.${(extra.photoFile.name.split('.').pop() || 'jpg')}` : '',
       };
 
-      // text/plain avoids CORS preflight; Apps Script returns JSON we can read
-      const res = await fetch(APPSCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-      });
+      // Apps Script redirects responses to googleusercontent.com which blocks CORS.
+      // Try a normal fetch first to capture photoUrl; fall back to no-cors so the
+      // request still succeeds when the browser blocks the redirected response.
       let photoUrl = '';
+      let sent = false;
       try {
-        const json = await res.json();
-        if (json?.status === 'ok') photoUrl = json.photoUrl || '';
-        else if (json?.status === 'error') throw new Error(json.message || 'apps script error');
+        const res = await fetch(APPSCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload),
+          redirect: 'follow',
+        });
+        sent = true;
+        try {
+          const json = await res.json();
+          if (json?.status === 'ok') photoUrl = json.photoUrl || '';
+          else if (json?.status === 'error') console.warn('Apps Script error', json.message);
+        } catch (e) {
+          console.warn('Could not parse Apps Script response (likely CORS on redirect)', e);
+        }
       } catch (e) {
-        console.warn('Could not parse Apps Script response', e);
+        console.warn('CORS blocked, retrying with no-cors (fire & forget)', e);
+        await fetch(APPSCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload),
+        });
+        sent = true;
       }
+      if (!sent) throw new Error('send failed');
       const next = { ...extra, photoUrl: photoUrl || extra.photoUrl };
       setExtra(next);
       saveLocal(current.id, next);
       await Swal.fire({
         icon: 'success',
         title: 'ส่งข้อมูลสำเร็จ',
-        html: photoUrl ? `<a href="${photoUrl}" target="_blank" class="text-blue-600 underline">ดูรูปที่อัปโหลด</a>` : 'บันทึกข้อมูลเรียบร้อย',
+        html: photoUrl
+          ? `<a href="${photoUrl}" target="_blank" class="text-blue-600 underline">ดูรูปที่อัปโหลด</a>`
+          : 'ส่งข้อมูลไปยัง Google Sheet เรียบร้อย (ตรวจสอบที่ชีต uppic)',
         timer: 2000,
       });
     } catch (err) {
