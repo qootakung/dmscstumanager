@@ -9,7 +9,7 @@ import { getStudents } from '@/utils/storage';
 import type { Student } from '@/types/student';
 import Swal from 'sweetalert2';
 
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7Ujpowe1C57qpV_M7ADlcDSm39RKatMp-FwtbJVE9HLe11G87Y5sJXHlD182O0Jr5/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9MUxfZsdSZEWzdmq6claTWSoBkXuYYwye8r0ICUMoLtpfgLi2LsoXiWsZCcdPVdcxnw/exec';
 
 const GRADE_OPTIONS = ['อ.1','อ.2','อ.3','ป.1','ป.2','ป.3','ป.4','ป.5','ป.6'];
 
@@ -18,6 +18,7 @@ interface ExtraInfo {
   phone: string;
   photoDataUrl?: string;
   photoFile?: File;
+  photoUrl?: string;
 }
 
 const storageKey = (studentId: string) => `individual-info:${studentId}`;
@@ -53,7 +54,21 @@ const IndividualStudentInfo: React.FC = () => {
   useEffect(() => {
     (async () => {
       const data = await getStudents();
-      setStudents(data);
+      // Keep only the latest academic year + latest semester
+      if (data.length === 0) { setStudents([]); return; }
+      const latestYear = data.reduce((m, s) => (s.academicYear > m ? s.academicYear : m), data[0].academicYear);
+      const inYear = data.filter(s => s.academicYear === latestYear);
+      const latestSem = inYear.reduce((m, s) => (s.semester > m ? s.semester : m), inYear[0].semester);
+      const latest = inYear.filter(s => s.semester === latestSem);
+      // Dedupe by studentId
+      const seen = new Set<string>();
+      const unique = latest.filter(s => {
+        const k = s.studentId || s.id;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      setStudents(unique);
     })();
   }, []);
 
@@ -70,7 +85,11 @@ const IndividualStudentInfo: React.FC = () => {
 
   useEffect(() => {
     if (current) {
-      setExtra(loadLocal(current.id));
+      const saved = loadLocal(current.id);
+      setExtra({
+        ...saved,
+        phone: saved.phone || current.guardianPhone || '',
+      });
     } else {
       setExtra({ nickname: '', phone: '' });
     }
@@ -105,16 +124,29 @@ const IndividualStudentInfo: React.FC = () => {
         photoFileName: extra.photoFile ? `${current.studentId}_${current.firstNameTh}.${(extra.photoFile.name.split('.').pop() || 'jpg')}` : '',
       };
 
-      // Apps Script Web App — use no-cors text/plain to avoid preflight; response is opaque.
-      await fetch(APPSCRIPT_URL, {
+      // text/plain avoids CORS preflight; Apps Script returns JSON we can read
+      const res = await fetch(APPSCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
       });
-
-      saveLocal(current.id, extra);
-      await Swal.fire({ icon: 'success', title: 'ส่งข้อมูลสำเร็จ', timer: 1400, showConfirmButton: false });
+      let photoUrl = '';
+      try {
+        const json = await res.json();
+        if (json?.status === 'ok') photoUrl = json.photoUrl || '';
+        else if (json?.status === 'error') throw new Error(json.message || 'apps script error');
+      } catch (e) {
+        console.warn('Could not parse Apps Script response', e);
+      }
+      const next = { ...extra, photoUrl: photoUrl || extra.photoUrl };
+      setExtra(next);
+      saveLocal(current.id, next);
+      await Swal.fire({
+        icon: 'success',
+        title: 'ส่งข้อมูลสำเร็จ',
+        html: photoUrl ? `<a href="${photoUrl}" target="_blank" class="text-blue-600 underline">ดูรูปที่อัปโหลด</a>` : 'บันทึกข้อมูลเรียบร้อย',
+        timer: 2000,
+      });
     } catch (err) {
       console.error(err);
       await Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถส่งข้อมูลได้' });
@@ -187,6 +219,8 @@ const IndividualStudentInfo: React.FC = () => {
                 <div className="w-64 h-64 rounded-2xl border-4 border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center overflow-hidden shadow-lg">
                   {extra.photoDataUrl ? (
                     <img src={extra.photoDataUrl} alt="student" className="w-full h-full object-cover" />
+                  ) : extra.photoUrl ? (
+                    <img src={extra.photoUrl} alt="student" className="w-full h-full object-cover" />
                   ) : (
                     <UserCircle2 className="w-32 h-32 text-blue-300" />
                   )}
