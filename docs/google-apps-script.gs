@@ -8,11 +8,12 @@
  *    - Execute as: Me
  *    - Who has access: Anyone
  * 4) คัดลอก URL ของ Web app มาใส่ในตัวแปร APPSCRIPT_URL ของหน้าเว็บ
- *    (URL ปัจจุบันที่ใช้อยู่:
- *     https://script.google.com/macros/s/AKfycbw7Ujpowe1C57qpV_M7ADlcDSm39RKatMp-FwtbJVE9HLe11G87Y5sJXHlD182O0Jr5/exec)
+ *    (URL ปัจจุบันที่หน้าเว็บส่งไป:
+ *     https://script.google.com/macros/s/AKfycbz9MUxfZsdSZEWzdmq6claTWSoBkXuYYwye8r0ICUMoLtpfgLi2LsoXiWsZCcdPVdcxnw/exec)
  */
 
-const SHEET_ID = '16WWGVsNOpLnutgi-rcPAWuovYTkvb0vP_U0Q_Nos-alByKGHWTv3Q0X5';
+// ไฟล์ Google Sheet ที่เห็นในภาพ: https://docs.google.com/spreadsheets/d/1nvgAyvbHjVVrP3XdNkz3q3lmzholsxthA1qkmr5EQAg0/edit
+const SHEET_ID = '1nvgAyvbHjVVrP3XdNkz3q3lmzholsxthA1qkmr5EQAg0';
 const SHEET_NAME = 'uppic';
 const DRIVE_FOLDER_ID = '1Ca0K1iIezJGO65aFFsMangrAwDIe9sx3';
 
