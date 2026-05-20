@@ -9,7 +9,7 @@ import { getStudents } from '@/utils/storage';
 import type { Student } from '@/types/student';
 import Swal from 'sweetalert2';
 
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9MUxfZsdSZEWzdmq6claTWSoBkXuYYwye8r0ICUMoLtpfgLi2LsoXiWsZCcdPVdcxnw/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQYp7L4Bfc66uofuMB0m3i1N4a7L7dtFykTF3Jpk2i-vdsN65XFpe2JPIxT6nFCz-X0A/exec';
 
 const GRADE_OPTIONS = ['อ.1','อ.2','อ.3','ป.1','ป.2','ป.3','ป.4','ป.5','ป.6'];
 
