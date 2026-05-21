@@ -19,28 +19,41 @@ const DRIVE_FOLDER_ID = '1Ca0K1iIezJGO65aFFsMangrAwDIe9sx3';
 
 function doPost(e) {
   try {
-    const body = JSON.parse(e.postData.contents);
+    const rawBody = e && e.postData && e.postData.contents ? e.postData.contents : '';
+    const body = rawBody ? JSON.parse(rawBody) : (e.parameter.payload ? JSON.parse(e.parameter.payload) : {});
 
     let photoUrl = '';
+    let photoError = '';
     if (body.photoBase64 && body.photoMimeType) {
-      const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-      const bytes = Utilities.base64Decode(body.photoBase64);
-      const fileName = body.photoFileName ||
-        (body.studentId + '_' + new Date().getTime() + '.jpg');
-      const blob = Utilities.newBlob(bytes, body.photoMimeType, fileName);
-      const file = folder.createFile(blob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      photoUrl = 'https://drive.google.com/uc?export=view&id=' + file.getId();
+      try {
+        const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+        const bytes = Utilities.base64Decode(body.photoBase64);
+        const safeStudentId = body.studentId || 'student';
+        const fileName = body.photoFileName ||
+          (safeStudentId + '_' + new Date().getTime() + '.jpg');
+        const blob = Utilities.newBlob(bytes, body.photoMimeType, fileName);
+        const file = folder.createFile(blob);
+        try {
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        } catch (shareErr) {
+          photoError = 'อัปโหลดรูปแล้ว แต่บัญชี/โดเมน Google ไม่อนุญาตให้ตั้งค่าแชร์สาธารณะ: ' + String(shareErr);
+        }
+        photoUrl = 'https://drive.google.com/file/d/' + file.getId() + '/view';
+      } catch (fileErr) {
+        photoError = 'บันทึกรูปลง Drive ไม่สำเร็จ: ' + String(fileErr);
+      }
     }
 
     const ss = SpreadsheetApp.openById(SHEET_ID);
     let sheet = ss.getSheetByName(SHEET_NAME);
     if (!sheet) {
       sheet = ss.insertSheet(SHEET_NAME);
+    }
+    if (sheet.getLastRow() === 0) {
       sheet.appendRow([
         'วันที่บันทึก','เลขประจำตัวนักเรียน','เลขบัตรประชาชน',
         'ชื่อ-นามสกุล','ชื่อเล่น','เบอร์โทร',
-        'ระดับชั้น','ปีการศึกษา','รูปภาพ (URL)'
+        'ระดับชั้น','ปีการศึกษา','รูปภาพ (URL)','หมายเหตุรูปภาพ'
       ]);
     }
 
@@ -63,19 +76,21 @@ function doPost(e) {
       body.phone || '',
       body.grade || '',
       body.academicYear || '',
-      photoUrl
+      photoUrl,
+      photoError
     ];
 
     if (rowIndex > 0) {
       // ถ้าไม่มีรูปใหม่ ให้คงรูปเดิมไว้
       if (!photoUrl) row[8] = data[rowIndex - 1][8] || '';
+      if (!photoError) row[9] = data[rowIndex - 1][9] || '';
       sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
     } else {
       sheet.appendRow(row);
     }
 
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok', photoUrl: photoUrl }))
+      .createTextOutput(JSON.stringify({ status: 'ok', photoUrl: photoUrl, photoError: photoError }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService
