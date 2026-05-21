@@ -43,6 +43,15 @@ const fileToDataUrl = (file: File): Promise<string> => new Promise((resolve, rej
   reader.readAsDataURL(file);
 });
 
+const getPhotoPayload = (dataUrl?: string, file?: File) => {
+  if (!dataUrl) return { base64: '', mimeType: '', extension: 'jpg' };
+  const match = dataUrl.match(/^data:([^;]+);base64,(.*)$/);
+  const mimeType = file?.type || match?.[1] || 'image/jpeg';
+  const base64 = (match?.[2] || dataUrl).replace(/\s/g, '');
+  const extension = file?.name.split('.').pop() || mimeType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+  return { base64, mimeType, extension };
+};
+
 const IndividualStudentInfo: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [grade, setGrade] = useState<string>('ป.1');
@@ -109,6 +118,7 @@ const IndividualStudentInfo: React.FC = () => {
     }
     setSubmitting(true);
     try {
+      const photoPayload = getPhotoPayload(extra.photoDataUrl, extra.photoFile);
       const payload = {
         studentId: current.studentId,
         citizenId: current.citizenId,
@@ -119,9 +129,9 @@ const IndividualStudentInfo: React.FC = () => {
         academicYear: current.academicYear,
         nickname: extra.nickname || '',
         phone: extra.phone || '',
-        photoBase64: extra.photoDataUrl ? extra.photoDataUrl.split(',')[1] : '',
-        photoMimeType: extra.photoFile?.type || '',
-        photoFileName: extra.photoFile ? `${current.studentId}_${current.firstNameTh}.${(extra.photoFile.name.split('.').pop() || 'jpg')}` : '',
+        photoBase64: photoPayload.base64,
+        photoMimeType: photoPayload.mimeType,
+        photoFileName: photoPayload.base64 ? `${current.studentId}_${current.firstNameTh}.${photoPayload.extension}` : '',
       };
 
       let photoUrl = '';
