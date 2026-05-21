@@ -24,10 +24,11 @@ function doPost(e) {
 
     let photoUrl = '';
     let photoError = '';
-    if (body.photoBase64 && body.photoMimeType) {
+    const cleanPhotoBase64 = body.photoBase64 ? String(body.photoBase64).replace(/^data:[^,]+,/, '').replace(/\s/g, '') : '';
+    if (cleanPhotoBase64 && body.photoMimeType) {
       try {
         const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-        const bytes = Utilities.base64Decode(body.photoBase64);
+        const bytes = Utilities.base64Decode(cleanPhotoBase64);
         const safeStudentId = body.studentId || 'student';
         const fileName = body.photoFileName ||
           (safeStudentId + '_' + new Date().getTime() + '.jpg');
@@ -36,12 +37,14 @@ function doPost(e) {
         try {
           file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         } catch (shareErr) {
-          photoError = 'อัปโหลดรูปแล้ว แต่บัญชี/โดเมน Google ไม่อนุญาตให้ตั้งค่าแชร์สาธารณะ: ' + String(shareErr);
+          photoError = 'อัปโหลดรูปเข้า Drive แล้ว แต่บัญชี/โดเมน Google ไม่อนุญาตให้ตั้งค่าแชร์สาธารณะ: ' + String(shareErr);
         }
         photoUrl = 'https://drive.google.com/file/d/' + file.getId() + '/view';
       } catch (fileErr) {
         photoError = 'บันทึกรูปลง Drive ไม่สำเร็จ: ' + String(fileErr);
       }
+    } else if (body.photoBase64 && !body.photoMimeType) {
+      photoError = 'มีข้อมูลรูปภาพ แต่ไม่พบชนิดไฟล์รูปภาพ (photoMimeType)';
     }
 
     const ss = SpreadsheetApp.openById(SHEET_ID);
@@ -90,7 +93,7 @@ function doPost(e) {
     }
 
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok', photoUrl: photoUrl, photoError: photoError }))
+      .createTextOutput(JSON.stringify({ status: 'ok', photoUrl: photoUrl, photoError: photoError, photoBytes: cleanPhotoBase64 ? cleanPhotoBase64.length : 0 }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService
