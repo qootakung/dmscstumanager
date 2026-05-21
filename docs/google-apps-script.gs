@@ -102,3 +102,23 @@ function doPost(e) {
 function doGet() {
   return ContentService.createTextOutput('DMSC uppic endpoint is running.');
 }
+
+// ใช้ทดสอบใน Apps Script Editor: เลือกฟังก์ชัน testWrite แล้วกด Run
+// ถ้าสำเร็จ จะมีแถว TEST_APPS_SCRIPT เพิ่ม/อัปเดตในชีต uppic
+function testWrite() {
+  const result = doPost({
+    postData: {
+      contents: JSON.stringify({
+        studentId: 'TEST_APPS_SCRIPT',
+        citizenId: '',
+        fullName: 'ทดสอบ Apps Script',
+        nickname: 'ทดสอบ',
+        phone: '0999999999',
+        grade: 'ป.1',
+        academicYear: '2567'
+      })
+    },
+    parameter: {}
+  });
+  Logger.log(result.getContent());
+}
