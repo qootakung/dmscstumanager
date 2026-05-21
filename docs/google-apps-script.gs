@@ -107,7 +107,7 @@ function doGet() {
 }
 
 // ใช้ทดสอบใน Apps Script Editor: เลือกฟังก์ชัน testWrite แล้วกด Run
-// ถ้าสำเร็จ จะมีแถว TEST_APPS_SCRIPT เพิ่ม/อัปเดตในชีต uppic
+// ถ้าสำเร็จ จะมีแถว TEST_APPS_SCRIPT เพิ่ม/อัปเดตในชีต uppic และมีไฟล์ TEST_APPS_SCRIPT.png ในโฟลเดอร์ Drive
 function testWrite() {
   const result = doPost({
     postData: {
@@ -118,7 +118,10 @@ function testWrite() {
         nickname: 'ทดสอบ',
         phone: '0999999999',
         grade: 'ป.1',
-        academicYear: '2567'
+        academicYear: '2567',
+        photoBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
+        photoMimeType: 'image/png',
+        photoFileName: 'TEST_APPS_SCRIPT.png'
       })
     },
     parameter: {}
