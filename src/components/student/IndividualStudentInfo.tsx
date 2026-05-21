@@ -131,7 +131,14 @@ const IndividualStudentInfo: React.FC = () => {
   const handlePhoto = async (file: File | undefined) => {
     if (!file) return;
     const dataUrl = await fileToDataUrl(file);
-    setExtra(prev => ({ ...prev, photoFile: file, photoDataUrl: dataUrl }));
+    const compressedDataUrl = await compressImageDataUrl(dataUrl);
+    setExtra(prev => ({
+      ...prev,
+      photoFile: file,
+      photoDataUrl: compressedDataUrl,
+      photoMimeType: 'image/jpeg',
+      photoFileName: `${file.name.replace(/\.[^.]+$/, '')}.jpg`,
+    }));
   };
 
   const handleSubmit = async () => {
@@ -142,7 +149,7 @@ const IndividualStudentInfo: React.FC = () => {
     }
     setSubmitting(true);
     try {
-      const photoPayload = getPhotoPayload(extra.photoDataUrl, extra.photoFile);
+      const photoPayload = getPhotoPayload(extra.photoDataUrl, extra.photoFile, extra.photoMimeType, extra.photoFileName);
       const payload = {
         studentId: current.studentId,
         citizenId: current.citizenId,
