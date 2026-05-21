@@ -18,6 +18,8 @@ interface ExtraInfo {
   phone: string;
   photoDataUrl?: string;
   photoFile?: File;
+  photoMimeType?: string;
+  photoFileName?: string;
   photoUrl?: string;
 }
 
@@ -42,6 +44,37 @@ const fileToDataUrl = (file: File): Promise<string> => new Promise((resolve, rej
   reader.onerror = reject;
   reader.readAsDataURL(file);
 });
+
+const compressImageDataUrl = (dataUrl: string): Promise<string> => new Promise((resolve, reject) => {
+  const image = new Image();
+  image.onload = () => {
+    const maxSize = 1200;
+    const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(image.width * scale));
+    canvas.height = Math.max(1, Math.round(image.height * scale));
+    const context = canvas.getContext('2d');
+    if (!context) {
+      reject(new Error('ไม่สามารถเตรียมรูปสำหรับอัปโหลดได้'));
+      return;
+    }
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    resolve(canvas.toDataURL('image/jpeg', 0.82));
+  };
+  image.onerror = () => reject(new Error('ไม่สามารถอ่านไฟล์รูปภาพได้'));
+  image.src = dataUrl;
+});
+
+const getPhotoPayload = (dataUrl?: string, file?: File, savedMimeType?: string, savedFileName?: string) => {
+  if (!dataUrl) return { base64: '', mimeType: '', extension: 'jpg' };
+  const match = dataUrl.match(/^data:([^;]+);base64,(.*)$/);
+  const mimeType = savedMimeType || file?.type || match?.[1] || 'image/jpeg';
+  const base64 = (match?.[2] || dataUrl).replace(/\s/g, '');
+  const extension = savedFileName?.split('.').pop() || file?.name.split('.').pop() || mimeType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+  return { base64, mimeType, extension, fileName: savedFileName };
+};
 
 const IndividualStudentInfo: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -98,7 +131,14 @@ const IndividualStudentInfo: React.FC = () => {
   const handlePhoto = async (file: File | undefined) => {
     if (!file) return;
     const dataUrl = await fileToDataUrl(file);
-    setExtra(prev => ({ ...prev, photoFile: file, photoDataUrl: dataUrl }));
+    const compressedDataUrl = await compressImageDataUrl(dataUrl);
+    setExtra(prev => ({
+      ...prev,
+      photoFile: file,
+      photoDataUrl: compressedDataUrl,
+      photoMimeType: 'image/jpeg',
+      photoFileName: `${file.name.replace(/\.[^.]+$/, '')}.jpg`,
+    }));
   };
 
   const handleSubmit = async () => {
@@ -109,6 +149,7 @@ const IndividualStudentInfo: React.FC = () => {
     }
     setSubmitting(true);
     try {
+      const photoPayload = getPhotoPayload(extra.photoDataUrl, extra.photoFile, extra.photoMimeType, extra.photoFileName);
       const payload = {
         studentId: current.studentId,
         citizenId: current.citizenId,
@@ -119,9 +160,9 @@ const IndividualStudentInfo: React.FC = () => {
         academicYear: current.academicYear,
         nickname: extra.nickname || '',
         phone: extra.phone || '',
-        photoBase64: extra.photoDataUrl ? extra.photoDataUrl.split(',')[1] : '',
-        photoMimeType: extra.photoFile?.type || '',
-        photoFileName: extra.photoFile ? `${current.studentId}_${current.firstNameTh}.${(extra.photoFile.name.split('.').pop() || 'jpg')}` : '',
+        photoBase64: photoPayload.base64,
+        photoMimeType: photoPayload.mimeType,
+        photoFileName: photoPayload.base64 ? `${current.studentId}_${current.firstNameTh}.${photoPayload.extension}` : '',
       };
 
       let photoUrl = '';
