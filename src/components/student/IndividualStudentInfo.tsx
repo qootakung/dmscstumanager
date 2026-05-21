@@ -124,11 +124,8 @@ const IndividualStudentInfo: React.FC = () => {
         photoFileName: extra.photoFile ? `${current.studentId}_${current.firstNameTh}.${(extra.photoFile.name.split('.').pop() || 'jpg')}` : '',
       };
 
-      // Apps Script redirects responses to googleusercontent.com which blocks CORS.
-      // Try a normal fetch first to capture photoUrl; fall back to no-cors so the
-      // request still succeeds when the browser blocks the redirected response.
       let photoUrl = '';
-      let sent = false;
+      let photoError = '';
       try {
         const res = await fetch(APPSCRIPT_URL, {
           method: 'POST',
@@ -136,35 +133,35 @@ const IndividualStudentInfo: React.FC = () => {
           body: JSON.stringify(payload),
           redirect: 'follow',
         });
-        sent = true;
-        try {
-          const json = await res.json();
-          if (json?.status === 'ok') photoUrl = json.photoUrl || '';
-          else if (json?.status === 'error') console.warn('Apps Script error', json.message);
-        } catch (e) {
-          console.warn('Could not parse Apps Script response (likely CORS on redirect)', e);
+        if (!res.ok) {
+          throw new Error(`Apps Script ไม่พร้อมใช้งาน (HTTP ${res.status})`);
+        }
+        const json = await res.json();
+        if (json?.status === 'ok') {
+          photoUrl = json.photoUrl || '';
+          photoError = json.photoError || '';
+        } else {
+          throw new Error(json?.message || 'Apps Script ตอบกลับว่า error');
         }
       } catch (e) {
-        console.warn('CORS blocked, retrying with no-cors (fire & forget)', e);
-        await fetch(APPSCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
+        console.error('Apps Script submit failed', e);
+        await Swal.fire({
+          icon: 'error',
+          title: 'ยังบันทึกลง Google Sheet/Drive ไม่ได้',
+          html: `Web app URL ยังไม่เปิดสาธารณะหรือยังเด้งไปหน้า Google Sign-In<br/><br/><small>${e instanceof Error ? e.message : String(e)}</small>`,
+          confirmButtonText: 'ตกลง',
         });
-        sent = true;
+        return;
       }
-      if (!sent) throw new Error('send failed');
       const next = { ...extra, photoUrl: photoUrl || extra.photoUrl };
       setExtra(next);
       saveLocal(current.id, next);
       await Swal.fire({
-        icon: 'success',
-        title: 'ส่งข้อมูลสำเร็จ',
+        icon: photoError ? 'warning' : 'success',
+        title: photoError ? 'บันทึกข้อมูลแล้ว แต่รูปมีหมายเหตุ' : 'บันทึกสำเร็จ',
         html: photoUrl
-          ? `<a href="${photoUrl}" target="_blank" class="text-blue-600 underline">ดูรูปที่อัปโหลด</a>`
-          : 'ส่งข้อมูลไปยัง Google Sheet เรียบร้อย (ตรวจสอบที่ชีต uppic)',
-        timer: 2000,
+          ? `<a href="${photoUrl}" target="_blank" class="text-blue-600 underline">ดูรูปที่อัปโหลด</a>${photoError ? `<br/><small>${photoError}</small>` : ''}`
+          : `บันทึกข้อมูลลง Google Sheet แล้ว${photoError ? `<br/><small>${photoError}</small>` : ''}`,
       });
     } catch (err) {
       console.error(err);
