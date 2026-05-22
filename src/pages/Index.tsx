@@ -18,6 +18,7 @@ import DentalMilkTracking from '@/components/DentalMilkTracking';
 import { StudentScoreManagement } from '@/components/StudentScoreManagement';
 import PP5Management from '@/components/PP5Management';
 import { getCurrentUser, logout } from '@/utils/userStorage';
+import StudentCardViewer from '@/components/student/StudentCardViewer';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
 import {
@@ -75,6 +76,19 @@ const Index = () => {
 
   if (!currentUser) {
     return <Auth onLogin={handleLogin} />;
+  }
+
+  // Special viewer-only account: show mobile student card view
+  if (currentUser.username === 'Sms') {
+    return (
+      <StudentCardViewer
+        username={currentUser.username}
+        onLogout={async () => {
+          logout();
+          setCurrentUser(null);
+        }}
+      />
+    );
   }
 
   const isAdmin = currentUser.role === 'admin';
