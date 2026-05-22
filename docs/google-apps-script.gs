@@ -102,8 +102,47 @@ function doPost(e) {
   }
 }
 
-function doGet() {
-  return ContentService.createTextOutput('DMSC uppic endpoint is running.');
+function doGet(e) {
+  try {
+    const params = (e && e.parameter) ? e.parameter : {};
+    const studentId = params.studentId ? String(params.studentId) : '';
+    const academicYear = params.academicYear ? String(params.academicYear) : '';
+    if (!studentId) {
+      return ContentService.createTextOutput('DMSC uppic endpoint is running.');
+    }
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    let result = { status: 'ok', photoUrl: '', nickname: '', phone: '', academicYear: '' };
+    if (sheet && sheet.getLastRow() > 1) {
+      const data = sheet.getDataRange().getValues();
+      // Columns: 0 date, 1 studentId, 2 citizenId, 3 fullName, 4 nickname, 5 phone, 6 grade, 7 academicYear, 8 photoUrl
+      let best = null;
+      let bestDate = 0;
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][1]) !== studentId) continue;
+        // ดึงรูปเดียวต่อ 1 ปีการศึกษา: ถ้าระบุ academicYear ให้กรอง, ถ้าไม่ระบุก็เอาแถวล่าสุด
+        if (academicYear && String(data[i][7]) !== academicYear) continue;
+        const t = data[i][0] instanceof Date ? data[i][0].getTime() : new Date(data[i][0]).getTime();
+        if (!best || t > bestDate) {
+          best = data[i];
+          bestDate = t;
+        }
+      }
+      if (best) {
+        result.photoUrl = best[8] || '';
+        result.nickname = best[4] || '';
+        result.phone = best[5] || '';
+        result.academicYear = best[7] || '';
+      }
+    }
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 // ใช้ทดสอบใน Apps Script Editor: เลือกฟังก์ชัน testWrite แล้วกด Run
