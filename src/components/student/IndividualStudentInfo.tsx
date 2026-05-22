@@ -16,7 +16,6 @@ const GRADE_OPTIONS = ['อ.1','อ.2','อ.3','ป.1','ป.2','ป.3','ป.4','
 interface ExtraInfo {
   nickname: string;
   phone: string;
-  phone2?: string;
   photoDataUrl?: string;
   photoFile?: File;
   photoMimeType?: string;
