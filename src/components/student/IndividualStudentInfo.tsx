@@ -23,19 +23,30 @@ interface ExtraInfo {
   photoUrl?: string;
 }
 
-const storageKey = (studentId: string) => `individual-info:${studentId}`;
+// ใช้ 1 รูป/1 ปีการศึกษา ไม่แยกเทอม จึง key ด้วย studentId + academicYear เท่านั้น
+const storageKey = (studentId: string, academicYear: string) =>
+  `individual-info:${studentId}:${academicYear}`;
 
-const loadLocal = (studentId: string): ExtraInfo => {
+// แปลง URL ของ Google Drive ให้แสดงเป็นรูปได้ใน <img>
+const driveViewToImage = (url?: string): string => {
+  if (!url) return '';
+  const m = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
+  const id = m?.[1];
+  if (!id) return url;
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w800`;
+};
+
+const loadLocal = (studentId: string, academicYear: string): ExtraInfo => {
   try {
-    const raw = localStorage.getItem(storageKey(studentId));
+    const raw = localStorage.getItem(storageKey(studentId, academicYear));
     if (raw) return JSON.parse(raw);
   } catch {}
   return { nickname: '', phone: '' };
 };
 
-const saveLocal = (studentId: string, info: ExtraInfo) => {
+const saveLocal = (studentId: string, academicYear: string, info: ExtraInfo) => {
   const { photoFile, ...rest } = info;
-  localStorage.setItem(storageKey(studentId), JSON.stringify(rest));
+  localStorage.setItem(storageKey(studentId, academicYear), JSON.stringify(rest));
 };
 
 const fileToDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
@@ -117,15 +128,38 @@ const IndividualStudentInfo: React.FC = () => {
   }, [grade]);
 
   useEffect(() => {
-    if (current) {
-      const saved = loadLocal(current.id);
-      setExtra({
-        ...saved,
-        phone: saved.phone || current.guardianPhone || '',
-      });
-    } else {
+    if (!current) {
       setExtra({ nickname: '', phone: '' });
+      return;
     }
+    const saved = loadLocal(current.studentId, current.academicYear);
+    setExtra({
+      ...saved,
+      phone: saved.phone || current.guardianPhone || '',
+    });
+    // ดึงข้อมูลล่าสุด (รวมถึงรูป) จาก Google Sheet/Drive — 1 รูปต่อ 1 ปีการศึกษา
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const url = `${APPSCRIPT_URL}?studentId=${encodeURIComponent(current.studentId)}&academicYear=${encodeURIComponent(current.academicYear)}`;
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json?.status === 'ok' && (json.photoUrl || json.nickname || json.phone)) {
+          setExtra(prev => {
+            const merged: ExtraInfo = {
+              ...prev,
+              nickname: prev.nickname || json.nickname || '',
+              phone: prev.phone || json.phone || '',
+              photoUrl: json.photoUrl || prev.photoUrl,
+            };
+            saveLocal(current.studentId, current.academicYear, merged);
+            return merged;
+          });
+        }
+      } catch {}
+    })();
+    return () => controller.abort();
   }, [current?.id]);
 
   const handlePhoto = async (file: File | undefined) => {
@@ -194,9 +228,9 @@ const IndividualStudentInfo: React.FC = () => {
         });
         return;
       }
-      const next = { ...extra, photoUrl: photoUrl || extra.photoUrl };
+      const next = { ...extra, photoUrl: photoUrl || extra.photoUrl, photoDataUrl: undefined, photoFile: undefined };
       setExtra(next);
-      saveLocal(current.id, next);
+      saveLocal(current.studentId, current.academicYear, next);
       await Swal.fire({
         icon: photoError ? 'warning' : 'success',
         title: photoError ? 'บันทึกข้อมูลแล้ว แต่รูปมีหมายเหตุ' : 'บันทึกสำเร็จ',
@@ -277,7 +311,15 @@ const IndividualStudentInfo: React.FC = () => {
                   {extra.photoDataUrl ? (
                     <img src={extra.photoDataUrl} alt="student" className="w-full h-full object-cover" />
                   ) : extra.photoUrl ? (
-                    <img src={extra.photoUrl} alt="student" className="w-full h-full object-cover" />
+                    <img
+                      src={driveViewToImage(extra.photoUrl)}
+                      alt="student"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                      onError={(ev) => {
+                        (ev.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
                   ) : (
                     <UserCircle2 className="w-32 h-32 text-blue-300" />
                   )}
