@@ -60,3 +60,39 @@ export const getTeacherStatistics = async () => {
     academicYears,
   };
 };
+
+/**
+ * Copies all teachers from a source academic year to a target academic year.
+ * Skips teachers (by citizenId or positionNumber) that already exist in the target year.
+ * Returns the number of teachers actually copied.
+ */
+export const copyTeachersToYear = async (
+  fromYear: string,
+  toYear: string
+): Promise<{ copied: number; skipped: number }> => {
+  const all = await getTeachers();
+  const source = all.filter((t) => t.academicYear === fromYear);
+  const targetExisting = all.filter((t) => t.academicYear === toYear);
+
+  const existsInTarget = (t: Teacher) =>
+    targetExisting.some(
+      (e) =>
+        (t.citizenId && e.citizenId && e.citizenId === t.citizenId) ||
+        (t.positionNumber &&
+          e.positionNumber &&
+          e.positionNumber === t.positionNumber)
+    );
+
+  let copied = 0;
+  let skipped = 0;
+  for (const t of source) {
+    if (existsInTarget(t)) {
+      skipped++;
+      continue;
+    }
+    const { id, createdAt, updatedAt, ...rest } = t as any;
+    const inserted = await addTeacher({ ...rest, academicYear: toYear });
+    if (inserted) copied++;
+  }
+  return { copied, skipped };
+};
