@@ -1,0 +1,1 @@
+INSERT INTO public.app_users (username, password, role, can_edit) VALUES ('Sms', 'sMs@@min', 'user', false) ON CONFLICT DO NOTHING;
