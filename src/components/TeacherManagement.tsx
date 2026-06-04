@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, Upload, Users, UserPlus, GraduationCap, BookOpen, TrendingUp, Award } from 'lucide-react';
-import { getTeachers, addTeacher, updateTeacher, deleteTeacher } from '@/utils/teacherStorage';
+import { getTeachers, addTeacher, updateTeacher, deleteTeacher, copyTeachersToYear } from '@/utils/teacherStorage';
 import { downloadTeacherTemplate, importTeachersFromExcel } from '@/utils/teacherExcel';
 import type { Teacher } from '@/types/teacher';
 import Swal from 'sweetalert2';
