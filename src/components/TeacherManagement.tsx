@@ -224,6 +224,66 @@ const TeacherManagement: React.FC = () => {
     }
   };
 
+  const handleCopyYear = async () => {
+    const years = [...new Set(teachers.map(t => t.academicYear).filter(Boolean) as string[])].sort().reverse();
+    if (years.length === 0) {
+      await Swal.fire('ไม่มีข้อมูล', 'ยังไม่มีข้อมูลครูในระบบให้คัดลอก', 'info');
+      return;
+    }
+    const fromOptions = years.reduce((acc, y) => ({ ...acc, [y]: y }), {} as Record<string, string>);
+    const { value: fromYear } = await Swal.fire({
+      title: 'คัดลอกข้อมูลครูไปปีการศึกษาใหม่',
+      input: 'select',
+      inputLabel: 'เลือกปีต้นทาง (ปีที่มีข้อมูลอยู่แล้ว)',
+      inputOptions: fromOptions,
+      inputPlaceholder: 'เลือกปีต้นทาง',
+      showCancelButton: true,
+      confirmButtonText: 'ถัดไป',
+      cancelButtonText: 'ยกเลิก',
+    });
+    if (!fromYear) return;
+
+    const { value: toYear } = await Swal.fire({
+      title: 'ปีปลายทาง',
+      input: 'text',
+      inputLabel: `คัดลอกจาก ${fromYear} ไปยังปีการศึกษา (เช่น 2569)`,
+      inputPlaceholder: 'เช่น 2569',
+      inputValue: String(Number(fromYear) + 1),
+      showCancelButton: true,
+      confirmButtonText: 'คัดลอก',
+      cancelButtonText: 'ยกเลิก',
+      inputValidator: (v) => (!v ? 'กรุณาระบุปีการศึกษา' : undefined),
+    });
+    if (!toYear) return;
+    if (toYear === fromYear) {
+      await Swal.fire('ไม่สำเร็จ', 'ปีปลายทางต้องไม่ใช่ปีเดียวกับต้นทาง', 'warning');
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: `ยืนยันการคัดลอก?`,
+      text: `คัดลอกข้อมูลครูจากปี ${fromYear} ไปยังปี ${toYear}`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'ยืนยัน',
+      cancelButtonText: 'ยกเลิก',
+    });
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const { copied, skipped } = await copyTeachersToYear(fromYear, toYear);
+      await loadTeachers();
+      await Swal.fire(
+        'คัดลอกสำเร็จ!',
+        `คัดลอก ${copied} คน, ข้าม ${skipped} คน (มีอยู่แล้วในปี ${toYear})`,
+        'success'
+      );
+    } catch (err) {
+      console.error(err);
+      await Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถคัดลอกข้อมูลได้', 'error');
+    }
+  };
+
   // Calculate statistics
   const totalTeachers = teachers.length;
   const positionStats = teachers.reduce((acc, teacher) => {
