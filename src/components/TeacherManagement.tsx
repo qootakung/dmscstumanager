@@ -403,6 +403,13 @@ const TeacherManagement: React.FC = () => {
                 <Upload className="mr-2 h-4 w-4" />
                 นำเข้าจาก Excel
               </Button>
+              <Button
+                onClick={handleCopyYear}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                คัดลอกข้อมูลไปปีการศึกษาใหม่
+              </Button>
               <input
                 type="file"
                 ref={fileInputRef}
