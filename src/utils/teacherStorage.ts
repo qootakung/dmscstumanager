@@ -44,10 +44,14 @@ export const deleteTeacher = async (id: string): Promise<boolean> => {
   return true;
 };
 
-export const getTeacherStatistics = async () => {
+export const getTeacherStatistics = async (academicYear?: string) => {
   const teachers = await getTeachers();
-  
-  const byPosition = teachers.reduce((acc, teacher) => {
+
+  const filteredTeachers = academicYear
+    ? teachers.filter((t) => t.academicYear === academicYear)
+    : teachers;
+
+  const byPosition = filteredTeachers.reduce((acc, teacher) => {
     acc[teacher.position] = (acc[teacher.position] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -55,7 +59,7 @@ export const getTeacherStatistics = async () => {
   const academicYears = [...new Set(teachers.map(t => t.academicYear))].sort().reverse();
 
   return {
-    total: teachers.length,
+    total: filteredTeachers.length,
     byPosition,
     academicYears,
   };
