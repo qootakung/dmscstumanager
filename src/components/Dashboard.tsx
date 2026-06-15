@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
       try {
         const [sStats, tStats] = await Promise.all([
           getStudentStatistics(selectedSemester, selectedYear),
-          getTeacherStatistics(),
+          getTeacherStatistics(selectedYear),
         ]);
         setStudentStats(sStats);
         setTeacherStats(tStats);
