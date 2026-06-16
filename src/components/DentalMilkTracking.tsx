@@ -76,14 +76,16 @@ const DentalMilkTracking = () => {
       // Load students with semester filter
       let studentsQuery = supabase
         .from('students')
-        .select('*');
-      
+        .select('*')
+        .eq('academicYear', String(selectedYear));
+
       if (selectedSemester !== 'all') {
         studentsQuery = studentsQuery.eq('semester', selectedSemester);
       }
       
       const { data: studentsData, error: studentsError } = await studentsQuery
-        .order('grade', { ascending: true });
+        .order('grade', { ascending: true })
+        .limit(5000);
       
       if (studentsError) throw studentsError;
       
