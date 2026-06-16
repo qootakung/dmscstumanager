@@ -147,10 +147,22 @@ const IndividualStudentInfo: React.FC = () => {
         const json = await res.json();
         if (json?.status === 'ok' && (json.photoUrl || json.nickname || json.phone)) {
           setExtra(prev => {
+            const normalizePhone = (p: any): string => {
+              if (p === undefined || p === null) return '';
+              let s = String(p).trim();
+              // ตัด .0 ที่อาจมาจาก number ของ Google Sheet
+              s = s.replace(/\.0+$/, '');
+              // เก็บเฉพาะตัวเลข
+              const digits = s.replace(/\D/g, '');
+              if (!digits) return '';
+              // เติม 0 นำหน้าให้ครบ 10 หลัก หากหายไป
+              if (digits.length === 9 && !digits.startsWith('0')) return '0' + digits;
+              return digits;
+            };
             const merged: ExtraInfo = {
               ...prev,
               nickname: prev.nickname || json.nickname || '',
-              phone: prev.phone || json.phone || '',
+              phone: prev.phone || normalizePhone(json.phone),
               photoUrl: json.photoUrl || prev.photoUrl,
             };
             saveLocal(current.studentId, current.academicYear, merged);

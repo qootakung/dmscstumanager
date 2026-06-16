@@ -36,6 +36,16 @@ const driveViewToImage = (url?: string): string => {
   return `https://drive.google.com/thumbnail?id=${id}&sz=w800`;
 };
 
+const normalizePhone = (p: any): string => {
+  if (p === undefined || p === null) return '';
+  let s = String(p).trim();
+  s = s.replace(/\.0+$/, '');
+  const digits = s.replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 9 && !digits.startsWith('0')) return '0' + digits;
+  return digits;
+};
+
 interface Props {
   username: string;
   onLogout: () => void;
@@ -101,8 +111,8 @@ const StudentCardViewer: React.FC<Props> = ({ username, onLogout }) => {
             [key]: {
               ...prev[key],
               nickname: json.nickname || prev[key]?.nickname,
-              phone: json.phone || prev[key]?.phone,
-              phone2: json.phone2 || prev[key]?.phone2,
+              phone: normalizePhone(json.phone) || prev[key]?.phone,
+              phone2: normalizePhone(json.phone2) || prev[key]?.phone2,
               photoUrl: json.photoUrl || prev[key]?.photoUrl,
             },
           }));
