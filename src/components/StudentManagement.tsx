@@ -50,10 +50,11 @@ const StudentManagement: React.FC = () => {
       if (!aIs3Digit && bIs3Digit) return 1;
       return parseInt(aId) - parseInt(bId);
     });
-    // Deduplicate by studentId (students may exist in both semesters)
+    // Deduplicate by studentId within the same academic year + grade
+    // (students exist in both semesters of a year, but are distinct across years)
     const seen = new Set<string>();
     const unique = sortedStudents.filter(s => {
-      const key = s.studentId || s.id;
+      const key = `${s.academicYear}__${s.grade}__${s.studentId || s.citizenId || s.id}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
