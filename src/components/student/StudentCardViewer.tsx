@@ -2,7 +2,22 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, UserCircle2, LogOut } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  UserCircle2,
+  LogOut,
+  Phone,
+  PhoneCall,
+  IdCard,
+  Hash,
+  User,
+  Users,
+  Shield,
+  MapPin,
+  Sparkles,
+  GraduationCap,
+} from 'lucide-react';
 import { getStudents } from '@/utils/storage';
 import { logout } from '@/utils/userStorage';
 import type { Student } from '@/types/student';
@@ -136,27 +151,54 @@ const StudentCardViewer: React.FC<Props> = ({ username, onLogout }) => {
   const ex = current ? extras[`${current.studentId}:${current.academicYear}`] || {} : {};
   const photo = ex.photoUrl ? driveViewToImage(ex.photoUrl) : '';
 
+  const fullName = current
+    ? `${current.titleTh || ''}${current.firstNameTh} ${current.lastNameTh}`.trim()
+    : '';
+  const fatherName = current
+    ? `${current.fatherTitle || ''}${current.fatherFirstName || ''} ${current.fatherLastName || ''}`.trim()
+    : '';
+  const motherName = current
+    ? `${current.motherTitle || ''}${current.motherFirstName || ''} ${current.motherLastName || ''}`.trim()
+    : '';
+  const guardianName = current
+    ? `${current.guardianTitle || ''}${current.guardianFirstName || ''} ${current.guardianLastName || ''}`.trim()
+    : '';
+  const address = current
+    ? [
+        current.houseNumber && `บ้านเลขที่ ${current.houseNumber}`,
+        current.moo && `ม.${current.moo}`,
+        current.subDistrict && `ต.${current.subDistrict}`,
+        current.district && `อ.${current.district}`,
+        current.province && `จ.${current.province}`,
+        current.postalCode,
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : '';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 font-sarabun">
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur shadow-sm">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-900 via-blue-900 to-sky-800 font-sarabun flex flex-col">
+      <header className="z-10 bg-white/10 backdrop-blur-md border-b border-white/10 text-white">
+        <div className="max-w-md mx-auto px-3 py-2 flex items-center justify-between">
           <div className="text-sm">
-            <div className="font-semibold text-blue-700 leading-tight">บัตรประจำตัวนักเรียน</div>
-            <div className="text-xs text-muted-foreground">โรงเรียนบ้านดอนมูล • {username}</div>
+            <div className="font-bold leading-tight flex items-center gap-1">
+              <Sparkles className="w-4 h-4 text-amber-300" /> บัตรนักเรียนดิจิทัล
+            </div>
+            <div className="text-[11px] text-white/70">โรงเรียนบ้านดอนมูล • {username}</div>
           </div>
-          <Button size="sm" variant="ghost" onClick={onLogout} className="text-red-600 hover:bg-red-50">
+          <Button size="sm" variant="ghost" onClick={onLogout} className="text-white hover:bg-white/10 h-8">
             <LogOut className="w-4 h-4 mr-1" /> ออก
           </Button>
         </div>
-        <div className="max-w-md mx-auto px-4 pb-3 grid grid-cols-2 gap-2">
+        <div className="max-w-md mx-auto px-3 pb-2 grid grid-cols-2 gap-2">
           <Select value={year} onValueChange={setYear}>
-            <SelectTrigger className="bg-white"><SelectValue placeholder="ปีการศึกษา" /></SelectTrigger>
+            <SelectTrigger className="bg-white/90 h-9 text-slate-800"><SelectValue placeholder="ปีการศึกษา" /></SelectTrigger>
             <SelectContent>
               {years.map(y => <SelectItem key={y} value={y}>ปีการศึกษา {y}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={grade} onValueChange={setGrade}>
-            <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="bg-white/90 h-9 text-slate-800"><SelectValue /></SelectTrigger>
             <SelectContent>
               {GRADE_OPTIONS.map(g => <SelectItem key={g} value={g}>ชั้น {g}</SelectItem>)}
             </SelectContent>
@@ -164,50 +206,82 @@ const StudentCardViewer: React.FC<Props> = ({ username, onLogout }) => {
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 py-6">
+      <main className="flex-1 overflow-hidden max-w-md w-full mx-auto px-3 py-2 flex flex-col">
         {!current ? (
           <Card><CardContent className="py-20 text-center text-muted-foreground">ไม่มีข้อมูลนักเรียนในชั้น/ปีนี้</CardContent></Card>
         ) : (
-          <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-            {/* Card mimicking the reference image */}
-            <div className="relative rounded-3xl p-4 bg-gradient-to-br from-amber-100 via-yellow-50 to-amber-100 shadow-2xl border-2 border-amber-200">
-              {/* Photo frame */}
-              <div className="mx-auto w-44 h-56 rounded-xl overflow-hidden border-4 border-sky-400 bg-white shadow-lg flex items-center justify-center">
-                {photo ? (
-                  <img src={photo} alt="student" referrerPolicy="no-referrer" className="w-full h-full object-cover"
-                    onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                ) : (
-                  <UserCircle2 className="w-24 h-24 text-sky-300" />
-                )}
-              </div>
+          <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="flex-1 flex flex-col min-h-0">
+            {/* Hero card */}
+            <div className="relative rounded-3xl p-3 bg-gradient-to-br from-amber-200 via-amber-50 to-amber-200 shadow-2xl border border-amber-300 overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-sky-400/30 blur-2xl" />
+              <div className="absolute -bottom-12 -left-10 w-32 h-32 rounded-full bg-pink-400/20 blur-2xl" />
 
-              {/* Info panel */}
-              <div className="mt-4 rounded-2xl bg-gradient-to-b from-sky-100 to-sky-50 border-2 border-sky-300 p-4 space-y-2 text-slate-800">
-                <div className="text-center">
-                  <div className="font-bold text-base">เลขบัตรประจำตัวประชาชน</div>
-                  <div className="text-lg tracking-wider">{current.citizenId || '-'}</div>
+              <div className="relative flex gap-3 items-stretch">
+                {/* Photo */}
+                <div className="w-24 h-32 shrink-0 rounded-xl overflow-hidden border-[3px] border-sky-400 bg-white shadow-lg flex items-center justify-center">
+                  {photo ? (
+                    <img src={photo} alt="student" referrerPolicy="no-referrer" className="w-full h-full object-cover"
+                      onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                  ) : (
+                    <UserCircle2 className="w-14 h-14 text-sky-300" />
+                  )}
                 </div>
-                <Row label="รหัสนักเรียน" value={current.studentId} />
-                <Row label="ชื่อ-สกุล" value={`${current.titleTh || ''}${current.firstNameTh} ${current.lastNameTh}`.trim()} />
-                <Row label="ชื่อเล่น" value={ex.nickname || '-'} />
-                <Row label="เบอร์โทร1" value={ex.phone || current.guardianPhone || '-'} />
-                <Row label="เบอร์โทร2" value={ex.phone2 || '-'} />
+                {/* Name + meta */}
+                <div className="flex-1 min-w-0 flex flex-col justify-between">
+                  <div>
+                    <div className="text-[11px] text-slate-600 flex items-center gap-1">
+                      <GraduationCap className="w-3.5 h-3.5" /> ชั้น {current.grade} • ปี {current.academicYear}
+                    </div>
+                    <div className="font-extrabold text-slate-800 text-base leading-snug truncate">
+                      {fullName}
+                    </div>
+                    {ex.nickname && (
+                      <div className="text-xs text-sky-700 font-semibold">ชื่อเล่น: {ex.nickname}</div>
+                    )}
+                  </div>
+                  <div className="space-y-1 text-[12px] text-slate-700">
+                    <div className="flex items-center gap-1.5">
+                      <Hash className="w-3.5 h-3.5 text-sky-600" />
+                      <span className="font-semibold">รหัส:</span>
+                      <span className="tracking-wide">{current.studentId || '-'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <IdCard className="w-3.5 h-3.5 text-sky-600" />
+                      <span className="tracking-wider">{current.citizenId || '-'}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            {/* Detail panel */}
+            <div className="mt-2 flex-1 min-h-0 overflow-y-auto rounded-2xl bg-white/95 backdrop-blur border border-white/40 shadow-xl p-3 space-y-2 text-slate-800">
+              <InfoRow icon={<Phone className="w-4 h-4" />} label="เบอร์โทร 1"
+                value={ex.phone || current.guardianPhone || '-'} tel />
+              <InfoRow icon={<PhoneCall className="w-4 h-4" />} label="เบอร์โทร 2"
+                value={ex.phone2 || '-'} tel />
+              <Divider />
+              <InfoRow icon={<User className="w-4 h-4 text-blue-600" />} label="บิดา" value={fatherName || '-'} />
+              <InfoRow icon={<User className="w-4 h-4 text-pink-600" />} label="มารดา" value={motherName || '-'} />
+              <InfoRow icon={<Shield className="w-4 h-4 text-emerald-600" />} label="ผู้ปกครอง" value={guardianName || '-'} />
+              <Divider />
+              <InfoRow icon={<MapPin className="w-4 h-4 text-rose-600" />} label="ที่อยู่" value={address || '-'} multiline />
             </div>
 
             {/* Nav */}
-            <div className="mt-5 flex items-center justify-between">
-              <Button variant="outline" size="lg" onClick={goPrev} disabled={index === 0} className="rounded-full">
-                <ChevronLeft className="w-5 h-5 mr-1" /> ก่อนหน้า
+            <div className="mt-2 flex items-center justify-between">
+              <Button size="sm" onClick={goPrev} disabled={index === 0}
+                className="rounded-full bg-white/90 text-slate-800 hover:bg-white shadow">
+                <ChevronLeft className="w-4 h-4 mr-1" /> ก่อนหน้า
               </Button>
-              <div className="text-sm font-medium text-blue-700">
+              <div className="text-xs font-semibold text-white bg-white/15 px-3 py-1 rounded-full backdrop-blur">
                 {index + 1} / {filtered.length}
               </div>
-              <Button variant="outline" size="lg" onClick={goNext} disabled={index >= filtered.length - 1} className="rounded-full">
-                ถัดไป <ChevronRight className="w-5 h-5 ml-1" />
+              <Button size="sm" onClick={goNext} disabled={index >= filtered.length - 1}
+                className="rounded-full bg-white/90 text-slate-800 hover:bg-white shadow">
+                ถัดไป <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
-            <p className="mt-3 text-center text-xs text-muted-foreground">ปัดซ้าย/ขวาเพื่อเลื่อนดูทีละคน</p>
           </div>
         )}
       </main>
@@ -215,10 +289,27 @@ const StudentCardViewer: React.FC<Props> = ({ username, onLogout }) => {
   );
 };
 
-const Row: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="flex items-baseline gap-2">
-    <span className="font-bold whitespace-nowrap">{label} :</span>
-    <span className="break-all">{value}</span>
+const Divider = () => <div className="h-px bg-slate-200" />;
+
+const InfoRow: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  tel?: boolean;
+  multiline?: boolean;
+}> = ({ icon, label, value, tel, multiline }) => (
+  <div className="flex items-start gap-2 text-[13px]">
+    <div className="mt-0.5 w-7 h-7 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-700 shrink-0">
+      {icon}
+    </div>
+    <div className="flex-1 min-w-0">
+      <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">{label}</div>
+      {tel && value && value !== '-' ? (
+        <a href={`tel:${value}`} className="font-bold text-sky-700 break-all">{value}</a>
+      ) : (
+        <div className={`font-semibold text-slate-800 ${multiline ? 'leading-snug' : 'truncate'}`}>{value}</div>
+      )}
+    </div>
   </div>
 );
 
