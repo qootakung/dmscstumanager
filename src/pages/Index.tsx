@@ -213,6 +213,12 @@ const Index = () => {
                       >
                         แบบ ปพ.5
                       </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => window.open('https://donmooncare.lovable.app/', '_blank')}
+                      >
+                        แบบบันทึกการเยี่ยมบ้าน
+                      </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
                   
