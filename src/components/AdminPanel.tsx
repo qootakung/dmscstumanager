@@ -8,12 +8,26 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye } from 'lucide-react';
+import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye, Download, FileSpreadsheet } from 'lucide-react';
 import { getUsers, addUser, clearAllStudents, getCurrentUser } from '@/utils/storage';
 import { updateUserPermission } from '@/utils/userStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+const BACKUP_TABLES = [
+  'students',
+  'teachers',
+  'app_users',
+  'student_health_records',
+  'student_scores',
+  'attendance_records',
+  'dental_milk_records',
+  'competency_assessments',
+  'assessment_documents',
+] as const;
 
 const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -526,6 +540,38 @@ const AdminPanel: React.FC = () => {
                         {!isMainAdmin && (
                           <p className="text-xs text-gray-600 mt-3 text-center">
                             เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถใช้งานได้
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mt-6 p-6 bg-gradient-to-r from-emerald-100 to-teal-100 border-2 border-emerald-300 rounded-2xl shadow-lg">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Database className="w-6 h-6 text-emerald-700" />
+                          <p className="text-sm text-emerald-900 font-semibold">
+                            สำรองข้อมูล (Backup) ทุกตารางจากฐานข้อมูล
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Button
+                            onClick={() => handleBackup('json')}
+                            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg rounded-xl"
+                            disabled={!isMainAdmin}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            ดาวน์โหลด JSON
+                          </Button>
+                          <Button
+                            onClick={() => handleBackup('xlsx')}
+                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg rounded-xl"
+                            disabled={!isMainAdmin}
+                          >
+                            <FileSpreadsheet className="w-4 h-4 mr-2" />
+                            ดาวน์โหลด Excel
+                          </Button>
+                        </div>
+                        {!isMainAdmin && (
+                          <p className="text-xs text-gray-600 mt-3 text-center">
+                            เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถสำรองข้อมูลได้
                           </p>
                         )}
                       </div>
