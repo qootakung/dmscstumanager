@@ -189,15 +189,35 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleClearAllStudents = async () => {
-    // Only allow the main admin (dmsc@) to delete all data
     if (currentUser?.username !== 'dmsc@') {
       await Swal.fire({
         title: 'ไม่มีสิทธิ์!',
         text: 'เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถลบข้อมูลทั้งหมดได้',
         icon: 'error',
-        confirmButtonText: 'ตกลง'
+        confirmButtonText: 'ตกลง',
       });
       return;
+    }
+
+    const result = await Swal.fire({
+      title: 'ลบข้อมูลนักเรียนทั้งหมด?',
+      text: 'การดำเนินการนี้ไม่สามารถย้อนกลับได้!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ลบทั้งหมด',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#ef4444',
+    });
+
+    if (result.isConfirmed) {
+      clearAllStudents();
+      await Swal.fire({
+        title: 'ลบข้อมูลสำเร็จ!',
+        text: 'ข้อมูลนักเรียนทั้งหมดถูกลบแล้ว',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
 
