@@ -288,30 +288,6 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const _handleClearAllStudentsBody = async () => {
-
-    const result = await Swal.fire({
-      title: 'ลบข้อมูลนักเรียนทั้งหมด?',
-      text: 'การดำเนินการนี้ไม่สามารถย้อนกลับได้!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'ลบทั้งหมด',
-      cancelButtonText: 'ยกเลิก',
-      confirmButtonColor: '#ef4444',
-    });
-
-    if (result.isConfirmed) {
-      clearAllStudents();
-      await Swal.fire({
-        title: 'ลบข้อมูลสำเร็จ!',
-        text: 'ข้อมูลนักเรียนทั้งหมดถูกลบแล้ว',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false
-      });
-    }
-  };
-
   const isMainAdmin = currentUser?.username === 'dmsc@';
   const adminUsers = users.filter(user => user.role === 'admin').length;
   const regularUsers = users.filter(user => user.role === 'user').length;
