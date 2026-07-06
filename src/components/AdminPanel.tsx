@@ -8,12 +8,26 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye } from 'lucide-react';
+import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye, Download, FileSpreadsheet } from 'lucide-react';
 import { getUsers, addUser, clearAllStudents, getCurrentUser } from '@/utils/storage';
 import { updateUserPermission } from '@/utils/userStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+const BACKUP_TABLES = [
+  'students',
+  'teachers',
+  'app_users',
+  'student_health_records',
+  'student_scores',
+  'attendance_records',
+  'dental_milk_records',
+  'competency_assessments',
+  'assessment_documents',
+] as const;
 
 const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -175,13 +189,12 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleClearAllStudents = async () => {
-    // Only allow the main admin (dmsc@) to delete all data
     if (currentUser?.username !== 'dmsc@') {
       await Swal.fire({
         title: 'ไม่มีสิทธิ์!',
         text: 'เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถลบข้อมูลทั้งหมดได้',
         icon: 'error',
-        confirmButtonText: 'ตกลง'
+        confirmButtonText: 'ตกลง',
       });
       return;
     }
@@ -203,7 +216,94 @@ const AdminPanel: React.FC = () => {
         text: 'ข้อมูลนักเรียนทั้งหมดถูกลบแล้ว',
         icon: 'success',
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  const handleBackup = async (format: 'json' | 'xlsx') => {
+    if (currentUser?.username !== 'dmsc@') {
+      await Swal.fire({
+        title: 'ไม่มีสิทธิ์!',
+        text: 'เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถสำรองข้อมูลได้',
+        icon: 'error',
+        confirmButtonText: 'ตกลง',
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'กำลังสำรองข้อมูล...',
+      text: 'กรุณารอสักครู่',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+      const dataByTable: Record<string, any[]> = {};
+      let totalRows = 0;
+
+      for (const table of BACKUP_TABLES) {
+        const all: any[] = [];
+        const pageSize = 1000;
+        let from = 0;
+        // Paginate to bypass the 1000-row default limit
+        while (true) {
+          const { data, error } = await supabase
+            .from(table as any)
+            .select('*')
+            .range(from, from + pageSize - 1);
+          if (error) throw new Error(`${table}: ${error.message}`);
+          if (!data || data.length === 0) break;
+          all.push(...data);
+          if (data.length < pageSize) break;
+          from += pageSize;
+        }
+        dataByTable[table] = all;
+        totalRows += all.length;
+      }
+
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+      if (format === 'json') {
+        const payload = {
+          exported_at: new Date().toISOString(),
+          project: 'dmsc-school',
+          tables: dataByTable,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {
+          type: 'application/json',
+        });
+        saveAs(blob, `dmsc-backup-${stamp}.json`);
+      } else {
+        const wb = XLSX.utils.book_new();
+        for (const table of BACKUP_TABLES) {
+          const rows = dataByTable[table];
+          const ws =
+            rows.length > 0
+              ? XLSX.utils.json_to_sheet(rows)
+              : XLSX.utils.aoa_to_sheet([['(no data)']]);
+          XLSX.utils.book_append_sheet(wb, ws, table.slice(0, 31));
+        }
+        const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+        saveAs(
+          new Blob([buf], { type: 'application/octet-stream' }),
+          `dmsc-backup-${stamp}.xlsx`,
+        );
+      }
+
+      await Swal.fire({
+        title: 'สำรองข้อมูลสำเร็จ!',
+        text: `รวม ${totalRows.toLocaleString()} แถว จาก ${BACKUP_TABLES.length} ตาราง`,
+        icon: 'success',
+        confirmButtonText: 'ตกลง',
+      });
+    } catch (err: any) {
+      await Swal.fire({
+        title: 'สำรองข้อมูลล้มเหลว',
+        text: err?.message ?? 'เกิดข้อผิดพลาด',
+        icon: 'error',
+        confirmButtonText: 'ตกลง',
       });
     }
   };
@@ -526,6 +626,38 @@ const AdminPanel: React.FC = () => {
                         {!isMainAdmin && (
                           <p className="text-xs text-gray-600 mt-3 text-center">
                             เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถใช้งานได้
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mt-6 p-6 bg-gradient-to-r from-emerald-100 to-teal-100 border-2 border-emerald-300 rounded-2xl shadow-lg">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Database className="w-6 h-6 text-emerald-700" />
+                          <p className="text-sm text-emerald-900 font-semibold">
+                            สำรองข้อมูล (Backup) ทุกตารางจากฐานข้อมูล
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Button
+                            onClick={() => handleBackup('json')}
+                            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg rounded-xl"
+                            disabled={!isMainAdmin}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            ดาวน์โหลด JSON
+                          </Button>
+                          <Button
+                            onClick={() => handleBackup('xlsx')}
+                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg rounded-xl"
+                            disabled={!isMainAdmin}
+                          >
+                            <FileSpreadsheet className="w-4 h-4 mr-2" />
+                            ดาวน์โหลด Excel
+                          </Button>
+                        </div>
+                        {!isMainAdmin && (
+                          <p className="text-xs text-gray-600 mt-3 text-center">
+                            เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถสำรองข้อมูลได้
                           </p>
                         )}
                       </div>
