@@ -199,6 +199,96 @@ const AdminPanel: React.FC = () => {
       });
       return;
     }
+  };
+
+  const handleBackup = async (format: 'json' | 'xlsx') => {
+    if (currentUser?.username !== 'dmsc@') {
+      await Swal.fire({
+        title: 'ไม่มีสิทธิ์!',
+        text: 'เฉพาะผู้ดูแลระบบหลัก (dmsc@) เท่านั้นที่สามารถสำรองข้อมูลได้',
+        icon: 'error',
+        confirmButtonText: 'ตกลง',
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'กำลังสำรองข้อมูล...',
+      text: 'กรุณารอสักครู่',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+      const dataByTable: Record<string, any[]> = {};
+      let totalRows = 0;
+
+      for (const table of BACKUP_TABLES) {
+        const all: any[] = [];
+        const pageSize = 1000;
+        let from = 0;
+        // Paginate to bypass the 1000-row default limit
+        while (true) {
+          const { data, error } = await supabase
+            .from(table as any)
+            .select('*')
+            .range(from, from + pageSize - 1);
+          if (error) throw new Error(`${table}: ${error.message}`);
+          if (!data || data.length === 0) break;
+          all.push(...data);
+          if (data.length < pageSize) break;
+          from += pageSize;
+        }
+        dataByTable[table] = all;
+        totalRows += all.length;
+      }
+
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+      if (format === 'json') {
+        const payload = {
+          exported_at: new Date().toISOString(),
+          project: 'dmsc-school',
+          tables: dataByTable,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {
+          type: 'application/json',
+        });
+        saveAs(blob, `dmsc-backup-${stamp}.json`);
+      } else {
+        const wb = XLSX.utils.book_new();
+        for (const table of BACKUP_TABLES) {
+          const rows = dataByTable[table];
+          const ws =
+            rows.length > 0
+              ? XLSX.utils.json_to_sheet(rows)
+              : XLSX.utils.aoa_to_sheet([['(no data)']]);
+          XLSX.utils.book_append_sheet(wb, ws, table.slice(0, 31));
+        }
+        const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+        saveAs(
+          new Blob([buf], { type: 'application/octet-stream' }),
+          `dmsc-backup-${stamp}.xlsx`,
+        );
+      }
+
+      await Swal.fire({
+        title: 'สำรองข้อมูลสำเร็จ!',
+        text: `รวม ${totalRows.toLocaleString()} แถว จาก ${BACKUP_TABLES.length} ตาราง`,
+        icon: 'success',
+        confirmButtonText: 'ตกลง',
+      });
+    } catch (err: any) {
+      await Swal.fire({
+        title: 'สำรองข้อมูลล้มเหลว',
+        text: err?.message ?? 'เกิดข้อผิดพลาด',
+        icon: 'error',
+        confirmButtonText: 'ตกลง',
+      });
+    }
+  };
+
+  const _handleClearAllStudentsBody = async () => {
 
     const result = await Swal.fire({
       title: 'ลบข้อมูลนักเรียนทั้งหมด?',
