@@ -26,7 +26,7 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
     if (column === 'ลายเซ็นผู้ปกครอง') return 100; // ลายเซ็นผู้ปกครอง
     if (column === 'เบอร์โทร') return 90; // เบอร์โทร
     if (column === 'ระดับชั้น') return 70; // ระดับชั้น
-    if (column === 'อายุ') return 45; // อายุ
+    if (column === 'อายุ') return 110; // อายุ - กว้างพอให้ "X ปี X เดือน X วัน" อยู่บรรทัดเดียว
     if (column === 'เวลามา' || column === 'เวลากลับ') return 60; // เวลา
     if (column === 'เลขบัตรประจำตัวประชาชน') return 120; // เลขบัตร
     if (column === 'ที่อยู่') return 150; // ที่อยู่
@@ -74,6 +74,11 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
             word-break: keep-all !important;
             overflow-wrap: break-word !important;
             hyphens: none !important;
+          }
+          .print-table td.age-cell,
+          .print-table th.age-cell {
+            white-space: nowrap !important;
+            word-break: keep-all !important;
           }
           table, th, td {
             border: 1px solid #000 !important;
@@ -200,7 +205,7 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
                       <td className="border border-black px-2 py-1 overflow-hidden" style={{ width: `${columnWidths[allColumns.indexOf('ที่อยู่')]}px`, wordBreak: 'break-all' }}>{formatAddress(student)}</td>
                     )}
                     {reportOptions.additionalFields.age && (
-                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('อายุ')]}px` }}>{calculateAge(student.birthDate)}</td>
+                      <td className="age-cell border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('อายุ')]}px`, whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>{calculateAge(student.birthDate)}</td>
                     )}
                     {reportOptions.additionalFields.birthDate && (
                       <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วันเดือนปีเกิด')]}px` }}>{formatBirthDate(student.birthDate)}</td>
