@@ -184,7 +184,7 @@ const PP5StudentInfo: React.FC<PP5StudentInfoProps> = ({
                      <th className="border border-gray-300 px-3 py-2 text-left font-semibold">ชื่อ - นามสกุล</th>
                      <th className="border border-gray-300 px-3 py-2 text-center font-semibold w-12">เพศ</th>
                      <th className="border border-gray-300 px-3 py-2 text-center font-semibold w-36">เลขบัตรประจำตัวประชาชน</th>
-                     <th className="border border-gray-300 px-3 py-2 text-center font-semibold w-40">อายุ</th>
+                     <th className="border border-gray-300 px-3 py-2 text-center font-semibold" style={{ width: '140px', whiteSpace: 'nowrap' }}>อายุ</th>
                      <th className="border border-gray-300 px-3 py-2 text-center font-semibold w-28">วันเดือนปีเกิด</th>
                    </tr>
                  </thead>
@@ -200,7 +200,7 @@ const PP5StudentInfo: React.FC<PP5StudentInfoProps> = ({
                          {student.gender === 'ชาย' || student.gender === 'ช' ? 'ช' : 'ญ'}
                        </td>
                        <td className="border border-gray-300 px-3 py-2 text-center">{student.citizenId}</td>
-                       <td className="border border-gray-300 px-3 py-2 text-center">{calculateAge(student.birthDate)}</td>
+                       <td className="border border-gray-300 px-3 py-2 text-center" style={{ whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>{calculateAge(student.birthDate)}</td>
                        <td className="border border-gray-300 px-3 py-2 text-center">{formatBirthDate(student.birthDate)}</td>
                      </tr>
                    ))}
@@ -294,7 +294,7 @@ const PP5StudentInfo: React.FC<PP5StudentInfoProps> = ({
              <th className="border border-black px-2 py-1 text-center font-semibold">ชื่อ - นามสกุล</th>
              <th className="border border-black px-2 py-1 text-center font-semibold" style={{ width: '40px' }}>เพศ</th>
              <th className="border border-black px-2 py-1 text-center font-semibold" style={{ width: '130px' }}>เลขบัตรประจำตัวประชาชน</th>
-             <th className="border border-black px-2 py-1 text-center font-semibold" style={{ width: '110px' }}>อายุ</th>
+             <th className="border border-black px-2 py-1 text-center font-semibold age-cell" style={{ width: '130px', whiteSpace: 'nowrap' }}>อายุ</th>
              <th className="border border-black px-2 py-1 text-center font-semibold" style={{ width: '90px' }}>วันเดือนปีเกิด</th>
            </tr>
          </thead>
