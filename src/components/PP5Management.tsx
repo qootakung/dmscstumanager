@@ -42,6 +42,7 @@ import AchievementSummaryReport from './pp5/AchievementSummaryReport';
 import AchievementChartReport from './pp5/AchievementChartReport';
 import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
 import type { SubjectInfo } from './pp5/types';
+import { getDefaultSubjectsForGrade } from './pp5/types';
 
 // Types for PP5 system
 interface PP5MenuCategory {
@@ -87,10 +88,21 @@ const getCurrentSemester = () => {
   return '2';
 };
 
+// Calculate current Thai academic year (พ.ศ.) based on school calendar
+// Academic year rolls over on May 16
+const getCurrentAcademicYear = (): string => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const d = now.getDate();
+  const gregorianYear = (m > 5 || (m === 5 && d >= 16)) ? y : y - 1;
+  return String(gregorianYear + 543);
+};
+
 const PP5Management: React.FC = () => {
   const [selectedGrade, setSelectedGrade] = useState<string>('ป.1');
   const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
-  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('2568');
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const academicYears = generateAcademicYears();
@@ -134,6 +146,7 @@ const PP5Management: React.FC = () => {
         { id: 'career', label: 'การงานอาชีพ', icon: Briefcase },
         { id: 'english', label: 'ภาษาต่างประเทศ', icon: Globe },
         { id: 'anti-corruption', label: 'ป้องกันการทุจริต', icon: Shield },
+        { id: 'english-comm', label: 'ภาษาอังกฤษเพื่อการสื่อสาร', icon: Globe },
         ...electiveMenuItems,
       ]
     },
