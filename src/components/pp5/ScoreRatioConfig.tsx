@@ -86,18 +86,47 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
     }).filter(g => g.strands.length > 0);
   };
 
+  // Extra elective subject ratio entries (no curriculum standards — single editable row)
+  const ELECTIVE_RATIO_GROUPS: { groupId: string; groupName: string }[] = [
+    { groupId: 'elective-anticorrupt', groupName: 'รายวิชาเพิ่มเติม - ป้องกันการทุจริต' },
+    { groupId: 'elective-english-comm', groupName: 'รายวิชาเพิ่มเติม - ภาษาอังกฤษเพื่อการสื่อสาร' },
+  ];
+
+  const buildElectiveRatios = (): SubjectGroupRatio[] => {
+    return ELECTIVE_RATIO_GROUPS.map(g => ({
+      groupId: g.groupId,
+      groupName: g.groupName,
+      strands: [
+        {
+          strandName: 'ผลการเรียนรู้',
+          standards: [{ standardCode: 'รวมคะแนนระหว่างปี', score: 0 }],
+        },
+      ],
+      midYearTotal: 0,
+      endYearScore: 0,
+    }));
+  };
+
+  const buildAllDefaults = (): SubjectGroupRatio[] => {
+    return [...buildDefaultRatios(), ...buildElectiveRatios()];
+  };
+
   useEffect(() => {
     const key = getStorageKey(gradeKey, selectedAcademicYear, selectedSemester);
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
-        setRatios(JSON.parse(saved));
+        const parsed: SubjectGroupRatio[] = JSON.parse(saved);
+        // Ensure elective groups exist (for backwards compatibility with old saves)
+        const existingIds = new Set(parsed.map(g => g.groupId));
+        const missingElectives = buildElectiveRatios().filter(g => !existingIds.has(g.groupId));
+        setRatios([...parsed, ...missingElectives]);
         return;
       } catch (e) {
         console.error('Error loading score ratios:', e);
       }
     }
-    setRatios(buildDefaultRatios());
+    setRatios(buildAllDefaults());
   }, [gradeKey, selectedAcademicYear, selectedSemester]);
 
   const updateStandardScore = (groupId: string, strandIdx: number, stdIdx: number, value: number) => {
