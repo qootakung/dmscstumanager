@@ -75,6 +75,11 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
             overflow-wrap: break-word !important;
             hyphens: none !important;
           }
+          .print-table td.age-cell,
+          .print-table th.age-cell {
+            white-space: nowrap !important;
+            word-break: keep-all !important;
+          }
           table, th, td {
             border: 1px solid #000 !important;
             border-collapse: collapse !important;
@@ -200,7 +205,7 @@ const StudentReportPrintableWithColumns: React.FC<StudentReportPrintableWithColu
                       <td className="border border-black px-2 py-1 overflow-hidden" style={{ width: `${columnWidths[allColumns.indexOf('ที่อยู่')]}px`, wordBreak: 'break-all' }}>{formatAddress(student)}</td>
                     )}
                     {reportOptions.additionalFields.age && (
-                      <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('อายุ')]}px`, whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>{calculateAge(student.birthDate)}</td>
+                      <td className="age-cell border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('อายุ')]}px`, whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>{calculateAge(student.birthDate)}</td>
                     )}
                     {reportOptions.additionalFields.birthDate && (
                       <td className="border border-black px-2 py-1 text-center" style={{ width: `${columnWidths[allColumns.indexOf('วันเดือนปีเกิด')]}px` }}>{formatBirthDate(student.birthDate)}</td>
