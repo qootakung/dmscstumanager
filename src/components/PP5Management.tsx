@@ -322,7 +322,40 @@ const PP5Management: React.FC = () => {
         );
       }
     }
-    
+
+    // Built-in elective subjects (no curriculum indicators — use learning outcomes)
+    if (subjectKey === 'anti-corruption' || subjectKey === 'english-comm') {
+      const defaults = getDefaultSubjectsForGrade(selectedGrade.replace('ป.', ''));
+      const mapId = subjectKey === 'anti-corruption' ? 'anticorrupt' : 'english2';
+      const base = defaults.find(s => s.id === mapId);
+      const subjectInfo: SubjectInfo = base
+        ? { ...base, teacherId: '', teacherName: '', id: subjectKey }
+        : {
+            id: subjectKey,
+            code: subjectKey === 'anti-corruption' ? 'ส' : 'อ',
+            name: subjectKey === 'anti-corruption' ? 'ป้องกันการทุจริต' : 'ภาษาอังกฤษเพื่อการสื่อสาร',
+            shortName: subjectKey === 'anti-corruption' ? 'ป้องกันทุจริต' : 'อังกฤษสื่อสาร',
+            hoursPerWeek: 1,
+            hoursPerYear: 40,
+            passingCriteria: 50,
+            teacherId: '',
+            teacherName: '',
+            subjectCode: '',
+            endTermRatio: 0,
+            midTermRatio: 0,
+            category: 'elective',
+          };
+      return (
+        <ElectiveScoreEntry
+          subjectInfo={subjectInfo}
+          selectedGrade={selectedGrade}
+          selectedSemester={selectedSemester}
+          selectedAcademicYear={selectedAcademicYear}
+          onBack={handleBack}
+        />
+      );
+    }
+
     return (
       <IndicatorScoreEntry
         subjectMenuId={subjectKey}
