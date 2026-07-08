@@ -32,6 +32,15 @@ interface ElectiveScoreData {
 const getStorageKey = (subjectId: string, grade: string, year: string, semester: string) =>
   `pp5-elective-scores-${subjectId}-${grade}-${year}-${semester}`;
 
+// Map elective subject id -> ratio group id used in ScoreRatioConfig
+const RATIO_GROUP_ID_MAP: Record<string, string> = {
+  'anti-corruption': 'elective-anticorrupt',
+  'english-comm': 'elective-english-comm',
+};
+
+const getRatioStorageKey = (grade: string, year: string, semester: string) =>
+  `pp5-score-ratio-${grade}-${year}-${semester}`;
+
 const calculateGradeLevel = (totalScore: number): number => {
   if (totalScore >= 80) return 4;
   if (totalScore >= 75) return 3.5;
@@ -68,27 +77,34 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
   const gradeKey = selectedGrade;
   const gradeNum = gradeKey.replace('ป.', '');
 
-  // Load learning outcomes count from subject config stored in localStorage
-  const learningOutcomes = useMemo(() => {
-    const basicKey = `pp5-basic-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`;
-    const saved = localStorage.getItem(basicKey);
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        const subj = data.subjects?.find((s: any) => s.id === subjectInfo.id);
-        if (subj?.learningOutcomes) return subj.learningOutcomes;
-      } catch { }
-    }
-    // Default: try to get from the subject's metadata or default 8
-    return (subjectInfo as any).learningOutcomes || 8;
-  }, [subjectInfo, selectedGrade, selectedAcademicYear, selectedSemester]);
-
   const [scoreData, setScoreData] = useState<ElectiveScoreData>({
     maxScorePerOutcome: 10,
     endYearMaxScore: 20,
-    learningOutcomes,
+    learningOutcomes: 8,
     studentScores: {},
   });
+
+  const learningOutcomes = scoreData.learningOutcomes;
+
+  // Target totals from ScoreRatioConfig (มิดเยียร์ต้องเท่ากับสัดส่วนที่กำหนด)
+  const ratioTargets = useMemo(() => {
+    const key = getRatioStorageKey(gradeKey, selectedAcademicYear, selectedSemester);
+    const saved = localStorage.getItem(key);
+    if (!saved) return null;
+    try {
+      const parsed = JSON.parse(saved);
+      const groupId = RATIO_GROUP_ID_MAP[subjectInfo.id];
+      if (!groupId) return null;
+      const group = parsed.find((g: any) => g.groupId === groupId);
+      if (!group) return null;
+      return {
+        midYear: group.midYearTotal || 0,
+        endYear: group.endYearScore || 0,
+      };
+    } catch {
+      return null;
+    }
+  }, [subjectInfo.id, gradeKey, selectedAcademicYear, selectedSemester, scoreData]);
 
   // Load students
   useEffect(() => {
@@ -117,6 +133,23 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
         setScoreData(prev => ({ ...prev, ...parsed }));
       } catch {
         // keep defaults
+      }
+    } else {
+      // Initialize defaults from ratio config if available
+      const ratioKey = getRatioStorageKey(gradeKey, selectedAcademicYear, selectedSemester);
+      const ratioSaved = localStorage.getItem(ratioKey);
+      if (ratioSaved) {
+        try {
+          const parsed = JSON.parse(ratioSaved);
+          const groupId = RATIO_GROUP_ID_MAP[subjectInfo.id];
+          const group = parsed.find((g: any) => g.groupId === groupId);
+          if (group) {
+            setScoreData(prev => ({
+              ...prev,
+              endYearMaxScore: group.endYearScore || prev.endYearMaxScore,
+            }));
+          }
+        } catch { /* ignore */ }
       }
     }
   }, [subjectInfo.id, gradeKey, selectedAcademicYear, selectedSemester]);
