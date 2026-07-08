@@ -411,6 +411,18 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
         <CardContent className="pt-4">
           <div className="flex flex-wrap gap-4 items-end">
             <div className="space-y-1">
+              <label className="text-xs font-medium">จำนวนผลการเรียนรู้</label>
+              <select
+                className="w-24 h-8 border rounded-md px-2 text-sm bg-background"
+                value={scoreData.learningOutcomes}
+                onChange={(e) => setScoreData(prev => ({ ...prev, learningOutcomes: parseInt(e.target.value) || 1 }))}
+              >
+                {[1,2,3,4,5,6,7,8].map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
               <label className="text-xs font-medium">คะแนนเต็มต่อผลการเรียนรู้</label>
               <Input
                 type="number"
@@ -432,6 +444,27 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
               รวมคะแนนเต็ม: <strong>{getMidYearMax() + scoreData.endYearMaxScore}</strong>
             </div>
           </div>
+          {ratioTargets && (
+            <div className="mt-3 text-sm space-y-1">
+              <div className="flex flex-wrap gap-4">
+                <span>
+                  สัดส่วนที่กำหนด — รวมระหว่างปี: <strong>{ratioTargets.midYear}</strong>
+                  {' '}| ปลายปี: <strong>{ratioTargets.endYear}</strong>
+                </span>
+              </div>
+              {getMidYearMax() !== ratioTargets.midYear && (
+                <div className="text-red-600 text-xs">
+                  ⚠ คะแนนเต็มรวมระหว่างปี ({getMidYearMax()}) ต้องเท่ากับสัดส่วนที่กำหนดไว้ ({ratioTargets.midYear}).
+                  ปรับ "จำนวนผลการเรียนรู้" × "คะแนนเต็มต่อผลการเรียนรู้" ให้เท่ากัน
+                </div>
+              )}
+              {scoreData.endYearMaxScore !== ratioTargets.endYear && (
+                <div className="text-red-600 text-xs">
+                  ⚠ คะแนนสอบปลายปี ({scoreData.endYearMaxScore}) ต้องเท่ากับสัดส่วนที่กำหนดไว้ ({ratioTargets.endYear})
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
