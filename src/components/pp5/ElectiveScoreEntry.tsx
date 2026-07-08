@@ -415,7 +415,14 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
               <select
                 className="w-24 h-8 border rounded-md px-2 text-sm bg-background"
                 value={scoreData.learningOutcomes}
-                onChange={(e) => setScoreData(prev => ({ ...prev, learningOutcomes: parseInt(e.target.value) || 1 }))}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value) || 1;
+                  setScoreData(prev => {
+                    const target = ratioTargets?.midYear ?? (prev.maxScorePerOutcome * prev.learningOutcomes);
+                    const newMax = n > 0 ? Math.round((target / n) * 100) / 100 : prev.maxScorePerOutcome;
+                    return { ...prev, learningOutcomes: n, maxScorePerOutcome: newMax };
+                  });
+                }}
               >
                 {[1,2,3,4,5,6,7,8].map(n => (
                   <option key={n} value={n}>{n}</option>
