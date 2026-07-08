@@ -193,7 +193,8 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
     }));
   }, [scoreData.endYearMaxScore]);
 
-  const getMidYearTotal = (studentId: string): number => {
+  // Raw sum (out of learningOutcomes × 10)
+  const getMidYearRaw = (studentId: string): number => {
     let sum = 0;
     for (let i = 1; i <= learningOutcomes; i++) {
       sum += getScore(studentId, i);
@@ -201,7 +202,17 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
     return sum;
   };
 
-  const getMidYearMax = (): number => learningOutcomes * scoreData.maxScorePerOutcome;
+  const getRawMax = (): number => learningOutcomes * 10;
+
+  // Scaled to ratio target (e.g., 70 or 80); falls back to raw max when no ratio configured
+  const getMidYearMax = (): number => ratioTargets?.midYear || getRawMax();
+
+  const getMidYearTotal = (studentId: string): number => {
+    const raw = getMidYearRaw(studentId);
+    const rawMax = getRawMax();
+    if (!ratioTargets?.midYear || rawMax === 0) return raw;
+    return Math.round((raw * ratioTargets.midYear / rawMax) * 100) / 100;
+  };
 
   const getTotalScore = (studentId: string): number => {
     const midYearTotal = getMidYearTotal(studentId);
