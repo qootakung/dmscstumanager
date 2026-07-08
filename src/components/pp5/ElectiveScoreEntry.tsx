@@ -417,11 +417,7 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
                 value={scoreData.learningOutcomes}
                 onChange={(e) => {
                   const n = parseInt(e.target.value) || 1;
-                  setScoreData(prev => {
-                    const target = ratioTargets?.midYear ?? (prev.maxScorePerOutcome * prev.learningOutcomes);
-                    const newMax = n > 0 ? Math.round((target / n) * 100) / 100 : prev.maxScorePerOutcome;
-                    return { ...prev, learningOutcomes: n, maxScorePerOutcome: newMax };
-                  });
+                  setScoreData(prev => ({ ...prev, learningOutcomes: n, maxScorePerOutcome: 10 }));
                 }}
               >
                 {[1,2,3,4,5,6,7,8].map(n => (
@@ -431,12 +427,7 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">คะแนนเต็มต่อผลการเรียนรู้</label>
-              <Input
-                type="number"
-                className="w-24 h-8"
-                value={scoreData.maxScorePerOutcome}
-                onChange={(e) => setScoreData(prev => ({ ...prev, maxScorePerOutcome: parseInt(e.target.value) || 10 }))}
-              />
+              <Input type="number" className="w-24 h-8 bg-muted" value={10} readOnly disabled />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">คะแนนสอบปลายปี</label>
