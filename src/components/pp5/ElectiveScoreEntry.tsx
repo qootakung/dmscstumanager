@@ -193,7 +193,8 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
     }));
   }, [scoreData.endYearMaxScore]);
 
-  const getMidYearTotal = (studentId: string): number => {
+  // Raw sum (out of learningOutcomes × 10)
+  const getMidYearRaw = (studentId: string): number => {
     let sum = 0;
     for (let i = 1; i <= learningOutcomes; i++) {
       sum += getScore(studentId, i);
@@ -201,7 +202,17 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
     return sum;
   };
 
-  const getMidYearMax = (): number => learningOutcomes * scoreData.maxScorePerOutcome;
+  const getRawMax = (): number => learningOutcomes * 10;
+
+  // Scaled to ratio target (e.g., 70 or 80); falls back to raw max when no ratio configured
+  const getMidYearMax = (): number => ratioTargets?.midYear || getRawMax();
+
+  const getMidYearTotal = (studentId: string): number => {
+    const raw = getMidYearRaw(studentId);
+    const rawMax = getRawMax();
+    if (!ratioTargets?.midYear || rawMax === 0) return raw;
+    return Math.round((raw * ratioTargets.midYear / rawMax) * 100) / 100;
+  };
 
   const getTotalScore = (studentId: string): number => {
     const midYearTotal = getMidYearTotal(studentId);
@@ -417,11 +428,7 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
                 value={scoreData.learningOutcomes}
                 onChange={(e) => {
                   const n = parseInt(e.target.value) || 1;
-                  setScoreData(prev => {
-                    const target = ratioTargets?.midYear ?? (prev.maxScorePerOutcome * prev.learningOutcomes);
-                    const newMax = n > 0 ? Math.round((target / n) * 100) / 100 : prev.maxScorePerOutcome;
-                    return { ...prev, learningOutcomes: n, maxScorePerOutcome: newMax };
-                  });
+                  setScoreData(prev => ({ ...prev, learningOutcomes: n, maxScorePerOutcome: 10 }));
                 }}
               >
                 {[1,2,3,4,5,6,7,8].map(n => (
@@ -431,12 +438,7 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">คะแนนเต็มต่อผลการเรียนรู้</label>
-              <Input
-                type="number"
-                className="w-24 h-8"
-                value={scoreData.maxScorePerOutcome}
-                onChange={(e) => setScoreData(prev => ({ ...prev, maxScorePerOutcome: parseInt(e.target.value) || 10 }))}
-              />
+              <Input type="number" className="w-24 h-8 bg-muted" value={10} readOnly disabled />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">คะแนนสอบปลายปี</label>
@@ -458,13 +460,10 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
                   สัดส่วนที่กำหนด — รวมระหว่างปี: <strong>{ratioTargets.midYear}</strong>
                   {' '}| ปลายปี: <strong>{ratioTargets.endYear}</strong>
                 </span>
+                <span className="text-muted-foreground">
+                  (คะแนนดิบ {getRawMax()} จะถูกปรับสัดส่วนเป็น {ratioTargets.midYear})
+                </span>
               </div>
-              {getMidYearMax() !== ratioTargets.midYear && (
-                <div className="text-red-600 text-xs">
-                  ⚠ คะแนนเต็มรวมระหว่างปี ({getMidYearMax()}) ต้องเท่ากับสัดส่วนที่กำหนดไว้ ({ratioTargets.midYear}).
-                  ปรับ "จำนวนผลการเรียนรู้" × "คะแนนเต็มต่อผลการเรียนรู้" ให้เท่ากัน
-                </div>
-              )}
               {scoreData.endYearMaxScore !== ratioTargets.endYear && (
                 <div className="text-red-600 text-xs">
                   ⚠ คะแนนสอบปลายปี ({scoreData.endYearMaxScore}) ต้องเท่ากับสัดส่วนที่กำหนดไว้ ({ratioTargets.endYear})
