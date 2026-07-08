@@ -460,13 +460,10 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
                   สัดส่วนที่กำหนด — รวมระหว่างปี: <strong>{ratioTargets.midYear}</strong>
                   {' '}| ปลายปี: <strong>{ratioTargets.endYear}</strong>
                 </span>
+                <span className="text-muted-foreground">
+                  (คะแนนดิบ {getRawMax()} จะถูกปรับสัดส่วนเป็น {ratioTargets.midYear})
+                </span>
               </div>
-              {getMidYearMax() !== ratioTargets.midYear && (
-                <div className="text-red-600 text-xs">
-                  ⚠ คะแนนเต็มรวมระหว่างปี ({getMidYearMax()}) ต้องเท่ากับสัดส่วนที่กำหนดไว้ ({ratioTargets.midYear}).
-                  ปรับ "จำนวนผลการเรียนรู้" × "คะแนนเต็มต่อผลการเรียนรู้" ให้เท่ากัน
-                </div>
-              )}
               {scoreData.endYearMaxScore !== ratioTargets.endYear && (
                 <div className="text-red-600 text-xs">
                   ⚠ คะแนนสอบปลายปี ({scoreData.endYearMaxScore}) ต้องเท่ากับสัดส่วนที่กำหนดไว้ ({ratioTargets.endYear})
