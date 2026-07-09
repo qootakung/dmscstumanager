@@ -41,6 +41,7 @@ import StandardReport from './pp5/StandardReport';
 import AchievementSummaryReport from './pp5/AchievementSummaryReport';
 import AchievementChartReport from './pp5/AchievementChartReport';
 import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
+import DesirableTraitsAssessment from './pp5/DesirableTraitsAssessment';
 import type { SubjectInfo } from './pp5/types';
 import { getDefaultSubjectsForGrade } from './pp5/types';
 
@@ -294,6 +295,18 @@ const PP5Management: React.FC = () => {
   if (activeSection === 'basic-info-score-ratio') {
     return (
       <ScoreRatioConfig
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Desirable Traits Assessment
+  if (activeSection === 'assessment-desirable-traits') {
+    return (
+      <DesirableTraitsAssessment
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
