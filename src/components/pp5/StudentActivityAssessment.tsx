@@ -345,9 +345,10 @@ interface PrintProps {
   grade: string;
   semester: string;
   academicYear: string;
+  summaryOnly?: boolean;
 }
 
-const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores, teacherNames, grade, semester, academicYear }) => {
+const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores, teacherNames, grade, semester, academicYear, summaryOnly }) => {
   const minRows = 25;
   const emptyCount = Math.max(0, minRows - students.length);
   const getRow = (key: ActivityKey, sid: string, hours: number): CellVal[] => {
@@ -378,7 +379,7 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
         .act-table td.num { text-align: center; }
       `}</style>
 
-      {activities.map((def, ai) => (
+      {!summaryOnly && activities.map((def, ai) => (
         <div key={def.key} className={ai < activities.length ? 'page-break' : ''} style={{ padding: '4mm' }}>
           <div style={{ textAlign: 'center', marginBottom: '6px' }}>
             <div style={{ fontSize: '18pt', fontWeight: 'bold' }}>แบบสรุปการประเมิน{def.name}</div>
@@ -442,6 +443,50 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
           </div>
         </div>
       ))}
+
+      {summaryOnly && (
+        <div style={{ padding: '4mm' }}>
+          <div style={{ textAlign: 'center', marginBottom: '6px' }}>
+            <div style={{ fontSize: '18pt', fontWeight: 'bold' }}>สรุปกิจกรรมพัฒนาผู้เรียน</div>
+            <div style={{ fontSize: '15pt' }}>
+              โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}
+            </div>
+          </div>
+          <table className="act-table">
+            <thead>
+              <tr>
+                <th style={{ width: '32px' }}>ที่</th>
+                <th style={{ minWidth: '200px' }}>ชื่อ - นามสกุล</th>
+                {ACTIVITIES.map(a => (<th key={a.key}>{a.short}</th>))}
+                <th>สรุปกิจกรรมพัฒนาผู้เรียน</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((s, idx) => {
+                const sid = s.studentId || s.id;
+                const results = ACTIVITIES.map(def => compute(getRow(def.key, sid, def.hours)));
+                const allPass = results.every(r => r.pass);
+                return (
+                  <tr key={s.id}>
+                    <td className="num">{idx + 1}</td>
+                    <td>{s.titleTh}{s.firstNameTh} {s.lastNameTh}</td>
+                    {results.map((r, i) => (<td key={i} className="num">{r.pass ? 'ผ.' : 'มผ.'}</td>))}
+                    <td className="num" style={{ fontWeight: 'bold' }}>{allPass ? 'ผ.' : 'มผ.'}</td>
+                  </tr>
+                );
+              })}
+              {Array.from({ length: emptyCount }).map((_, i) => (
+                <tr key={`e-${i}`}>
+                  <td className="num" style={{ color: '#bbb' }}>{students.length + i + 1}</td>
+                  <td>&nbsp;</td>
+                  {ACTIVITIES.map(a => (<td key={a.key}>&nbsp;</td>))}
+                  <td>&nbsp;</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
