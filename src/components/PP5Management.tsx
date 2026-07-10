@@ -43,6 +43,7 @@ import AchievementChartReport from './pp5/AchievementChartReport';
 import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
 import DesirableTraitsAssessment from './pp5/DesirableTraitsAssessment';
 import ReadingAnalysisAssessment from './pp5/ReadingAnalysisAssessment';
+import StudentActivityAssessment from './pp5/StudentActivityAssessment';
 import type { SubjectInfo } from './pp5/types';
 import { getDefaultSubjectsForGrade } from './pp5/types';
 
@@ -319,6 +320,17 @@ const PP5Management: React.FC = () => {
   if (activeSection === 'assessment-reading-analysis') {
     return (
       <ReadingAnalysisAssessment
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  if (activeSection === 'assessment-student-activity') {
+    return (
+      <StudentActivityAssessment
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
