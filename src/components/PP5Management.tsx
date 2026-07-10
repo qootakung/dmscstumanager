@@ -339,6 +339,29 @@ const PP5Management: React.FC = () => {
     );
   }
 
+  // Extra-activities menu → focus a single activity or overall summary
+  const extraActivityMap: Record<string, { focus?: 'guidance' | 'scout' | 'club' | 'social'; title: string; summaryOnly?: boolean }> = {
+    'extra-activities-guidance': { focus: 'guidance', title: 'กิจกรรมแนะแนว' },
+    'extra-activities-scout': { focus: 'scout', title: 'กิจกรรมลูกเสือ เนตรนารี ยุวกาชาด' },
+    'extra-activities-club': { focus: 'club', title: 'กิจกรรมชุมนุม / ชมรม' },
+    'extra-activities-social-primary': { focus: 'social', title: 'กิจกรรมเพื่อสังคมและสาธารณประโยชน์ (ประถม)' },
+    'extra-activities-activity-summary': { title: 'สรุปกิจกรรมพัฒนาผู้เรียน', summaryOnly: true },
+  };
+  if (activeSection && extraActivityMap[activeSection]) {
+    const cfg = extraActivityMap[activeSection];
+    return (
+      <StudentActivityAssessment
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+        focusActivity={cfg.focus}
+        summaryOnly={cfg.summaryOnly}
+        titleOverride={cfg.title}
+      />
+    );
+  }
+
   // Show Indicator Score Entry when a score-entry subject is selected
   const scoreEntryMatch = activeSection?.match(/^score-entry-(.+)$/);
   if (scoreEntryMatch) {

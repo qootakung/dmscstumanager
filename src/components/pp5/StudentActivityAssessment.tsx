@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 const primaryGrades = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
 
-type ActivityKey = 'guidance' | 'scout' | 'club' | 'social';
+export type ActivityKey = 'guidance' | 'scout' | 'club' | 'social';
 interface ActivityDef { key: ActivityKey; name: string; short: string; hours: number; }
 
 const ACTIVITIES: ActivityDef[] = [
@@ -35,6 +35,12 @@ interface Props {
   selectedSemester: string;
   selectedAcademicYear: string;
   onBack: () => void;
+  /** Show only one activity's data-entry tab. */
+  focusActivity?: ActivityKey;
+  /** Show only the overall summary table (hides data-entry). */
+  summaryOnly?: boolean;
+  /** Override the header title. */
+  titleOverride?: string;
 }
 
 const StudentActivityAssessment: React.FC<Props> = ({
@@ -42,6 +48,9 @@ const StudentActivityAssessment: React.FC<Props> = ({
   selectedSemester,
   selectedAcademicYear,
   onBack,
+  focusActivity,
+  summaryOnly,
+  titleOverride,
 }) => {
   const [currentGrade, setCurrentGrade] = useState(initialGrade);
   const [students, setStudents] = useState<Student[]>([]);
@@ -49,8 +58,13 @@ const StudentActivityAssessment: React.FC<Props> = ({
   const [teacherNames, setTeacherNames] = useState<Record<ActivityKey, string>>({
     guidance: '', scout: '', club: '', social: '',
   });
-  const [activeTab, setActiveTab] = useState<ActivityKey>('guidance');
+  const [activeTab, setActiveTab] = useState<ActivityKey>(focusActivity || 'guidance');
   const [loading, setLoading] = useState(true);
+
+  const visibleActivities = useMemo(
+    () => (focusActivity ? ACTIVITIES.filter(a => a.key === focusActivity) : ACTIVITIES),
+    [focusActivity]
+  );
 
   const storageKey = `pp5-student-activity-${currentGrade}-${selectedAcademicYear}-${selectedSemester}`;
 
@@ -135,13 +149,14 @@ const StudentActivityAssessment: React.FC<Props> = ({
     win.document.body.appendChild(el);
     createRoot(el).render(
       <ActivityPrintable
-        activities={ACTIVITIES}
+        activities={visibleActivities}
         students={students}
         scores={scores}
         teacherNames={teacherNames}
         grade={currentGrade}
         semester={selectedSemester}
         academicYear={selectedAcademicYear}
+        summaryOnly={summaryOnly}
       />
     );
     setTimeout(() => { win.focus(); win.print(); win.close(); }, 900);
@@ -156,7 +171,7 @@ const StudentActivityAssessment: React.FC<Props> = ({
               <ArrowLeft className="w-4 h-4 mr-2" />กลับ
             </Button>
             <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
-              <Users className="w-6 h-6" />กิจกรรมพัฒนาผู้เรียน
+              <Users className="w-6 h-6" />{titleOverride || 'กิจกรรมพัฒนาผู้เรียน'}
             </CardTitle>
             <div className="text-white text-sm">ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}</div>
           </div>
@@ -186,14 +201,15 @@ const StudentActivityAssessment: React.FC<Props> = ({
             <div className="mt-1 text-xs text-muted-foreground">คลิกที่ช่องเพื่อสลับสถานะระหว่าง ผ. (เข้าร่วม) และ มผ. (ไม่เข้าร่วม)</div>
           </div>
 
+          {!summaryOnly && (
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ActivityKey)}>
-            <TabsList className="grid grid-cols-4 w-full">
-              {ACTIVITIES.map(a => (
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${visibleActivities.length}, minmax(0, 1fr))` }}>
+              {visibleActivities.map(a => (
                 <TabsTrigger key={a.key} value={a.key}>{a.short}</TabsTrigger>
               ))}
             </TabsList>
 
-            {ACTIVITIES.map(def => (
+            {visibleActivities.map(def => (
               <TabsContent key={def.key} value={def.key} className="space-y-3">
                 <div className="flex flex-wrap gap-3 items-end pt-2">
                   <div className="flex items-center gap-2 flex-1 min-w-[240px]">
@@ -271,9 +287,10 @@ const StudentActivityAssessment: React.FC<Props> = ({
               </TabsContent>
             ))}
           </Tabs>
+          )}
 
           {/* Summary section - all activities */}
-          {!loading && students.length > 0 && (
+          {!loading && students.length > 0 && (summaryOnly || !focusActivity) && (
             <div className="mt-6">
               <h3 className="font-bold text-indigo-800 mb-2">สรุปผลรวมทุกกิจกรรม</h3>
               <div className="overflow-auto">
@@ -328,9 +345,10 @@ interface PrintProps {
   grade: string;
   semester: string;
   academicYear: string;
+  summaryOnly?: boolean;
 }
 
-const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores, teacherNames, grade, semester, academicYear }) => {
+const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores, teacherNames, grade, semester, academicYear, summaryOnly }) => {
   const minRows = 25;
   const emptyCount = Math.max(0, minRows - students.length);
   const getRow = (key: ActivityKey, sid: string, hours: number): CellVal[] => {
@@ -361,7 +379,7 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
         .act-table td.num { text-align: center; }
       `}</style>
 
-      {activities.map((def, ai) => (
+      {!summaryOnly && activities.map((def, ai) => (
         <div key={def.key} className={ai < activities.length ? 'page-break' : ''} style={{ padding: '4mm' }}>
           <div style={{ textAlign: 'center', marginBottom: '6px' }}>
             <div style={{ fontSize: '18pt', fontWeight: 'bold' }}>แบบสรุปการประเมิน{def.name}</div>
@@ -425,6 +443,50 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
           </div>
         </div>
       ))}
+
+      {summaryOnly && (
+        <div style={{ padding: '4mm' }}>
+          <div style={{ textAlign: 'center', marginBottom: '6px' }}>
+            <div style={{ fontSize: '18pt', fontWeight: 'bold' }}>สรุปกิจกรรมพัฒนาผู้เรียน</div>
+            <div style={{ fontSize: '15pt' }}>
+              โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}
+            </div>
+          </div>
+          <table className="act-table">
+            <thead>
+              <tr>
+                <th style={{ width: '32px' }}>ที่</th>
+                <th style={{ minWidth: '200px' }}>ชื่อ - นามสกุล</th>
+                {ACTIVITIES.map(a => (<th key={a.key}>{a.short}</th>))}
+                <th>สรุปกิจกรรมพัฒนาผู้เรียน</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((s, idx) => {
+                const sid = s.studentId || s.id;
+                const results = ACTIVITIES.map(def => compute(getRow(def.key, sid, def.hours)));
+                const allPass = results.every(r => r.pass);
+                return (
+                  <tr key={s.id}>
+                    <td className="num">{idx + 1}</td>
+                    <td>{s.titleTh}{s.firstNameTh} {s.lastNameTh}</td>
+                    {results.map((r, i) => (<td key={i} className="num">{r.pass ? 'ผ.' : 'มผ.'}</td>))}
+                    <td className="num" style={{ fontWeight: 'bold' }}>{allPass ? 'ผ.' : 'มผ.'}</td>
+                  </tr>
+                );
+              })}
+              {Array.from({ length: emptyCount }).map((_, i) => (
+                <tr key={`e-${i}`}>
+                  <td className="num" style={{ color: '#bbb' }}>{students.length + i + 1}</td>
+                  <td>&nbsp;</td>
+                  {ACTIVITIES.map(a => (<td key={a.key}>&nbsp;</td>))}
+                  <td>&nbsp;</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
