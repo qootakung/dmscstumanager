@@ -284,7 +284,7 @@ const buildRowsShape = () => [] as Array<{ student: Student; sid: string; row: n
 
 const DesirableTraitsPrintable: React.FC<PrintableProps> = ({ rows, grade, semester, academicYear, teacherName, summary }) => {
   const totalStudents = rows.length;
-  const minRows = 25;
+  const minRows = 20;
   const emptyCount = Math.max(0, minRows - totalStudents);
 
   return (
@@ -360,11 +360,10 @@ const DesirableTraitsPrintable: React.FC<PrintableProps> = ({ rows, grade, semes
         </div>
       </div>
 
-      <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'flex-end', fontSize: '14pt' }}>
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', fontSize: '14pt', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
         <div style={{ textAlign: 'center', minWidth: '260px', lineHeight: 1.6 }}>
-          <div>ลงชื่อ .................................................. ผู้ประเมิน</div>
-          <div>({teacherName || '.......................................'})</div>
-          <div>ครูประจำชั้น {grade}</div>
+          <div>ลงชื่อ ..................................................... ครูผู้ประเมิน</div>
+          <div>( {teacherName || '.....................................................'} )</div>
         </div>
       </div>
     </div>
