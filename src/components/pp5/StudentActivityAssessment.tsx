@@ -349,7 +349,7 @@ interface PrintProps {
 }
 
 const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores, teacherNames, grade, semester, academicYear, summaryOnly }) => {
-  const minRows = 25;
+  const minRows = 20;
   const emptyCount = Math.max(0, minRows - students.length);
   const getRow = (key: ActivityKey, sid: string, hours: number): CellVal[] => {
     const existing = scores[key][sid];
@@ -435,7 +435,7 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
             <strong>เกณฑ์:</strong> เข้าร่วมกิจกรรม ≥ 80% ของ {def.hours} ชั่วโมง = ผ่าน (ผ.) / น้อยกว่า = ไม่ผ่าน (มผ.)
           </div>
 
-          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', fontSize: '14pt' }}>
+          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', fontSize: '14pt', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
             <div style={{ textAlign: 'center', minWidth: '260px', lineHeight: 1.6 }}>
               <div>ลงชื่อ ..................................................... ครูผู้ประเมิน</div>
               <div>( {teacherNames[def.key] || '.....................................................'} )</div>
@@ -485,6 +485,12 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
               ))}
             </tbody>
           </table>
+          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', fontSize: '14pt', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+            <div style={{ textAlign: 'center', minWidth: '260px', lineHeight: 1.6 }}>
+              <div>ลงชื่อ ..................................................... ครูผู้ประเมิน</div>
+              <div>( ..................................................... )</div>
+            </div>
+          </div>
         </div>
       )}
     </div>
