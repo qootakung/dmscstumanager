@@ -44,6 +44,12 @@ import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
 import DesirableTraitsAssessment from './pp5/DesirableTraitsAssessment';
 import ReadingAnalysisAssessment from './pp5/ReadingAnalysisAssessment';
 import StudentActivityAssessment from './pp5/StudentActivityAssessment';
+import IndicatorCountTable from './pp5/IndicatorCountTable';
+import StudentNameListPrint from './pp5/StudentNameListPrint';
+import GradeDecision from './pp5/GradeDecision';
+import FixGrades from './pp5/FixGrades';
+import PP5Cover from './pp5/PP5Cover';
+import PP5PrintCenter from './pp5/PP5PrintCenter';
 import type { SubjectInfo } from './pp5/types';
 import { getDefaultSubjectsForGrade } from './pp5/types';
 
@@ -297,6 +303,78 @@ const PP5Management: React.FC = () => {
   if (activeSection === 'basic-info-score-ratio') {
     return (
       <ScoreRatioConfig
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // ตารางจำนวนตัวชี้วัด (Print)
+  if (activeSection === 'basic-info-indicator-table') {
+    return (
+      <IndicatorCountTable
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // ใบรายชื่อนักเรียน
+  if (activeSection === 'basic-info-student-list') {
+    return (
+      <StudentNameListPrint
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // การตัดสินผลการเรียน
+  if (activeSection === 'assessment-grade-decision') {
+    return (
+      <GradeDecision
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // การแก้ "0", "ร", "มส"
+  if (activeSection === 'assessment-fix-grades') {
+    return (
+      <FixGrades
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // หน้าปก ปพ.5
+  if (activeSection === 'learning-reports-pp5-cover') {
+    return (
+      <PP5Cover
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // การสั่งพิมพ์ ปพ.5
+  if (activeSection === 'learning-reports-pp5-print') {
+    return (
+      <PP5PrintCenter
         selectedGrade={selectedGrade}
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
