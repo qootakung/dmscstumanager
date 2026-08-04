@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
 import DentalMilkPrintDialog from './DentalMilkPrintDialog';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 
 // Calculate current semester based on date
 const getCurrentSemester = () => {
@@ -44,12 +45,8 @@ const DentalMilkTracking = () => {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const { data: teachersData, error } = await supabase
-          .from('teachers')
-          .select('id, firstName, lastName')
-          .order('firstName');
-
-        if (error) throw error;
+        // Deduplicated: one record per teacher, from their latest academic year
+        const teachersData = await getTeachersLatestYear();
         setTeachers(teachersData || []);
         
         // Set first teacher as default if available
