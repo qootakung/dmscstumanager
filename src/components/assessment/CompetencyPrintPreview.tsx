@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer, X, Edit } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
-import { supabase } from '@/integrations/supabase/client';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 
 interface Student {
   id: string;
@@ -52,12 +52,8 @@ const CompetencyPrintPreview: React.FC<CompetencyPrintPreviewProps> = ({
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const { data: teachersData, error } = await supabase
-          .from('teachers')
-          .select('id, firstName, lastName')
-          .order('firstName');
-
-        if (error) throw error;
+        // Deduplicated: one record per teacher, from their latest academic year
+        const teachersData = await getTeachersLatestYear();
         setTeachers(teachersData || []);
         
         // Set first teacher as default if available
