@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer, X, Edit } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
-import { supabase } from '@/integrations/supabase/client';
 import { getTeachersLatestYear } from '@/utils/teacherStorage';
 
 interface Student {
