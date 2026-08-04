@@ -35,12 +35,29 @@ const HealthImportExport: React.FC = () => {
     });
 
     try {
-      const students = await getStudents();
-      if (students.length === 0) {
+      const allStudents = await getStudents();
+      if (allStudents.length === 0) {
         Swal.close();
         Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลนักเรียนในระบบ', 'warning');
         return;
       }
+      // Deduplicate: one record per student, from the latest academic year & semester
+      const best = new Map<string, typeof allStudents[number]>();
+      for (const s of allStudents) {
+        const key = (s.studentId || s.citizenId || `${s.firstNameTh} ${s.lastNameTh}` || '').trim();
+        if (!key) continue;
+        const existing = best.get(key);
+        if (!existing) {
+          best.set(key, s);
+          continue;
+        }
+        const scoreOf = (st: typeof s) =>
+          (parseInt(st.academicYear || '0', 10) || 0) * 10 + (parseInt(st.semester || '1', 10) || 1);
+        if (scoreOf(s) > scoreOf(existing)) {
+          best.set(key, s);
+        }
+      }
+      const students = Array.from(best.values());
       exportStudentsForHealthImport(students);
       Swal.close();
       
