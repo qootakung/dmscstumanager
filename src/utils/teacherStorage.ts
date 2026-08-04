@@ -10,6 +10,43 @@ export const getTeachers = async (): Promise<Teacher[]> => {
   return data as Teacher[];
 };
 
+/**
+ * Deduplicates teachers by full name, keeping only the record from the
+ * latest academic year (tie-break: latest createdAt).
+ */
+export const dedupeTeachersLatestYear = (teachers: Teacher[]): Teacher[] => {
+  const best = new Map<string, Teacher>();
+  for (const t of teachers) {
+    const key = `${(t.firstName || '').trim()}-${(t.lastName || '').trim()}`.toLowerCase();
+    if (!key || key === '-') continue;
+    const existing = best.get(key);
+    if (!existing) {
+      best.set(key, t);
+      continue;
+    }
+    const yearT = parseInt(t.academicYear || '0', 10) || 0;
+    const yearE = parseInt(existing.academicYear || '0', 10) || 0;
+    if (
+      yearT > yearE ||
+      (yearT === yearE &&
+        new Date(t.createdAt || 0).getTime() > new Date(existing.createdAt || 0).getTime())
+    ) {
+      best.set(key, t);
+    }
+  }
+  return Array.from(best.values()).sort((a, b) =>
+    (a.positionNumber || '').localeCompare(b.positionNumber || '', undefined, { numeric: true })
+  );
+};
+
+/**
+ * Fetches teachers and returns one record per person,
+ * based on the latest academic year.
+ */
+export const getTeachersLatestYear = async (): Promise<Teacher[]> => {
+  return dedupeTeachersLatestYear(await getTeachers());
+};
+
 export const addTeacher = async (teacherData: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>): Promise<Teacher | null> => {
   const { data, error } = await supabase.from('teachers').insert(teacherData).select().single();
   
