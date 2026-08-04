@@ -237,7 +237,7 @@ const Index = () => {
                   {/* บัญชีการเงิน */}
                   <DropdownMenuItem 
                     className="cursor-pointer"
-                    onClick={() => window.open('https://baandonmoon-voucher-log.lovable.app/', '_blank')}
+                    onClick={() => window.open('https://baandonmoon-voucher-log.vercel.app//', '_blank')}
                   >
                     บัญชีการเงิน
                   </DropdownMenuItem>
