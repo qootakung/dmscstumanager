@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { getTeachers } from '@/utils/teacherStorage';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 import { getStudents } from '@/utils/studentStorage';
 import { Teacher } from '@/types/teacher';
 import { Student } from '@/types/student';
@@ -190,7 +190,7 @@ export const StudentScoreManagement: React.FC = () => {
   }, [selectedGrade, academicYear, selectedSemester]);
 
   const loadTeachers = async () => {
-    const teacherData = await getTeachers();
+    const teacherData = await getTeachersLatestYear();
     setTeachers(teacherData);
     
     // Auto-fill principal name from teachers list

@@ -17,7 +17,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { generateAcademicYears } from '@/utils/data';
-import { getTeachers } from '@/utils/teacherStorage';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 import type { Teacher } from '@/types/teacher';
 import TeacherSelectDialog from './TeacherSelectDialog';
 import SubjectInfoTable from './SubjectInfoTable';
@@ -125,7 +125,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
   }, [selectedGrade, selectedSemester, selectedAcademicYear]);
 
   const loadTeachers = async () => {
-    const data = await getTeachers();
+    const data = await getTeachersLatestYear();
     setTeachers(data);
     
     // Auto-fill administrator

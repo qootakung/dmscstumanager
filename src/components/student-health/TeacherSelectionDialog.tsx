@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getTeachers } from '@/utils/teacherStorage';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 import { Teacher } from '@/types/teacher';
 
 interface TeacherSelectionDialogProps {
@@ -30,7 +30,7 @@ const TeacherSelectionDialog: React.FC<TeacherSelectionDialogProps> = ({
   useEffect(() => {
     const loadTeachers = async () => {
       try {
-        const teacherData = await getTeachers();
+        const teacherData = await getTeachersLatestYear();
         setTeachers(teacherData);
       } catch (error) {
         console.error('Failed to load teachers:', error);

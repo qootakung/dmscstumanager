@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
-import { getTeachers } from '@/utils/teacherStorage';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 import type { Teacher } from '@/types/teacher';
 
 interface StudentWithAssessment {
@@ -63,7 +63,7 @@ const CompetencyPrintPreviewDialog: React.FC<CompetencyPrintPreviewDialogProps> 
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const teachersData = await getTeachers();
+        const teachersData = await getTeachersLatestYear();
         setTeachers(teachersData);
       } catch (error) {
         console.error('Error fetching teachers:', error);
