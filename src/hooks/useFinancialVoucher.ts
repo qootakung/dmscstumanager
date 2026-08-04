@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { getStudents } from '@/utils/studentStorage';
-import { getTeachers } from '@/utils/teacherStorage';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 import type { Student } from '@/types/student';
 import type { Teacher } from '@/types/teacher';
 import type { PaymentVoucherData } from '@/types/finance';
@@ -94,7 +94,7 @@ export const useFinancialVoucher = () => {
   };
 
   const loadTeachers = async () => {
-    const teacherData = await getTeachers();
+    const teacherData = await getTeachersLatestYear();
     setTeachers(teacherData);
     const principal = teacherData.find((t) => t.position === "ผู้อำนวยการโรงเรียน");
     if (principal && !voucherData.principalName) {

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, User, Check } from 'lucide-react';
-import { getTeachers } from '@/utils/teacherStorage';
+import { getTeachersLatestYear } from '@/utils/teacherStorage';
 import type { Teacher } from '@/types/teacher';
 
 interface TeacherSelectDialogProps {
@@ -38,7 +38,7 @@ const TeacherSelectDialog: React.FC<TeacherSelectDialogProps> = ({
 
   const loadTeachers = async () => {
     setLoading(true);
-    const data = await getTeachers();
+    const data = await getTeachersLatestYear();
     setTeachers(data);
     setLoading(false);
   };
