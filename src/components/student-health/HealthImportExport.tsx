@@ -2,17 +2,45 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, Loader2, AlertTriangle, Settings2 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { getStudents } from '@/utils/studentStorage';
 import { upsertStudentHealthRecords } from '@/utils/healthStorage';
 import { exportStudentsForHealthImport, importHealthDataFromExcel } from '@/utils/excel';
+import { generateAcademicYears } from '@/utils/data';
 import HealthImportInstructions from './HealthImportInstructions';
 import Swal from 'sweetalert2';
+
+const getCurrentAcademicYear = (): string => {
+  const now = new Date();
+  let year = now.getFullYear() + 543;
+  // Thai academic year starts May 16 — earlier dates belong to previous year
+  if (now.getMonth() < 4 || (now.getMonth() === 4 && now.getDate() < 16)) year -= 1;
+  return year.toString();
+};
+
+const getCurrentSemester = (): string => {
+  const now = new Date();
+  const m = now.getMonth(); // 0-indexed
+  const d = now.getDate();
+  // Semester 1: May 16 - Oct 31
+  if ((m > 4 || (m === 4 && d >= 16)) && m <= 9) return '1';
+  return '2';
+};
+
+const thaiMonths = Array.from({ length: 12 }, (_, i) => ({
+  value: (i + 1).toString(),
+  label: new Date(2000, i).toLocaleString('th-TH', { month: 'long' }),
+}));
 
 const HealthImportExport: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<string>(getCurrentAcademicYear());
+  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
+  const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [importResult, setImportResult] = useState<{ 
     success: number, 
     fail: number, 
@@ -41,9 +69,16 @@ const HealthImportExport: React.FC = () => {
         Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลนักเรียนในระบบ', 'warning');
         return;
       }
-      // Deduplicate: one record per student, from the latest academic year & semester
+      // Filter by selected academic year first
+      const yearStudents = allStudents.filter(s => (s.academicYear || '') === selectedYear);
+      if (yearStudents.length === 0) {
+        Swal.close();
+        Swal.fire('ไม่มีข้อมูล', `ไม่พบข้อมูลนักเรียนปีการศึกษา ${selectedYear} ในระบบ`, 'warning');
+        return;
+      }
+      // Deduplicate: one record per student, preferring the selected semester
       const best = new Map<string, typeof allStudents[number]>();
-      for (const s of allStudents) {
+      for (const s of yearStudents) {
         const key = (s.studentId || s.citizenId || `${s.firstNameTh} ${s.lastNameTh}` || '').trim();
         if (!key) continue;
         const existing = best.get(key);
@@ -52,13 +87,17 @@ const HealthImportExport: React.FC = () => {
           continue;
         }
         const scoreOf = (st: typeof s) =>
-          (parseInt(st.academicYear || '0', 10) || 0) * 10 + (parseInt(st.semester || '1', 10) || 1);
+          (st.semester === selectedSemester ? 100 : 0) + (parseInt(st.semester || '1', 10) || 1);
         if (scoreOf(s) > scoreOf(existing)) {
           best.set(key, s);
         }
       }
       const students = Array.from(best.values());
-      exportStudentsForHealthImport(students);
+      exportStudentsForHealthImport(students, {
+        academicYear: selectedYear,
+        semester: selectedSemester,
+        month: selectedMonth,
+      });
       Swal.close();
       
       // Quick success message
@@ -106,7 +145,10 @@ const HealthImportExport: React.FC = () => {
       });
 
       // Process import with timeout handling
-      const importPromise = importHealthDataFromExcel(file);
+      const importPromise = importHealthDataFromExcel(file, {
+        academicYear: selectedYear,
+        month: parseInt(selectedMonth, 10),
+      });
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('การประมวลผลใช้เวลานานเกินไป')), 20000);
       });
@@ -245,6 +287,61 @@ const HealthImportExport: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <Card className="border-emerald-200 bg-emerald-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-emerald-800 text-lg">
+            <Settings2 className="w-5 h-5" />
+            ตั้งค่าปีการศึกษา / ภาคเรียน / เดือน
+          </CardTitle>
+          <CardDescription>
+            ใช้ร่วมกันทั้งการส่งออกและนำเข้า — ส่งออกจะดึงเฉพาะนักเรียนของปีการศึกษาที่เลือก
+            และถ้าแถวในไฟล์ไม่ได้กรอกวันที่ชั่ง ระบบจะใช้เดือนที่เลือกนี้ให้อัตโนมัติ
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="health-year">ปีการศึกษา</Label>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger id="health-year">
+                  <SelectValue placeholder="เลือกปีการศึกษา" />
+                </SelectTrigger>
+                <SelectContent>
+                  {generateAcademicYears().map((year) => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="health-semester">ภาคเรียน</Label>
+              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                <SelectTrigger id="health-semester">
+                  <SelectValue placeholder="เลือกภาคเรียน" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">ภาคเรียนที่ 1</SelectItem>
+                  <SelectItem value="2">ภาคเรียนที่ 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="health-month">เดือนที่ชั่งน้ำหนัก</Label>
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger id="health-month">
+                  <SelectValue placeholder="เลือกเดือน" />
+                </SelectTrigger>
+                <SelectContent>
+                  {thaiMonths.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -253,7 +350,7 @@ const HealthImportExport: React.FC = () => {
               ส่งออกข้อมูลเพื่อนำเข้า
             </CardTitle>
             <CardDescription>
-              ส่งออกไฟล์ Excel ที่มีรายชื่อนักเรียนทั้งหมด
+              ส่งออกไฟล์ Excel รายชื่อนักเรียนปีการศึกษา {selectedYear} ภาคเรียนที่ {selectedSemester}
               เพื่อกรอกข้อมูลน้ำหนักและส่วนสูง แล้วนำกลับเข้ามาในระบบ
             </CardDescription>
           </CardHeader>
@@ -282,6 +379,7 @@ const HealthImportExport: React.FC = () => {
             </CardTitle>
             <CardDescription>
               นำเข้าไฟล์ Excel ที่กรอกข้อมูลน้ำหนักและส่วนสูงเรียบร้อยแล้ว
+              (บันทึกลงปีการศึกษา {selectedYear} — แถวที่ไม่ได้กรอกวันที่จะใช้เดือน{thaiMonths.find(m => m.value === selectedMonth)?.label})
             </CardDescription>
           </CardHeader>
           <CardContent>

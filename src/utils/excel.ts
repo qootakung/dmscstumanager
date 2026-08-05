@@ -10,7 +10,10 @@ export const exportToExcel = (data: any[], filename: string) => {
   XLSX.writeFile(workbook, `${filename}.xlsx`);
 };
 
-export const exportStudentsForHealthImport = (students: Student[]) => {
+export const exportStudentsForHealthImport = (
+  students: Student[],
+  options?: { academicYear?: string; semester?: string; month?: string }
+) => {
   const sortedStudents = [...students].sort((a, b) => {
     const gradeAIndex = gradeOptions.indexOf(a.grade);
     const gradeBIndex = gradeOptions.indexOf(b.grade);
@@ -26,10 +29,12 @@ export const exportStudentsForHealthImport = (students: Student[]) => {
   });
 
   // Add example row for reference
+  const exampleMonth = (options?.month || '6').padStart(2, '0');
+  const exampleYear = options?.academicYear || (new Date().getFullYear() + 543).toString();
   const exampleRow = {
     'รหัสนักเรียน': 'ตัวอย่าง: ST001',
     'ชื่อ-นามสกุล': 'ตัวอย่าง: เด็กชาย สมชาย ใจดี',
-    'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': '15/06/2568',
+    'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': `15/${exampleMonth}/${exampleYear}`,
     'น้ำหนัก (กก.)': '25.5',
     'ส่วนสูง (ซม.)': '120.0',
   };
@@ -60,7 +65,10 @@ export const exportStudentsForHealthImport = (students: Student[]) => {
   
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'ข้อมูลน้ำหนักส่วนสูง');
-  XLSX.writeFile(workbook, `template-health-import.xlsx`);
+  const suffix = options?.academicYear
+    ? `-${options.academicYear}${options.semester ? `-เทอม${options.semester}` : ''}`
+    : '';
+  XLSX.writeFile(workbook, `template-health-import${suffix}.xlsx`);
 };
 
 export const importFromExcel = (file: File, academicYear?: string): Promise<any[]> => {
@@ -164,7 +172,10 @@ export const importFromExcel = (file: File, academicYear?: string): Promise<any[
   });
 };
 
-export const importHealthDataFromExcel = (file: File): Promise<{ 
+export const importHealthDataFromExcel = (
+  file: File,
+  options?: { academicYear?: string; month?: number }
+): Promise<{ 
   healthRecords: any[], 
   errors: string[], 
   validRecords: number,
@@ -190,7 +201,7 @@ export const importHealthDataFromExcel = (file: File): Promise<{
 
           console.log('Excel data rows:', jsonData.length);
 
-          const currentAcademicYear = (new Date().getFullYear() + 543).toString();
+          const currentAcademicYear = options?.academicYear || (new Date().getFullYear() + 543).toString();
           const errors: string[] = [];
           const healthRecords: any[] = [];
           let validRecords = 0;
@@ -221,12 +232,18 @@ export const importHealthDataFromExcel = (file: File): Promise<{
             const measurementDateValue = row['วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)'];
             let measurementDateISO = '';
             
-            if (!measurementDateValue) {
+            if (!measurementDateValue && options?.month) {
+              // No date in row: use selected month (day 15) within the selected academic year
+              // Thai academic year: May-Dec => Buddhist year = academicYear, Jan-Apr => academicYear + 1
+              const ayNum = parseInt(currentAcademicYear, 10);
+              const buddhistYear = options.month >= 5 ? ayNum : ayNum + 1;
+              const gregorianYear = buddhistYear - 543;
+              measurementDateISO = `${gregorianYear}-${options.month.toString().padStart(2, '0')}-15`;
+              console.log(`Row ${rowNumber}: No date, defaulted to selected month => ${measurementDateISO}`);
+            } else if (!measurementDateValue) {
               errors.push(`แถวที่ ${rowNumber}: กรุณาระบุวันที่ชั่งน้ำหนัก`);
               return;
-            }
-
-            if (measurementDateValue instanceof Date) {
+            } else if (measurementDateValue instanceof Date) {
               let year = measurementDateValue.getFullYear();
               if (year > 2500) year -= 543;
               const month = (measurementDateValue.getMonth() + 1).toString().padStart(2, '0');
