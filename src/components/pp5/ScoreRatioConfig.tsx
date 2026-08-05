@@ -44,6 +44,45 @@ const SUBJECT_GROUP_COLORS: { [key: string]: { bg: string; header: string; text:
 const getStorageKey = (grade: string, year: string, semester: string) =>
   `pp5-score-ratio-${grade}-${year}-${semester}`;
 
+// ค่าน้ำหนักคะแนนเริ่มต้น อ้างอิงจากไฟล์ ปพ.5 โรงเรียนบ้านดอนมูล (ชีต "สัดส่วน")
+// รวมคะแนนระหว่างปี + คะแนนปลายปี = 100 เสมอ
+const DEFAULT_WEIGHTS: {
+  [groupId: string]: { standards: { [stdCode: string]: number }; endYear: number };
+} = {
+  thai: {
+    standards: { 'ท 1.1': 20, 'ท 2.1': 10, 'ท 3.1': 15, 'ท 4.1': 15, 'ท 5.1': 10 },
+    endYear: 30,
+  },
+  math: {
+    standards: { 'ค 1.1': 15, 'ค 1.2': 10, 'ค 1.3': 0, 'ค 2.1': 15, 'ค 2.2': 10, 'ค 3.1': 20, 'ค 3.2': 0 },
+    endYear: 30,
+  },
+  science: {
+    standards: { 'ว 1.1': 10, 'ว 1.2': 10, 'ว 1.3': 0, 'ว 2.1': 10, 'ว 2.2': 0, 'ว 2.3': 5, 'ว 3.1': 10, 'ว 3.2': 5, 'ว 4.1': 0, 'ว 4.2': 20 },
+    endYear: 30,
+  },
+  social: {
+    standards: { 'ส 1.1': 10, 'ส 1.2': 10, 'ส 2.1': 5, 'ส 2.2': 10, 'ส 3.1': 10, 'ส 3.2': 5, 'ส 4.1': 0, 'ส 4.2': 0, 'ส 4.3': 0, 'ส 5.1': 10, 'ส 5.2': 10 },
+    endYear: 30,
+  },
+  health: {
+    standards: { 'พ 1.1': 10, 'พ 2.1': 10, 'พ 3.1': 15, 'พ 3.2': 20, 'พ 4.1': 15, 'พ 5.1': 10 },
+    endYear: 20,
+  },
+  arts: {
+    standards: { 'ศ 1.1': 20, 'ศ 1.2': 10, 'ศ 2.1': 15, 'ศ 2.2': 15, 'ศ 3.1': 10, 'ศ 3.2': 10 },
+    endYear: 20,
+  },
+  career: {
+    standards: { 'ง 1.1': 40, 'ง 2.1': 40 },
+    endYear: 20,
+  },
+  english: {
+    standards: { 'ต 1.1': 10, 'ต 1.2': 10, 'ต 1.3': 10, 'ต 2.1': 5, 'ต 2.2': 10, 'ต 3.1': 15, 'ต 4.1': 5, 'ต 4.2': 5 },
+    endYear: 30,
+  },
+};
+
 const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
   selectedGrade,
   selectedSemester,
@@ -58,6 +97,7 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
   // Initialize from curriculum data
   const buildDefaultRatios = (): SubjectGroupRatio[] => {
     return allSubjectGroups.map(group => {
+      const defaultWeight = DEFAULT_WEIGHTS[group.id];
       const strandMap = new Map<string, StandardScore[]>();
 
       group.subjects.forEach(subject => {
@@ -65,7 +105,10 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
           const indicators = standard.indicators[gradeKey];
           if (indicators && indicators.length > 0) {
             const existing = strandMap.get(subject.strand) || [];
-            existing.push({ standardCode: standard.code, score: 0 });
+            existing.push({
+              standardCode: standard.code,
+              score: defaultWeight?.standards[standard.code] ?? 0,
+            });
             strandMap.set(subject.strand, existing);
           }
         });
@@ -76,12 +119,17 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
         standards,
       }));
 
+      const midYearTotal = strands.reduce(
+        (sum, st) => sum + st.standards.reduce((s2, s) => s2 + s.score, 0),
+        0
+      );
+
       return {
         groupId: group.id,
         groupName: group.name,
         strands,
-        midYearTotal: 0,
-        endYearScore: 0,
+        midYearTotal,
+        endYearScore: defaultWeight?.endYear ?? 0,
       };
     }).filter(g => g.strands.length > 0);
   };
@@ -99,11 +147,11 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
       strands: [
         {
           strandName: 'ผลการเรียนรู้',
-          standards: [{ standardCode: 'รวมคะแนนระหว่างปี', score: 0 }],
+          standards: [{ standardCode: 'รวมคะแนนระหว่างปี', score: 80 }],
         },
       ],
-      midYearTotal: 0,
-      endYearScore: 0,
+      midYearTotal: 80,
+      endYearScore: 20,
     }));
   };
 
