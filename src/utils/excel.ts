@@ -10,7 +10,10 @@ export const exportToExcel = (data: any[], filename: string) => {
   XLSX.writeFile(workbook, `${filename}.xlsx`);
 };
 
-export const exportStudentsForHealthImport = (students: Student[]) => {
+export const exportStudentsForHealthImport = (
+  students: Student[],
+  options?: { academicYear?: string; semester?: string; month?: string }
+) => {
   const sortedStudents = [...students].sort((a, b) => {
     const gradeAIndex = gradeOptions.indexOf(a.grade);
     const gradeBIndex = gradeOptions.indexOf(b.grade);
@@ -26,10 +29,12 @@ export const exportStudentsForHealthImport = (students: Student[]) => {
   });
 
   // Add example row for reference
+  const exampleMonth = (options?.month || '6').padStart(2, '0');
+  const exampleYear = options?.academicYear || (new Date().getFullYear() + 543).toString();
   const exampleRow = {
     'รหัสนักเรียน': 'ตัวอย่าง: ST001',
     'ชื่อ-นามสกุล': 'ตัวอย่าง: เด็กชาย สมชาย ใจดี',
-    'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': '15/06/2568',
+    'วันเดือนปีที่ชั่ง (วว/ดด/ปปปป)': `15/${exampleMonth}/${exampleYear}`,
     'น้ำหนัก (กก.)': '25.5',
     'ส่วนสูง (ซม.)': '120.0',
   };
@@ -60,7 +65,10 @@ export const exportStudentsForHealthImport = (students: Student[]) => {
   
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'ข้อมูลน้ำหนักส่วนสูง');
-  XLSX.writeFile(workbook, `template-health-import.xlsx`);
+  const suffix = options?.academicYear
+    ? `-${options.academicYear}${options.semester ? `-เทอม${options.semester}` : ''}`
+    : '';
+  XLSX.writeFile(workbook, `template-health-import${suffix}.xlsx`);
 };
 
 export const importFromExcel = (file: File, academicYear?: string): Promise<any[]> => {
