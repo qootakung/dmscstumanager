@@ -2,17 +2,45 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Download, Upload, FileSpreadsheet, CheckCircle, XCircle, Loader2, AlertTriangle, Settings2 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { getStudents } from '@/utils/studentStorage';
 import { upsertStudentHealthRecords } from '@/utils/healthStorage';
 import { exportStudentsForHealthImport, importHealthDataFromExcel } from '@/utils/excel';
+import { generateAcademicYears } from '@/utils/data';
 import HealthImportInstructions from './HealthImportInstructions';
 import Swal from 'sweetalert2';
+
+const getCurrentAcademicYear = (): string => {
+  const now = new Date();
+  let year = now.getFullYear() + 543;
+  // Thai academic year starts May 16 — earlier dates belong to previous year
+  if (now.getMonth() < 4 || (now.getMonth() === 4 && now.getDate() < 16)) year -= 1;
+  return year.toString();
+};
+
+const getCurrentSemester = (): string => {
+  const now = new Date();
+  const m = now.getMonth(); // 0-indexed
+  const d = now.getDate();
+  // Semester 1: May 16 - Oct 31
+  if ((m > 4 || (m === 4 && d >= 16)) && m <= 9) return '1';
+  return '2';
+};
+
+const thaiMonths = Array.from({ length: 12 }, (_, i) => ({
+  value: (i + 1).toString(),
+  label: new Date(2000, i).toLocaleString('th-TH', { month: 'long' }),
+}));
 
 const HealthImportExport: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<string>(getCurrentAcademicYear());
+  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
+  const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [importResult, setImportResult] = useState<{ 
     success: number, 
     fail: number, 
@@ -41,9 +69,16 @@ const HealthImportExport: React.FC = () => {
         Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลนักเรียนในระบบ', 'warning');
         return;
       }
-      // Deduplicate: one record per student, from the latest academic year & semester
+      // Filter by selected academic year first
+      const yearStudents = allStudents.filter(s => (s.academicYear || '') === selectedYear);
+      if (yearStudents.length === 0) {
+        Swal.close();
+        Swal.fire('ไม่มีข้อมูล', `ไม่พบข้อมูลนักเรียนปีการศึกษา ${selectedYear} ในระบบ`, 'warning');
+        return;
+      }
+      // Deduplicate: one record per student, preferring the selected semester
       const best = new Map<string, typeof allStudents[number]>();
-      for (const s of allStudents) {
+      for (const s of yearStudents) {
         const key = (s.studentId || s.citizenId || `${s.firstNameTh} ${s.lastNameTh}` || '').trim();
         if (!key) continue;
         const existing = best.get(key);
@@ -52,13 +87,17 @@ const HealthImportExport: React.FC = () => {
           continue;
         }
         const scoreOf = (st: typeof s) =>
-          (parseInt(st.academicYear || '0', 10) || 0) * 10 + (parseInt(st.semester || '1', 10) || 1);
+          (st.semester === selectedSemester ? 100 : 0) + (parseInt(st.semester || '1', 10) || 1);
         if (scoreOf(s) > scoreOf(existing)) {
           best.set(key, s);
         }
       }
       const students = Array.from(best.values());
-      exportStudentsForHealthImport(students);
+      exportStudentsForHealthImport(students, {
+        academicYear: selectedYear,
+        semester: selectedSemester,
+        month: selectedMonth,
+      });
       Swal.close();
       
       // Quick success message
