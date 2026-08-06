@@ -137,6 +137,7 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
   const buildDefaultRatios = (): SubjectGroupRatio[] => {
     return allSubjectGroups.map(group => {
       const defaultWeight = DEFAULT_WEIGHTS[group.id];
+      // (replaced below)
       const strandMap = new Map<string, StandardScore[]>();
 
       group.subjects.forEach(subject => {
