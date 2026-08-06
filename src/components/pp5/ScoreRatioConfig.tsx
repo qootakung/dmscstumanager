@@ -83,6 +83,45 @@ const DEFAULT_WEIGHTS: {
   },
 };
 
+// น้ำหนักวิทยาศาสตร์ฯ แยกตามระดับชั้น — อ้างอิงเอกสารตัวชี้วัดระหว่างทาง/ปลายทาง กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี (สพฐ.)
+// แต่ละชั้นมีมาตรฐานที่มีตัวชี้วัดต่างกัน จึงกระจายคะแนนระหว่างปี 70 เฉพาะมาตรฐานที่มีตัวชี้วัดในชั้นนั้น
+// (ว 4.1 ไม่มีตัวชี้วัดระดับประถมในหลักสูตรปรับปรุง 2560)
+const SCIENCE_WEIGHTS_BY_GRADE: {
+  [grade: string]: { standards: { [stdCode: string]: number }; endYear: number };
+} = {
+  'ป.1': { // ว1.1 ว1.2 ว2.1 ว2.3 ว3.1 ว3.2 ว4.2 (15 ตัวชี้วัด)
+    standards: { 'ว 1.1': 10, 'ว 1.2': 10, 'ว 2.1': 10, 'ว 2.3': 5, 'ว 3.1': 10, 'ว 3.2': 5, 'ว 4.2': 20 },
+    endYear: 30,
+  },
+  'ป.2': { // ว1.2 ว1.3 ว2.1 ว2.3 ว3.2 ว4.2 (16 ตัวชี้วัด)
+    standards: { 'ว 1.2': 10, 'ว 1.3': 5, 'ว 2.1': 15, 'ว 2.3': 10, 'ว 3.2': 10, 'ว 4.2': 20 },
+    endYear: 30,
+  },
+  'ป.3': { // ว1.2 ว2.1 ว2.2 ว2.3 ว3.1 ว3.2 ว4.2 (25 ตัวชี้วัด)
+    standards: { 'ว 1.2': 10, 'ว 2.1': 10, 'ว 2.2': 10, 'ว 2.3': 5, 'ว 3.1': 10, 'ว 3.2': 5, 'ว 4.2': 20 },
+    endYear: 30,
+  },
+  'ป.4': { // ว1.2 ว1.3 ว2.1 ว2.2 ว2.3 ว3.1 ว4.2 (21 ตัวชี้วัด)
+    standards: { 'ว 1.2': 5, 'ว 1.3': 10, 'ว 2.1': 10, 'ว 2.2': 10, 'ว 2.3': 5, 'ว 3.1': 10, 'ว 4.2': 20 },
+    endYear: 30,
+  },
+  'ป.5': { // ว1.1 ว1.3 ว2.1 ว2.2 ว2.3 ว3.1 ว3.2 ว4.2 (32 ตัวชี้วัด)
+    standards: { 'ว 1.1': 10, 'ว 1.3': 5, 'ว 2.1': 10, 'ว 2.2': 10, 'ว 2.3': 5, 'ว 3.1': 5, 'ว 3.2': 5, 'ว 4.2': 20 },
+    endYear: 30,
+  },
+  'ป.6': { // ว1.2 ว2.1 ว2.2 ว2.3 ว3.1 ว3.2 ว4.2 (30 ตัวชี้วัด)
+    standards: { 'ว 1.2': 10, 'ว 2.1': 5, 'ว 2.2': 5, 'ว 2.3': 10, 'ว 3.1': 5, 'ว 3.2': 15, 'ว 4.2': 20 },
+    endYear: 30,
+  },
+};
+
+const getDefaultWeight = (groupId: string, gradeKey: string) => {
+  if (groupId === 'science') {
+    return SCIENCE_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.science;
+  }
+  return DEFAULT_WEIGHTS[groupId];
+};
+
 const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
   selectedGrade,
   selectedSemester,
@@ -97,7 +136,7 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
   // Initialize from curriculum data
   const buildDefaultRatios = (): SubjectGroupRatio[] => {
     return allSubjectGroups.map(group => {
-      const defaultWeight = DEFAULT_WEIGHTS[group.id];
+      const defaultWeight = getDefaultWeight(group.id, gradeKey);
       const strandMap = new Map<string, StandardScore[]>();
 
       group.subjects.forEach(subject => {
