@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight, CalendarOff, RotateCcw } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
@@ -18,6 +20,11 @@ import {
   getSemesterMonths,
   getDaysInMonth,
   getStartDay,
+  getCustomDays,
+  saveCustomDays,
+  getDayStatus,
+  toDateKey,
+  type CustomDayMap,
 } from '@/utils/thaiHolidays';
 import PP5AttendancePrint from './PP5AttendancePrint';
 import { createRoot } from 'react-dom/client';
@@ -49,6 +56,17 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   
   const semesterMonths = getSemesterMonths(selectedSemester, selectedAcademicYear);
   const holidays = getThaiHolidays(parseInt(selectedAcademicYear));
+  const [customDays, setCustomDays] = useState<CustomDayMap>(() => getCustomDays(selectedAcademicYear));
+  const [holidayDialogOpen, setHolidayDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setCustomDays(getCustomDays(selectedAcademicYear));
+  }, [selectedAcademicYear]);
+
+  const updateCustomDays = useCallback((next: CustomDayMap) => {
+    setCustomDays(next);
+    saveCustomDays(selectedAcademicYear, next);
+  }, [selectedAcademicYear]);
   
   const currentMonthInfo = semesterMonths[currentMonthIndex];
   const daysInMonth = getDaysInMonth(currentMonthInfo.month, currentMonthInfo.ceYear);
@@ -194,17 +212,17 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   }, [attendanceData, currentMonthInfo, students, selectedAcademicYear, selectedSemester, currentGrade]);
 
   // Generate day columns
-  const dayColumns: { day: number; date: Date; dayAbbr: string; weekend: boolean; holiday: string | null }[] = [];
+  const dayColumns: { day: number; date: Date; dayAbbr: string; weekend: boolean; holiday: string | null; custom: boolean }[] = [];
   for (let d = startDay; d <= daysInMonth; d++) {
     const date = new Date(currentMonthInfo.ceYear, currentMonthInfo.month, d);
-    const weekend = isWeekend(date);
-    const holiday = isThaiHoliday(date, holidays);
+    const { weekend, holiday, custom } = getDayStatus(date, holidays, customDays);
     dayColumns.push({
       day: d,
       date,
       dayAbbr: getThaiDayAbbr(date),
       weekend,
       holiday,
+      custom,
     });
   }
 
@@ -329,6 +347,10 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
               <Printer className="w-4 h-4 mr-2" />
               พิมพ์
             </Button>
+            <Button variant="outline" onClick={() => setHolidayDialogOpen(true)}>
+              <CalendarOff className="w-4 h-4 mr-2" />
+              กำหนดวันหยุดเอง
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -361,6 +383,10 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
             <span className="flex items-center gap-1">
               <span className="w-6 h-6 bg-red-100 rounded"></span>
               วันหยุดราชการ
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-6 h-6 bg-amber-100 rounded border border-amber-400"></span>
+              วันหยุดที่กำหนดเอง
             </span>
             <span className="ml-auto text-muted-foreground">
               วันเรียนในเดือนนี้: <strong className="text-primary">{schoolDays}</strong> วัน
@@ -399,12 +425,12 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   </tr>
                   {/* Row 2: Day numbers */}
                   <tr className="bg-orange-50">
-                    {dayColumns.map(({ day, weekend, holiday }) => (
+                    {dayColumns.map(({ day, weekend, holiday, custom }) => (
                       <th
                         key={day}
                         className={`border border-gray-300 px-0 py-0.5 text-center font-medium w-7 text-[10px] ${
                           weekend ? 'bg-gray-200 text-gray-500' :
-                          holiday ? 'bg-red-100 text-red-500' : ''
+                          holiday ? (custom ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-500') : ''
                         }`}
                         title={holiday || undefined}
                       >
@@ -417,12 +443,12 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                     <th className="border border-gray-300 px-1 py-0.5 text-center font-medium text-[10px]">
                       วัน
                     </th>
-                    {dayColumns.map(({ day, dayAbbr, weekend, holiday }) => (
+                    {dayColumns.map(({ day, dayAbbr, weekend, holiday, custom }) => (
                       <th
                         key={day}
                         className={`border border-gray-300 px-0 py-0.5 text-center font-medium text-[10px] ${
                           weekend ? 'bg-gray-200 text-gray-500' :
-                          holiday ? 'bg-red-100 text-red-500' : ''
+                          holiday ? (custom ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-500') : ''
                         }`}
                       >
                         {dayAbbr}
@@ -438,12 +464,12 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                       เช็คทั้งหมด
                     </td>
                     <td className="border border-gray-300 px-1 py-1 text-center text-[10px]"></td>
-                    {dayColumns.map(({ day, weekend, holiday }) => (
+                    {dayColumns.map(({ day, weekend, holiday, custom }) => (
                       <td
                         key={day}
                         className={`border border-gray-300 px-0 py-0.5 text-center ${
                           weekend ? 'bg-gray-200' :
-                          holiday ? 'bg-red-100' : ''
+                          holiday ? (custom ? 'bg-amber-100' : 'bg-red-100') : ''
                         }`}
                       >
                         {!weekend && !holiday && (
@@ -469,7 +495,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                         {student.titleTh}{student.firstNameTh} {student.lastNameTh}
                       </td>
                       <td className="border border-gray-300 px-1 py-1 text-center text-[10px]"></td>
-                      {dayColumns.map(({ day, weekend, holiday }) => {
+                      {dayColumns.map(({ day, weekend, holiday, custom }) => {
                         const dateStr = `${currentMonthInfo.ceYear}-${String(currentMonthInfo.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                         const key = `${student.id}_${dateStr}`;
                         const status = attendanceData[key] || '';
@@ -479,7 +505,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                           <td
                             key={day}
                             className={`border border-gray-300 px-0 py-0 text-center cursor-pointer select-none w-7 h-7 ${
-                              isDisabled ? (weekend ? 'bg-gray-200' : 'bg-red-100') : 'hover:bg-blue-50'
+                              isDisabled ? (weekend ? 'bg-gray-200' : custom ? 'bg-amber-100' : 'bg-red-100') : 'hover:bg-blue-50'
                             }`}
                             onClick={() => !isDisabled && toggleAttendance(student.id, day)}
                           >
@@ -502,6 +528,81 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
           )}
         </CardContent>
       </Card>
+
+      {/* Custom holiday manager */}
+      <Dialog open={holidayDialogOpen} onOpenChange={setHolidayDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              กำหนดวันหยุดเอง — {getThaiMonthName(currentMonthInfo.month)} {buddhistYear}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto space-y-1 pr-1">
+            {dayColumns.map(({ day, date, dayAbbr, weekend, holiday, custom }) => {
+              const key = toDateKey(date);
+              const override = customDays[key];
+              const isHoliday = weekend || !!holiday;
+              return (
+                <div key={day} className="flex items-center gap-2 border rounded-md px-2 py-1.5">
+                  <span className="w-24 text-sm font-medium">
+                    {day} ({dayAbbr})
+                  </span>
+                  <span className={`w-40 text-xs ${isHoliday ? 'text-red-600' : 'text-green-700'}`}>
+                    {weekend ? 'เสาร์-อาทิตย์' : holiday ? holiday : 'วันเรียน'}
+                    {custom ? ' (กำหนดเอง)' : ''}
+                  </span>
+                  <Input
+                    className="h-8 flex-1"
+                    placeholder="ชื่อวันหยุด (ถ้าตั้งเป็นวันหยุด)"
+                    value={override?.type === 'holiday' ? (override.name || '') : ''}
+                    onChange={(e) =>
+                      updateCustomDays({ ...customDays, [key]: { type: 'holiday', name: e.target.value } })
+                    }
+                  />
+                  <Button
+                    size="sm"
+                    variant={override?.type === 'holiday' ? 'default' : 'outline'}
+                    onClick={() =>
+                      updateCustomDays({
+                        ...customDays,
+                        [key]: { type: 'holiday', name: override?.name || 'วันหยุดโรงเรียน' },
+                      })
+                    }
+                  >
+                    หยุด
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={override?.type === 'school' ? 'default' : 'outline'}
+                    onClick={() => updateCustomDays({ ...customDays, [key]: { type: 'school' } })}
+                  >
+                    เรียน
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={!override}
+                    title="คืนค่าเดิม"
+                    onClick={() => {
+                      const next = { ...customDays };
+                      delete next[key];
+                      updateCustomDays(next);
+                    }}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <span className="mr-auto text-sm text-muted-foreground">
+              วันเรียนในเดือนนี้: <strong className="text-primary">{schoolDays}</strong> วัน
+            </span>
+            <Button onClick={() => setHolidayDialogOpen(false)}>เสร็จสิ้น</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
