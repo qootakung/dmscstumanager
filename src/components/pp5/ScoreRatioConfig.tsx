@@ -115,9 +115,26 @@ const SCIENCE_WEIGHTS_BY_GRADE: {
   },
 };
 
+// น้ำหนักคณิตศาสตร์ แยกตามระดับชั้น — อ้างอิงเอกสารตัวชี้วัดระหว่างทาง/ปลายทาง กลุ่มสาระคณิตศาสตร์ (ฉบับปรับปรุง พ.ศ. 2560)
+// จำนวนตัวชี้วัดรวม: ป.1=10, ป.2=16, ป.3=28, ป.4=22, ป.5=19, ป.6=21
+// (ค 1.3 และ ค 3.2 ไม่มีตัวชี้วัดในระดับประถมศึกษา) กระจายคะแนนระหว่างปี 70 + ปลายปี 30 = 100
+const MATH_WEIGHTS_BY_GRADE: {
+  [grade: string]: { standards: { [stdCode: string]: number }; endYear: number };
+} = {
+  'ป.1': { standards: { 'ค 1.1': 30, 'ค 1.2': 10, 'ค 2.1': 15, 'ค 2.2': 10, 'ค 3.1': 5 }, endYear: 30 },
+  'ป.2': { standards: { 'ค 1.1': 35, 'ค 2.1': 25, 'ค 2.2': 5, 'ค 3.1': 5 }, endYear: 30 },
+  'ป.3': { standards: { 'ค 1.1': 28, 'ค 1.2': 5, 'ค 2.1': 30, 'ค 2.2': 4, 'ค 3.1': 3 }, endYear: 30 },
+  'ป.4': { standards: { 'ค 1.1': 45, 'ค 2.1': 12, 'ค 2.2': 8, 'ค 3.1': 5 }, endYear: 30 },
+  'ป.5': { standards: { 'ค 1.1': 35, 'ค 2.1': 15, 'ค 2.2': 15, 'ค 3.1': 5 }, endYear: 30 },
+  'ป.6': { standards: { 'ค 1.1': 40, 'ค 1.2': 4, 'ค 2.1': 10, 'ค 2.2': 12, 'ค 3.1': 4 }, endYear: 30 },
+};
+
 const getDefaultWeight = (groupId: string, gradeKey: string) => {
   if (groupId === 'science') {
     return SCIENCE_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.science;
+  }
+  if (groupId === 'math') {
+    return MATH_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.math;
   }
   return DEFAULT_WEIGHTS[groupId];
 };
