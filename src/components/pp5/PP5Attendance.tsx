@@ -425,12 +425,12 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   </tr>
                   {/* Row 2: Day numbers */}
                   <tr className="bg-orange-50">
-                    {dayColumns.map(({ day, weekend, holiday }) => (
+                    {dayColumns.map(({ day, weekend, holiday, custom }) => (
                       <th
                         key={day}
                         className={`border border-gray-300 px-0 py-0.5 text-center font-medium w-7 text-[10px] ${
                           weekend ? 'bg-gray-200 text-gray-500' :
-                          holiday ? 'bg-red-100 text-red-500' : ''
+                          holiday ? (custom ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-500') : ''
                         }`}
                         title={holiday || undefined}
                       >
@@ -443,12 +443,12 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                     <th className="border border-gray-300 px-1 py-0.5 text-center font-medium text-[10px]">
                       วัน
                     </th>
-                    {dayColumns.map(({ day, dayAbbr, weekend, holiday }) => (
+                    {dayColumns.map(({ day, dayAbbr, weekend, holiday, custom }) => (
                       <th
                         key={day}
                         className={`border border-gray-300 px-0 py-0.5 text-center font-medium text-[10px] ${
                           weekend ? 'bg-gray-200 text-gray-500' :
-                          holiday ? 'bg-red-100 text-red-500' : ''
+                          holiday ? (custom ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-500') : ''
                         }`}
                       >
                         {dayAbbr}
@@ -464,12 +464,12 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                       เช็คทั้งหมด
                     </td>
                     <td className="border border-gray-300 px-1 py-1 text-center text-[10px]"></td>
-                    {dayColumns.map(({ day, weekend, holiday }) => (
+                    {dayColumns.map(({ day, weekend, holiday, custom }) => (
                       <td
                         key={day}
                         className={`border border-gray-300 px-0 py-0.5 text-center ${
                           weekend ? 'bg-gray-200' :
-                          holiday ? 'bg-red-100' : ''
+                          holiday ? (custom ? 'bg-amber-100' : 'bg-red-100') : ''
                         }`}
                       >
                         {!weekend && !holiday && (
@@ -495,7 +495,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                         {student.titleTh}{student.firstNameTh} {student.lastNameTh}
                       </td>
                       <td className="border border-gray-300 px-1 py-1 text-center text-[10px]"></td>
-                      {dayColumns.map(({ day, weekend, holiday }) => {
+                      {dayColumns.map(({ day, weekend, holiday, custom }) => {
                         const dateStr = `${currentMonthInfo.ceYear}-${String(currentMonthInfo.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                         const key = `${student.id}_${dateStr}`;
                         const status = attendanceData[key] || '';
@@ -505,7 +505,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                           <td
                             key={day}
                             className={`border border-gray-300 px-0 py-0 text-center cursor-pointer select-none w-7 h-7 ${
-                              isDisabled ? (weekend ? 'bg-gray-200' : 'bg-red-100') : 'hover:bg-blue-50'
+                              isDisabled ? (weekend ? 'bg-gray-200' : custom ? 'bg-amber-100' : 'bg-red-100') : 'hover:bg-blue-50'
                             }`}
                             onClick={() => !isDisabled && toggleAttendance(student.id, day)}
                           >

@@ -12,6 +12,8 @@ import { toast } from '@/components/ui/use-toast';
 import {
   getThaiHolidays,
   isThaiHoliday,
+  getCustomDays,
+  getDayStatus,
   isWeekend,
   getThaiMonthName,
   getSemesterMonths,
@@ -63,6 +65,7 @@ const PP5AttendanceHoursSummary: React.FC<PP5AttendanceHoursSummaryProps> = ({
   const [attendanceData, setAttendanceData] = useState<Record<string, string>>({});
 
   const holidays = getThaiHolidays(parseInt(selectedAcademicYear));
+  const customDays = getCustomDays(selectedAcademicYear);
 
   // Get months based on report type
   const getReportMonths = () => {
@@ -83,7 +86,8 @@ const PP5AttendanceHoursSummary: React.FC<PP5AttendanceHoursSummaryProps> = ({
     let schoolDays = 0;
     for (let d = startDay; d <= daysInMonth; d++) {
       const date = new Date(m.ceYear, m.month, d);
-      if (!isWeekend(date) && !isThaiHoliday(date, holidays)) {
+      const st = getDayStatus(date, holidays, customDays);
+      if (!st.weekend && !st.holiday) {
         schoolDays++;
       }
     }
@@ -167,7 +171,8 @@ const PP5AttendanceHoursSummary: React.FC<PP5AttendanceHoursSummaryProps> = ({
 
     for (let d = startDay; d <= daysInMonth; d++) {
       const date = new Date(m.ceYear, m.month, d);
-      if (isWeekend(date) || isThaiHoliday(date, holidays)) continue;
+      const st2 = getDayStatus(date, holidays, customDays);
+      if (st2.weekend || st2.holiday) continue;
       const dateStr = `${m.ceYear}-${String(m.month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const status = attendanceData[`${studentId}_${dateStr}`] || '';
       if (status === '/') present++;
