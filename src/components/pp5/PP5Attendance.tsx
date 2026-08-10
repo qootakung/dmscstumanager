@@ -384,6 +384,10 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
               <span className="w-6 h-6 bg-red-100 rounded"></span>
               วันหยุดราชการ
             </span>
+            <span className="flex items-center gap-1">
+              <span className="w-6 h-6 bg-amber-100 rounded border border-amber-400"></span>
+              วันหยุดที่กำหนดเอง
+            </span>
             <span className="ml-auto text-muted-foreground">
               วันเรียนในเดือนนี้: <strong className="text-primary">{schoolDays}</strong> วัน
             </span>
@@ -524,6 +528,81 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
           )}
         </CardContent>
       </Card>
+
+      {/* Custom holiday manager */}
+      <Dialog open={holidayDialogOpen} onOpenChange={setHolidayDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              กำหนดวันหยุดเอง — {getThaiMonthName(currentMonthInfo.month)} {buddhistYear}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto space-y-1 pr-1">
+            {dayColumns.map(({ day, date, dayAbbr, weekend, holiday, custom }) => {
+              const key = toDateKey(date);
+              const override = customDays[key];
+              const isHoliday = weekend || !!holiday;
+              return (
+                <div key={day} className="flex items-center gap-2 border rounded-md px-2 py-1.5">
+                  <span className="w-24 text-sm font-medium">
+                    {day} ({dayAbbr})
+                  </span>
+                  <span className={`w-40 text-xs ${isHoliday ? 'text-red-600' : 'text-green-700'}`}>
+                    {weekend ? 'เสาร์-อาทิตย์' : holiday ? holiday : 'วันเรียน'}
+                    {custom ? ' (กำหนดเอง)' : ''}
+                  </span>
+                  <Input
+                    className="h-8 flex-1"
+                    placeholder="ชื่อวันหยุด (ถ้าตั้งเป็นวันหยุด)"
+                    value={override?.type === 'holiday' ? (override.name || '') : ''}
+                    onChange={(e) =>
+                      updateCustomDays({ ...customDays, [key]: { type: 'holiday', name: e.target.value } })
+                    }
+                  />
+                  <Button
+                    size="sm"
+                    variant={override?.type === 'holiday' ? 'default' : 'outline'}
+                    onClick={() =>
+                      updateCustomDays({
+                        ...customDays,
+                        [key]: { type: 'holiday', name: override?.name || 'วันหยุดโรงเรียน' },
+                      })
+                    }
+                  >
+                    หยุด
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={override?.type === 'school' ? 'default' : 'outline'}
+                    onClick={() => updateCustomDays({ ...customDays, [key]: { type: 'school' } })}
+                  >
+                    เรียน
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={!override}
+                    title="คืนค่าเดิม"
+                    onClick={() => {
+                      const next = { ...customDays };
+                      delete next[key];
+                      updateCustomDays(next);
+                    }}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <span className="mr-auto text-sm text-muted-foreground">
+              วันเรียนในเดือนนี้: <strong className="text-primary">{schoolDays}</strong> วัน
+            </span>
+            <Button onClick={() => setHolidayDialogOpen(false)}>เสร็จสิ้น</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
