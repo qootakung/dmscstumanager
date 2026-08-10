@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight, CalendarOff, RotateCcw } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
@@ -18,6 +20,11 @@ import {
   getSemesterMonths,
   getDaysInMonth,
   getStartDay,
+  getCustomDays,
+  saveCustomDays,
+  getDayStatus,
+  toDateKey,
+  type CustomDayMap,
 } from '@/utils/thaiHolidays';
 import PP5AttendancePrint from './PP5AttendancePrint';
 import { createRoot } from 'react-dom/client';
@@ -49,6 +56,17 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   
   const semesterMonths = getSemesterMonths(selectedSemester, selectedAcademicYear);
   const holidays = getThaiHolidays(parseInt(selectedAcademicYear));
+  const [customDays, setCustomDays] = useState<CustomDayMap>(() => getCustomDays(selectedAcademicYear));
+  const [holidayDialogOpen, setHolidayDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setCustomDays(getCustomDays(selectedAcademicYear));
+  }, [selectedAcademicYear]);
+
+  const updateCustomDays = useCallback((next: CustomDayMap) => {
+    setCustomDays(next);
+    saveCustomDays(selectedAcademicYear, next);
+  }, [selectedAcademicYear]);
   
   const currentMonthInfo = semesterMonths[currentMonthIndex];
   const daysInMonth = getDaysInMonth(currentMonthInfo.month, currentMonthInfo.ceYear);
@@ -194,17 +212,17 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   }, [attendanceData, currentMonthInfo, students, selectedAcademicYear, selectedSemester, currentGrade]);
 
   // Generate day columns
-  const dayColumns: { day: number; date: Date; dayAbbr: string; weekend: boolean; holiday: string | null }[] = [];
+  const dayColumns: { day: number; date: Date; dayAbbr: string; weekend: boolean; holiday: string | null; custom: boolean }[] = [];
   for (let d = startDay; d <= daysInMonth; d++) {
     const date = new Date(currentMonthInfo.ceYear, currentMonthInfo.month, d);
-    const weekend = isWeekend(date);
-    const holiday = isThaiHoliday(date, holidays);
+    const { weekend, holiday, custom } = getDayStatus(date, holidays, customDays);
     dayColumns.push({
       day: d,
       date,
       dayAbbr: getThaiDayAbbr(date),
       weekend,
       holiday,
+      custom,
     });
   }
 
