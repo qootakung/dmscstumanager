@@ -152,3 +152,45 @@ export const getStartDay = (semester: string, month: number): number => {
   }
   return 1;
 };
+
+// ============ Custom (user-defined) holidays ============
+// Stored per academic (Buddhist) year in localStorage.
+// type 'holiday' = ปิดเรียนเพิ่มเติม, type 'school' = ยกเลิกวันหยุด (เปิดเรียนพิเศษ)
+export interface CustomDay {
+  type: 'holiday' | 'school';
+  name?: string;
+}
+export type CustomDayMap = Record<string, CustomDay>; // key: YYYY-MM-DD
+
+export const customHolidayKey = (academicYear: string) => `pp5-custom-holidays-${academicYear}`;
+
+export const toDateKey = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+export const getCustomDays = (academicYear: string): CustomDayMap => {
+  try {
+    const raw = localStorage.getItem(customHolidayKey(academicYear));
+    return raw ? (JSON.parse(raw) as CustomDayMap) : {};
+  } catch {
+    return {};
+  }
+};
+
+export const saveCustomDays = (academicYear: string, map: CustomDayMap): void => {
+  localStorage.setItem(customHolidayKey(academicYear), JSON.stringify(map));
+};
+
+/** Resolve the final status of a date, honouring user overrides. */
+export const getDayStatus = (
+  date: Date,
+  holidays: ThaiHoliday[],
+  custom: CustomDayMap = {},
+): { weekend: boolean; holiday: string | null; custom: boolean } => {
+  const key = toDateKey(date);
+  const override = custom[key];
+  if (override) {
+    if (override.type === 'school') return { weekend: false, holiday: null, custom: true };
+    return { weekend: false, holiday: override.name || 'วันหยุด', custom: true };
+  }
+  return { weekend: isWeekend(date), holiday: isThaiHoliday(date, holidays), custom: false };
+};
