@@ -347,6 +347,10 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
               <Printer className="w-4 h-4 mr-2" />
               พิมพ์
             </Button>
+            <Button variant="outline" onClick={() => setHolidayDialogOpen(true)}>
+              <CalendarOff className="w-4 h-4 mr-2" />
+              กำหนดวันหยุดเอง
+            </Button>
           </div>
         </CardContent>
       </Card>
