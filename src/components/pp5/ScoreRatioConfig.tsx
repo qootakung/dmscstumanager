@@ -129,6 +129,19 @@ const MATH_WEIGHTS_BY_GRADE: {
   'ป.6': { standards: { 'ค 1.1': 40, 'ค 1.2': 4, 'ค 2.1': 10, 'ค 2.2': 12, 'ค 3.1': 4 }, endYear: 30 },
 };
 
+// น้ำหนักสังคมศึกษาฯ แยกตามระดับชั้น — อ้างอิงเอกสารตัวชี้วัดระหว่างทาง/ปลายทาง กลุ่มสาระสังคมศึกษา ศาสนาและวัฒนธรรม (สพฐ.)
+// จำนวนตัวชี้วัดรวม: ป.1=31, ป.2=34, ป.3=39, ป.4=38, ป.5=36, ป.6=39 — กระจายคะแนนระหว่างปี 70 ตามสัดส่วนตัวชี้วัดของแต่ละมาตรฐาน + ปลายปี 30 = 100
+const SOCIAL_WEIGHTS_BY_GRADE: {
+  [grade: string]: { standards: { [stdCode: string]: number }; endYear: number };
+} = {
+  'ป.1': { standards: { 'ส 1.1': 8, 'ส 1.2': 7, 'ส 2.1': 5, 'ส 2.2': 7, 'ส 3.1': 7, 'ส 3.2': 2, 'ส 4.1': 7, 'ส 4.2': 5, 'ส 4.3': 7, 'ส 5.1': 8, 'ส 5.2': 7 }, endYear: 30 },
+  'ป.2': { standards: { 'ส 1.1': 15, 'ส 1.2': 4, 'ส 2.1': 9, 'ส 2.2': 4, 'ส 3.1': 8, 'ส 3.2': 4, 'ส 4.1': 4, 'ส 4.2': 4, 'ส 4.3': 4, 'ส 5.1': 6, 'ส 5.2': 8 }, endYear: 30 },
+  'ป.3': { standards: { 'ส 1.1': 12, 'ส 1.2': 6, 'ส 2.1': 6, 'ส 2.2': 6, 'ส 3.1': 6, 'ส 3.2': 6, 'ส 4.1': 4, 'ส 4.2': 6, 'ส 4.3': 6, 'ส 5.1': 4, 'ส 5.2': 8 }, endYear: 30 },
+  'ป.4': { standards: { 'ส 1.1': 14, 'ส 1.2': 5, 'ส 2.1': 8, 'ส 2.2': 5, 'ส 3.1': 6, 'ส 3.2': 4, 'ส 4.1': 6, 'ส 4.2': 4, 'ส 4.3': 6, 'ส 5.1': 6, 'ส 5.2': 6 }, endYear: 30 },
+  'ป.5': { standards: { 'ส 1.1': 13, 'ส 1.2': 6, 'ส 2.1': 7, 'ส 2.2': 6, 'ส 3.1': 6, 'ส 3.2': 4, 'ส 4.1': 6, 'ส 4.2': 4, 'ส 4.3': 8, 'ส 5.1': 4, 'ส 5.2': 6 }, endYear: 30 },
+  'ป.6': { standards: { 'ส 1.1': 16, 'ส 1.2': 7, 'ส 2.1': 9, 'ส 2.2': 5, 'ส 3.1': 5, 'ส 3.2': 4, 'ส 4.1': 4, 'ส 4.2': 4, 'ส 4.3': 7, 'ส 5.1': 4, 'ส 5.2': 5 }, endYear: 30 },
+};
+
 const getDefaultWeight = (groupId: string, gradeKey: string) => {
   if (groupId === 'science') {
     return SCIENCE_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.science;
@@ -136,8 +149,12 @@ const getDefaultWeight = (groupId: string, gradeKey: string) => {
   if (groupId === 'math') {
     return MATH_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.math;
   }
+  if (groupId === 'social') {
+    return SOCIAL_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.social;
+  }
   return DEFAULT_WEIGHTS[groupId];
 };
+
 
 const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
   selectedGrade,
