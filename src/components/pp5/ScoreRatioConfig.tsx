@@ -156,6 +156,20 @@ const HEALTH_WEIGHTS_BY_GRADE: {
   'ป.6': { standards: { 'พ 1.1': 7, 'พ 2.1': 7, 'พ 3.1': 18, 'พ 3.2': 22, 'พ 4.1': 15, 'พ 5.1': 11 }, endYear: 20 },
 };
 
+// น้ำหนักศิลปะ แยกตามระดับชั้น — อ้างอิงเอกสารตัวชี้วัดระหว่างทาง/ปลายทาง กลุ่มสาระการเรียนรู้ศิลปะ (สพฐ.)
+// จำนวนตัวชี้วัดรวม: ป.1=18, ป.2=25, ป.3=29, ป.4=29, ป.5=26, ป.6=27
+// กระจายคะแนนระหว่างปี 80 ตามสัดส่วนตัวชี้วัดของแต่ละมาตรฐาน + ปลายปี 20 = 100
+const ART_WEIGHTS_BY_GRADE: {
+  [grade: string]: { standards: { [stdCode: string]: number }; endYear: number };
+} = {
+  'ป.1': { standards: { 'ศ 1.1': 22, 'ศ 1.2': 4, 'ศ 2.1': 22, 'ศ 2.2': 9, 'ศ 3.1': 13, 'ศ 3.2': 10 }, endYear: 20 },
+  'ป.2': { standards: { 'ศ 1.1': 26, 'ศ 1.2': 6, 'ศ 2.1': 16, 'ศ 2.2': 6, 'ศ 3.1': 16, 'ศ 3.2': 10 }, endYear: 20 },
+  'ป.3': { standards: { 'ศ 1.1': 28, 'ศ 1.2': 5, 'ศ 2.1': 19, 'ศ 2.2': 6, 'ศ 3.1': 14, 'ศ 3.2': 8 }, endYear: 20 },
+  'ป.4': { standards: { 'ศ 1.1': 25, 'ศ 1.2': 5, 'ศ 2.1': 19, 'ศ 2.2': 6, 'ศ 3.1': 14, 'ศ 3.2': 11 }, endYear: 20 },
+  'ป.5': { standards: { 'ศ 1.1': 22, 'ศ 1.2': 6, 'ศ 2.1': 21, 'ศ 2.2': 6, 'ศ 3.1': 19, 'ศ 3.2': 6 }, endYear: 20 },
+  'ป.6': { standards: { 'ศ 1.1': 21, 'ศ 1.2': 9, 'ศ 2.1': 18, 'ศ 2.2': 9, 'ศ 3.1': 18, 'ศ 3.2': 5 }, endYear: 20 },
+};
+
 const getDefaultWeight = (groupId: string, gradeKey: string) => {
   if (groupId === 'science') {
     return SCIENCE_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.science;
@@ -168,6 +182,9 @@ const getDefaultWeight = (groupId: string, gradeKey: string) => {
   }
   if (groupId === 'health') {
     return HEALTH_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.health;
+  }
+  if (groupId === 'arts') {
+    return ART_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.arts;
   }
   return DEFAULT_WEIGHTS[groupId];
 };
