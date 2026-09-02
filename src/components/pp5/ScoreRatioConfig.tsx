@@ -170,6 +170,20 @@ const ART_WEIGHTS_BY_GRADE: {
   'ป.6': { standards: { 'ศ 1.1': 21, 'ศ 1.2': 9, 'ศ 2.1': 18, 'ศ 2.2': 9, 'ศ 3.1': 18, 'ศ 3.2': 5 }, endYear: 20 },
 };
 
+// น้ำหนักภาษาต่างประเทศ (ภาษาอังกฤษ) แยกตามระดับชั้น — อ้างอิงเอกสารตัวชี้วัดระหว่างทาง/ปลายทาง (สพฐ.)
+// จำนวนตัวชี้วัดรวม: ป.1=16, ป.2=16, ป.3=18, ป.4=20, ป.5=20, ป.6=20
+// กระจายคะแนนระหว่างปี 80 ตามสัดส่วนตัวชี้วัดของแต่ละมาตรฐาน + ปลายปี 20 = 100
+const ENGLISH_WEIGHTS_BY_GRADE: {
+  [grade: string]: { standards: { [stdCode: string]: number }; endYear: number };
+} = {
+  'ป.1': { standards: { 'ต 1.1': 20, 'ต 1.2': 20, 'ต 1.3': 5, 'ต 2.1': 15, 'ต 2.2': 5, 'ต 3.1': 5, 'ต 4.1': 5, 'ต 4.2': 5 }, endYear: 20 },
+  'ป.2': { standards: { 'ต 1.1': 20, 'ต 1.2': 20, 'ต 1.3': 5, 'ต 2.1': 15, 'ต 2.2': 5, 'ต 3.1': 5, 'ต 4.1': 5, 'ต 4.2': 5 }, endYear: 20 },
+  'ป.3': { standards: { 'ต 1.1': 18, 'ต 1.2': 22, 'ต 1.3': 9, 'ต 2.1': 13, 'ต 2.2': 4, 'ต 3.1': 5, 'ต 4.1': 4, 'ต 4.2': 5 }, endYear: 20 },
+  'ป.4': { standards: { 'ต 1.1': 16, 'ต 1.2': 20, 'ต 1.3': 12, 'ต 2.1': 12, 'ต 2.2': 8, 'ต 3.1': 4, 'ต 4.1': 4, 'ต 4.2': 4 }, endYear: 20 },
+  'ป.5': { standards: { 'ต 1.1': 16, 'ต 1.2': 20, 'ต 1.3': 12, 'ต 2.1': 12, 'ต 2.2': 8, 'ต 3.1': 4, 'ต 4.1': 4, 'ต 4.2': 4 }, endYear: 20 },
+  'ป.6': { standards: { 'ต 1.1': 16, 'ต 1.2': 20, 'ต 1.3': 12, 'ต 2.1': 12, 'ต 2.2': 8, 'ต 3.1': 4, 'ต 4.1': 4, 'ต 4.2': 4 }, endYear: 20 },
+};
+
 const getDefaultWeight = (groupId: string, gradeKey: string) => {
   if (groupId === 'science') {
     return SCIENCE_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.science;
@@ -186,8 +200,12 @@ const getDefaultWeight = (groupId: string, gradeKey: string) => {
   if (groupId === 'arts') {
     return ART_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.arts;
   }
+  if (groupId === 'english') {
+    return ENGLISH_WEIGHTS_BY_GRADE[gradeKey] ?? DEFAULT_WEIGHTS.english;
+  }
   return DEFAULT_WEIGHTS[groupId];
 };
+
 
 
 
