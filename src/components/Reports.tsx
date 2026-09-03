@@ -112,29 +112,6 @@ const Reports: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Beautiful Header Section */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-10 rounded-3xl"></div>
-          <div className="relative text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 animate-pulse">
-              <GraduationCap className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-              รายงานข้อมูลนักเรียน
-            </h1>
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Award className="w-6 h-6 text-blue-500" />
-              <p className="text-xl text-slate-700 font-medium">
-                จัดการและส่งออกรายงานข้อมูลนักเรียนอย่างครบถ้วน
-              </p>
-              <FileText className="w-6 h-6 text-indigo-500" />
-            </div>
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full border border-blue-200">
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
-              <span className="text-sm font-semibold text-blue-700">ระบบพร้อมใช้งาน</span>
-            </div>
-          </div>
-        </div>
 
         {/* Enhanced Main Card */}
         <Card className="bg-white/90 backdrop-blur-sm shadow-2xl border-0 rounded-3xl overflow-hidden print:border-none print:shadow-none">
