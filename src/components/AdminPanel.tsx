@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye, Download, FileSpreadsheet } from 'lucide-react';
+import { UserPlus, Trash2, Users, Database, Shield, Server, Activity, AlertTriangle, Pencil, Eye, Download, FileSpreadsheet } from 'lucide-react';
 import { getUsers, addUser, clearAllStudents, getCurrentUser } from '@/utils/storage';
 import { updateUserPermission } from '@/utils/userStorage';
 import { supabase } from '@/integrations/supabase/client';
@@ -315,29 +315,6 @@ const AdminPanel: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Beautiful Header */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 opacity-10 rounded-3xl"></div>
-          <div className="relative text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl mb-6 animate-pulse">
-              <Settings className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 bg-clip-text text-transparent mb-4">
-              จัดการระบบ
-            </h1>
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Shield className="w-6 h-6 text-red-500" />
-              <p className="text-xl text-slate-700 font-medium">
-                จัดการผู้ใช้งานและการตั้งค่าระบบ
-              </p>
-              <Server className="w-6 h-6 text-orange-500" />
-            </div>
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-100 to-orange-100 rounded-full border border-red-200">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-              <span className="text-sm font-semibold text-red-700">ระบบพร้อมใช้งาน</span>
-            </div>
-          </div>
-        </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

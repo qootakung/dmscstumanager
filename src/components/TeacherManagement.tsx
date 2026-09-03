@@ -6,7 +6,7 @@ import { format, isValid } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Upload, Users, UserPlus, GraduationCap, BookOpen, TrendingUp, Award, Copy } from 'lucide-react';
+import { Download, Upload, Users, UserPlus, GraduationCap, TrendingUp, Award, Copy } from 'lucide-react';
 import { getTeachers, addTeacher, updateTeacher, deleteTeacher, copyTeachersToYear } from '@/utils/teacherStorage';
 import { downloadTeacherTemplate, importTeachersFromExcel } from '@/utils/teacherExcel';
 import type { Teacher } from '@/types/teacher';
@@ -294,29 +294,6 @@ const TeacherManagement: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Beautiful Header */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 opacity-10 rounded-3xl"></div>
-          <div className="relative text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl mb-6 animate-pulse">
-              <Users className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-              จัดการข้อมูลครู
-            </h1>
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <BookOpen className="w-6 h-6 text-green-500" />
-              <p className="text-xl text-slate-700 font-medium">
-                เพิ่ม แก้ไข และจัดการข้อมูลครูทั้งหมด
-              </p>
-              <GraduationCap className="w-6 h-6 text-blue-500" />
-            </div>
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-100 to-blue-100 rounded-full border border-green-200">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-              <span className="text-sm font-semibold text-green-700">ระบบพร้อมใช้งาน</span>
-            </div>
-          </div>
-        </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
