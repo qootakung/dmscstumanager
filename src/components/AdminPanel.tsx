@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Users, Database, Shield, Settings, Server, Activity, AlertTriangle, Pencil, Eye, Download, FileSpreadsheet } from 'lucide-react';
+import { UserPlus, Trash2, Users, Database, Shield, Server, Activity, AlertTriangle, Pencil, Eye, Download, FileSpreadsheet } from 'lucide-react';
 import { getUsers, addUser, clearAllStudents, getCurrentUser } from '@/utils/storage';
 import { updateUserPermission } from '@/utils/userStorage';
 import { supabase } from '@/integrations/supabase/client';

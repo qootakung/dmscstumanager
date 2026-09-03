@@ -10,7 +10,7 @@ import StudentForm from './student/StudentForm';
 import StudentList from './student/StudentList';
 import StudentImport from './student/StudentImport';
 import IndividualStudentInfo from './student/IndividualStudentInfo';
-import { Users, UserPlus, FileText, Upload, GraduationCap, BookOpen, TrendingUp, IdCard } from 'lucide-react';
+import { Users, UserPlus, Upload, GraduationCap, BookOpen, TrendingUp, IdCard } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 // Calculate current semester based on date

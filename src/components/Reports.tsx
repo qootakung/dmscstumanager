@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, GraduationCap, Users, FileText, Award, Settings, FileUp } from 'lucide-react';
+import { Download, Printer, GraduationCap, Users, FileText, Settings, FileUp } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import type { Student, ReportOptions } from '@/types/student';
 import { generateStudentExcel, generateStudentExcelPaginated } from '@/utils/studentReportExcel';
