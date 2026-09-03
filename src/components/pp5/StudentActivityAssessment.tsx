@@ -422,7 +422,7 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
               })}
               {Array.from({ length: emptyCount }).map((_, i) => (
                 <tr key={`e-${i}`}>
-                  <td className="num" style={{ color: '#bbb' }}>{students.length + i + 1}</td>
+                  <td className="num">&nbsp;</td>
                   <td>&nbsp;</td>
                   {Array.from({ length: def.hours }).map((_, j) => <td key={j}>&nbsp;</td>)}
                   <td>&nbsp;</td><td>&nbsp;</td>
@@ -477,7 +477,7 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
               })}
               {Array.from({ length: emptyCount }).map((_, i) => (
                 <tr key={`e-${i}`}>
-                  <td className="num" style={{ color: '#bbb' }}>{students.length + i + 1}</td>
+                  <td className="num">&nbsp;</td>
                   <td>&nbsp;</td>
                   {ACTIVITIES.map(a => (<td key={a.key}>&nbsp;</td>))}
                   <td>&nbsp;</td>

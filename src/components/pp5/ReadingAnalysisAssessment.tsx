@@ -338,7 +338,7 @@ const ReadingAnalysisPrintable: React.FC<PrintableProps> = ({ rows, grade, semes
           ))}
           {Array.from({ length: emptyCount }).map((_, i) => (
             <tr key={`e-${i}`}>
-              <td className="num" style={{ color: '#bbb' }}>{totalStudents + i + 1}</td>
+              <td className="num">&nbsp;</td>
               <td>&nbsp;</td>
               {Array.from({ length: 5 }).map((_, j) => <td key={j}>&nbsp;</td>)}
               <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>

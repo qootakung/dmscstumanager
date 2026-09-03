@@ -44,7 +44,7 @@ export const signatureBlock = (label = 'ครูผู้สอน', name = '')
 export const emptyRows = (count: number, cols: number, startNo: number) => {
   let html = '';
   for (let i = 0; i < count; i++) {
-    html += `<tr class="empty"><td class="num" style="color:#bbb">${startNo + i}</td>${Array(cols - 1).fill('<td>&nbsp;</td>').join('')}</tr>`;
+    html += `<tr class="empty"><td class="num">&nbsp;</td>${Array(cols - 1).fill('<td>&nbsp;</td>').join('')}</tr>`;
   }
   return html;
 };
