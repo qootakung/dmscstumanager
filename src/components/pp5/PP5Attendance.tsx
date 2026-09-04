@@ -22,7 +22,6 @@ import {
   getStartDay,
   getCustomDays,
   saveCustomDays,
-  getDayStatus,
   getDayStatusLocked,
   getLockedMonths,
   saveLockedMonths,
@@ -239,6 +238,20 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   // Count school days for summary
   const schoolDays = dayColumns.filter(d => !d.weekend && !d.holiday).length;
 
+  // Lock / unlock school days for this month (shared by every grade)
+  const toggleMonthLock = () => {
+    const next = { ...lockedMonths };
+    if (isMonthLocked) {
+      delete next[currentMonthKey];
+      toast({ title: 'ปลดล็อกวันเรียนแล้ว', description: `${getThaiMonthName(currentMonthInfo.month)} — แก้ไขวันหยุด/วันเรียนได้` });
+    } else {
+      next[currentMonthKey] = dayColumns.filter(d => !d.weekend && !d.holiday).map(d => toDateKey(d.date));
+      toast({ title: 'ล็อกวันเรียนแล้ว', description: `${getThaiMonthName(currentMonthInfo.month)} — ใช้ร่วมกันทุกชั้นเรียน (${next[currentMonthKey].length} วัน)` });
+    }
+    setLockedMonths(next);
+    saveLockedMonths(selectedAcademicYear, next);
+  };
+
   // Print handler
   const handlePrint = () => {
     const printWindow = window.open('', '', 'height=800,width=1200');
@@ -360,6 +373,15 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
             <Button variant="outline" onClick={() => setHolidayDialogOpen(true)}>
               <CalendarOff className="w-4 h-4 mr-2" />
               กำหนดวันหยุดเอง
+            </Button>
+            <Button
+              variant={isMonthLocked ? 'default' : 'outline'}
+              onClick={toggleMonthLock}
+              className={isMonthLocked ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}
+              title="ล็อกวันเรียนของเดือนนี้ให้ใช้ร่วมกันทุกชั้นเรียน"
+            >
+              {isMonthLocked ? <Unlock className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+              {isMonthLocked ? 'แก้ไขวันเรียน' : 'ล็อกวันเรียน'}
             </Button>
           </div>
         </CardContent>
