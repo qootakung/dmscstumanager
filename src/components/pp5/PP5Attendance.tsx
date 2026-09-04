@@ -23,8 +23,13 @@ import {
   getCustomDays,
   saveCustomDays,
   getDayStatus,
+  getDayStatusLocked,
+  getLockedMonths,
+  saveLockedMonths,
+  toMonthKey,
   toDateKey,
   type CustomDayMap,
+  type LockedMonthsMap,
 } from '@/utils/thaiHolidays';
 import PP5AttendancePrint from './PP5AttendancePrint';
 import { createRoot } from 'react-dom/client';
