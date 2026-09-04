@@ -225,7 +225,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   const dayColumns: { day: number; date: Date; dayAbbr: string; weekend: boolean; holiday: string | null; custom: boolean }[] = [];
   for (let d = startDay; d <= daysInMonth; d++) {
     const date = new Date(currentMonthInfo.ceYear, currentMonthInfo.month, d);
-    const { weekend, holiday, custom } = getDayStatus(date, holidays, customDays);
+    const { weekend, holiday, custom } = getDayStatusLocked(date, holidays, customDays, lockedSchoolDays);
     dayColumns.push({
       day: d,
       date,
