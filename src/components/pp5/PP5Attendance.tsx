@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight, CalendarOff, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight, CalendarOff, RotateCcw, Lock, Unlock } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
@@ -22,9 +22,13 @@ import {
   getStartDay,
   getCustomDays,
   saveCustomDays,
-  getDayStatus,
+  getDayStatusLocked,
+  getLockedMonths,
+  saveLockedMonths,
+  toMonthKey,
   toDateKey,
   type CustomDayMap,
+  type LockedMonthsMap,
 } from '@/utils/thaiHolidays';
 import PP5AttendancePrint from './PP5AttendancePrint';
 import { createRoot } from 'react-dom/client';
@@ -58,9 +62,11 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   const holidays = getThaiHolidays(parseInt(selectedAcademicYear));
   const [customDays, setCustomDays] = useState<CustomDayMap>(() => getCustomDays(selectedAcademicYear));
   const [holidayDialogOpen, setHolidayDialogOpen] = useState(false);
+  const [lockedMonths, setLockedMonths] = useState<LockedMonthsMap>(() => getLockedMonths(selectedAcademicYear));
 
   useEffect(() => {
     setCustomDays(getCustomDays(selectedAcademicYear));
+    setLockedMonths(getLockedMonths(selectedAcademicYear));
   }, [selectedAcademicYear]);
 
   const updateCustomDays = useCallback((next: CustomDayMap) => {
@@ -71,6 +77,9 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   const currentMonthInfo = semesterMonths[currentMonthIndex];
   const daysInMonth = getDaysInMonth(currentMonthInfo.month, currentMonthInfo.ceYear);
   const startDay = getStartDay(selectedSemester, currentMonthInfo.month);
+  const currentMonthKey = toMonthKey(currentMonthInfo.ceYear, currentMonthInfo.month);
+  const lockedSchoolDays = lockedMonths[currentMonthKey] ?? null;
+  const isMonthLocked = lockedSchoolDays !== null;
 
   // Load students
   useEffect(() => {
@@ -215,7 +224,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   const dayColumns: { day: number; date: Date; dayAbbr: string; weekend: boolean; holiday: string | null; custom: boolean }[] = [];
   for (let d = startDay; d <= daysInMonth; d++) {
     const date = new Date(currentMonthInfo.ceYear, currentMonthInfo.month, d);
-    const { weekend, holiday, custom } = getDayStatus(date, holidays, customDays);
+    const { weekend, holiday, custom } = getDayStatusLocked(date, holidays, customDays, lockedSchoolDays);
     dayColumns.push({
       day: d,
       date,
@@ -228,6 +237,20 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
 
   // Count school days for summary
   const schoolDays = dayColumns.filter(d => !d.weekend && !d.holiday).length;
+
+  // Lock / unlock school days for this month (shared by every grade)
+  const toggleMonthLock = () => {
+    const next = { ...lockedMonths };
+    if (isMonthLocked) {
+      delete next[currentMonthKey];
+      toast({ title: 'ปลดล็อกวันเรียนแล้ว', description: `${getThaiMonthName(currentMonthInfo.month)} — แก้ไขวันหยุด/วันเรียนได้` });
+    } else {
+      next[currentMonthKey] = dayColumns.filter(d => !d.weekend && !d.holiday).map(d => toDateKey(d.date));
+      toast({ title: 'ล็อกวันเรียนแล้ว', description: `${getThaiMonthName(currentMonthInfo.month)} — ใช้ร่วมกันทุกชั้นเรียน (${next[currentMonthKey].length} วัน)` });
+    }
+    setLockedMonths(next);
+    saveLockedMonths(selectedAcademicYear, next);
+  };
 
   // Print handler
   const handlePrint = () => {
@@ -350,6 +373,15 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
             <Button variant="outline" onClick={() => setHolidayDialogOpen(true)}>
               <CalendarOff className="w-4 h-4 mr-2" />
               กำหนดวันหยุดเอง
+            </Button>
+            <Button
+              variant={isMonthLocked ? 'default' : 'outline'}
+              onClick={toggleMonthLock}
+              className={isMonthLocked ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}
+              title="ล็อกวันเรียนของเดือนนี้ให้ใช้ร่วมกันทุกชั้นเรียน"
+            >
+              {isMonthLocked ? <Unlock className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+              {isMonthLocked ? 'แก้ไขวันเรียน' : 'ล็อกวันเรียน'}
             </Button>
           </div>
         </CardContent>
@@ -537,6 +569,11 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
               กำหนดวันหยุดเอง — {getThaiMonthName(currentMonthInfo.month)} {buddhistYear}
             </DialogTitle>
           </DialogHeader>
+          {isMonthLocked && (
+            <div className="rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+              เดือนนี้ถูกล็อกวันเรียนไว้ (ใช้ร่วมกันทุกชั้นเรียน) กดปุ่ม "แก้ไขวันเรียน" เพื่อปลดล็อกก่อนแก้ไข
+            </div>
+          )}
           <div className="max-h-[60vh] overflow-y-auto space-y-1 pr-1">
             {dayColumns.map(({ day, date, dayAbbr, weekend, holiday, custom }) => {
               const key = toDateKey(date);
@@ -553,6 +590,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   </span>
                   <Input
                     className="h-8 flex-1"
+                    disabled={isMonthLocked}
                     placeholder="ชื่อวันหยุด (ถ้าตั้งเป็นวันหยุด)"
                     value={override?.type === 'holiday' ? (override.name || '') : ''}
                     onChange={(e) =>
@@ -562,6 +600,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   <Button
                     size="sm"
                     variant={override?.type === 'holiday' ? 'default' : 'outline'}
+                    disabled={isMonthLocked}
                     onClick={() =>
                       updateCustomDays({
                         ...customDays,
@@ -574,6 +613,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   <Button
                     size="sm"
                     variant={override?.type === 'school' ? 'default' : 'outline'}
+                    disabled={isMonthLocked}
                     onClick={() => updateCustomDays({ ...customDays, [key]: { type: 'school' } })}
                   >
                     เรียน
@@ -581,7 +621,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   <Button
                     size="sm"
                     variant="ghost"
-                    disabled={!override}
+                    disabled={!override || isMonthLocked}
                     title="คืนค่าเดิม"
                     onClick={() => {
                       const next = { ...customDays };
