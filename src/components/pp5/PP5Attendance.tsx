@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight, CalendarOff, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Printer, CalendarDays, ChevronLeft, ChevronRight, CalendarOff, RotateCcw, Lock, Unlock } from 'lucide-react';
 import { getStudents } from '@/utils/studentStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { Student } from '@/types/student';
