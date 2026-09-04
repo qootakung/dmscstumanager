@@ -63,9 +63,11 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   const holidays = getThaiHolidays(parseInt(selectedAcademicYear));
   const [customDays, setCustomDays] = useState<CustomDayMap>(() => getCustomDays(selectedAcademicYear));
   const [holidayDialogOpen, setHolidayDialogOpen] = useState(false);
+  const [lockedMonths, setLockedMonths] = useState<LockedMonthsMap>(() => getLockedMonths(selectedAcademicYear));
 
   useEffect(() => {
     setCustomDays(getCustomDays(selectedAcademicYear));
+    setLockedMonths(getLockedMonths(selectedAcademicYear));
   }, [selectedAcademicYear]);
 
   const updateCustomDays = useCallback((next: CustomDayMap) => {
@@ -76,6 +78,9 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   const currentMonthInfo = semesterMonths[currentMonthIndex];
   const daysInMonth = getDaysInMonth(currentMonthInfo.month, currentMonthInfo.ceYear);
   const startDay = getStartDay(selectedSemester, currentMonthInfo.month);
+  const currentMonthKey = toMonthKey(currentMonthInfo.ceYear, currentMonthInfo.month);
+  const lockedSchoolDays = lockedMonths[currentMonthKey] ?? null;
+  const isMonthLocked = lockedSchoolDays !== null;
 
   // Load students
   useEffect(() => {
