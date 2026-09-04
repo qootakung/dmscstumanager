@@ -40,6 +40,11 @@ const StudentNameListPrint: React.FC<Props> = ({ selectedGrade, selectedSemester
     })();
   }, [selectedGrade, selectedAcademicYear]);
 
+  const genderShort = (g: string) => {
+    const first = (g || '').charAt(0);
+    return first === 'ห' ? 'ญ' : first;
+  };
+
   const handlePrint = () => {
     const baseCols = 2 + (showId ? 1 : 0) + (showGender ? 1 : 0);
     const totalCols = baseCols + blankCols;
@@ -56,7 +61,7 @@ const StudentNameListPrint: React.FC<Props> = ({ selectedGrade, selectedSemester
         <td class="num">${i + 1}</td>
         ${showId ? `<td class="num">${s.studentId || ''}</td>` : ''}
         <td>${fullName(s)}</td>
-        ${showGender ? `<td class="num">${(s.gender || '').charAt(0)}</td>` : ''}
+        ${showGender ? `<td class="num">${genderShort(s.gender)}</td>` : ''}
         ${Array.from({ length: blankCols }).map(() => '<td>&nbsp;</td>').join('')}
       </tr>`).join('');
 
