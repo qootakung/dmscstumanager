@@ -194,3 +194,41 @@ export const getDayStatus = (
   }
   return { weekend: isWeekend(date), holiday: isThaiHoliday(date, holidays), custom: false };
 };
+
+// ============ Locked school days (shared across all grades) ============
+// When a month is locked, the set of school days is frozen and used by every
+// grade's attendance sheet, so all classes reference the same open-school days.
+export type LockedMonthsMap = Record<string, string[]>; // key: YYYY-MM -> list of school-day keys (YYYY-MM-DD)
+
+export const lockedDaysKey = (academicYear: string) => `pp5-locked-schooldays-${academicYear}`;
+
+export const toMonthKey = (ceYear: number, month: number): string =>
+  `${ceYear}-${String(month + 1).padStart(2, '0')}`;
+
+export const getLockedMonths = (academicYear: string): LockedMonthsMap => {
+  try {
+    const raw = localStorage.getItem(lockedDaysKey(academicYear));
+    return raw ? (JSON.parse(raw) as LockedMonthsMap) : {};
+  } catch {
+    return {};
+  }
+};
+
+export const saveLockedMonths = (academicYear: string, map: LockedMonthsMap): void => {
+  localStorage.setItem(lockedDaysKey(academicYear), JSON.stringify(map));
+};
+
+/** Day status honouring a locked month snapshot (takes priority over overrides). */
+export const getDayStatusLocked = (
+  date: Date,
+  holidays: ThaiHoliday[],
+  custom: CustomDayMap,
+  lockedSchoolDays: string[] | null,
+): { weekend: boolean; holiday: string | null; custom: boolean } => {
+  if (lockedSchoolDays) {
+    const key = toDateKey(date);
+    if (lockedSchoolDays.includes(key)) return { weekend: false, holiday: null, custom: true };
+    return { weekend: isWeekend(date), holiday: isWeekend(date) ? null : 'วันหยุด (ล็อก)', custom: true };
+  }
+  return getDayStatus(date, holidays, custom);
+};
