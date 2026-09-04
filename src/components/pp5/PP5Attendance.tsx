@@ -569,6 +569,11 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
               กำหนดวันหยุดเอง — {getThaiMonthName(currentMonthInfo.month)} {buddhistYear}
             </DialogTitle>
           </DialogHeader>
+          {isMonthLocked && (
+            <div className="rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+              เดือนนี้ถูกล็อกวันเรียนไว้ (ใช้ร่วมกันทุกชั้นเรียน) กดปุ่ม "แก้ไขวันเรียน" เพื่อปลดล็อกก่อนแก้ไข
+            </div>
+          )}
           <div className="max-h-[60vh] overflow-y-auto space-y-1 pr-1">
             {dayColumns.map(({ day, date, dayAbbr, weekend, holiday, custom }) => {
               const key = toDateKey(date);
@@ -585,6 +590,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   </span>
                   <Input
                     className="h-8 flex-1"
+                    disabled={isMonthLocked}
                     placeholder="ชื่อวันหยุด (ถ้าตั้งเป็นวันหยุด)"
                     value={override?.type === 'holiday' ? (override.name || '') : ''}
                     onChange={(e) =>
@@ -594,6 +600,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   <Button
                     size="sm"
                     variant={override?.type === 'holiday' ? 'default' : 'outline'}
+                    disabled={isMonthLocked}
                     onClick={() =>
                       updateCustomDays({
                         ...customDays,
@@ -606,6 +613,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   <Button
                     size="sm"
                     variant={override?.type === 'school' ? 'default' : 'outline'}
+                    disabled={isMonthLocked}
                     onClick={() => updateCustomDays({ ...customDays, [key]: { type: 'school' } })}
                   >
                     เรียน
@@ -613,7 +621,7 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
                   <Button
                     size="sm"
                     variant="ghost"
-                    disabled={!override}
+                    disabled={!override || isMonthLocked}
                     title="คืนค่าเดิม"
                     onClick={() => {
                       const next = { ...customDays };
