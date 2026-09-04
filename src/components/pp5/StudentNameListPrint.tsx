@@ -146,7 +146,7 @@ const StudentNameListPrint: React.FC<Props> = ({ selectedGrade, selectedSemester
                       <td className="border border-gray-300 p-1 text-center">{i + 1}</td>
                       {showId && <td className="border border-gray-300 p-1 text-center">{s.studentId}</td>}
                       <td className="border border-gray-300 p-1">{fullName(s)}</td>
-                      {showGender && <td className="border border-gray-300 p-1 text-center">{(s.gender || '').charAt(0)}</td>}
+                      {showGender && <td className="border border-gray-300 p-1 text-center">{genderShort(s.gender)}</td>}
                     </tr>
                   ))}
                 </tbody>
