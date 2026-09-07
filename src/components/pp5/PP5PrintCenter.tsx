@@ -109,6 +109,40 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
         </div>`);
     }
 
+    if (selected.includes('front')) {
+      const cover = readJSON(`pp5-cover-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`);
+      const sign = (name: string, role: string) => `
+        <div style="text-align:center;min-width:230px;line-height:1.6;margin-top:12mm">
+          ลงชื่อ .....................................................<br/>
+          ( ${name || '.....................................................'} )<br/>${role}
+        </div>`;
+      pages.push(`
+        <div style="text-align:center;line-height:1.9">
+          <div style="font-size:26pt;font-weight:bold">ปพ.5</div>
+          <div style="font-size:20pt;font-weight:bold">แบบบันทึกผลการพัฒนาคุณภาพผู้เรียน</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">โรงเรียน${cover?.schoolName || info?.schoolName || 'บ้านดอนมูล'}</div>
+          <div style="font-size:16pt">สำนักงานเขตพื้นที่การศึกษาประถมศึกษา${info?.educationArea || '..............................'}</div>
+        </div>
+        <table style="margin-top:10mm;width:70%;margin-left:auto;margin-right:auto">
+          <tbody>
+            <tr><td>จำนวนนักเรียนทั้งหมด</td><td class="num" style="width:80px">${students.length}</td><td style="width:50px">คน</td></tr>
+            <tr><td>จำนวนนักเรียนที่ผ่านเกณฑ์การประเมิน</td><td class="num">&nbsp;</td><td>คน</td></tr>
+            <tr><td>จำนวนนักเรียนที่ไม่ผ่านเกณฑ์การประเมิน</td><td class="num">&nbsp;</td><td>คน</td></tr>
+            <tr><td>จำนวนนักเรียนที่จำหน่ายออก</td><td class="num">&nbsp;</td><td>คน</td></tr>
+            <tr><td>จำนวนนักเรียนย้ายสถานศึกษา</td><td class="num">&nbsp;</td><td>คน</td></tr>
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:space-around;flex-wrap:wrap">
+          ${sign(cover?.teacher1 || info?.homeTeacher1 || '', 'ครูประจำชั้น')}
+          ${sign(cover?.teacher2 || info?.homeTeacher2 || '', 'ครูประจำชั้น')}
+          ${sign(info?.academicHead || '', 'หัวหน้าฝ่ายวิชาการ')}
+          ${sign(info?.directorName || '', 'ผู้อำนวยการโรงเรียน')}
+        </div>`);
+    }
+
+
+
     if (selected.includes('students')) {
       pages.push(`${header('รายชื่อนักเรียน')}
         <table style="margin-top:8px">
