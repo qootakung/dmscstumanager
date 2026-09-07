@@ -20,12 +20,39 @@ interface Props {
 
 const SECTIONS = [
   { id: 'cover', label: 'หน้าปก ปพ.5' },
+  { id: 'front', label: 'ปกหน้า (สรุปจำนวนนักเรียน / ลงนาม)' },
   { id: 'students', label: 'รายชื่อนักเรียน' },
   { id: 'grades', label: 'สรุปผลการเรียนรายวิชา (ระดับผลการเรียน)' },
   { id: 'traits', label: 'สรุปคุณลักษณะอันพึงประสงค์' },
   { id: 'reading', label: 'สรุปการอ่าน คิดวิเคราะห์ และเขียน' },
   { id: 'activities', label: 'สรุปกิจกรรมพัฒนาผู้เรียน' },
+  { id: 'individual', label: 'รายงานผลการพัฒนาคุณภาพผู้เรียนรายบุคคล' },
+  { id: 'individualEval', label: 'รายงานผลการประเมินรายบุคคล (อ่านคิดฯ / คุณลักษณะ / กิจกรรม)' },
 ];
+
+const TRAITS = [
+  '1. รักชาติ ศาสน์ กษัตริย์', '2. ซื่อสัตย์ สุจริต', '3. มีวินัย', '4. ใฝ่เรียนรู้',
+  '5. อยู่อย่างพอเพียง', '6. มุ่งมั่นในการทำงาน', '7. รักความเป็นไทย', '8. มีจิตสาธารณะ',
+];
+const READING_ITEMS = [
+  '1. สามารถอ่านและหาประสบการณ์จากสื่อ', '2. สามารถจับประเด็นสำคัญ',
+  '3. สามารถเปรียบเทียบ/เชื่อมโยงความคิด', '4. สามารถแสดงความคิดเห็นอย่างมีเหตุผล',
+  '5. สามารถถ่ายทอดความคิดเห็นด้วยการเขียน',
+];
+const ACTIVITY_DEFS = [
+  { key: 'guidance', name: 'กิจกรรมแนะแนว', short: 'แนะแนว', hours: 40 },
+  { key: 'scout', name: 'กิจกรรมลูกเสือ เนตรนารี ยุวกาชาด', short: 'ลูกเสือฯ', hours: 40 },
+  { key: 'club', name: 'กิจกรรมชุมนุม/ชมรม', short: 'ชุมนุม', hours: 40 },
+  { key: 'social', name: 'กิจกรรมเพื่อสังคมและสาธารณประโยชน์', short: 'เพื่อสังคมฯ', hours: 10 },
+] as const;
+
+const SUBJECT_CODES: Record<string, string> = {
+  thai: 'ท#3101', math: 'ค#3101', science: 'ว#3101', social: 'ส#3101', history: 'ส#3102',
+  health: 'พ#3101', art: 'ศ#3101', career: 'ง#3101', english: 'อ#3101',
+  'anti-corruption': 'ส#3202', 'english-comm': 'อ#3201',
+};
+const subjectCode = (menuId: string, gradeNum: string) =>
+  (SUBJECT_CODES[menuId] || '').replace('#3', `1${gradeNum}`);
 
 const readJSON = (key: string): any => {
   const raw = localStorage.getItem(key);
@@ -35,6 +62,7 @@ const readJSON = (key: string): any => {
 
 const traitLevel = (sum: number) => (sum >= 22 ? 'ดีเยี่ยม' : sum >= 16 ? 'ดี' : sum >= 8 ? 'ผ่าน' : 'ไม่ผ่าน');
 const readingLevel = (sum: number) => (sum >= 14 ? 'ดีเยี่ยม' : sum >= 10 ? 'ดี' : sum >= 6 ? 'ผ่าน' : 'ไม่ผ่าน');
+
 
 const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedAcademicYear, onBack }) => {
   const [students, setStudents] = useState<Student[]>([]);
