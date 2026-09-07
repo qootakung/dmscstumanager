@@ -199,19 +199,123 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
         </table>`);
     }
 
+    const activityData = readJSON(`pp5-student-activity-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`);
+    const actResult = (key: string, sid: string, hours: number): boolean | null => {
+      const row: number[] | undefined = activityData?.scores?.[key]?.[sid];
+      if (!row || row.length === 0) return null;
+      const attended = row.reduce((a: number, b: number) => a + (Number(b) || 0), 0);
+      return attended / row.length >= 0.8;
+    };
+    const actSymbol = (v: boolean | null) => (v === null ? '' : v ? 'ผ.' : 'มผ.');
+
     if (selected.includes('activities')) {
-      pages.push(`${header('สรุปกิจกรรมพัฒนาผู้เรียน')}
+      pages.push(`${header('สรุปผลการประเมินกิจกรรมพัฒนาผู้เรียน')}
         <table style="margin-top:8px">
           <thead><tr><th style="width:36px">ที่</th><th>ชื่อ - นามสกุล</th>
-            <th style="width:70px">แนะแนว</th><th style="width:70px">ลูกเสือฯ</th>
-            <th style="width:70px">ชุมนุม</th><th style="width:90px">เพื่อสังคมฯ</th>
+            ${ACTIVITY_DEFS.map(a => `<th style="width:80px">${a.short}</th>`).join('')}
             <th style="width:80px">สรุปผล</th></tr></thead>
-          <tbody>${students.map((s, i) =>
-            `<tr><td class="num">${i + 1}</td><td>${fullName(s)}</td><td></td><td></td><td></td><td></td><td></td></tr>`
-          ).join('')}</tbody>
-        </table>
-        <div style="font-size:13pt;margin-top:4px;color:#555">* บันทึกผลรายกิจกรรมได้ที่เมนู “กิจกรรมพัฒนาผู้เรียน”</div>`);
+          <tbody>${students.map((s, i) => {
+            const sid = s.studentId || s.id;
+            const res = ACTIVITY_DEFS.map(a => actResult(a.key, sid, a.hours));
+            const known = res.filter(r => r !== null);
+            const summary = known.length === 0 ? '' : res.every(r => r === true) ? 'ผ่าน' : 'ไม่ผ่าน';
+            return `<tr><td class="num">${i + 1}</td><td>${fullName(s)}</td>${res.map(r => `<td class="num">${actSymbol(r)}</td>`).join('')}<td class="num">${summary}</td></tr>`;
+          }).join('')}</tbody>
+        </table>`);
     }
+
+    if (selected.includes('individual') || selected.includes('individualEval')) {
+      const results = computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester);
+      const traitData = readJSON(`pp5-desirable-traits-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`);
+      const readData = readJSON(`pp5-reading-analysis-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`);
+
+      const gpaOf = (s: Student) => {
+        let credits = 0, weighted = 0;
+        results.forEach(r => { credits += r.def.credit; weighted += (r.results[s.id]?.grade || 0) * r.def.credit; });
+        return credits ? weighted / credits : 0;
+      };
+      const ranked = [...students].sort((a, b) => gpaOf(b) - gpaOf(a));
+      const rankOf = (s: Student) => ranked.findIndex(x => x.id === s.id) + 1;
+
+      const signPair = `
+        <div style="display:flex;justify-content:space-around;margin-top:12mm">
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.homeTeacher1 || '.........................................'} )<br/>ครูประจำชั้น</div>
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.directorName || '.........................................'} )<br/>ผู้อำนวยการโรงเรียน</div>
+        </div>`;
+
+      students.forEach(s => {
+        const sid = s.studentId || s.id;
+        const traitRow: number[] = traitData?.scores?.[sid] || [];
+        const traitSum = traitRow.reduce((a, b) => a + (Number(b) || 0), 0);
+        const readRow: number[] = readData?.scores?.[sid] || [];
+        const readSum = readRow.reduce((a, b) => a + (Number(b) || 0), 0);
+        const actRes = ACTIVITY_DEFS.map(a => actResult(a.key, sid, a.hours));
+        const actSummary = actRes.every(r => r === null) ? '' : actRes.every(r => r === true) ? 'ผ่าน' : 'ไม่ผ่าน';
+
+        if (selected.includes('individual')) {
+          let credits = 0, earned = 0, weighted = 0;
+          const rows = results.map(r => {
+            const res = r.results[s.id] || { score100: 0, grade: 0 };
+            credits += r.def.credit;
+            weighted += res.grade * r.def.credit;
+            if (res.grade > 0) earned += r.def.credit;
+            return `<tr><td class="num">${subjectCode(r.def.menuId, gradeNum)}</td><td>${r.def.name}</td>
+              <td class="num">${r.def.credit.toFixed(1)}</td><td class="num">100</td>
+              <td class="num">${Math.round(res.score100)}</td><td class="num">${res.grade.toFixed(1)}</td></tr>`;
+          }).join('');
+          const gpa = credits ? (weighted / credits).toFixed(2) : '0.00';
+          pages.push(`${header('รายงานผลการพัฒนาคุณภาพผู้เรียนรายบุคคล')}
+            <div style="margin:6px 0;font-size:16pt">ชื่อนักเรียน : ${fullName(s)} &nbsp;&nbsp; เลขประจำตัว : ${s.studentId || '-'}</div>
+            <table>
+              <thead><tr><th style="width:78px">รหัสวิชา</th><th>กลุ่มสาระการเรียนรู้</th>
+                <th style="width:70px">น้ำหนัก<br/>หน่วยกิต</th><th style="width:60px">คะแนน<br/>เต็ม</th>
+                <th style="width:60px">คะแนน<br/>ที่ได้</th><th style="width:60px">ระดับ<br/>ผลการเรียน</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <table style="margin-top:6px">
+              <thead><tr><th colspan="2">สรุปผลการเรียน</th><th style="width:150px">ผลการประเมิน</th></tr></thead>
+              <tbody>
+                <tr><td colspan="2">จำนวนหน่วยกิตที่เรียน</td><td class="num">${credits.toFixed(1)}</td></tr>
+                <tr><td colspan="2">จำนวนหน่วยกิตที่ได้</td><td class="num">${earned.toFixed(1)}</td></tr>
+                <tr><td colspan="2">ระดับผลการเรียนเฉลี่ย (GPA)</td><td class="num">${gpa}</td></tr>
+                <tr><td colspan="2">คุณลักษณะอันพึงประสงค์</td><td class="num">${traitSum ? traitLevel(traitSum) : ''}</td></tr>
+                <tr><td colspan="2">การอ่าน คิดวิเคราะห์และเขียน</td><td class="num">${readSum ? readingLevel(readSum) : ''}</td></tr>
+                <tr><td colspan="2">กิจกรรมพัฒนาผู้เรียน</td><td class="num">${actSummary}</td></tr>
+                <tr><td colspan="2">สอบได้ลำดับที่</td><td class="num">${rankOf(s)} จาก ${students.length}</td></tr>
+              </tbody>
+            </table>
+            ${signPair}`);
+        }
+
+        if (selected.includes('individualEval')) {
+          pages.push(`${header('รายงานผลการประเมินรายบุคคล')}
+            <div style="margin:6px 0;font-size:16pt">ชื่อนักเรียน : ${fullName(s)} &nbsp;&nbsp; เลขประจำตัว : ${s.studentId || '-'}</div>
+            <table>
+              <thead><tr><th>การประเมินการอ่าน คิดวิเคราะห์ และเขียน</th><th style="width:120px">คะแนน</th><th style="width:130px">ผลการประเมิน</th></tr></thead>
+              <tbody>${READING_ITEMS.map((t, i) => {
+                const v = Number(readRow[i] || 0);
+                return `<tr><td>${t}</td><td class="num">${v || ''}</td><td class="num">${v ? readingLevel(v * 5) : ''}</td></tr>`;
+              }).join('')}
+              <tr><td style="font-weight:bold">สรุปผลการประเมินการอ่าน คิดวิเคราะห์ และเขียน</td><td class="num">${readSum || ''}</td><td class="num">${readSum ? readingLevel(readSum) : ''}</td></tr></tbody>
+            </table>
+            <table style="margin-top:6px">
+              <thead><tr><th>การประเมินคุณลักษณะอันพึงประสงค์</th><th style="width:120px">คะแนน</th><th style="width:130px">ผลการประเมิน</th></tr></thead>
+              <tbody>${TRAITS.map((t, i) => {
+                const v = Number(traitRow[i] || 0);
+                return `<tr><td>${t}</td><td class="num">${v || ''}</td><td class="num">${v ? traitLevel(v * 8) : ''}</td></tr>`;
+              }).join('')}
+              <tr><td style="font-weight:bold">สรุปผลการประเมินคุณลักษณะอันพึงประสงค์</td><td class="num">${traitSum || ''}</td><td class="num">${traitSum ? traitLevel(traitSum) : ''}</td></tr></tbody>
+            </table>
+            <table style="margin-top:6px">
+              <thead><tr><th>การประเมินกิจกรรมพัฒนาผู้เรียน</th><th style="width:120px">เวลาเรียน</th><th style="width:130px">ผลการประเมิน</th></tr></thead>
+              <tbody>${ACTIVITY_DEFS.map((a, i) => `<tr><td>${a.name}</td><td class="num">${a.hours} ชม.</td><td class="num">${actSymbol(actRes[i])}</td></tr>`).join('')}
+              <tr><td style="font-weight:bold">สรุปผลการประเมินกิจกรรมพัฒนาผู้เรียน</td><td class="num">&nbsp;</td><td class="num">${actSummary}</td></tr></tbody>
+            </table>
+            ${signPair}`);
+        }
+      });
+    }
+
 
     return pages.map((p, i) => `<div${i < pages.length - 1 ? ' class="page-break"' : ''}>${p}</div>`).join('');
   };
