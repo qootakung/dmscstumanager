@@ -215,6 +215,58 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
       return attended / row.length >= 0.8;
     };
     const actSymbol = (v: boolean | null) => (v === null ? '' : v ? 'ผ.' : 'มผ.');
+    const actHours = (key: string, sid: string): number | null => {
+      const row: number[] | undefined = activityData?.scores?.[key]?.[sid];
+      if (!row || row.length === 0) return null;
+      return row.reduce((a: number, b: number) => a + (Number(b) || 0), 0);
+    };
+
+    if (selected.includes('activityCover')) {
+      pages.push(`
+        <div style="text-align:center;line-height:2;padding-top:18mm">
+          <div style="font-size:24pt;font-weight:bold">แบบเสนอขออนุมัติผลการประเมิน</div>
+          <div style="font-size:22pt;font-weight:bold">กิจกรรมพัฒนาผู้เรียน</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'}</div>
+        </div>
+        <table style="margin-top:10mm;width:80%;margin-left:auto;margin-right:auto">
+          <thead><tr><th>กิจกรรม</th><th style="width:90px">เวลาเรียน<br/>(ชั่วโมง)</th><th style="width:70px">ผ่าน</th><th style="width:70px">ไม่ผ่าน</th></tr></thead>
+          <tbody>${ACTIVITY_DEFS.map(a => {
+            const res = students.map(s => actResult(a.key, s.studentId || s.id, a.hours));
+            const pass = res.filter(r => r === true).length;
+            const fail = res.filter(r => r === false).length;
+            return `<tr><td>${a.name}</td><td class="num">${a.hours}</td><td class="num">${pass || ''}</td><td class="num">${fail || ''}</td></tr>`;
+          }).join('')}</tbody>
+        </table>
+        <div style="display:flex;justify-content:space-around;margin-top:16mm">
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.homeTeacher1 || '.........................................'} )<br/>ครูผู้รับผิดชอบกิจกรรม</div>
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.directorName || '.........................................'} )<br/>ผู้อำนวยการโรงเรียน</div>
+        </div>`);
+    }
+
+    if (selected.includes('activityForms')) {
+      ACTIVITY_DEFS.forEach(a => {
+        pages.push(`${header(`แบบประเมิน${a.name}`)}
+          <table style="margin-top:8px">
+            <thead><tr><th style="width:36px">ที่</th><th style="width:90px">เลขประจำตัว</th><th>ชื่อ - นามสกุล</th>
+              <th style="width:90px">เวลาเรียน<br/>(${a.hours} ชม.)</th><th style="width:70px">ร้อยละ</th><th style="width:80px">ผลการประเมิน</th></tr></thead>
+            <tbody>${students.map((s, i) => {
+              const sid = s.studentId || s.id;
+              const h = actHours(a.key, sid);
+              const pct = h === null ? '' : Math.round((h / a.hours) * 100).toString();
+              return `<tr><td class="num">${i + 1}</td><td class="num">${s.studentId || ''}</td><td>${fullName(s)}</td>
+                <td class="num">${h === null ? '' : h}</td><td class="num">${pct}</td><td class="num">${actSymbol(actResult(a.key, sid, a.hours))}</td></tr>`;
+            }).join('')}</tbody>
+          </table>
+          <div style="margin-top:6px;font-size:14pt">เกณฑ์การประเมิน : มีเวลาเข้าร่วมกิจกรรมไม่น้อยกว่าร้อยละ 80 และผ่านจุดประสงค์สำคัญของกิจกรรม</div>
+          <div style="display:flex;justify-content:space-around;margin-top:14mm">
+            <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${activityData?.teacherNames?.[a.key] || info?.homeTeacher1 || '.........................................'} )<br/>ครูผู้สอนกิจกรรม</div>
+            <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.directorName || '.........................................'} )<br/>ผู้อำนวยการโรงเรียน</div>
+          </div>`);
+      });
+    }
+
+
 
     if (selected.includes('activities')) {
       pages.push(`${header('สรุปผลการประเมินกิจกรรมพัฒนาผู้เรียน')}
