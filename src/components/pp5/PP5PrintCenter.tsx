@@ -159,6 +159,64 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
         </table>`);
     }
 
+    if (selected.includes('basicInfo')) {
+      const addr = (s: Student) =>
+        [s.houseNumber && `บ้านเลขที่ ${s.houseNumber}`, s.moo && `หมู่ ${s.moo}`, s.subDistrict, s.district, s.province, s.postalCode]
+          .filter(Boolean).join(' ');
+      pages.push(`${header('ข้อมูลพื้นฐานนักเรียน')}
+        <table style="margin-top:8px;font-size:12pt">
+          <thead><tr><th style="width:28px">ที่</th><th style="width:78px">เลขประจำตัว</th><th>ชื่อ - นามสกุล</th>
+            <th style="width:76px">วันเกิด</th><th>ชื่อบิดา</th><th>ชื่อมารดา</th><th>ผู้ปกครอง</th><th style="width:78px">โทรศัพท์</th></tr></thead>
+          <tbody>${students.map((s, i) => `<tr>
+            <td class="num">${i + 1}</td><td class="num">${s.studentId || ''}</td><td>${fullName(s)}</td>
+            <td class="num">${s.birthDate || ''}</td>
+            <td>${`${s.fatherTitle || ''}${s.fatherFirstName || ''} ${s.fatherLastName || ''}`.trim()}</td>
+            <td>${`${s.motherTitle || ''}${s.motherFirstName || ''} ${s.motherLastName || ''}`.trim()}</td>
+            <td>${`${s.guardianTitle || ''}${s.guardianFirstName || ''} ${s.guardianLastName || ''}`.trim()}</td>
+            <td class="num">${s.guardianPhone ? (s.guardianPhone.length === 9 ? `0${s.guardianPhone}` : s.guardianPhone) : ''}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+        <table style="margin-top:8px;font-size:12pt">
+          <thead><tr><th style="width:28px">ที่</th><th style="width:170px">ชื่อ - นามสกุล</th><th>ที่อยู่</th></tr></thead>
+          <tbody>${students.map((s, i) => `<tr><td class="num">${i + 1}</td><td>${fullName(s)}</td><td>${addr(s)}</td></tr>`).join('')}</tbody>
+        </table>`);
+    }
+
+    if (selected.includes('ratio')) {
+      const ratios: any[] = readJSON(`pp5-score-ratio-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`) || [];
+      if (ratios.length === 0) {
+        pages.push(`${header('การกำหนดสัดส่วนคะแนน')}<div style="margin-top:10mm;text-align:center;font-size:16pt">ยังไม่ได้บันทึกสัดส่วนคะแนนของชั้นนี้</div>`);
+      } else {
+        pages.push(`${header('การกำหนดสัดส่วนคะแนน')}
+          <table style="margin-top:8px;font-size:13pt">
+            <thead><tr><th style="width:32px">ที่</th><th>กลุ่มสาระการเรียนรู้ / รายวิชา</th>
+              <th style="width:90px">ระหว่างปี</th><th style="width:90px">ปลายปี</th><th style="width:70px">รวม</th></tr></thead>
+            <tbody>${ratios.map((g: any, i: number) => {
+              const mid = Number(g.midYearTotal || 0), end = Number(g.endYearScore || 0);
+              return `<tr><td class="num">${i + 1}</td><td>${g.groupName || ''}</td>
+                <td class="num">${mid}</td><td class="num">${end}</td><td class="num">${mid + end}</td></tr>`;
+            }).join('')}</tbody>
+          </table>`);
+        ratios.forEach((g: any) => {
+          const rows = (g.strands || []).flatMap((st: any) =>
+            (st.standards || []).map((s: any) => `<tr><td>${st.strandName || ''}</td><td>${s.standardCode || ''}</td><td class="num">${s.score ?? ''}</td></tr>`)
+          ).join('');
+          if (!rows) return;
+          pages.push(`${header(`สัดส่วนคะแนน : ${g.groupName || ''}`)}
+            <table style="margin-top:8px;font-size:13pt">
+              <thead><tr><th style="width:230px">สาระ</th><th>มาตรฐาน / ผลการเรียนรู้</th><th style="width:90px">คะแนน</th></tr></thead>
+              <tbody>${rows}
+                <tr><td colspan="2" style="font-weight:bold">รวมคะแนนระหว่างปี</td><td class="num">${g.midYearTotal || 0}</td></tr>
+                <tr><td colspan="2" style="font-weight:bold">คะแนนปลายปี</td><td class="num">${g.endYearScore || 0}</td></tr>
+                <tr><td colspan="2" style="font-weight:bold">รวมทั้งสิ้น</td><td class="num">${Number(g.midYearTotal || 0) + Number(g.endYearScore || 0)}</td></tr>
+              </tbody>
+            </table>`);
+        });
+      }
+    }
+
+
+
     if (selected.includes('grades')) {
       const results = computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester);
       pages.push(`${header('สรุปผลการเรียนรายวิชา')}
