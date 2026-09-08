@@ -22,13 +22,21 @@ const SECTIONS = [
   { id: 'cover', label: 'หน้าปก ปพ.5' },
   { id: 'front', label: 'ปกหน้า (สรุปจำนวนนักเรียน / ลงนาม)' },
   { id: 'students', label: 'รายชื่อนักเรียน' },
+  { id: 'basicInfo', label: 'ข้อมูลพื้นฐานนักเรียน (ผู้ปกครอง / ที่อยู่)' },
+  { id: 'ratio', label: 'การกำหนดสัดส่วนคะแนน' },
   { id: 'grades', label: 'สรุปผลการเรียนรายวิชา (ระดับผลการเรียน)' },
+  { id: 'elective', label: 'เอกสารรายวิชาเพิ่มเติม (ปกอนุมัติ / คะแนน)' },
+  { id: 'chart', label: 'กราฟสรุปผลสัมฤทธิ์ทางการเรียน' },
+  { id: 'analysis', label: 'วิเคราะห์ผลสัมฤทธิ์ 8 กลุ่มสาระการเรียนรู้' },
   { id: 'traits', label: 'สรุปคุณลักษณะอันพึงประสงค์' },
   { id: 'reading', label: 'สรุปการอ่าน คิดวิเคราะห์ และเขียน' },
+  { id: 'activityCover', label: 'ปกเสนออนุมัติกิจกรรมพัฒนาผู้เรียน' },
+  { id: 'activityForms', label: 'แบบประเมินกิจกรรมพัฒนาผู้เรียน (4 ประเภท)' },
   { id: 'activities', label: 'สรุปกิจกรรมพัฒนาผู้เรียน' },
   { id: 'individual', label: 'รายงานผลการพัฒนาคุณภาพผู้เรียนรายบุคคล' },
   { id: 'individualEval', label: 'รายงานผลการประเมินรายบุคคล (อ่านคิดฯ / คุณลักษณะ / กิจกรรม)' },
 ];
+
 
 const TRAITS = [
   '1. รักชาติ ศาสน์ กษัตริย์', '2. ซื่อสัตย์ สุจริต', '3. มีวินัย', '4. ใฝ่เรียนรู้',
@@ -151,6 +159,64 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
         </table>`);
     }
 
+    if (selected.includes('basicInfo')) {
+      const addr = (s: Student) =>
+        [s.houseNumber && `บ้านเลขที่ ${s.houseNumber}`, s.moo && `หมู่ ${s.moo}`, s.subDistrict, s.district, s.province, s.postalCode]
+          .filter(Boolean).join(' ');
+      pages.push(`${header('ข้อมูลพื้นฐานนักเรียน')}
+        <table style="margin-top:8px;font-size:12pt">
+          <thead><tr><th style="width:28px">ที่</th><th style="width:78px">เลขประจำตัว</th><th>ชื่อ - นามสกุล</th>
+            <th style="width:76px">วันเกิด</th><th>ชื่อบิดา</th><th>ชื่อมารดา</th><th>ผู้ปกครอง</th><th style="width:78px">โทรศัพท์</th></tr></thead>
+          <tbody>${students.map((s, i) => `<tr>
+            <td class="num">${i + 1}</td><td class="num">${s.studentId || ''}</td><td>${fullName(s)}</td>
+            <td class="num">${s.birthDate || ''}</td>
+            <td>${`${s.fatherTitle || ''}${s.fatherFirstName || ''} ${s.fatherLastName || ''}`.trim()}</td>
+            <td>${`${s.motherTitle || ''}${s.motherFirstName || ''} ${s.motherLastName || ''}`.trim()}</td>
+            <td>${`${s.guardianTitle || ''}${s.guardianFirstName || ''} ${s.guardianLastName || ''}`.trim()}</td>
+            <td class="num">${s.guardianPhone ? (s.guardianPhone.length === 9 ? `0${s.guardianPhone}` : s.guardianPhone) : ''}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+        <table style="margin-top:8px;font-size:12pt">
+          <thead><tr><th style="width:28px">ที่</th><th style="width:170px">ชื่อ - นามสกุล</th><th>ที่อยู่</th></tr></thead>
+          <tbody>${students.map((s, i) => `<tr><td class="num">${i + 1}</td><td>${fullName(s)}</td><td>${addr(s)}</td></tr>`).join('')}</tbody>
+        </table>`);
+    }
+
+    if (selected.includes('ratio')) {
+      const ratios: any[] = readJSON(`pp5-score-ratio-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`) || [];
+      if (ratios.length === 0) {
+        pages.push(`${header('การกำหนดสัดส่วนคะแนน')}<div style="margin-top:10mm;text-align:center;font-size:16pt">ยังไม่ได้บันทึกสัดส่วนคะแนนของชั้นนี้</div>`);
+      } else {
+        pages.push(`${header('การกำหนดสัดส่วนคะแนน')}
+          <table style="margin-top:8px;font-size:13pt">
+            <thead><tr><th style="width:32px">ที่</th><th>กลุ่มสาระการเรียนรู้ / รายวิชา</th>
+              <th style="width:90px">ระหว่างปี</th><th style="width:90px">ปลายปี</th><th style="width:70px">รวม</th></tr></thead>
+            <tbody>${ratios.map((g: any, i: number) => {
+              const mid = Number(g.midYearTotal || 0), end = Number(g.endYearScore || 0);
+              return `<tr><td class="num">${i + 1}</td><td>${g.groupName || ''}</td>
+                <td class="num">${mid}</td><td class="num">${end}</td><td class="num">${mid + end}</td></tr>`;
+            }).join('')}</tbody>
+          </table>`);
+        ratios.forEach((g: any) => {
+          const rows = (g.strands || []).flatMap((st: any) =>
+            (st.standards || []).map((s: any) => `<tr><td>${st.strandName || ''}</td><td>${s.standardCode || ''}</td><td class="num">${s.score ?? ''}</td></tr>`)
+          ).join('');
+          if (!rows) return;
+          pages.push(`${header(`สัดส่วนคะแนน : ${g.groupName || ''}`)}
+            <table style="margin-top:8px;font-size:13pt">
+              <thead><tr><th style="width:230px">สาระ</th><th>มาตรฐาน / ผลการเรียนรู้</th><th style="width:90px">คะแนน</th></tr></thead>
+              <tbody>${rows}
+                <tr><td colspan="2" style="font-weight:bold">รวมคะแนนระหว่างปี</td><td class="num">${g.midYearTotal || 0}</td></tr>
+                <tr><td colspan="2" style="font-weight:bold">คะแนนปลายปี</td><td class="num">${g.endYearScore || 0}</td></tr>
+                <tr><td colspan="2" style="font-weight:bold">รวมทั้งสิ้น</td><td class="num">${Number(g.midYearTotal || 0) + Number(g.endYearScore || 0)}</td></tr>
+              </tbody>
+            </table>`);
+        });
+      }
+    }
+
+
+
     if (selected.includes('grades')) {
       const results = computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester);
       pages.push(`${header('สรุปผลการเรียนรายวิชา')}
@@ -172,6 +238,88 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
           }).join('')}</tbody>
         </table>`);
     }
+
+    if (selected.includes('elective')) {
+      const results = computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester)
+        .filter(r => r.def.category === 'elective');
+      pages.push(`
+        <div style="text-align:center;line-height:2;padding-top:20mm">
+          <div style="font-size:24pt;font-weight:bold">แบบเสนอขออนุมัติผลการเรียน</div>
+          <div style="font-size:22pt;font-weight:bold">รายวิชาเพิ่มเติม</div>
+          <div style="font-size:18pt">${results.map(r => r.def.name).join(' / ') || '-'}</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'}</div>
+        </div>
+        <div style="display:flex;justify-content:space-around;margin-top:24mm">
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.homeTeacher1 || '.........................................'} )<br/>ครูผู้สอน</div>
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.directorName || '.........................................'} )<br/>ผู้อำนวยการโรงเรียน</div>
+        </div>`);
+      results.forEach(r => {
+        pages.push(`${header(`ผลการเรียนรายวิชาเพิ่มเติม : ${r.def.name}`)}
+          <table style="margin-top:8px">
+            <thead><tr><th style="width:36px">ที่</th><th style="width:90px">เลขประจำตัว</th><th>ชื่อ - นามสกุล</th>
+              <th style="width:80px">คะแนน<br/>(100)</th><th style="width:80px">ระดับ<br/>ผลการเรียน</th></tr></thead>
+            <tbody>${students.map((s, i) => {
+              const res = r.results[s.id] || { score100: 0, grade: 0, hasData: false };
+              return `<tr><td class="num">${i + 1}</td><td class="num">${s.studentId || ''}</td><td>${fullName(s)}</td>
+                <td class="num">${res.hasData ? Math.round(res.score100) : ''}</td><td class="num">${res.hasData ? res.grade.toFixed(1) : ''}</td></tr>`;
+            }).join('')}</tbody>
+          </table>`);
+      });
+    }
+
+    if (selected.includes('chart') || selected.includes('analysis')) {
+      const results = computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester);
+      const stats = results.map(r => {
+        const vals = students.map(s => r.results[s.id]).filter(v => v?.hasData).map(v => v.score100);
+        const n = vals.length;
+        const mean = n ? vals.reduce((a, b) => a + b, 0) / n : 0;
+        const sd = n > 1 ? Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1)) : 0;
+        const cv = mean ? (sd / mean) * 100 : 0;
+        return { name: r.def.shortName, full: r.def.name, n, mean, sd, cv };
+      });
+
+      if (selected.includes('chart')) {
+        const w = 700, h = 330, base = h - 60, barW = w / (stats.length * 1.6);
+        const bars = stats.map((st, i) => {
+          const x = 40 + i * (barW * 1.6);
+          const bh = (st.mean / 100) * (base - 20);
+          return `<rect x="${x}" y="${base - bh}" width="${barW}" height="${bh}" fill="#3b5ba5"/>
+            <text x="${x + barW / 2}" y="${base - bh - 5}" font-size="12" text-anchor="middle">${st.mean.toFixed(1)}</text>
+            <text x="${x + barW / 2}" y="${base + 14}" font-size="11" text-anchor="middle" transform="rotate(35 ${x + barW / 2} ${base + 14})">${st.name}</text>`;
+        }).join('');
+        pages.push(`${header('กราฟสรุปผลสัมฤทธิ์ทางการเรียน')}
+          <div style="text-align:center;margin-top:8px">
+            <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+              <line x1="38" y1="20" x2="38" y2="${base}" stroke="#333"/>
+              <line x1="38" y1="${base}" x2="${w - 10}" y2="${base}" stroke="#333"/>
+              ${[0, 20, 40, 60, 80, 100].map(v => {
+                const y = base - (v / 100) * (base - 20);
+                return `<line x1="38" y1="${y}" x2="${w - 10}" y2="${y}" stroke="#ddd"/><text x="32" y="${y + 4}" font-size="11" text-anchor="end">${v}</text>`;
+              }).join('')}
+              ${bars}
+            </svg>
+          </div>
+          <div style="text-align:center;font-size:14pt">คะแนนเฉลี่ยร้อยละ จำแนกตามรายวิชา (จำนวนนักเรียน ${students.length} คน)</div>`);
+      }
+
+      if (selected.includes('analysis')) {
+        const suggest = (cv: number, mean: number) =>
+          !mean ? '' : cv <= 10 ? 'ผลการเรียนสม่ำเสมอ ควรรักษาระดับคุณภาพ'
+            : cv <= 20 ? 'ผลการเรียนค่อนข้างสม่ำเสมอ ควรพัฒนากลุ่มที่ยังอ่อน'
+            : 'ผลการเรียนกระจายมาก ควรจัดสอนซ่อมเสริมเป็นรายบุคคล';
+        pages.push(`${header('การวิเคราะห์ผลสัมฤทธิ์ทางการเรียน 8 กลุ่มสาระการเรียนรู้')}
+          <table style="margin-top:8px;font-size:14pt">
+            <thead><tr><th style="width:32px">ที่</th><th>รายวิชา</th><th style="width:52px">จำนวน<br/>(คน)</th>
+              <th style="width:62px">ค่าเฉลี่ย</th><th style="width:58px">S.D.</th><th style="width:66px">C.V.(%)</th><th>ข้อเสนอแนะ</th></tr></thead>
+            <tbody>${stats.map((st, i) => `<tr><td class="num">${i + 1}</td><td>${st.full}</td><td class="num">${st.n}</td>
+              <td class="num">${st.mean.toFixed(2)}</td><td class="num">${st.sd.toFixed(2)}</td><td class="num">${st.cv.toFixed(2)}</td>
+              <td>${suggest(st.cv, st.mean)}</td></tr>`).join('')}</tbody>
+          </table>`);
+      }
+    }
+
+
 
     if (selected.includes('traits')) {
       const d = readJSON(`pp5-desirable-traits-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`);
@@ -207,6 +355,58 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
       return attended / row.length >= 0.8;
     };
     const actSymbol = (v: boolean | null) => (v === null ? '' : v ? 'ผ.' : 'มผ.');
+    const actHours = (key: string, sid: string): number | null => {
+      const row: number[] | undefined = activityData?.scores?.[key]?.[sid];
+      if (!row || row.length === 0) return null;
+      return row.reduce((a: number, b: number) => a + (Number(b) || 0), 0);
+    };
+
+    if (selected.includes('activityCover')) {
+      pages.push(`
+        <div style="text-align:center;line-height:2;padding-top:18mm">
+          <div style="font-size:24pt;font-weight:bold">แบบเสนอขออนุมัติผลการประเมิน</div>
+          <div style="font-size:22pt;font-weight:bold">กิจกรรมพัฒนาผู้เรียน</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'}</div>
+        </div>
+        <table style="margin-top:10mm;width:80%;margin-left:auto;margin-right:auto">
+          <thead><tr><th>กิจกรรม</th><th style="width:90px">เวลาเรียน<br/>(ชั่วโมง)</th><th style="width:70px">ผ่าน</th><th style="width:70px">ไม่ผ่าน</th></tr></thead>
+          <tbody>${ACTIVITY_DEFS.map(a => {
+            const res = students.map(s => actResult(a.key, s.studentId || s.id, a.hours));
+            const pass = res.filter(r => r === true).length;
+            const fail = res.filter(r => r === false).length;
+            return `<tr><td>${a.name}</td><td class="num">${a.hours}</td><td class="num">${pass || ''}</td><td class="num">${fail || ''}</td></tr>`;
+          }).join('')}</tbody>
+        </table>
+        <div style="display:flex;justify-content:space-around;margin-top:16mm">
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.homeTeacher1 || '.........................................'} )<br/>ครูผู้รับผิดชอบกิจกรรม</div>
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.directorName || '.........................................'} )<br/>ผู้อำนวยการโรงเรียน</div>
+        </div>`);
+    }
+
+    if (selected.includes('activityForms')) {
+      ACTIVITY_DEFS.forEach(a => {
+        pages.push(`${header(`แบบประเมิน${a.name}`)}
+          <table style="margin-top:8px">
+            <thead><tr><th style="width:36px">ที่</th><th style="width:90px">เลขประจำตัว</th><th>ชื่อ - นามสกุล</th>
+              <th style="width:90px">เวลาเรียน<br/>(${a.hours} ชม.)</th><th style="width:70px">ร้อยละ</th><th style="width:80px">ผลการประเมิน</th></tr></thead>
+            <tbody>${students.map((s, i) => {
+              const sid = s.studentId || s.id;
+              const h = actHours(a.key, sid);
+              const pct = h === null ? '' : Math.round((h / a.hours) * 100).toString();
+              return `<tr><td class="num">${i + 1}</td><td class="num">${s.studentId || ''}</td><td>${fullName(s)}</td>
+                <td class="num">${h === null ? '' : h}</td><td class="num">${pct}</td><td class="num">${actSymbol(actResult(a.key, sid, a.hours))}</td></tr>`;
+            }).join('')}</tbody>
+          </table>
+          <div style="margin-top:6px;font-size:14pt">เกณฑ์การประเมิน : มีเวลาเข้าร่วมกิจกรรมไม่น้อยกว่าร้อยละ 80 และผ่านจุดประสงค์สำคัญของกิจกรรม</div>
+          <div style="display:flex;justify-content:space-around;margin-top:14mm">
+            <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${activityData?.teacherNames?.[a.key] || info?.homeTeacher1 || '.........................................'} )<br/>ครูผู้สอนกิจกรรม</div>
+            <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.directorName || '.........................................'} )<br/>ผู้อำนวยการโรงเรียน</div>
+          </div>`);
+      });
+    }
+
+
 
     if (selected.includes('activities')) {
       pages.push(`${header('สรุปผลการประเมินกิจกรรมพัฒนาผู้เรียน')}
