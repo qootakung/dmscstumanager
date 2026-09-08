@@ -181,6 +181,88 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
         </table>`);
     }
 
+    if (selected.includes('elective')) {
+      const results = computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester)
+        .filter(r => r.def.category === 'elective');
+      pages.push(`
+        <div style="text-align:center;line-height:2;padding-top:20mm">
+          <div style="font-size:24pt;font-weight:bold">แบบเสนอขออนุมัติผลการเรียน</div>
+          <div style="font-size:22pt;font-weight:bold">รายวิชาเพิ่มเติม</div>
+          <div style="font-size:18pt">${results.map(r => r.def.name).join(' / ') || '-'}</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'}</div>
+        </div>
+        <div style="display:flex;justify-content:space-around;margin-top:24mm">
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.homeTeacher1 || '.........................................'} )<br/>ครูผู้สอน</div>
+          <div style="text-align:center;line-height:1.6">ลงชื่อ .....................................................<br/>( ${info?.directorName || '.........................................'} )<br/>ผู้อำนวยการโรงเรียน</div>
+        </div>`);
+      results.forEach(r => {
+        pages.push(`${header(`ผลการเรียนรายวิชาเพิ่มเติม : ${r.def.name}`)}
+          <table style="margin-top:8px">
+            <thead><tr><th style="width:36px">ที่</th><th style="width:90px">เลขประจำตัว</th><th>ชื่อ - นามสกุล</th>
+              <th style="width:80px">คะแนน<br/>(100)</th><th style="width:80px">ระดับ<br/>ผลการเรียน</th></tr></thead>
+            <tbody>${students.map((s, i) => {
+              const res = r.results[s.id] || { score100: 0, grade: 0, hasData: false };
+              return `<tr><td class="num">${i + 1}</td><td class="num">${s.studentId || ''}</td><td>${fullName(s)}</td>
+                <td class="num">${res.hasData ? Math.round(res.score100) : ''}</td><td class="num">${res.hasData ? res.grade.toFixed(1) : ''}</td></tr>`;
+            }).join('')}</tbody>
+          </table>`);
+      });
+    }
+
+    if (selected.includes('chart') || selected.includes('analysis')) {
+      const results = computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester);
+      const stats = results.map(r => {
+        const vals = students.map(s => r.results[s.id]).filter(v => v?.hasData).map(v => v.score100);
+        const n = vals.length;
+        const mean = n ? vals.reduce((a, b) => a + b, 0) / n : 0;
+        const sd = n > 1 ? Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1)) : 0;
+        const cv = mean ? (sd / mean) * 100 : 0;
+        return { name: r.def.shortName, full: r.def.name, n, mean, sd, cv };
+      });
+
+      if (selected.includes('chart')) {
+        const w = 700, h = 330, base = h - 60, barW = w / (stats.length * 1.6);
+        const bars = stats.map((st, i) => {
+          const x = 40 + i * (barW * 1.6);
+          const bh = (st.mean / 100) * (base - 20);
+          return `<rect x="${x}" y="${base - bh}" width="${barW}" height="${bh}" fill="#3b5ba5"/>
+            <text x="${x + barW / 2}" y="${base - bh - 5}" font-size="12" text-anchor="middle">${st.mean.toFixed(1)}</text>
+            <text x="${x + barW / 2}" y="${base + 14}" font-size="11" text-anchor="middle" transform="rotate(35 ${x + barW / 2} ${base + 14})">${st.name}</text>`;
+        }).join('');
+        pages.push(`${header('กราฟสรุปผลสัมฤทธิ์ทางการเรียน')}
+          <div style="text-align:center;margin-top:8px">
+            <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+              <line x1="38" y1="20" x2="38" y2="${base}" stroke="#333"/>
+              <line x1="38" y1="${base}" x2="${w - 10}" y2="${base}" stroke="#333"/>
+              ${[0, 20, 40, 60, 80, 100].map(v => {
+                const y = base - (v / 100) * (base - 20);
+                return `<line x1="38" y1="${y}" x2="${w - 10}" y2="${y}" stroke="#ddd"/><text x="32" y="${y + 4}" font-size="11" text-anchor="end">${v}</text>`;
+              }).join('')}
+              ${bars}
+            </svg>
+          </div>
+          <div style="text-align:center;font-size:14pt">คะแนนเฉลี่ยร้อยละ จำแนกตามรายวิชา (จำนวนนักเรียน ${students.length} คน)</div>`);
+      }
+
+      if (selected.includes('analysis')) {
+        const suggest = (cv: number, mean: number) =>
+          !mean ? '' : cv <= 10 ? 'ผลการเรียนสม่ำเสมอ ควรรักษาระดับคุณภาพ'
+            : cv <= 20 ? 'ผลการเรียนค่อนข้างสม่ำเสมอ ควรพัฒนากลุ่มที่ยังอ่อน'
+            : 'ผลการเรียนกระจายมาก ควรจัดสอนซ่อมเสริมเป็นรายบุคคล';
+        pages.push(`${header('การวิเคราะห์ผลสัมฤทธิ์ทางการเรียน 8 กลุ่มสาระการเรียนรู้')}
+          <table style="margin-top:8px;font-size:14pt">
+            <thead><tr><th style="width:32px">ที่</th><th>รายวิชา</th><th style="width:52px">จำนวน<br/>(คน)</th>
+              <th style="width:62px">ค่าเฉลี่ย</th><th style="width:58px">S.D.</th><th style="width:66px">C.V.(%)</th><th>ข้อเสนอแนะ</th></tr></thead>
+            <tbody>${stats.map((st, i) => `<tr><td class="num">${i + 1}</td><td>${st.full}</td><td class="num">${st.n}</td>
+              <td class="num">${st.mean.toFixed(2)}</td><td class="num">${st.sd.toFixed(2)}</td><td class="num">${st.cv.toFixed(2)}</td>
+              <td>${suggest(st.cv, st.mean)}</td></tr>`).join('')}</tbody>
+          </table>`);
+      }
+    }
+
+
+
     if (selected.includes('traits')) {
       const d = readJSON(`pp5-desirable-traits-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`);
       pages.push(`${header('สรุปผลการประเมินคุณลักษณะอันพึงประสงค์')}
