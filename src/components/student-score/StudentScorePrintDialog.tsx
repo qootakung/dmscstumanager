@@ -243,59 +243,84 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     const printContent = document.querySelector('.print-content');
     if (!printContent) return;
 
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open('', '_blank', 'width=900,height=1200');
     if (!printWindow) return;
 
     printWindow.document.write(`
       <!DOCTYPE html>
-      <html>
+      <html lang="th">
         <head>
-          <title>บันทึกคะแนนนักเรียน</title>
+          <meta charset="utf-8" />
+          <title>รายงานผลคะแนนผู้เรียนรายบุคคล</title>
           <style>
             @page {
               size: A4 portrait;
-              margin: 1cm;
+              margin: 10mm 12mm;
+            }
+            * {
+              box-sizing: border-box;
+            }
+            html, body {
+              margin: 0;
+              padding: 0;
+              width: 210mm;
+              background: #ffffff;
             }
             body {
               font-family: 'TH SarabunPSK', 'TH Sarabun', 'Sarabun', Arial, sans-serif;
-              font-size: 21px;
-              margin: 0;
-              padding: 0;
-              background: white;
+              font-size: 16pt;
+              line-height: 1.3;
+              color: #000;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .print-content {
+              width: 186mm;
+              max-width: 186mm;
+              margin: 0 auto;
+              overflow: hidden;
             }
             table {
               width: 100%;
               border-collapse: collapse;
+              table-layout: auto;
             }
+            thead { display: table-header-group; }
+            tr { page-break-inside: avoid; }
             th, td {
-              border: 1px solid black;
-              padding: 6px;
-              text-align: left;
+              border: 1px solid #000;
+              padding: 2px 4px;
+              line-height: 1.25;
+              vertical-align: middle;
             }
             th {
               background-color: #f0f0f0;
               font-weight: bold;
               text-align: center;
             }
+            img {
+              max-width: 22mm;
+              height: auto;
+            }
+            /* utility classes used by the preview markup */
             .text-center { text-align: center; }
             .text-right { text-align: right; }
+            .mb-1 { margin-bottom: 4px; }
             .mb-2 { margin-bottom: 8px; }
             .mb-4 { margin-bottom: 16px; }
-            .mb-6 { margin-bottom: 24px; }
-            .mt-6 { margin-top: 24px; }
-            .mt-8 { margin-top: 32px; }
-            .mt-12 { margin-top: 48px; }
-            .grid { display: grid; }
-            .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-            .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-            .gap-4 { gap: 16px; }
-            .inline-block { display: inline-block; }
+            .mb-6 { margin-bottom: 16px; }
+            .mt-6 { margin-top: 20px; }
+            .mt-8 { margin-top: 20px; }
+            .mt-12 { margin-top: 32px; }
             .flex { display: flex; }
+            .inline-block { display: inline-block; }
             .justify-between { justify-content: space-between; }
-            .items-start { align-items: flex-start; }
             .justify-center { justify-content: center; }
+            .items-start { align-items: flex-start; }
+            .flex-1 { flex: 1 1 0%; }
+            .w-full { width: 100%; }
             @media print {
-              body { -webkit-print-color-adjust: exact; }
+              body { margin: 0; }
             }
           </style>
         </head>
@@ -307,8 +332,11 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
 
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    // ปิดหน้าต่างหลังพิมพ์เสร็จเท่านั้น กันการพิมพ์หลุด/ขาดหน้าบนไดรเวอร์บางรุ่น
+    printWindow.onafterprint = () => printWindow.close();
+    setTimeout(() => {
+      printWindow.print();
+    }, 300);
   };
 
   return (
