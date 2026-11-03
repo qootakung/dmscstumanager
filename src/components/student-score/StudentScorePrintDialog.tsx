@@ -239,10 +239,11 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
     setCurrentStudentIndex(0);
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const printContent = document.querySelector('.print-content');
     if (!printContent) return;
 
+    // ต้องเปิดหน้าต่างทันทีในจังหวะที่ผู้ใช้คลิก ไม่เช่นนั้นเบราว์เซอร์จะบล็อกป๊อปอัป
     const printWindow = window.open('', '_blank', 'width=900,height=1200');
     if (!printWindow) return;
 
@@ -252,10 +253,16 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
         <head>
           <meta charset="utf-8" />
           <title>รายงานผลคะแนนผู้เรียนรายบุคคล</title>
+          <!-- ฟอนต์สำรอง: เครื่องที่ไม่มี TH Sarabun จะได้ตัวอักษรไทยหน้าตาใกล้เคียงกัน -->
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet" />
           <style>
+            /*
+              margin: 0 เพื่อตัดหัว/ท้ายกระดาษของเบราว์เซอร์ (วันที่, URL, เลขหน้า)
+              ขอบกระดาษจริงควบคุมด้วย padding ของ .sheet แทน จึงเหมือนกันทุกเครื่อง
+            */
             @page {
               size: A4 portrait;
-              margin: 10mm 12mm;
+              margin: 0;
             }
             * {
               box-sizing: border-box;
@@ -263,30 +270,43 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             html, body {
               margin: 0;
               padding: 0;
-              width: 210mm;
               background: #ffffff;
             }
             body {
-              font-family: 'TH SarabunPSK', 'TH Sarabun', 'Sarabun', Arial, sans-serif;
+              font-family: 'TH SarabunPSK', 'TH Sarabun New', 'TH Sarabun', 'Sarabun', Arial, sans-serif;
               font-size: 16pt;
               line-height: 1.3;
               color: #000;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
+            /* แผ่น A4 ความสูงคงที่ ต่ำกว่า 297mm เล็กน้อย กันการปัดเศษจนล้นไปหน้าที่ 2 */
+            .sheet {
+              width: 210mm;
+              height: 296mm;
+              padding: 10mm 12mm;
+              margin: 0 auto;
+              overflow: hidden;
+              page-break-after: avoid;
+              break-after: avoid;
+            }
+            /* พื้นที่เนื้อหา 186mm x 276mm ถ้าล้นจะถูกย่ออัตโนมัติด้วยสคริปต์ */
+            .fit {
+              width: 186mm;
+              transform-origin: top center;
+            }
             .print-content {
               width: 186mm;
               max-width: 186mm;
               margin: 0 auto;
-              overflow: hidden;
             }
             table {
               width: 100%;
               border-collapse: collapse;
-              table-layout: auto;
+              table-layout: fixed;
             }
             thead { display: table-header-group; }
-            tr { page-break-inside: avoid; }
+            tr { page-break-inside: avoid; break-inside: avoid; }
             th, td {
               border: 1px solid #000;
               padding: 2px 4px;
@@ -299,8 +319,8 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
               text-align: center;
             }
             img {
-              max-width: 22mm;
-              height: auto;
+              max-width: 26mm;
+              max-height: 26mm;
             }
             /* utility classes used by the preview markup */
             .text-center { text-align: center; }
@@ -319,24 +339,110 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
             .items-start { align-items: flex-start; }
             .flex-1 { flex: 1 1 0%; }
             .w-full { width: 100%; }
+            @media screen {
+              body { background: #e5e7eb; }
+              .sheet { background: #ffffff; margin: 8px auto; box-shadow: 0 0 6px rgba(0, 0, 0, 0.25); }
+            }
             @media print {
               body { margin: 0; }
             }
           </style>
         </head>
         <body>
-          ${printContent.innerHTML}
+          <div class="sheet" id="sheet">
+            <div class="fit" id="fit">
+              ${printContent.outerHTML}
+            </div>
+          </div>
         </body>
       </html>
     `);
-
     printWindow.document.close();
     printWindow.focus();
+
+    // รอให้ฟอนต์และรูปโลโก้โหลดเสร็จก่อน ไม่งั้นการจัดหน้าจะเพี้ยนและวัดความสูงผิด
+    const waitForPrintAssets = async (win: Window) => {
+      const doc = win.document;
+      const pending: Promise<unknown>[] = [];
+
+      doc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+        if (!(link as HTMLLinkElement).sheet) {
+          pending.push(
+            new Promise((resolve) => {
+              link.addEventListener('load', resolve, { once: true });
+              link.addEventListener('error', resolve, { once: true });
+            })
+          );
+        }
+      });
+
+      doc.querySelectorAll('img').forEach((img) => {
+        if (!img.complete) {
+          pending.push(
+            new Promise((resolve) => {
+              img.addEventListener('load', resolve, { once: true });
+              img.addEventListener('error', resolve, { once: true });
+            })
+          );
+        }
+      });
+
+      const timeout = new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // 1) รอ stylesheet/รูป  2) สั่งโหลดฟอนต์ที่ใช้จริง  3) รอให้เบราว์เซอร์จัดวางใหม่
+      await Promise.race([Promise.all(pending), timeout]);
+      if (doc.fonts) {
+        await Promise.race([
+          Promise.all([
+            doc.fonts.load('16pt "Sarabun"', 'ก'),
+            doc.fonts.load('bold 16pt "Sarabun"', 'ก'),
+          ]).then(() => doc.fonts.ready),
+          timeout,
+        ]);
+      }
+      await new Promise((resolve) => win.requestAnimationFrame(() => resolve(null)));
+    };
+
+    // ถ้าเนื้อหาสูง/กว้างเกินพื้นที่ A4 ให้ย่ออัตโนมัติให้พอดี 1 หน้า (ไม่ขยายเมื่อพื้นที่เหลือ)
+    const fitToA4 = (win: Window) => {
+      const doc = win.document;
+      const sheet = doc.getElementById('sheet');
+      const fit = doc.getElementById('fit');
+      if (!sheet || !fit) return;
+
+      const style = win.getComputedStyle(sheet);
+      const availH =
+        sheet.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      const availW =
+        sheet.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+
+      const needH = fit.offsetHeight;
+      const needW = fit.scrollWidth;
+      if (!needH || !needW) return;
+
+      const ratioH = availH / needH;
+      const ratioW = availW / needW;
+      // เผื่อ 1% กันเศษทศนิยมของเครื่องพิมพ์แต่ละรุ่น
+      const scaleH = ratioH >= 1 ? 1 : ratioH * 0.99;
+      const scaleW = ratioW >= 1 ? 1 : ratioW * 0.99;
+      const scale = Math.min(scaleH, scaleW);
+
+      if (scale < 1) {
+        fit.style.transform = `scale(${scale})`;
+        fit.style.transformOrigin = 'top center';
+      }
+    };
+
+    try {
+      await waitForPrintAssets(printWindow);
+      fitToA4(printWindow);
+    } catch (error) {
+      console.error('Error preparing print layout:', error);
+    }
+
     // ปิดหน้าต่างหลังพิมพ์เสร็จเท่านั้น กันการพิมพ์หลุด/ขาดหน้าบนไดรเวอร์บางรุ่น
     printWindow.onafterprint = () => printWindow.close();
-    setTimeout(() => {
-      printWindow.print();
-    }, 300);
+    printWindow.print();
   };
 
   return (
@@ -498,7 +604,7 @@ export const StudentScorePrintDialog: React.FC<StudentScorePrintDialogProps> = (
           )}
         </div>
 
-        <div className="border rounded-lg p-4 bg-gray-50" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', transform: 'scale(0.8)', transformOrigin: 'top center' }}>
+        <div className="border rounded-lg bg-gray-50" style={{ boxSizing: 'border-box', width: '210mm', minHeight: '297mm', padding: '10mm 12mm', margin: '0 auto', transform: 'scale(0.8)', transformOrigin: 'top center' }}>
           <StudentScorePrintPreview
             scores={filteredScores}
             students={filteredStudents}
