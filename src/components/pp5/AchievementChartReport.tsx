@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { ArrowLeft, Printer } from 'lucide-react';
 import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
+import { standardScore, finalizeScore, findRatioGroup, migrateRatioGroups } from '@/utils/pp5GradeCalc';
 
 interface AchievementChartReportProps {
   selectedGrade: string;
@@ -39,16 +39,6 @@ const getScoreStorageKey = (menuId: string, grade: string, year: string, semeste
 const getRatioStorageKey = (grade: string, year: string, semester: string) =>
   `pp5-score-ratio-${grade}-${year}-${semester}`;
 
-const calculateGradeLevel = (totalScore: number): number => {
-  if (totalScore >= 80) return 4;
-  if (totalScore >= 75) return 3.5;
-  if (totalScore >= 70) return 3;
-  if (totalScore >= 65) return 2.5;
-  if (totalScore >= 60) return 2;
-  if (totalScore >= 55) return 1.5;
-  if (totalScore >= 50) return 1;
-  return 0;
-};
 
 // Beautiful gradient colors for bar charts
 const BAR_COLORS = [
@@ -93,7 +83,7 @@ const AchievementChartReport: React.FC<AchievementChartReportProps> = ({
     const savedRatios = localStorage.getItem(ratioKey);
     let ratioData: any[] = [];
     if (savedRatios) {
-      try { ratioData = JSON.parse(savedRatios); } catch {}
+      try { ratioData = migrateRatioGroups(JSON.parse(savedRatios)); } catch {}
     }
 
     // Calculate per subject per student scores
@@ -110,7 +100,7 @@ const AchievementChartReport: React.FC<AchievementChartReportProps> = ({
       let standardWeights: Record<string, number> = {};
 
       if (subject.groupId) {
-        const matchingGroup = ratioData.find((r: any) => r.groupId === subject.groupId);
+        const matchingGroup = findRatioGroup(ratioData, subject.menuId, subject.groupId);
         if (matchingGroup) {
           endYearWeight = matchingGroup.endYearScore || 0;
           matchingGroup.strands?.forEach((strand: any) => {
@@ -158,13 +148,11 @@ const AchievementChartReport: React.FC<AchievementChartReportProps> = ({
           const totalScore = ig.indicators.reduce((sum, ind) => {
             return sum + (scores.indicators?.[ind.id] ?? 0);
           }, 0);
-          midYearTotal += (totalScore / totalMax) * ig.weight;
+          midYearTotal += standardScore(totalScore, ig.indicators.length, scoreData.maxScorePerIndicator, ig.weight);
         });
 
-        const endYear = scores.endYearScore ?? 0;
-        const total = midYearTotal + endYear;
-        const score100 = grandTotalWeight > 0 ? (total / grandTotalWeight) * 100 : 0;
-        studentScores[student.id] = parseFloat(score100.toFixed(2));
+        const fin = finalizeScore(midYearTotal, scores.endYearScore ?? 0, grandTotalWeight);
+        studentScores[student.id] = parseFloat(fin.percent.toFixed(2));
       });
 
       // Average for this subject
