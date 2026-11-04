@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,7 @@ import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
 import { toast } from 'sonner';
 import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
+import { standardScore, finalizeScore, findRatioGroup, roundHalfUp } from '@/utils/pp5GradeCalc';
 
 // ============ Types ============
 interface IndicatorScoreEntryProps {
@@ -58,16 +58,6 @@ const getStorageKey = (menuId: string, grade: string, year: string, semester: st
 const getRatioStorageKey = (grade: string, year: string, semester: string) =>
   `pp5-score-ratio-${grade}-${year}-${semester}`;
 
-const calculateGradeLevel = (totalScore: number): number => {
-  if (totalScore >= 80) return 4;
-  if (totalScore >= 75) return 3.5;
-  if (totalScore >= 70) return 3;
-  if (totalScore >= 65) return 2.5;
-  if (totalScore >= 60) return 2;
-  if (totalScore >= 55) return 1.5;
-  if (totalScore >= 50) return 1;
-  return 0;
-};
 
 // ============ Component ============
 const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
@@ -127,7 +117,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
     if (savedRatios) {
       try {
         const ratios = JSON.parse(savedRatios);
-        const matchingGroup = ratios.find((r: any) => r.groupId === config?.groupId);
+        const matchingGroup = findRatioGroup(ratios, subjectMenuId, config?.groupId);
         if (matchingGroup) {
           endYearWeight = matchingGroup.endYearScore || 0;
           matchingGroup.strands.forEach((strand: any) => {
@@ -236,7 +226,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
     const totalMax = group.indicators.length * maxPerIndicator;
     if (totalMax === 0) return 0;
     const totalScore = group.indicators.reduce((sum, ind) => sum + getScore(studentId, ind.id), 0);
-    return parseFloat(((totalScore / totalMax) * group.standardWeight).toFixed(1));
+    return standardScore(totalScore, group.indicators.length, maxPerIndicator, group.standardWeight);
   };
 
   const calcMidYearTotal = (studentId: string): number => {
@@ -367,10 +357,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
           </thead>
           <tbody>
             ${students.map((student, idx) => {
-              const midYear = parseFloat(calcMidYearTotal(student.id).toFixed(1));
-              const endYear = getEndYearScore(student.id);
-              const total = parseFloat((midYear + endYear).toFixed(1));
-              const grade = grandTotal > 0 ? calculateGradeLevel((total / grandTotal) * 100) : 0;
+              const { mid: midYear, end: endYear, total, grade } = finalizeScore(calcMidYearTotal(student.id), getEndYearScore(student.id), grandTotal);
               return `
                 <tr class="${idx % 2 === 0 ? 'even' : ''}">
                   <td class="text-center">${idx + 1}</td>
@@ -409,10 +396,10 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
           </thead>
           <tbody>
             ${students.map((student, idx) => {
-              const midYear = parseFloat(calcMidYearTotal(student.id).toFixed(2));
-              const endYear = getEndYearScore(student.id);
-              const total = parseFloat((midYear + endYear).toFixed(2));
-              const semesterScore = parseFloat((total / 2).toFixed(2));
+              const midYear = roundHalfUp(calcMidYearTotal(student.id), 0);
+              const endYear = roundHalfUp(getEndYearScore(student.id), 0);
+              const total = midYear + endYear;
+              const semesterScore = roundHalfUp(total / 2, 2);
               return `
                 <tr class="${idx % 2 === 0 ? 'even' : ''}">
                   <td class="text-center">${idx + 1}</td>
@@ -579,10 +566,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                   </thead>
                   <tbody>
                     {students.map((student, idx) => {
-                      const midYear = parseFloat(calcMidYearTotal(student.id).toFixed(1));
-                      const endYear = getEndYearScore(student.id);
-                      const total = parseFloat((midYear + endYear).toFixed(1));
-                      const grade = grandTotalWeight > 0 ? calculateGradeLevel((total / grandTotalWeight) * 100) : 0;
+                      const { mid: midYear, end: endYear, total, grade } = finalizeScore(calcMidYearTotal(student.id), getEndYearScore(student.id), grandTotalWeight);
 
                       return (
                         <tr key={student.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
