@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { ArrowLeft, Printer } from 'lucide-react';
 import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
+import { standardScore, finalizeScore, findRatioGroup, migrateRatioGroups } from '@/utils/pp5GradeCalc';
 
 interface AchievementAnalysisReportProps {
   selectedGrade: string;
@@ -95,7 +95,7 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
     const ratioKey = getRatioStorageKey(gradeKey, selectedAcademicYear, selectedSemester);
     const savedRatios = localStorage.getItem(ratioKey);
     let ratioData: any[] = [];
-    if (savedRatios) { try { ratioData = JSON.parse(savedRatios); } catch {} }
+    if (savedRatios) { try { ratioData = migrateRatioGroups(JSON.parse(savedRatios)); } catch {} }
 
     return SUBJECT_CONFIG.map(subject => {
       if (!subject.groupId) return null;
@@ -108,7 +108,7 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
       const group = allSubjectGroups.find(g => g.id === subject.groupId);
       if (!group) return null;
 
-      const matchingRatio = ratioData.find((r: any) => r.groupId === subject.groupId);
+      const matchingRatio = findRatioGroup(ratioData, subject.menuId, subject.groupId);
       let endYearWeight = matchingRatio?.endYearScore || 0;
       const standardWeights: Record<string, number> = {};
       let midYearWeight = 0;
@@ -166,16 +166,14 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
             const pct = (totalScore / totalMax) * 100;
             strandWeightedScore += pct * std.weight;
             strandTotalWeight += std.weight;
-            totalMid += (totalScore / totalMax) * std.weight;
+            totalMid += standardScore(totalScore, std.indicators.length, scoreData.maxScorePerIndicator, std.weight);
           });
           const strandPct = strandTotalWeight > 0 ? strandWeightedScore / strandTotalWeight : 0;
           strandScoresPerStudent[si.strandName].push(strandPct);
         });
 
-        const endYear = scores.endYearScore ?? 0;
-        const total = totalMid + endYear;
-        const score100 = grandTotalWeight > 0 ? (total / grandTotalWeight) * 100 : 0;
-        studentScores100.push(parseFloat(score100.toFixed(2)));
+        const fin = finalizeScore(totalMid, scores.endYearScore ?? 0, grandTotalWeight);
+        studentScores100.push(parseFloat(fin.percent.toFixed(2)));
       });
 
       const avgPercent = studentScores100.length > 0 ? studentScores100.reduce((a, b) => a + b, 0) / studentScores100.length : 0;
