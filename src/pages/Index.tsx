@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -234,13 +233,26 @@ const Index = () => {
                   
                   <DropdownMenuSeparator />
                   
-                  {/* บัญชีการเงิน */}
-                  <DropdownMenuItem 
-                    className="cursor-pointer"
-                    onClick={() => window.open('https://baandonmoon-voucher-log.vercel.app//', '_blank')}
-                  >
-                    บัญชีการเงิน
-                  </DropdownMenuItem>
+                  {/* บัญชีการเงิน Submenu */}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="cursor-pointer">
+                      บัญชีการเงิน
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="bg-white border border-gray-200 shadow-lg">
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => window.open('https://budgetdm.vercel.app/', '_blank', 'noopener,noreferrer')}
+                      >
+                        ระบบแผนงานโครงการ
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => window.open('https://bdmv.vercel.app/', '_blank', 'noopener,noreferrer')}
+                      >
+                        ระบบบัญชีการเงิน
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
                 </DropdownMenuContent>
               </DropdownMenu>
 
