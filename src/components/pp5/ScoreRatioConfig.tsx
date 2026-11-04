@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Printer, Settings } from 'lucide-react';
 import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { toast } from 'sonner';
+import { splitSocialRatioGroup, migrateRatioGroups } from '@/utils/pp5GradeCalc';
 
 interface ScoreRatioConfigProps {
   selectedGrade: string;
@@ -257,7 +257,9 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
         midYearTotal,
         endYearScore: defaultWeight?.endYear ?? 0,
       };
-    }).filter(g => g.strands.length > 0);
+    }).filter(g => g.strands.length > 0)
+      // ประวัติศาสตร์เป็นรายวิชาแยก: แยกจากสังคมฯ แล้วให้แต่ละวิชารวม 70 + 30 = 100
+      .flatMap(g => (g.groupId === 'social' ? (splitSocialRatioGroup(g) as SubjectGroupRatio[]) : [g]));
   };
 
   // Extra elective subject ratio entries (no curriculum standards — single editable row)
@@ -290,7 +292,7 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
-        const parsed: SubjectGroupRatio[] = JSON.parse(saved);
+        const parsed: SubjectGroupRatio[] = migrateRatioGroups(JSON.parse(saved));
         // Ensure elective groups exist (for backwards compatibility with old saves)
         const existingIds = new Set(parsed.map(g => g.groupId));
         const missingElectives = buildElectiveRatios().filter(g => !existingIds.has(g.groupId));
