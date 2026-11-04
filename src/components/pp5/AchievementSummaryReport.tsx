@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
 import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
+import { standardScore, finalizeScore, findRatioGroup, migrateRatioGroups } from '@/utils/pp5GradeCalc';
 
 interface AchievementSummaryReportProps {
   selectedGrade: string;
@@ -36,16 +36,6 @@ const getScoreStorageKey = (menuId: string, grade: string, year: string, semeste
 const getRatioStorageKey = (grade: string, year: string, semester: string) =>
   `pp5-score-ratio-${grade}-${year}-${semester}`;
 
-const calculateGradeLevel = (totalScore: number): number => {
-  if (totalScore >= 80) return 4;
-  if (totalScore >= 75) return 3.5;
-  if (totalScore >= 70) return 3;
-  if (totalScore >= 65) return 2.5;
-  if (totalScore >= 60) return 2;
-  if (totalScore >= 55) return 1.5;
-  if (totalScore >= 50) return 1;
-  return 0;
-};
 
 interface SubjectResult {
   menuId: string;
@@ -91,7 +81,7 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
     const savedRatios = localStorage.getItem(ratioKey);
     let ratioData: any[] = [];
     if (savedRatios) {
-      try { ratioData = JSON.parse(savedRatios); } catch {}
+      try { ratioData = migrateRatioGroups(JSON.parse(savedRatios)); } catch {}
     }
 
     const results: SubjectResult[] = ALL_SUBJECTS.map(subject => {
@@ -108,7 +98,7 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
       let standardWeights: Record<string, number> = {};
 
       if (subject.groupId) {
-        const matchingGroup = ratioData.find((r: any) => r.groupId === subject.groupId);
+        const matchingGroup = findRatioGroup(ratioData, subject.menuId, subject.groupId);
         if (matchingGroup) {
           endYearWeight = matchingGroup.endYearScore || 0;
           matchingGroup.strands?.forEach((strand: any) => {
@@ -159,15 +149,12 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
           const totalScore = ig.indicators.reduce((sum, ind) => {
             return sum + (studentScores.indicators?.[ind.id] ?? 0);
           }, 0);
-          midYearTotal += (totalScore / totalMax) * ig.weight;
+          midYearTotal += standardScore(totalScore, ig.indicators.length, scoreData.maxScorePerIndicator, ig.weight);
         });
 
-        const endYear = studentScores.endYearScore ?? 0;
-        const total = midYearTotal + endYear;
-        const score100 = grandTotalWeight > 0 ? (total / grandTotalWeight) * 100 : 0;
-        const grade = calculateGradeLevel(score100);
+        const fin = finalizeScore(midYearTotal, studentScores.endYearScore ?? 0, grandTotalWeight);
 
-        studentResults[student.id] = { grade, score100: parseFloat(score100.toFixed(2)) };
+        studentResults[student.id] = { grade: fin.grade, score100: parseFloat(fin.percent.toFixed(2)) };
       });
 
       return {
