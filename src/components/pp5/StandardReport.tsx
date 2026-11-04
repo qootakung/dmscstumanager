@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { getStudents } from '@/utils/studentStorage';
 import { Student } from '@/types/student';
 import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
+import { standardScore, finalizeScore, findRatioGroup, roundHalfUp } from '@/utils/pp5GradeCalc';
 
 interface StandardReportProps {
   subjectMenuId: string;
@@ -52,16 +52,6 @@ const getScoreStorageKey = (menuId: string, grade: string, year: string, semeste
 const getRatioStorageKey = (grade: string, year: string, semester: string) =>
   `pp5-score-ratio-${grade}-${year}-${semester}`;
 
-const calculateGradeLevel = (totalScore: number): number => {
-  if (totalScore >= 80) return 4;
-  if (totalScore >= 75) return 3.5;
-  if (totalScore >= 70) return 3;
-  if (totalScore >= 65) return 2.5;
-  if (totalScore >= 60) return 2;
-  if (totalScore >= 55) return 1.5;
-  if (totalScore >= 50) return 1;
-  return 0;
-};
 
 const getGradeLabel = (grade: number): string => {
   if (grade >= 3.5) return 'ดีเยี่ยม';
@@ -122,7 +112,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
     if (savedRatios) {
       try {
         const ratios = JSON.parse(savedRatios);
-        const matchingGroup = ratios.find((r: any) => r.groupId === config?.groupId);
+        const matchingGroup = findRatioGroup(ratios, subjectMenuId, config?.groupId);
         if (matchingGroup) {
           endYearWeight = matchingGroup.endYearScore || 0;
           matchingGroup.strands.forEach((strand: any) => {
@@ -192,7 +182,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
     const totalMax = group.indicators.length * scoreData.maxScorePerIndicator;
     if (totalMax === 0) return 0;
     const totalScore = group.indicators.reduce((sum, ind) => sum + getScore(studentId, ind.id), 0);
-    return parseFloat(((totalScore / totalMax) * group.standardWeight).toFixed(1));
+    return standardScore(totalScore, group.indicators.length, scoreData.maxScorePerIndicator, group.standardWeight);
   };
 
   const calcStrandTotal = (studentId: string, standards: StandardColumnGroup[]): number =>
@@ -245,7 +235,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
           </thead>
           <tbody>
             ${students.map((student, idx) => {
-              const midYear = parseFloat(calcMidYearTotal(student.id).toFixed(1));
+              const midYear = roundHalfUp(calcMidYearTotal(student.id), 0);
               const endYear = getEndYearScore(student.id);
               return `
                 <tr class="${idx % 2 === 0 ? 'even' : ''}">
@@ -288,10 +278,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
           </thead>
           <tbody>
             ${students.map((student, idx) => {
-              const midYear = parseFloat(calcMidYearTotal(student.id).toFixed(1));
-              const endYear = getEndYearScore(student.id);
-              const total = parseFloat((midYear + endYear).toFixed(1));
-              const gradeLevel = grandTotalWeight > 0 ? calculateGradeLevel((total / grandTotalWeight) * 100) : 0;
+              const { mid: midYear, end: endYear, total, grade: gradeLevel } = finalizeScore(calcMidYearTotal(student.id), getEndYearScore(student.id), grandTotalWeight);
               const label = getGradeLabel(gradeLevel);
               return `
                 <tr class="${idx % 2 === 0 ? 'even' : ''}">
@@ -415,7 +402,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
                   </thead>
                   <tbody>
                     {students.map((student, idx) => {
-                      const midYear = parseFloat(calcMidYearTotal(student.id).toFixed(1));
+                      const midYear = roundHalfUp(calcMidYearTotal(student.id), 0);
                       const endYear = getEndYearScore(student.id);
                       return (
                         <tr key={student.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -466,10 +453,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
                   </thead>
                   <tbody>
                     {students.map((student, idx) => {
-                      const midYear = parseFloat(calcMidYearTotal(student.id).toFixed(1));
-                      const endYear = getEndYearScore(student.id);
-                      const total = parseFloat((midYear + endYear).toFixed(1));
-                      const gradeLevel = grandTotalWeight > 0 ? calculateGradeLevel((total / grandTotalWeight) * 100) : 0;
+                      const { mid: midYear, end: endYear, total, grade: gradeLevel } = finalizeScore(calcMidYearTotal(student.id), getEndYearScore(student.id), grandTotalWeight);
                       const label = getGradeLabel(gradeLevel);
                       return (
                         <tr key={student.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
