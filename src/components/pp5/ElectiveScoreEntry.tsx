@@ -8,6 +8,7 @@ import { Student } from '@/types/student';
 import { toast } from 'sonner';
 import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
 import { SubjectInfo } from './types';
+import { finalizeScore } from '@/utils/pp5GradeCalc';
 
 interface ElectiveScoreEntryProps {
   subjectInfo: SubjectInfo;
@@ -41,16 +42,6 @@ const RATIO_GROUP_ID_MAP: Record<string, string> = {
 const getRatioStorageKey = (grade: string, year: string, semester: string) =>
   `pp5-score-ratio-${grade}-${year}-${semester}`;
 
-const calculateGradeLevel = (totalScore: number): number => {
-  if (totalScore >= 80) return 4;
-  if (totalScore >= 75) return 3.5;
-  if (totalScore >= 70) return 3;
-  if (totalScore >= 65) return 2.5;
-  if (totalScore >= 60) return 2;
-  if (totalScore >= 55) return 1.5;
-  if (totalScore >= 50) return 1;
-  return 0;
-};
 
 const getGradeLabel = (grade: number): string => {
   if (grade >= 4) return 'ดีเยี่ยม';
@@ -218,8 +209,8 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
     const midYearTotal = getMidYearTotal(studentId);
     const endYear = getEndYearScore(studentId);
     const totalMax = getMidYearMax() + scoreData.endYearMaxScore;
-    // Convert to percentage (100-based)
-    return totalMax > 0 ? (midYearTotal + endYear) / totalMax * 100 : 0;
+    // Convert to percentage (100-based) — ใช้ตัวคำนวณกลางเดียวกับทุกหน้า
+    return finalizeScore(midYearTotal, endYear, totalMax).percent;
   };
 
   const handleSave = () => {
@@ -305,7 +296,7 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
             <tbody>
               ${students.map((student, idx) => {
                 const totalPercent = getTotalScore(student.id);
-                const grade = calculateGradeLevel(totalPercent);
+                const grade = finalizeScore(getMidYearTotal(student.id), getEndYearScore(student.id), getMidYearMax() + scoreData.endYearMaxScore).grade;
                 const label = getGradeLabel(grade);
                 return `
                   <tr>
@@ -516,10 +507,8 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
               {students.map((student, idx) => {
                 const midTotal = getMidYearTotal(student.id);
                 const endYear = getEndYearScore(student.id);
-                const total = midTotal + endYear;
                 const totalMax = getMidYearMax() + scoreData.endYearMaxScore;
-                const percent = totalMax > 0 ? total / totalMax * 100 : 0;
-                const grade = calculateGradeLevel(percent);
+                const { total, percent, grade } = finalizeScore(midTotal, endYear, totalMax);
                 const label = getGradeLabel(grade);
 
                 return (
