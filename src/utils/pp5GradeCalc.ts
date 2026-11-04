@@ -22,7 +22,7 @@ export const PP5_SUBJECTS: PP5SubjectDef[] = [
   { menuId: 'health', groupId: 'health', name: 'สุขศึกษาและพลศึกษา', shortName: 'สุขศึกษาฯ', credit: 1.0, category: 'core' },
   { menuId: 'art', groupId: 'arts', name: 'ศิลปะ', shortName: 'ศิลปะ', credit: 1.0, category: 'core' },
   { menuId: 'career', groupId: 'career', name: 'การงานอาชีพ', shortName: 'การงานอาชีพ', credit: 1.0, category: 'core' },
-  { menuId: 'english', groupId: 'english', name: 'ภาษาอังกฤษ', shortName: 'ภาษาอังกฤษ', credit: 1.0, category: 'core' },
+  { menuId: 'english', groupId: 'english', name: 'ภาษาอังกฤษ', shortName: 'ภาษาอังกฤษ', credit: 4.0, category: 'core' },
   { menuId: 'anti-corruption', groupId: null, name: 'ป้องกันการทุจริต', shortName: 'ป้องกันทุจริต', credit: 1.0, category: 'elective' },
   { menuId: 'english-comm', groupId: null, name: 'ภาษาอังกฤษเพื่อการสื่อสาร', shortName: 'อังกฤษสื่อสาร', credit: 1.0, category: 'elective' },
 ];
@@ -50,6 +50,130 @@ export const calculateGradeLevel = (score100: number): number => {
   if (score100 >= 55) return 1.5;
   if (score100 >= 50) return 1;
   return 0;
+};
+
+/**
+ * ปัดเศษแบบ "ครึ่งขึ้น" เหมือน ROUND ของ Excel (ใช้ toPrecision กันปัญหาทศนิยมฐานสอง เช่น 17.85 -> 17.9)
+ */
+export const roundHalfUp = (value: number, digits = 0): number => {
+  if (!Number.isFinite(value)) return 0;
+  const f = Math.pow(10, digits);
+  return Math.round(Number((value * f).toPrecision(12))) / f;
+};
+
+/**
+ * คะแนนต่อ 1 มาตรฐาน = (คะแนนรวมตัวชี้วัด / (จำนวนตัวชี้วัด x คะแนนเต็มต่อตัวชี้วัด)) x น้ำหนัก ปัด 1 ตำแหน่ง
+ * (ตรงกับสูตรชีต "ไทย." ใน Excel ต้นแบบ)
+ */
+export const standardScore = (sum: number, indicatorCount: number, maxPerIndicator: number, weight: number): number => {
+  const totalMax = indicatorCount * maxPerIndicator;
+  if (!weight || totalMax <= 0) return 0;
+  return roundHalfUp((sum / totalMax) * weight, 1);
+};
+
+export interface FinalScore {
+  mid: number;     // คะแนนระหว่างปี (ปัดเป็นจำนวนเต็ม)
+  end: number;     // คะแนนปลายปี (ปัดเป็นจำนวนเต็ม)
+  total: number;   // รวม
+  percent: number; // ร้อยละของคะแนนเต็ม (grand)
+  grade: number;   // ระดับผลการเรียน
+}
+
+/**
+ * จุดคำนวณกลางของ ปพ.5: ทุกหน้าต้องเรียกฟังก์ชันนี้เพื่อให้ได้เกรดตรงกัน
+ * กติกาเดียวกับ Excel: ปัดคะแนนระหว่างปีและปลายปีเป็นจำนวนเต็มก่อนรวม แล้วจึงตัดเกรด
+ * ถ้าต้องการเปลี่ยนกติกาการปัดเศษ แก้ที่ฟังก์ชันนี้ที่เดียว
+ */
+export const finalizeScore = (midRaw: number, endRaw: number, grand: number): FinalScore => {
+  const mid = roundHalfUp(midRaw, 0);
+  const end = roundHalfUp(endRaw, 0);
+  const total = mid + end;
+  const percent = grand > 0 ? (total / grand) * 100 : 0;
+  return { mid, end, total, percent, grade: grand > 0 ? calculateGradeLevel(percent) : 0 };
+};
+
+// ---------------------------------------------------------------------------
+// สัดส่วนคะแนน: แยก "ประวัติศาสตร์" ออกจาก "สังคมศึกษาฯ" ให้แต่ละวิชารวมระหว่างปี + ปลายปี = 100
+// ---------------------------------------------------------------------------
+export const HISTORY_RATIO_GROUP_ID = 'history';
+
+/** กระจายคะแนนให้รวมเป็น target (จำนวนเต็ม) ตามสัดส่วนเดิม ด้วยวิธี largest remainder */
+const scaleWeights = (weights: number[], target: number): number[] => {
+  const sum = weights.reduce((a, b) => a + b, 0);
+  if (sum <= 0 || target <= 0) return weights.map(() => 0);
+  const exact = weights.map(w => (w * target) / sum);
+  const floors = exact.map(Math.floor);
+  let rest = target - floors.reduce((a, b) => a + b, 0);
+  exact
+    .map((v, i) => ({ i, frac: v - Math.floor(v), w: weights[i] }))
+    .filter(x => x.w > 0)
+    .sort((a, b) => b.frac - a.frac)
+    .forEach(x => { if (rest > 0) { floors[x.i] += 1; rest -= 1; } });
+  return floors;
+};
+
+const rescaleGroupToHundred = (group: any): any => {
+  const stds = (group.strands || []).flatMap((st: any) => st.standards || []);
+  const target = Math.max(0, 100 - (Number(group.endYearScore) || 0));
+  const scaled = scaleWeights(stds.map((s: any) => Number(s.score) || 0), target);
+  let k = 0;
+  const strands = (group.strands || []).map((st: any) => ({
+    ...st,
+    standards: (st.standards || []).map((s: any) => ({ ...s, score: scaled[k++] })),
+  }));
+  return { ...group, strands, midYearTotal: scaled.reduce((a, b) => a + b, 0) };
+};
+
+/**
+ * แยกกลุ่ม 'social' (ที่มีสาระประวัติศาสตร์ปนอยู่) เป็น 2 กลุ่ม: social และ history
+ * แล้วปรับน้ำหนักของแต่ละกลุ่มให้ระหว่างปี = 100 - ปลายปี  คืนค่าเป็นอาร์เรย์ของกลุ่ม
+ */
+export const splitSocialRatioGroup = (social: any): any[] => {
+  const isHistory = (st: any) => String(st.strandName || '').includes('ประวัติศาสตร์');
+  const historyStrands = (social.strands || []).filter(isHistory);
+  const socialStrands = (social.strands || []).filter((st: any) => !isHistory(st));
+  const out: any[] = [];
+  if (socialStrands.length > 0) {
+    out.push(rescaleGroupToHundred({ ...social, strands: socialStrands }));
+  }
+  if (historyStrands.length > 0) {
+    out.push(rescaleGroupToHundred({
+      ...social,
+      groupId: HISTORY_RATIO_GROUP_ID,
+      groupName: 'ประวัติศาสตร์',
+      strands: historyStrands,
+    }));
+  }
+  return out;
+};
+
+/** รองรับข้อมูลเก่าที่ยังเก็บสังคม+ประวัติศาสตร์ไว้กลุ่มเดียว */
+export const migrateRatioGroups = (ratios: any[]): any[] => {
+  if (!Array.isArray(ratios)) return [];
+  if (ratios.some(g => g?.groupId === HISTORY_RATIO_GROUP_ID)) return ratios;
+  const out: any[] = [];
+  ratios.forEach(g => {
+    const hasHistory = g?.groupId === 'social' &&
+      (g.strands || []).some((st: any) => String(st.strandName || '').includes('ประวัติศาสตร์'));
+    if (hasHistory) out.push(...splitSocialRatioGroup(g));
+    else out.push(g);
+  });
+  return out;
+};
+
+/** หากลุ่มสัดส่วนของรายวิชา (ประวัติศาสตร์ใช้กลุ่ม 'history' ของตัวเอง) */
+export const findRatioGroup = (ratios: any[], menuId: string | undefined, groupId: string | null | undefined): any | undefined => {
+  const id = menuId === 'history' ? HISTORY_RATIO_GROUP_ID : groupId;
+  if (!id) return undefined;
+  return migrateRatioGroups(ratios).find((g: any) => g?.groupId === id);
+};
+
+// ---------------------------------------------------------------------------
+// หน่วยกิต = ชั่วโมงต่อปี / 40  (อ่านจากข้อมูลพื้นฐานของชั้นนั้น ถ้าไม่มีใช้ค่าตั้งต้นตาม Excel)
+// ---------------------------------------------------------------------------
+const BASIC_INFO_SUBJECT_ID: Record<string, string> = {
+  'anti-corruption': 'anticorrupt',
+  'english-comm': 'english2',
 };
 
 export const gradeLabel = (g: number): string => {
@@ -80,6 +204,16 @@ export interface PP5SubjectResult {
   results: Record<string, PP5StudentSubjectResult>; // by student.id
 }
 
+/** หน่วยกิตของรายวิชา: ชั่วโมง/ปี (จากข้อมูลพื้นฐานของชั้น) หาร 40 ถ้าไม่มีข้อมูลใช้ค่าตั้งต้น */
+export const resolveCredit = (def: PP5SubjectDef, grade: string, academicYear: string, semester: string): number => {
+  const info = getBasicInfo(grade, academicYear, semester);
+  const wantedId = BASIC_INFO_SUBJECT_ID[def.menuId] || def.menuId;
+  const hours = Array.isArray(info?.subjects)
+    ? Number(info.subjects.find((x: any) => x?.id === wantedId)?.hoursPerYear)
+    : NaN;
+  return Number.isFinite(hours) && hours > 0 ? hours / 40 : def.credit;
+};
+
 /** Compute the 100-based score and grade of every student for every PP.5 subject. */
 export const computeSubjectResults = (
   students: Student[],
@@ -87,9 +221,10 @@ export const computeSubjectResults = (
   academicYear: string,
   semester: string,
 ): PP5SubjectResult[] => {
-  const ratioData = readJSON<any[]>(ratioKey(gradeKey, academicYear, semester), []);
+  const ratioData = migrateRatioGroups(readJSON<any[]>(ratioKey(gradeKey, academicYear, semester), []));
 
-  return PP5_SUBJECTS.map(def => {
+  return PP5_SUBJECTS.map(baseDef => {
+    const def: PP5SubjectDef = { ...baseDef, credit: resolveCredit(baseDef, gradeKey, academicYear, semester) };
     const results: Record<string, PP5StudentSubjectResult> = {};
 
     if (def.category === 'elective') {
@@ -107,11 +242,10 @@ export const computeSubjectResults = (
         let raw = 0;
         for (let i = 1; i <= outcomes; i++) raw += Number(s.outcomes?.[String(i)] ?? 0);
         const mid = midTarget && rawMax ? (raw * midTarget) / rawMax : raw;
-        const total = mid + Number(s.endYearScore ?? 0);
-        const score100 = totalMax > 0 ? (total / totalMax) * 100 : 0;
+        const fin = finalizeScore(mid, Number(s.endYearScore ?? 0), totalMax);
         results[st.id] = {
-          score100: parseFloat(score100.toFixed(2)),
-          grade: calculateGradeLevel(score100),
+          score100: parseFloat(fin.percent.toFixed(2)),
+          grade: fin.grade,
           hasData: true,
         };
       });
@@ -127,7 +261,7 @@ export const computeSubjectResults = (
     let midYearWeight = 0;
     let endYearWeight = 0;
     const standardWeights: Record<string, number> = {};
-    const matchingGroup = ratioData.find((r: any) => r.groupId === def.groupId);
+    const matchingGroup = findRatioGroup(ratioData, def.menuId, def.groupId);
     if (matchingGroup) {
       endYearWeight = matchingGroup.endYearScore || 0;
       matchingGroup.strands?.forEach((strand: any) => {
@@ -160,16 +294,13 @@ export const computeSubjectResults = (
       let midYearTotal = 0;
       indicatorGroups.forEach(ig => {
         if (!ig.weight) return;
-        const totalMax = ig.indicatorIds.length * (scoreData.maxScorePerIndicator || 10);
-        if (!totalMax) return;
         const sum = ig.indicatorIds.reduce((acc, id) => acc + (ss.indicators?.[id] ?? 0), 0);
-        midYearTotal += (sum / totalMax) * ig.weight;
+        midYearTotal += standardScore(sum, ig.indicatorIds.length, scoreData.maxScorePerIndicator || 10, ig.weight);
       });
-      const total = midYearTotal + (ss.endYearScore ?? 0);
-      const score100 = grandTotalWeight > 0 ? (total / grandTotalWeight) * 100 : 0;
+      const fin = finalizeScore(midYearTotal, ss.endYearScore ?? 0, grandTotalWeight);
       results[st.id] = {
-        score100: parseFloat(score100.toFixed(2)),
-        grade: calculateGradeLevel(score100),
+        score100: parseFloat(fin.percent.toFixed(2)),
+        grade: fin.grade,
         hasData: true,
       };
     });
