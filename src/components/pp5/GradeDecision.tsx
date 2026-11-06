@@ -10,6 +10,9 @@ import {
   computeSubjectResults, sortStudents, fullName, getBasicInfo,
   type PP5SubjectResult,
 } from '@/utils/pp5GradeCalc';
+import { loadSemesterAttendance, type SemesterAttendance } from '@/utils/pp5Attendance';
+import { loadActivityResults, ACTIVITY_DEFS } from '@/utils/pp5Activities';
+import { decideStudent, type FixRecordLite } from '@/utils/pp5Decision';
 import { openPrintWindow, signatureBlock } from '@/utils/pp5Print';
 import { toast } from 'sonner';
 
@@ -20,12 +23,11 @@ interface Props {
   onBack: () => void;
 }
 
-const gradeText = (g: number) => (g === 0 ? '0' : g.toFixed(1).replace('.0', ''));
-
 const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedAcademicYear, onBack }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [passCriteria, setPassCriteria] = useState(50);
+  const [attendance, setAttendance] = useState<SemesterAttendance | null>(null);
 
   const info = useMemo(
     () => getBasicInfo(selectedGrade, selectedAcademicYear, selectedSemester),
@@ -33,38 +35,80 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
   );
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       setLoading(true);
       const all = await getStudents();
-      setStudents(sortStudents(all.filter(s => s.grade === selectedGrade && s.academicYear === selectedAcademicYear)));
-      setLoading(false);
+      const inClass = all.filter(s => s.grade === selectedGrade && s.academicYear === selectedAcademicYear);
+      const list = sortStudents(inClass);
+      if (cancelled) return;
+      setStudents(list);
+
+      // เวลาเรียน: นักเรียนคนเดียวกันอาจมีระเบียนแยกตามภาคเรียน จึงรวมทุก id ที่มีรหัสนักเรียนเดียวกัน
+      const idsByCode: Record<string, string[]> = {};
+      inClass.forEach(s => {
+        const code = s.studentId || s.id;
+        (idsByCode[code] = idsByCode[code] || []).push(s.id);
+      });
+      try {
+        const att = await loadSemesterAttendance(idsByCode, selectedSemester, selectedAcademicYear);
+        if (!cancelled) setAttendance(att);
+      } catch (e) {
+        console.error('Error loading attendance:', e);
+        if (!cancelled) setAttendance(null);
+      }
+      if (!cancelled) setLoading(false);
     })();
-  }, [selectedGrade, selectedAcademicYear]);
+    return () => { cancelled = true; };
+  }, [selectedGrade, selectedAcademicYear, selectedSemester]);
 
   const subjectResults: PP5SubjectResult[] = useMemo(() => {
     if (students.length === 0) return [];
     return computeSubjectResults(students, selectedGrade, selectedAcademicYear, selectedSemester);
   }, [students, selectedGrade, selectedAcademicYear, selectedSemester]);
 
-  const rows = useMemo(() => students.map(st => {
-    const perSubject = subjectResults.map(sr => sr.results[st.id] || { score100: 0, grade: 0, hasData: false });
-    const failed = perSubject.filter(r => r.score100 < passCriteria).length;
-    let creditSum = 0, weighted = 0;
-    subjectResults.forEach((sr, i) => {
-      creditSum += sr.def.credit;
-      weighted += perSubject[i].grade * sr.def.credit;
-    });
-    const gpa = creditSum > 0 ? weighted / creditSum : 0;
-    return {
-      student: st,
-      perSubject,
-      failed,
-      gpa: parseFloat(gpa.toFixed(2)),
-      decision: failed === 0 ? 'ผ่านการตัดสิน' : 'ไม่ผ่าน (ต้องซ่อมเสริม)',
-    };
-  }), [students, subjectResults, passCriteria]);
+  const activityResults = useMemo(
+    () => loadActivityResults(selectedGrade, selectedAcademicYear, selectedSemester, students.map(s => s.studentId || s.id)),
+    [students, selectedGrade, selectedAcademicYear, selectedSemester]
+  );
 
-  const passCount = rows.filter(r => r.failed === 0).length;
+  const fixRecords: FixRecordLite[] = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(`pp5-fix-grades-${selectedGrade}-${selectedAcademicYear}-${selectedSemester}`);
+      const recs = raw ? JSON.parse(raw)?.records : [];
+      return Array.isArray(recs)
+        ? recs.map((r: any) => ({
+            studentId: String(r.studentId ?? ''),
+            subject: String(r.subject ?? ''),
+            status: String(r.status ?? ''),
+            resultGrade: String(r.resultGrade ?? ''),
+          }))
+        : [];
+    } catch {
+      return [];
+    }
+  }, [selectedGrade, selectedAcademicYear, selectedSemester, students]);
+
+  const rows = useMemo(() => students.map(st => {
+    const code = st.studentId || st.id;
+    const result = decideStudent({
+      studentId: st.id,
+      subjects: subjectResults.map(sr => {
+        const r = sr.results[st.id] || { score100: 0, grade: 0, hasData: false };
+        return { name: sr.def.name, shortName: sr.def.shortName, credit: sr.def.credit, ...r };
+      }),
+      passCriteria,
+      attendance: attendance?.byStudent[code],
+      activity: activityResults[code],
+      fixes: fixRecords,
+    });
+    return { student: st, att: attendance?.byStudent[code], ...result };
+  }), [students, subjectResults, passCriteria, attendance, activityResults, fixRecords]);
+
+  const passCount = rows.filter(r => r.tone === 'pass').length;
+  const waitCount = rows.filter(r => r.tone === 'wait').length;
+  const failCount = rows.filter(r => r.tone === 'fail').length;
+  const noAttendanceData = !!attendance && rows.length > 0 && rows.every(r => !r.att?.hasRecords);
 
   const handlePrint = () => {
     const head = `
@@ -72,6 +116,8 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
         <th rowspan="2" style="width:32px">ที่</th>
         <th rowspan="2" style="min-width:170px">ชื่อ - นามสกุล</th>
         <th colspan="${subjectResults.length}">ผลการเรียนรายวิชา (ระดับผลการเรียน)</th>
+        <th rowspan="2" style="width:52px">เวลาเรียน<br/>(ร้อยละ)</th>
+        <th rowspan="2" style="width:60px">กิจกรรม<br/>พัฒนาผู้เรียน</th>
         <th rowspan="2" style="width:48px">GPA</th>
         <th rowspan="2" style="width:52px">วิชาที่<br/>ไม่ผ่าน</th>
         <th rowspan="2" style="width:110px">ผลการตัดสิน</th>
@@ -81,9 +127,11 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
       <tr>
         <td class="num">${i + 1}</td>
         <td>${fullName(r.student)}</td>
-        ${r.perSubject.map(p => `<td class="num">${gradeText(p.grade)}</td>`).join('')}
+        ${r.cells.map(c => `<td class="num">${c.display}</td>`).join('')}
+        <td class="num">${r.att?.hasRecords ? r.att.percent.toFixed(1) : '-'}</td>
+        <td class="num">${r.activityFailed.length === 0 ? 'ผ.' : 'มผ.'}</td>
         <td class="num">${r.gpa.toFixed(2)}</td>
-        <td class="num">${r.failed || '-'}</td>
+        <td class="num">${r.failedCount || '-'}</td>
         <td class="num">${r.decision}</td>
       </tr>`).join('');
 
@@ -91,11 +139,11 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
       <div class="center">
         <div class="title">แบบบันทึกการตัดสินผลการเรียน</div>
         <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
-        <div style="font-size:15pt">เกณฑ์การผ่าน: ได้คะแนนไม่น้อยกว่าร้อยละ ${passCriteria} ของทุกรายวิชา</div>
+        <div style="font-size:15pt">เกณฑ์การผ่าน: ได้คะแนนไม่น้อยกว่าร้อยละ ${passCriteria} ของทุกรายวิชา มีเวลาเรียนไม่น้อยกว่าร้อยละ 80 (ต่ำกว่านี้ได้ มส.) และผ่านกิจกรรมพัฒนาผู้เรียนทุกกิจกรรม</div>
       </div>
       <table style="margin-top:8px;font-size:14pt"><thead>${head}</thead><tbody>${body}</tbody></table>
       <div style="margin-top:8px;font-size:15pt">
-        สรุป: ผ่านการตัดสิน ${passCount} คน | ไม่ผ่าน ${rows.length - passCount} คน | รวม ${rows.length} คน
+        สรุป: ผ่านการตัดสิน ${passCount} คน | ไม่ผ่าน ${failCount} คน | รอการตัดสิน (ร) ${waitCount} คน | รวม ${rows.length} คน
       </div>
       ${signatureBlock('ครูประจำชั้น', info?.homeTeacher1 || '')}
     `;
@@ -149,8 +197,25 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
               <div className="flex gap-4 text-sm bg-amber-50 border border-amber-200 rounded p-3">
                 <span>นักเรียนทั้งหมด <strong>{rows.length}</strong> คน</span>
                 <span className="text-green-700">ผ่านการตัดสิน <strong>{passCount}</strong> คน</span>
-                <span className="text-red-700">ไม่ผ่าน <strong>{rows.length - passCount}</strong> คน</span>
+                <span className="text-red-700">ไม่ผ่าน <strong>{failCount}</strong> คน</span>
+                <span className="text-amber-700">รอการตัดสิน (ร) <strong>{waitCount}</strong> คน</span>
+                {attendance && (
+                  <span className="text-muted-foreground ml-auto">
+                    วันเปิดเรียน <strong>{attendance.totalSchoolDays}</strong> วัน (ต้องมาไม่น้อยกว่า <strong>{attendance.minRequiredDays}</strong> วัน)
+                  </span>
+                )}
               </div>
+              {attendance && attendance.unlockedMonths.length > 0 && !noAttendanceData && (
+                <div className="text-sm bg-amber-50 border border-amber-300 text-amber-900 rounded p-2">
+                  เดือนที่ยังไม่ได้ล็อกวันเปิดเรียน: {attendance.unlockedMonths.join(', ')} — จำนวนวันเปิดเรียนคำนวณจากปฏิทินวันหยุดเท่านั้น
+                  ถ้ามีวันปิดเรียนที่ไม่ได้ตั้งไว้ จะทำให้ร้อยละเวลาเรียนต่ำกว่าจริงและเกิด มส. ผิดพลาดได้ ควรล็อกวันเปิดเรียนในหน้าเช็คเวลาเรียนก่อนตัดสินผล
+                </div>
+              )}
+              {noAttendanceData && (
+                <div className="text-sm bg-yellow-50 border border-yellow-300 text-yellow-800 rounded p-2">
+                  ยังไม่พบข้อมูลเช็คเวลาเรียนของภาคเรียนนี้ ระบบจึงยังไม่ตัดสิน มส. ให้ใคร กรุณาบันทึกเวลาเรียนก่อน
+                </div>
+              )}
               <div className="overflow-auto">
                 <table className="w-full border-collapse text-sm">
                   <thead>
@@ -162,6 +227,8 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
                           {sr.def.shortName}
                         </th>
                       ))}
+                      <th className="border border-gray-400 p-1 w-16 text-[11px] leading-tight">เวลาเรียน %</th>
+                      <th className="border border-gray-400 p-1 w-16 text-[11px] leading-tight">กิจกรรม</th>
                       <th className="border border-gray-400 p-1 w-16">GPA</th>
                       <th className="border border-gray-400 p-1 w-16">ไม่ผ่าน</th>
                       <th className="border border-gray-400 p-1 w-32">ผลการตัดสิน</th>
@@ -172,20 +239,33 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
                       <tr key={r.student.id} className="hover:bg-amber-50/50">
                         <td className="border border-gray-300 p-1 text-center">{i + 1}</td>
                         <td className="border border-gray-300 p-1">{fullName(r.student)}</td>
-                        {r.perSubject.map((p, j) => (
-                          <td key={j} className={`border border-gray-300 p-1 text-center ${p.score100 < passCriteria ? 'text-red-600 font-semibold' : ''}`}>
-                            {gradeText(p.grade)}
+                        {r.cells.map((c, j) => (
+                          <td key={j} className={`border border-gray-300 p-1 text-center ${c.failed || c.status === 'มส' ? 'text-red-600 font-semibold' : c.status === 'ร' ? 'text-amber-600 font-semibold' : ''}`}>
+                            {c.display}
                           </td>
                         ))}
+                        <td className={`border border-gray-300 p-1 text-center ${r.att?.failed ? 'text-red-600 font-semibold' : ''}`}>
+                          {r.att?.hasRecords ? r.att.percent.toFixed(1) : '-'}
+                        </td>
+                        <td
+                          className={`border border-gray-300 p-1 text-center ${r.activityFailed.length ? 'text-red-600 font-semibold' : 'text-green-700'}`}
+                          title={r.activityFailed.length ? `ไม่ผ่าน: ${r.activityFailed.join(', ')}` : 'ผ่านทุกกิจกรรม'}
+                        >
+                          {r.activityFailed.length ? 'มผ.' : 'ผ.'}
+                        </td>
                         <td className="border border-gray-300 p-1 text-center font-semibold">{r.gpa.toFixed(2)}</td>
-                        <td className="border border-gray-300 p-1 text-center">{r.failed || '-'}</td>
-                        <td className={`border border-gray-300 p-1 text-center ${r.failed === 0 ? 'text-green-700' : 'text-red-700'}`}>
+                        <td className="border border-gray-300 p-1 text-center">{r.failedCount || '-'}</td>
+                        <td className={`border border-gray-300 p-1 text-center ${r.tone === 'pass' ? 'text-green-700' : r.tone === 'wait' ? 'text-amber-700' : 'text-red-700'}`}>
                           {r.decision}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="text-xs text-muted-foreground space-y-0.5">
+                <div><strong>มส</strong> = มีเวลาเรียนน้อยกว่าร้อยละ 80 (นับเฉพาะวันที่มาเรียน) · <strong>ร</strong> = รอการตัดสิน (จากหน้าแก้ผลการเรียน) · <strong>มผ.</strong> = ไม่ผ่านกิจกรรมพัฒนาผู้เรียน ({ACTIVITY_DEFS.map(a => a.short).join(' / ')})</div>
+                <div>เมื่อแก้ผลการเรียนแล้ว ให้ใส่ "ผลหลังแก้" เป็นตัวเลขระดับผลการเรียนในหน้าแก้ผลการเรียน ระบบจะใช้ค่านั้นแทน ร/มส</div>
               </div>
             </>
           )}

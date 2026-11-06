@@ -34,8 +34,9 @@ export interface SubjectInfo {
   teacherId: string;
   teacherName: string;
   subjectCode: string;
-  endTermRatio: number;
-  midTermRatio: number;
+  /** เลิกใช้แล้ว (ข้อสอบมาตรฐานกลางยกเลิกตั้งแต่ 22 ต.ค. 2561) คงไว้เฉพาะให้อ่านข้อมูลเก่าที่บันทึกไว้ได้ */
+  endTermRatio?: number;
+  midTermRatio?: number;
   category: 'core' | 'elective' | 'activity';
   learningOutcomes?: number; // จำนวนผลการเรียนรู้ (สำหรับวิชาเพิ่มเติม)
 }
@@ -88,24 +89,24 @@ export const getSubjectCodeForGrade = (subjectId: string, gradeLevel: string): s
 export const getDefaultSubjectsForGrade = (gradeLevel: string): Omit<SubjectInfo, 'teacherId' | 'teacherName'>[] => {
   return [
     // Core subjects (สาระการเรียนรู้พื้นฐาน)
-    { id: 'thai', code: 'ท', name: 'ภาษาไทย', shortName: 'ภาษาไทย', hoursPerWeek: 5, hoursPerYear: 200, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('thai', gradeLevel), endTermRatio: 100, midTermRatio: 0, category: 'core' },
-    { id: 'math', code: 'ค', name: 'คณิตศาสตร์', shortName: 'คณิตศาสตร์', hoursPerWeek: 5, hoursPerYear: 200, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('math', gradeLevel), endTermRatio: 100, midTermRatio: 0, category: 'core' },
-    { id: 'science', code: 'ว', name: 'วิทยาศาสตร์และเทคโนโลยี', shortName: 'วิทยาศาสตร์ฯ', hoursPerWeek: 2, hoursPerYear: 80, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('science', gradeLevel), endTermRatio: 100, midTermRatio: 0, category: 'core' },
-    { id: 'social', code: 'ส', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม', shortName: 'สังคมศึกษาฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('social', gradeLevel), endTermRatio: 0, midTermRatio: 0, category: 'core' },
-    { id: 'history', code: 'ส', name: 'ประวัติศาสตร์', shortName: 'ประวัติศาสตร์', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('history', gradeLevel), endTermRatio: 0, midTermRatio: 0, category: 'core' },
-    { id: 'health', code: 'พ', name: 'สุขศึกษาและพลศึกษา', shortName: 'สุขศึกษาฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('health', gradeLevel), endTermRatio: 0, midTermRatio: 0, category: 'core' },
-    { id: 'art', code: 'ศ', name: 'ศิลปะ', shortName: 'ศิลปะ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('art', gradeLevel), endTermRatio: 0, midTermRatio: 0, category: 'core' },
-    { id: 'career', code: 'ง', name: 'การงานอาชีพ', shortName: 'การงานอาชีพ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('career', gradeLevel), endTermRatio: 0, midTermRatio: 0, category: 'core' },
-    { id: 'english', code: 'อ', name: 'ภาษาอังกฤษ', shortName: 'ภาษาอังกฤษ', hoursPerWeek: 4, hoursPerYear: 160, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('english', gradeLevel), endTermRatio: 100, midTermRatio: 0, category: 'core' },
+    { id: 'thai', code: 'ท', name: 'ภาษาไทย', shortName: 'ภาษาไทย', hoursPerWeek: 5, hoursPerYear: 200, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('thai', gradeLevel), category: 'core' },
+    { id: 'math', code: 'ค', name: 'คณิตศาสตร์', shortName: 'คณิตศาสตร์', hoursPerWeek: 5, hoursPerYear: 200, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('math', gradeLevel), category: 'core' },
+    { id: 'science', code: 'ว', name: 'วิทยาศาสตร์และเทคโนโลยี', shortName: 'วิทยาศาสตร์ฯ', hoursPerWeek: 2, hoursPerYear: 80, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('science', gradeLevel), category: 'core' },
+    { id: 'social', code: 'ส', name: 'สังคมศึกษา ศาสนาและวัฒนธรรม', shortName: 'สังคมศึกษาฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('social', gradeLevel), category: 'core' },
+    { id: 'history', code: 'ส', name: 'ประวัติศาสตร์', shortName: 'ประวัติศาสตร์', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('history', gradeLevel), category: 'core' },
+    { id: 'health', code: 'พ', name: 'สุขศึกษาและพลศึกษา', shortName: 'สุขศึกษาฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('health', gradeLevel), category: 'core' },
+    { id: 'art', code: 'ศ', name: 'ศิลปะ', shortName: 'ศิลปะ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('art', gradeLevel), category: 'core' },
+    { id: 'career', code: 'ง', name: 'การงานอาชีพ', shortName: 'การงานอาชีพ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('career', gradeLevel), category: 'core' },
+    { id: 'english', code: 'อ', name: 'ภาษาอังกฤษ', shortName: 'ภาษาอังกฤษ', hoursPerWeek: 4, hoursPerYear: 160, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('english', gradeLevel), category: 'core' },
     
     // Elective subjects (สาระการเรียนรู้เพิ่มเติม)
-    { id: 'english2', code: 'อ', name: 'ภาษาอังกฤษเพื่อการสื่อสาร', shortName: 'อังกฤษสื่อสาร', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('english2', gradeLevel), endTermRatio: 0, midTermRatio: 0, category: 'elective' },
-    { id: 'anticorrupt', code: 'ส', name: 'ป้องกันการทุจริต', shortName: 'ป้องกันทุจริต', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('anticorrupt', gradeLevel), endTermRatio: 0, midTermRatio: 0, category: 'elective' },
+    { id: 'english2', code: 'อ', name: 'ภาษาอังกฤษเพื่อการสื่อสาร', shortName: 'อังกฤษสื่อสาร', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('english2', gradeLevel), category: 'elective' },
+    { id: 'anticorrupt', code: 'ส', name: 'ป้องกันการทุจริต', shortName: 'ป้องกันทุจริต', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 50, subjectCode: getSubjectCodeForGrade('anticorrupt', gradeLevel), category: 'elective' },
     
     // Activities (กิจกรรมพัฒนาผู้เรียน) - no subject codes
-    { id: 'guidance', code: 'ก', name: 'แนะแนว', shortName: 'แนะแนว', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 0, subjectCode: '', endTermRatio: 0, midTermRatio: 0, category: 'activity' },
-    { id: 'scout', code: 'ก', name: 'ลูกเสือ เนตรนารี', shortName: 'ลูกเสือฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 0, subjectCode: '', endTermRatio: 0, midTermRatio: 0, category: 'activity' },
-    { id: 'club', code: 'ก', name: 'ชมรม ชุมนุม', shortName: 'ชมรมฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 0, subjectCode: '', endTermRatio: 0, midTermRatio: 0, category: 'activity' },
+    { id: 'guidance', code: 'ก', name: 'แนะแนว', shortName: 'แนะแนว', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 0, subjectCode: '', category: 'activity' },
+    { id: 'scout', code: 'ก', name: 'ลูกเสือ เนตรนารี', shortName: 'ลูกเสือฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 0, subjectCode: '', category: 'activity' },
+    { id: 'club', code: 'ก', name: 'ชมรม ชุมนุม', shortName: 'ชมรมฯ', hoursPerWeek: 1, hoursPerYear: 40, passingCriteria: 0, subjectCode: '', category: 'activity' },
   ];
 };
 

@@ -66,8 +66,6 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
       teacherId: '',
       teacherName: '',
       subjectCode: newSubject.subjectCode,
-      endTermRatio: 0,
-      midTermRatio: 0,
       category: 'elective',
       learningOutcomes: newSubject.learningOutcomes,
     };
@@ -168,22 +166,6 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
           className="w-20 h-7 text-center mx-auto text-sm"
         />
       </td>
-      <td className="border border-gray-300 px-2 py-1.5 text-center bg-white">
-        <Input 
-          type="number" 
-          value={subject.endTermRatio}
-          onChange={(e) => onUpdateSubject(subject.id, { endTermRatio: parseInt(e.target.value) || 0 })}
-          className="w-16 h-7 text-center mx-auto text-sm"
-        />
-      </td>
-      <td className="border border-gray-300 px-2 py-1.5 text-center bg-white">
-        <Input 
-          type="number" 
-          value={subject.midTermRatio}
-          onChange={(e) => onUpdateSubject(subject.id, { midTermRatio: parseInt(e.target.value) || 0 })}
-          className="w-16 h-7 text-center mx-auto text-sm"
-        />
-      </td>
     </tr>
   );
 
@@ -200,7 +182,6 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
         <td colSpan={3} className="border border-gray-300 px-2 py-2 text-center text-muted-foreground">
           ชั่วโมง/ปี
         </td>
-        <td colSpan={2} className="border border-gray-300"></td>
       </tr>
     );
   };
@@ -225,21 +206,17 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
                 <th className="border border-blue-300 px-2 py-2 text-blue-700">เกณฑ์การผ่าน</th>
                 <th className="border border-blue-300 px-3 py-2 text-blue-700" rowSpan={2}>ชื่อครูผู้สอน</th>
                 <th className="border border-blue-300 px-2 py-2 text-blue-700" rowSpan={2}>รหัสวิชา</th>
-                <th className="border border-blue-300 px-2 py-2 text-blue-700">สัดส่วน</th>
-                <th className="border border-blue-300 px-2 py-2 text-blue-700">สัดส่วนข้อสอบ</th>
               </tr>
               <tr className="bg-blue-50">
                 <th className="border border-blue-300 px-2 py-1 text-blue-600 text-xs">สัปดาห์</th>
                 <th className="border border-blue-300 px-2 py-1 text-blue-600 text-xs"></th>
                 <th className="border border-blue-300 px-2 py-1 text-blue-600 text-xs">ตัวชี้วัด(ร้อยละ)</th>
-                <th className="border border-blue-300 px-2 py-1 text-blue-600 text-xs">ข้อสอบปลายปี</th>
-                <th className="border border-blue-300 px-2 py-1 text-blue-600 text-xs">มาตรฐานกลาง</th>
               </tr>
             </thead>
             <tbody>
               {/* Core Subjects Header */}
               <tr className="bg-green-100">
-                <td colSpan={9} className="border border-gray-300 px-3 py-2 font-bold text-green-700">
+                <td colSpan={7} className="border border-gray-300 px-3 py-2 font-bold text-green-700">
                   สาระการเรียนรู้พื้นฐาน
                 </td>
               </tr>
@@ -248,7 +225,7 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
 
               {/* Elective Subjects Header */}
               <tr className="bg-orange-100">
-                <td colSpan={9} className="border border-gray-300 px-3 py-2 font-bold text-orange-700">
+                <td colSpan={7} className="border border-gray-300 px-3 py-2 font-bold text-orange-700">
                   <div className="flex items-center justify-between">
                     <span>สาระการเรียนรู้เพิ่มเติม</span>
                     {onAddSubject && (
@@ -270,7 +247,7 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
 
               {/* Activity Subjects Header */}
               <tr className="bg-purple-100">
-                <td colSpan={9} className="border border-gray-300 px-3 py-2 font-bold text-purple-700">
+                <td colSpan={7} className="border border-gray-300 px-3 py-2 font-bold text-purple-700">
                   กิจกรรมพัฒนาผู้เรียน
                 </td>
               </tr>
@@ -291,7 +268,6 @@ const SubjectInfoTable: React.FC<SubjectInfoTableProps> = ({
                 <td colSpan={3} className="border border-gray-300 px-2 py-2 text-center font-bold text-cyan-800">
                   ชั่วโมง/ปี
                 </td>
-                <td colSpan={2} className="border border-gray-300"></td>
               </tr>
             </tbody>
           </table>

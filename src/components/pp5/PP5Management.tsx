@@ -1,0 +1,699 @@
+
+import React, { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  BookOpen, 
+  Calculator, 
+  FlaskConical, 
+  Users, 
+  History, 
+  Heart, 
+  Palette, 
+  Briefcase,
+  Globe,
+  Shield,
+  PlusCircle,
+  FileText,
+  ClipboardList,
+  BarChart3,
+  Printer,
+  Settings,
+  GraduationCap,
+  Target,
+  CheckSquare,
+  Edit3,
+  BookMarked,
+  FileSpreadsheet,
+  ArrowLeft
+} from 'lucide-react';
+import { generateAcademicYears, gradeOptions } from '@/utils/data';
+import BasicInfoEntry from './pp5/BasicInfoEntry';
+import PP5StudentInfo from './pp5/PP5StudentInfo';
+import PP5Attendance from './pp5/PP5Attendance';
+import PP5AttendanceHoursSummary from './pp5/PP5AttendanceHoursSummary';
+import CurriculumIndicators from './pp5/CurriculumIndicators';
+import ScoreRatioConfig from './pp5/ScoreRatioConfig';
+import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
+import ElectiveScoreEntry from './pp5/ElectiveScoreEntry';
+import StandardReport from './pp5/StandardReport';
+import AchievementSummaryReport from './pp5/AchievementSummaryReport';
+import AchievementChartReport from './pp5/AchievementChartReport';
+import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
+import DesirableTraitsAssessment from './pp5/DesirableTraitsAssessment';
+import ReadingAnalysisAssessment from './pp5/ReadingAnalysisAssessment';
+import StudentActivityAssessment from './pp5/StudentActivityAssessment';
+import IndicatorCountTable from './pp5/IndicatorCountTable';
+import StudentNameListPrint from './pp5/StudentNameListPrint';
+import GradeDecision from './pp5/GradeDecision';
+import FixGrades from './pp5/FixGrades';
+import PP5Cover from './pp5/PP5Cover';
+import PP5PrintCenter from './pp5/PP5PrintCenter';
+import PP5Backup from './pp5/PP5Backup';
+import type { SubjectInfo } from './pp5/types';
+import { getDefaultSubjectsForGrade } from './pp5/types';
+
+// Types for PP5 system
+interface PP5MenuCategory {
+  id: string;
+  title: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  items: PP5MenuItem[];
+}
+
+interface PP5MenuItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  action?: () => void;
+}
+
+// Helper to load custom elective subjects from localStorage
+const getCustomElectives = (grade: string, academicYear: string, semester: string): SubjectInfo[] => {
+  const gradeNum = grade.replace('ป.', '');
+  const storageKey = `pp5-basic-ป.${gradeNum}-${academicYear}-${semester}`;
+  const saved = localStorage.getItem(storageKey);
+  if (!saved) return [];
+  try {
+    const data = JSON.parse(saved);
+    if (data.subjects && Array.isArray(data.subjects)) {
+      return data.subjects.filter((s: SubjectInfo) => s.id.startsWith('custom-elective-'));
+    }
+  } catch {}
+  return [];
+};
+
+// Calculate current semester based on Thai school calendar
+const getCurrentSemester = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  // Semester 1: May 16 - October 31, Semester 2: November 1 - May 15
+  if ((month === 5 && day >= 16) || (month > 5 && month <= 10)) {
+    return '1';
+  }
+  return '2';
+};
+
+// Calculate current Thai academic year (พ.ศ.) based on school calendar
+// Academic year rolls over on May 16
+const getCurrentAcademicYear = (): string => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const d = now.getDate();
+  const gregorianYear = (m > 5 || (m === 5 && d >= 16)) ? y : y - 1;
+  return String(gregorianYear + 543);
+};
+
+const PP5Management: React.FC = () => {
+  const [selectedGrade, setSelectedGrade] = useState<string>('ป.1');
+  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  const academicYears = generateAcademicYears();
+  const primaryGrades = gradeOptions.filter(g => g.startsWith('ป.'));
+
+  // Load custom elective subjects dynamically
+  const customElectives = useMemo(() => 
+    getCustomElectives(selectedGrade, selectedAcademicYear, selectedSemester),
+    [selectedGrade, selectedAcademicYear, selectedSemester, activeSection] // re-check when returning to menu
+  );
+
+  // Build dynamic elective menu items
+  const electiveMenuItems: PP5MenuItem[] = useMemo(() => {
+    const items: PP5MenuItem[] = [];
+    customElectives.forEach((subj) => {
+      items.push({
+        id: subj.id,
+        label: subj.shortName || subj.name,
+        icon: PlusCircle,
+      });
+    });
+    return items;
+  }, [customElectives]);
+
+  // Define menu categories with colorful styling based on reference images
+  const menuCategories: PP5MenuCategory[] = [
+    {
+      id: 'score-entry',
+      title: 'กรอกคะแนนตามตัวชี้วัด',
+      color: 'text-orange-700',
+      bgColor: 'bg-gradient-to-br from-orange-100 to-orange-200',
+      borderColor: 'border-orange-300',
+      items: [
+        { id: 'thai', label: 'ภาษาไทย', icon: BookOpen },
+        { id: 'math', label: 'คณิตศาสตร์', icon: Calculator },
+        { id: 'science', label: 'วิทยาศาสตร์ฯ', icon: FlaskConical },
+        { id: 'social', label: 'สังคมศึกษาฯ', icon: Users },
+        { id: 'history', label: 'ประวัติศาสตร์', icon: History },
+        { id: 'health', label: 'สุขศึกษาฯ', icon: Heart },
+        { id: 'art', label: 'ศิลปะ', icon: Palette },
+        { id: 'career', label: 'การงานอาชีพ', icon: Briefcase },
+        { id: 'english', label: 'ภาษาต่างประเทศ', icon: Globe },
+        { id: 'anti-corruption', label: 'ป้องกันการทุจริต', icon: Shield },
+        { id: 'english-comm', label: 'ภาษาอังกฤษเพื่อการสื่อสาร', icon: Globe },
+        ...electiveMenuItems,
+      ]
+    },
+    {
+      id: 'learning-reports',
+      title: 'รายงานผลการเรียนรู้ตามมาตรฐาน',
+      color: 'text-cyan-700',
+      bgColor: 'bg-gradient-to-br from-cyan-100 to-cyan-200',
+      borderColor: 'border-cyan-300',
+      items: [
+        { id: 'report-thai', label: 'ภาษาไทย', icon: BookOpen },
+        { id: 'report-math', label: 'คณิตศาสตร์', icon: Calculator },
+        { id: 'report-science', label: 'วิทยาศาสตร์ฯ', icon: FlaskConical },
+        { id: 'report-social', label: 'สังคมศึกษาฯ', icon: Users },
+        { id: 'report-history', label: 'ประวัติศาสตร์', icon: History },
+        { id: 'report-health', label: 'สุขศึกษาฯ', icon: Heart },
+        { id: 'report-art', label: 'ศิลปะ', icon: Palette },
+        { id: 'report-career', label: 'การงานอาชีพ', icon: Briefcase },
+        { id: 'report-english', label: 'ภาษาต่างประเทศ', icon: Globe },
+        { id: 'summary-result', label: 'แบบสรุปผลสัมฤทธิ์ฯ', icon: BarChart3 },
+        { id: 'achievement-map', label: 'แผนภูมิผลสัมฤทธิ์ฯ', icon: FileSpreadsheet },
+        { id: 'analysis-result', label: 'วิเคราะห์ผลสัมฤทธิ์ฯ', icon: ClipboardList },
+        { id: 'pp5-cover', label: 'หน้าปก ปพ.5', icon: FileText },
+        { id: 'pp5-print', label: 'การสั่งพิมพ์ ปพ.5', icon: Printer },
+      ]
+    },
+    {
+      id: 'curriculum-indicators',
+      title: 'ตัวชี้วัดตามหลักสูตร \'60',
+      color: 'text-pink-700',
+      bgColor: 'bg-gradient-to-br from-pink-100 to-pink-200',
+      borderColor: 'border-pink-300',
+      items: [
+        { id: 'indicator-p1', label: 'ตัวชี้วัดชั้น ป.1', icon: Target },
+        { id: 'indicator-p2', label: 'ตัวชี้วัดชั้น ป.2', icon: Target },
+        { id: 'indicator-p3', label: 'ตัวชี้วัดชั้น ป.3', icon: Target },
+        { id: 'indicator-p4', label: 'ตัวชี้วัดชั้น ป.4', icon: Target },
+        { id: 'indicator-p5', label: 'ตัวชี้วัดชั้น ป.5', icon: Target },
+        { id: 'indicator-p6', label: 'ตัวชี้วัดชั้น ป.6', icon: Target },
+      ]
+    },
+    {
+      id: 'basic-info',
+      title: 'ข้อมูลพื้นฐาน',
+      color: 'text-blue-700',
+      bgColor: 'bg-gradient-to-br from-blue-100 to-blue-200',
+      borderColor: 'border-blue-300',
+      items: [
+        { id: 'basic-data', label: 'กรอกข้อมูลพื้นฐาน', icon: Edit3 },
+        { id: 'student-info', label: 'ข้อมูลนักเรียน', icon: Users },
+        { id: 'study-time', label: 'เช็คเวลาเรียน (วัน)', icon: CheckSquare },
+        { id: 'study-time-hour', label: 'แบบนับเวลาเรียน(ชั่วโมง)', icon: ClipboardList },
+        { id: 'indicator-table', label: 'ตารางจำนวนตัวชี้วัด(Print)', icon: FileSpreadsheet },
+        { id: 'score-ratio', label: 'กำหนดสัดส่วนคะแนน', icon: Settings },
+        { id: 'student-list', label: 'ใบรายชื่อนักเรียน', icon: FileText },
+      ]
+    },
+    {
+      id: 'assessment',
+      title: 'การประเมินคุณลักษณะ',
+      color: 'text-purple-700',
+      bgColor: 'bg-gradient-to-br from-purple-100 to-purple-200',
+      borderColor: 'border-purple-300',
+      items: [
+        { id: 'desirable-traits', label: 'การประเมินคุณลักษณะอันพึงประสงค์', icon: GraduationCap },
+        { id: 'reading-analysis', label: 'การประเมินการอ่าน คิดวิเคราะห์ และเขียน', icon: BookMarked },
+        { id: 'student-activity', label: 'กิจกรรมพัฒนาผู้เรียน', icon: Users },
+        { id: 'grade-decision', label: 'การตัดสินผลการเรียน', icon: CheckSquare },
+        { id: 'fix-grades', label: 'การแก้ "0", "ร", "มส"', icon: Edit3 },
+      ]
+    },
+    {
+      id: 'extra-activities',
+      title: 'กิจกรรมเสริม',
+      color: 'text-teal-700',
+      bgColor: 'bg-gradient-to-br from-teal-100 to-teal-200',
+      borderColor: 'border-teal-300',
+      items: [
+        { id: 'guidance', label: 'แนะแนว', icon: Target },
+        { id: 'scout', label: 'ลูกเสือ เนตรนารีฯ', icon: Shield },
+        { id: 'club', label: 'ชุมนุม ชมรม', icon: Users },
+        { id: 'social-primary', label: 'เพื่อสังคมฯ (ประถม)', icon: Heart },
+        { id: 'activity-summary', label: 'สรุปกิจกรรมพัฒนาผู้เรียน', icon: BarChart3 },
+      ]
+    }
+  ];
+
+  const handleMenuClick = (categoryId: string, itemId: string) => {
+    setActiveSection(`${categoryId}-${itemId}`);
+    console.log(`Selected: ${categoryId} -> ${itemId}`);
+  };
+
+  const handleBack = () => {
+    setActiveSection(null);
+  };
+
+  // Show BasicInfoEntry when selected
+  if (activeSection === 'basic-info-basic-data') {
+    return (
+      <BasicInfoEntry
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show PP5StudentInfo when selected
+  if (activeSection === 'basic-info-student-info') {
+    return (
+      <PP5StudentInfo
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show PP5AttendanceHoursSummary when selected
+  if (activeSection === 'basic-info-study-time-hour') {
+    return (
+      <PP5AttendanceHoursSummary
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+
+  if (activeSection === 'basic-info-study-time') {
+    return (
+      <PP5Attendance
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+  // Show Score Ratio Config when selected
+  if (activeSection === 'basic-info-score-ratio') {
+    return (
+      <ScoreRatioConfig
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // ตารางจำนวนตัวชี้วัด (Print)
+  if (activeSection === 'basic-info-indicator-table') {
+    return (
+      <IndicatorCountTable
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // ใบรายชื่อนักเรียน
+  if (activeSection === 'basic-info-student-list') {
+    return (
+      <StudentNameListPrint
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // การตัดสินผลการเรียน
+  if (activeSection === 'assessment-grade-decision') {
+    return (
+      <GradeDecision
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // การแก้ "0", "ร", "มส"
+  if (activeSection === 'assessment-fix-grades') {
+    return (
+      <FixGrades
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // หน้าปก ปพ.5
+  if (activeSection === 'learning-reports-pp5-cover') {
+    return (
+      <PP5Cover
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // การสั่งพิมพ์ ปพ.5
+  if (activeSection === 'learning-reports-pp5-print') {
+    return (
+      <PP5PrintCenter
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Desirable Traits Assessment
+  if (activeSection === 'assessment-desirable-traits') {
+    return (
+      <DesirableTraitsAssessment
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  if (activeSection === 'assessment-reading-analysis') {
+    return (
+      <ReadingAnalysisAssessment
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  if (activeSection === 'assessment-student-activity') {
+    return (
+      <StudentActivityAssessment
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Extra-activities menu → focus a single activity or overall summary
+  const extraActivityMap: Record<string, { focus?: 'guidance' | 'scout' | 'club' | 'social'; title: string; summaryOnly?: boolean }> = {
+    'extra-activities-guidance': { focus: 'guidance', title: 'กิจกรรมแนะแนว' },
+    'extra-activities-scout': { focus: 'scout', title: 'กิจกรรมลูกเสือ เนตรนารี ยุวกาชาด' },
+    'extra-activities-club': { focus: 'club', title: 'กิจกรรมชุมนุม / ชมรม' },
+    'extra-activities-social-primary': { focus: 'social', title: 'กิจกรรมเพื่อสังคมและสาธารณประโยชน์ (ประถม)' },
+    'extra-activities-activity-summary': { title: 'สรุปกิจกรรมพัฒนาผู้เรียน', summaryOnly: true },
+  };
+  if (activeSection && extraActivityMap[activeSection]) {
+    const cfg = extraActivityMap[activeSection];
+    return (
+      <StudentActivityAssessment
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+        focusActivity={cfg.focus}
+        summaryOnly={cfg.summaryOnly}
+        titleOverride={cfg.title}
+      />
+    );
+  }
+
+  // Show Indicator Score Entry when a score-entry subject is selected
+  const scoreEntryMatch = activeSection?.match(/^score-entry-(.+)$/);
+  if (scoreEntryMatch) {
+    const subjectKey = scoreEntryMatch[1];
+    
+    // Check if it's a custom elective subject
+    if (subjectKey.startsWith('custom-elective-')) {
+      const electiveSubject = customElectives.find(s => s.id === subjectKey);
+      if (electiveSubject) {
+        return (
+          <ElectiveScoreEntry
+            subjectInfo={electiveSubject}
+            selectedGrade={selectedGrade}
+            selectedSemester={selectedSemester}
+            selectedAcademicYear={selectedAcademicYear}
+            onBack={handleBack}
+          />
+        );
+      }
+    }
+
+    // Built-in elective subjects (no curriculum indicators — use learning outcomes)
+    if (subjectKey === 'anti-corruption' || subjectKey === 'english-comm') {
+      const defaults = getDefaultSubjectsForGrade(selectedGrade.replace('ป.', ''));
+      const mapId = subjectKey === 'anti-corruption' ? 'anticorrupt' : 'english2';
+      const base = defaults.find(s => s.id === mapId);
+      const subjectInfo: SubjectInfo = base
+        ? { ...base, teacherId: '', teacherName: '', id: subjectKey }
+        : {
+            id: subjectKey,
+            code: subjectKey === 'anti-corruption' ? 'ส' : 'อ',
+            name: subjectKey === 'anti-corruption' ? 'ป้องกันการทุจริต' : 'ภาษาอังกฤษเพื่อการสื่อสาร',
+            shortName: subjectKey === 'anti-corruption' ? 'ป้องกันทุจริต' : 'อังกฤษสื่อสาร',
+            hoursPerWeek: 1,
+            hoursPerYear: 40,
+            passingCriteria: 50,
+            teacherId: '',
+            teacherName: '',
+            subjectCode: '',
+            category: 'elective',
+          };
+      return (
+        <ElectiveScoreEntry
+          subjectInfo={subjectInfo}
+          selectedGrade={selectedGrade}
+          selectedSemester={selectedSemester}
+          selectedAcademicYear={selectedAcademicYear}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    return (
+      <IndicatorScoreEntry
+        subjectMenuId={subjectKey}
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Achievement Summary Report
+  if (activeSection === 'learning-reports-summary-result') {
+    return (
+      <AchievementSummaryReport
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Achievement Chart Report
+  if (activeSection === 'learning-reports-achievement-map') {
+    return (
+      <AchievementChartReport
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Achievement Analysis Report
+  if (activeSection === 'learning-reports-analysis-result') {
+    return (
+      <AchievementAnalysisReport
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  const reportMatch = activeSection?.match(/^learning-reports-report-(.+)$/);
+  if (reportMatch) {
+    const subjectKey = reportMatch[1];
+    return (
+      <StandardReport
+        subjectMenuId={subjectKey}
+        selectedGrade={selectedGrade}
+        selectedSemester={selectedSemester}
+        selectedAcademicYear={selectedAcademicYear}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // Show Curriculum Indicators when selected
+  const indicatorMatch = activeSection?.match(/^curriculum-indicators-indicator-p(\d)$/);
+  if (indicatorMatch) {
+    const grade = `ป.${indicatorMatch[1]}`;
+    return (
+      <CurriculumIndicators
+        gradeLevel={grade}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">
+        <CardHeader className="pb-2">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                <GraduationCap className="w-8 h-8" />
+                ระบบ ปพ.5 โปรแกรมวิเคราะห์และรายงานผลการเรียน
+              </CardTitle>
+              <p className="text-emerald-100 mt-1">
+                ตามหลักสูตรแกนกลาง พ.ศ. 2551 ปรับปรุง พ.ศ. 2560 | โรงเรียนบ้านดอนมูล
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4 items-center bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <label className="text-white font-medium whitespace-nowrap">ปีการศึกษา:</label>
+              <Select value={selectedAcademicYear} onValueChange={setSelectedAcademicYear}>
+                <SelectTrigger className="w-28 bg-white/90 border-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {academicYears.map(year => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-white font-medium whitespace-nowrap">ภาคเรียน:</label>
+              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                <SelectTrigger className="w-20 bg-white/90 border-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-white font-medium whitespace-nowrap">ระดับชั้น:</label>
+              <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+                <SelectTrigger className="w-24 bg-white/90 border-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {primaryGrades.map(grade => (
+                    <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Menu Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {menuCategories.map((category) => (
+          <Card 
+            key={category.id} 
+            className={`${category.bgColor} ${category.borderColor} border-2 shadow-lg hover:shadow-xl transition-all duration-300`}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className={`text-lg font-bold ${category.color} flex items-center gap-2`}>
+                <div className={`w-2 h-6 rounded-full bg-current`}></div>
+                {category.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-2 gap-2">
+                {category.items.map((item) => (
+                  <Button
+                    key={item.id}
+                    variant="outline"
+                    onClick={() => handleMenuClick(category.id, item.id)}
+                    className={`
+                      h-auto py-3 px-3 
+                      bg-white/80 hover:bg-white 
+                      border-2 ${category.borderColor}
+                      ${category.color}
+                      hover:scale-[1.02] transition-all duration-200
+                      flex flex-col items-center justify-center gap-1
+                      text-xs font-medium
+                      shadow-sm hover:shadow-md
+                      ${activeSection === `${category.id}-${item.id}` ? 'ring-2 ring-offset-1 ring-current bg-white' : ''}
+                    `}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-center leading-tight">{item.label}</span>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* สำรอง/กู้คืนข้อมูล ปพ.5 */}
+      <PP5Backup />
+
+      {/* Footer Info */}
+      <Card className="bg-gradient-to-r from-gray-100 to-gray-50 border-gray-200">
+        <CardContent className="py-4">
+          <div className="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-6">
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                ระบบ ปพ.5 สำหรับนักเรียนประถมศึกษา ป.1-6
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester}
+              </span>
+            </div>
+            <div className="text-gray-500">
+              <span className="font-medium">หมายเลขเลือก:</span> {activeSection || 'ยังไม่ได้เลือกเมนู'}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default PP5Management;

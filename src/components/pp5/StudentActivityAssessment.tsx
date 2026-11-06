@@ -10,25 +10,21 @@ import { getStudents } from '@/utils/studentStorage';
 import type { Student } from '@/types/student';
 import { createRoot } from 'react-dom/client';
 import { toast } from 'sonner';
+import { ACTIVITY_DEFS, ACTIVITY_PASS_THRESHOLD, activityStorageKey } from '@/utils/pp5Activities';
 
 const primaryGrades = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
 
 export type ActivityKey = 'guidance' | 'scout' | 'club' | 'social';
 interface ActivityDef { key: ActivityKey; name: string; short: string; hours: number; }
 
-const ACTIVITIES: ActivityDef[] = [
-  { key: 'guidance', name: 'กิจกรรมแนะแนว', short: 'แนะแนว', hours: 40 },
-  { key: 'scout', name: 'กิจกรรมลูกเสือ เนตรนารี ยุวกาชาด', short: 'ลูกเสือฯ', hours: 40 },
-  { key: 'club', name: 'กิจกรรมชุมนุม/ชมรม', short: 'ชุมนุม', hours: 40 },
-  { key: 'social', name: 'กิจกรรมเพื่อสังคมและสาธารณประโยชน์', short: 'เพื่อสังคม', hours: 10 },
-];
+const ACTIVITIES: ActivityDef[] = ACTIVITY_DEFS; // นิยามกิจกรรมอยู่ที่ utils/pp5Activities.ts (ใช้ร่วมกับหน้าตัดสินผลการเรียน)
 
 // value: 1 = ผ่าน (participated), 0 = ไม่มา, -1 = มผ. explicit
 type CellVal = 0 | 1;
 type ActivityScores = Record<string, CellVal[]>; // studentId -> hours[]
 type AllScores = Record<ActivityKey, ActivityScores>;
 
-const PASS_THRESHOLD = 0.8; // 80% attendance required to pass
+const PASS_THRESHOLD = ACTIVITY_PASS_THRESHOLD; // 80% attendance required to pass
 
 interface Props {
   selectedGrade: string;
@@ -66,7 +62,7 @@ const StudentActivityAssessment: React.FC<Props> = ({
     [focusActivity]
   );
 
-  const storageKey = `pp5-student-activity-${currentGrade}-${selectedAcademicYear}-${selectedSemester}`;
+  const storageKey = activityStorageKey(currentGrade, selectedAcademicYear, selectedSemester);
 
   useEffect(() => {
     (async () => {
