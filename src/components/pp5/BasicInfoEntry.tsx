@@ -20,6 +20,7 @@ import { generateAcademicYears } from '@/utils/data';
 import { getTeachersLatestYear } from '@/utils/teacherStorage';
 import type { Teacher } from '@/types/teacher';
 import TeacherSelectDialog from './TeacherSelectDialog';
+import ThaiDatePicker from './ThaiDatePicker';
 import SubjectInfoTable from './SubjectInfoTable';
 import { 
   PP5BasicInfo, 
@@ -300,11 +301,9 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
                 </div>
                 <div className="space-y-2">
                   <Label className="text-pink-600 font-medium">วันที่อนุมัติผลการเรียน</Label>
-                  <Input 
-                    type="date"
-                    value={basicInfo.approvalDate} 
-                    onChange={(e) => setBasicInfo(prev => ({ ...prev, approvalDate: e.target.value }))}
-                    className="bg-pink-50 border-pink-200"
+                  <ThaiDatePicker
+                    value={basicInfo.approvalDate}
+                    onChange={(v) => setBasicInfo(prev => ({ ...prev, approvalDate: v }))}
                   />
                 </div>
 

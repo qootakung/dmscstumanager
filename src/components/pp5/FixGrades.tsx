@@ -9,6 +9,7 @@ import { getStudents } from '@/utils/studentStorage';
 import type { Student } from '@/types/student';
 import { computeSubjectResults, sortStudents, fullName, getBasicInfo } from '@/utils/pp5GradeCalc';
 import { openPrintWindow, signatureBlock, emptyRows } from '@/utils/pp5Print';
+import ThaiDatePicker, { formatThaiDate } from './ThaiDatePicker';
 import { toast } from 'sonner';
 
 interface Props {
@@ -129,7 +130,7 @@ const FixGrades: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedA
         <td class="num">${r.status}</td>
         <td>${r.reason}</td>
         <td>${r.fixMethod}</td>
-        <td class="num">${r.fixDate}</td>
+        <td class="num">${formatThaiDate(r.fixDate, true)}</td>
         <td class="num">${r.resultGrade}</td>
       </tr>`).join('');
 
@@ -252,8 +253,7 @@ const FixGrades: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedA
                           className="h-8 border-0 rounded-none" />
                       </td>
                       <td className="border border-gray-300 p-0">
-                        <Input type="date" value={r.fixDate} onChange={e => update(r.id, { fixDate: e.target.value })}
-                          className="h-8 border-0 rounded-none" />
+                        <ThaiDatePicker variant="plain" value={r.fixDate} onChange={v => update(r.id, { fixDate: v })} />
                       </td>
                       <td className="border border-gray-300 p-0">
                         <Input value={r.resultGrade} onChange={e => update(r.id, { resultGrade: e.target.value })}
