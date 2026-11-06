@@ -37,6 +37,8 @@ interface BasicInfoEntryProps {
   selectedSemester: string;
   selectedAcademicYear: string;
   onBack?: () => void;
+  /** แจ้งหน้าแม่เมื่อเปลี่ยนระดับชั้น/ปีการศึกษาในหน้านี้ เพื่อให้เมนูอื่นๆ ใช้ค่าเดียวกัน */
+  onContextChange?: (grade: string, academicYear: string) => void;
 }
 
 const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
@@ -44,6 +46,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
   selectedSemester,
   selectedAcademicYear,
   onBack,
+  onContextChange,
 }) => {
   // Extract grade number from selectedGrade (e.g., "ป.1" -> "1")
   const getGradeNumber = (grade: string) => grade.replace('ป.', '');
@@ -152,6 +155,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
   
   const handleGradeLevelChange = (newGradeLevel: string) => {
     const loaded = loadOrInitializeForContext(newGradeLevel, basicInfo.academicYear, basicInfo.semester);
+    onContextChange?.(`ป.${newGradeLevel}`, basicInfo.academicYear);
     if (loaded) toast.success(`โหลดข้อมูลที่บันทึกไว้ของประถมศึกษาปีที่ ${newGradeLevel}`);
     else toast.info(`ประถมศึกษาปีที่ ${newGradeLevel}: ยังไม่มีข้อมูลบันทึก`);
   };
@@ -164,6 +168,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
 
   const handleAcademicYearChange = (newAcademicYear: string) => {
     const loaded = loadOrInitializeForContext(basicInfo.gradeLevel, newAcademicYear, basicInfo.semester);
+    onContextChange?.(`ป.${basicInfo.gradeLevel}`, newAcademicYear);
     if (loaded) toast.success(`โหลดข้อมูล ปีการศึกษา ${newAcademicYear}`);
     else toast.info(`ปีการศึกษา ${newAcademicYear}: ยังไม่มีข้อมูลบันทึก`);
   };
