@@ -74,13 +74,18 @@ export const listUnlockedMonths = (semester: string, academicYear: string): stri
     .filter(key => !locked[key]);
 };
 
+/** ทั้งปีการศึกษา = ภาคเรียนที่ 1 + 2 */
+export const loadYearAttendance = (idsByCode: Record<string, string[]>, academicYear: string) =>
+  loadSemesterAttendance(idsByCode, ['1', '2'], academicYear);
+
 export const loadSemesterAttendance = async (
   idsByCode: Record<string, string[]>,
-  semester: string,
+  semesters: string | string[],
   academicYear: string,
 ): Promise<SemesterAttendance> => {
-  const schoolDays = listSchoolDays(semester, academicYear);
-  const unlockedMonths = listUnlockedMonths(semester, academicYear);
+  const sems = Array.isArray(semesters) ? semesters : [semesters];
+  const schoolDays = sems.flatMap(sem => listSchoolDays(sem, academicYear)).sort();
+  const unlockedMonths = sems.flatMap(sem => listUnlockedMonths(sem, academicYear));
   const totalSchoolDays = schoolDays.length;
   const minRequiredDays = Math.ceil(totalSchoolDays * ATTENDANCE_PASS_RATIO);
   const byStudent: Record<string, StudentAttendanceResult> = {};
