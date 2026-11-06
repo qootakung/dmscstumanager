@@ -52,6 +52,7 @@ import PP5Cover from './pp5/PP5Cover';
 import PP5PrintCenter from './pp5/PP5PrintCenter';
 import PP5Backup from './pp5/PP5Backup';
 import { toast } from 'sonner';
+import PP5CloudGate from './pp5/PP5CloudGate';
 import { PP5_YEAR_SEMESTER, runYearMigrationOnce } from '@/utils/pp5YearMigration';
 import type { SubjectInfo } from './pp5/types';
 import { getDefaultSubjectsForGrade } from './pp5/types';
@@ -100,7 +101,7 @@ const getCurrentAcademicYear = (): string => {
   return String(gregorianYear + 543);
 };
 
-const PP5Management: React.FC = () => {
+const PP5ManagementInner: React.FC = () => {
   const [selectedGrade, setSelectedGrade] = useState<string>('ป.1');
   const [selectedSemester] = useState<string>(PP5_YEAR_SEMESTER); // ปพ.5 ทำรายปี ใช้ภาคเรียนที่ 2 เป็นค่าคงที่
 
@@ -260,6 +261,7 @@ const PP5Management: React.FC = () => {
         selectedSemester={selectedSemester}
         selectedAcademicYear={selectedAcademicYear}
         onBack={handleBack}
+        onContextChange={(g, y) => { setSelectedGrade(g); setSelectedAcademicYear(y); }}
       />
     );
   }
@@ -682,5 +684,11 @@ const PP5Management: React.FC = () => {
     </div>
   );
 };
+
+const PP5Management: React.FC = () => (
+  <PP5CloudGate>
+    <PP5ManagementInner />
+  </PP5CloudGate>
+);
 
 export default PP5Management;
