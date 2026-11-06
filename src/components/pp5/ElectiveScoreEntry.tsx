@@ -8,7 +8,7 @@ import { Student } from '@/types/student';
 import { toast } from 'sonner';
 import { generateEmptyRowsHtml } from '@/utils/pp5PrintUtils';
 import { SubjectInfo } from './types';
-import { finalizeScore } from '@/utils/pp5GradeCalc';
+import { finalizeScore, DEFAULT_ELECTIVE_RATIO } from '@/utils/pp5GradeCalc';
 
 interface ElectiveScoreEntryProps {
   subjectInfo: SubjectInfo;
@@ -71,7 +71,8 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
   const [scoreData, setScoreData] = useState<ElectiveScoreData>({
     maxScorePerOutcome: 10,
     endYearMaxScore: 20,
-    learningOutcomes: 8,
+    // ใช้จำนวนผลการเรียนรู้ที่ตั้งไว้ตอนเพิ่มวิชา (1-8) ถ้าไม่มีใช้ 8
+    learningOutcomes: Math.min(8, Math.max(1, subjectInfo.learningOutcomes || 8)),
     studentScores: {},
   });
 
@@ -79,23 +80,42 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
 
   // Target totals from ScoreRatioConfig (มิดเยียร์ต้องเท่ากับสัดส่วนที่กำหนด)
   const ratioTargets = useMemo(() => {
+    // วิชาเพิ่มเติมที่ครูเพิ่มเอง (custom-elective-*) ใช้กติกาเดียวกัน: ปรับคะแนนดิบเป็นสัดส่วนระหว่างปี (ค่าตั้งต้น 80:20)
+    const groupId = RATIO_GROUP_ID_MAP[subjectInfo.id] ?? (subjectInfo.id.startsWith('custom-elective-') ? subjectInfo.id : null);
+    if (!groupId) return null;
+    // ยังไม่เคยบันทึกสัดส่วนในหน้ากำหนดสัดส่วนคะแนน → ใช้ค่าตั้งต้น 80:20 (คะแนนดิบจะถูกปรับสัดส่วนให้เอง)
+    const fallback = { midYear: DEFAULT_ELECTIVE_RATIO.midYear, endYear: DEFAULT_ELECTIVE_RATIO.endYear, isDefault: true };
     const key = getRatioStorageKey(gradeKey, selectedAcademicYear, selectedSemester);
     const saved = localStorage.getItem(key);
-    if (!saved) return null;
+    if (!saved) return fallback;
     try {
       const parsed = JSON.parse(saved);
-      const groupId = RATIO_GROUP_ID_MAP[subjectInfo.id];
-      if (!groupId) return null;
       const group = parsed.find((g: any) => g.groupId === groupId);
-      if (!group) return null;
+      if (!group) return fallback;
       return {
-        midYear: group.midYearTotal || 0,
-        endYear: group.endYearScore || 0,
+        midYear: group.midYearTotal || fallback.midYear,
+        endYear: group.endYearScore || fallback.endYear,
+        isDefault: false,
       };
     } catch {
-      return null;
+      return fallback;
     }
   }, [subjectInfo.id, gradeKey, selectedAcademicYear, selectedSemester, scoreData]);
+
+  // คะแนนสอบปลายปีเต็มต้องตามสัดส่วนที่กำหนด (70:30 / 80:20) อัตโนมัติ ถ้าลดลงให้ตัดคะแนนที่เกินเต็ม
+  const targetEndYear = ratioTargets?.endYear;
+  useEffect(() => {
+    if (!targetEndYear) return;
+    setScoreData(prev => {
+      if (prev.endYearMaxScore === targetEndYear) return prev;
+      const studentScores = { ...prev.studentScores };
+      Object.keys(studentScores).forEach(id => {
+        const cur = studentScores[id]?.endYearScore ?? 0;
+        if (cur > targetEndYear) studentScores[id] = { ...studentScores[id], endYearScore: targetEndYear };
+      });
+      return { ...prev, endYearMaxScore: targetEndYear, studentScores };
+    });
+  }, [targetEndYear]);
 
   // Load students
   useEffect(() => {
@@ -437,6 +457,9 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
                 type="number"
                 className="w-24 h-8"
                 value={scoreData.endYearMaxScore}
+                readOnly={!!ratioTargets}
+                disabled={!!ratioTargets}
+                title={ratioTargets ? 'ตามสัดส่วนที่กำหนดในหน้ากำหนดสัดส่วนคะแนน' : undefined}
                 onChange={(e) => setScoreData(prev => ({ ...prev, endYearMaxScore: parseInt(e.target.value) || 20 }))}
               />
             </div>
@@ -452,7 +475,8 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
                   {' '}| ปลายปี: <strong>{ratioTargets.endYear}</strong>
                 </span>
                 <span className="text-muted-foreground">
-                  (คะแนนดิบ {getRawMax()} จะถูกปรับสัดส่วนเป็น {ratioTargets.midYear})
+                  (คะแนนดิบเต็ม {getRawMax()} จะถูกปรับสัดส่วนเป็น {ratioTargets.midYear}
+                  {ratioTargets.isDefault ? ' — ใช้ค่าตั้งต้น ยังไม่ได้บันทึกในหน้ากำหนดสัดส่วนคะแนน' : ''})
                 </span>
               </div>
               {scoreData.endYearMaxScore !== ratioTargets.endYear && (

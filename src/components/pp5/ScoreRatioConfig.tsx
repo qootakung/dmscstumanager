@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Printer, Settings } from 'lucide-react';
 import { allSubjectGroups } from '@/data/curriculumIndicators';
 import { toast } from 'sonner';
-import { splitSocialRatioGroup, migrateRatioGroups } from '@/utils/pp5GradeCalc';
+import { splitSocialRatioGroup, migrateRatioGroups, getBasicInfo } from '@/utils/pp5GradeCalc';
 
 interface ScoreRatioConfigProps {
   selectedGrade: string;
@@ -41,6 +41,13 @@ const SUBJECT_GROUP_COLORS: { [key: string]: { bg: string; header: string; text:
   career: { bg: 'bg-amber-50', header: 'bg-amber-500', text: 'text-amber-700', stripe: 'bg-amber-100' },
   english: { bg: 'bg-teal-50', header: 'bg-teal-500', text: 'text-teal-700', stripe: 'bg-teal-100' },
 };
+
+// กลุ่มวิชาเพิ่มเติม (วิชาที่มีมาให้ + วิชาที่ครูเพิ่มเอง): ตั้งสัดส่วน ระหว่างปี : ปลายปี รวม 100 ด้วยปุ่มเลือก 70:30 / 80:20
+const isElectiveGroupId = (id: string) => id.startsWith('elective-') || id.startsWith('custom-elective-');
+const RATIO_PRESETS: { mid: number; end: number }[] = [
+  { mid: 70, end: 30 },
+  { mid: 80, end: 20 },
+];
 
 const getStorageKey = (grade: string, year: string, semester: string) =>
   `pp5-score-ratio-${grade}-${year}-${semester}`;
@@ -269,20 +276,30 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
     { groupId: 'elective-english-comm', groupName: 'รายวิชาเพิ่มเติม - ภาษาอังกฤษเพื่อการสื่อสาร' },
   ];
 
-  const buildElectiveRatios = (): SubjectGroupRatio[] => {
-    return ELECTIVE_RATIO_GROUPS.map(g => ({
-      groupId: g.groupId,
-      groupName: g.groupName,
-      strands: [
-        {
-          strandName: 'ผลการเรียนรู้',
-          standards: [{ standardCode: 'รวมคะแนนระหว่างปี', score: 80 }],
-        },
-      ],
-      midYearTotal: 80,
-      endYearScore: 20,
-    }));
+  // วิชาเพิ่มเติมที่ครูเพิ่มเองในหน้าข้อมูลพื้นฐาน (เช่น วิทย์พลังสิบ) — ใช้ id ของวิชาเป็น groupId
+  const getCustomElectiveGroups = (): { groupId: string; groupName: string }[] => {
+    const info = getBasicInfo(gradeKey, selectedAcademicYear, selectedSemester);
+    if (!Array.isArray(info?.subjects)) return [];
+    return info.subjects
+      .filter((x: any) => typeof x?.id === 'string' && x.id.startsWith('custom-elective-'))
+      .map((x: any) => ({ groupId: x.id as string, groupName: `รายวิชาเพิ่มเติม - ${x.name || 'ไม่ระบุชื่อ'}` }));
   };
+
+  const makeElectiveRatio = (g: { groupId: string; groupName: string }, mid = 80): SubjectGroupRatio => ({
+    groupId: g.groupId,
+    groupName: g.groupName,
+    strands: [
+      {
+        strandName: 'ผลการเรียนรู้',
+        standards: [{ standardCode: 'รวมคะแนนระหว่างปี', score: mid }],
+      },
+    ],
+    midYearTotal: mid,
+    endYearScore: 100 - mid,
+  });
+
+  const buildElectiveRatios = (): SubjectGroupRatio[] =>
+    [...ELECTIVE_RATIO_GROUPS, ...getCustomElectiveGroups()].map(g => makeElectiveRatio(g));
 
   const buildAllDefaults = (): SubjectGroupRatio[] => {
     return [...buildDefaultRatios(), ...buildElectiveRatios()];
@@ -295,9 +312,14 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
       try {
         const parsed: SubjectGroupRatio[] = migrateRatioGroups(JSON.parse(saved));
         // Ensure elective groups exist (for backwards compatibility with old saves)
-        const existingIds = new Set(parsed.map(g => g.groupId));
+        // และสอดคล้องกับวิชาที่เพิ่มเองในข้อมูลพื้นฐาน (เพิ่มแถวใหม่ / ตัดวิชาที่ถูกลบ / อัปเดตชื่อ)
+        const customNow = new Map(getCustomElectiveGroups().map(g => [g.groupId, g.groupName]));
+        const kept = parsed
+          .filter(g => !g.groupId.startsWith('custom-elective-') || customNow.has(g.groupId))
+          .map(g => (customNow.has(g.groupId) ? { ...g, groupName: customNow.get(g.groupId)! } : g));
+        const existingIds = new Set(kept.map(g => g.groupId));
         const missingElectives = buildElectiveRatios().filter(g => !existingIds.has(g.groupId));
-        setRatios([...parsed, ...missingElectives]);
+        setRatios([...kept, ...missingElectives]);
         return;
       } catch (e) {
         console.error('Error loading score ratios:', e);
@@ -306,7 +328,21 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
     setRatios(buildAllDefaults());
   }, [gradeKey, selectedAcademicYear, selectedSemester]);
 
+  /** วิชาเพิ่มเติม: ตั้งระหว่างปี = mid แล้วปลายปีปรับเป็น 100 - mid อัตโนมัติ (รวม 100 เสมอ) */
+  const setElectiveMid = (groupId: string, mid: number) => {
+    const m = Math.max(0, Math.min(100, Math.round(mid) || 0));
+    setRatios(prev => prev.map(g => {
+      if (g.groupId !== groupId) return g;
+      const strands = g.strands.map((st, si) => si !== 0 ? st : {
+        ...st,
+        standards: st.standards.map((sd, i) => i === 0 ? { ...sd, score: m } : sd),
+      });
+      return { ...g, strands, midYearTotal: m, endYearScore: 100 - m };
+    }));
+  };
+
   const updateStandardScore = (groupId: string, strandIdx: number, stdIdx: number, value: number) => {
+    if (isElectiveGroupId(groupId)) { setElectiveMid(groupId, value); return; }
     setRatios(prev => prev.map(g => {
       if (g.groupId !== groupId) return g;
       const newStrands = g.strands.map((strand, si) => {
@@ -320,6 +356,7 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
   };
 
   const updateEndYearScore = (groupId: string, value: number) => {
+    if (isElectiveGroupId(groupId)) { setElectiveMid(groupId, 100 - (Math.max(0, Math.min(100, value)) || 0)); return; }
     setRatios(prev => prev.map(g => g.groupId === groupId ? { ...g, endYearScore: value } : g));
   };
 
@@ -414,6 +451,25 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
+              {isElectiveGroupId(group.groupId) && (
+                <div className="flex flex-wrap items-center gap-2 border-b border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+                  <span className="font-medium">เลือกสัดส่วน (ระหว่างปี : ปลายปี)</span>
+                  {RATIO_PRESETS.map(p => {
+                    const active = group.midYearTotal === p.mid && group.endYearScore === p.end;
+                    return (
+                      <Button key={p.mid} type="button" size="sm"
+                        variant={active ? 'default' : 'outline'}
+                        className={active ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                        onClick={() => setElectiveMid(group.groupId, p.mid)}>
+                        {p.mid} : {p.end}
+                      </Button>
+                    );
+                  })}
+                  <span className="text-xs text-muted-foreground">
+                    หรือกรอกเอง — ปลายปีจะปรับให้รวมเป็น 100 อัตโนมัติ คะแนนที่กรอกในหน้ากรอกคะแนนจะถูกปรับตามสัดส่วนนี้
+                  </span>
+                </div>
+              )}
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className={colors.stripe}>
