@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -682,5 +681,4 @@ const PP5Management: React.FC = () => {
     </div>
   );
 };
-
 export default PP5Management;
