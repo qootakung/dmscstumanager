@@ -32,6 +32,10 @@ const ELECTIVE_RATIO_GROUP: Record<string, string> = {
   'english-comm': 'elective-english-comm',
 };
 
+/** สัดส่วนตั้งต้นของวิชาเพิ่มเติม (ระหว่างปี 80 + ปลายปี 20) ใช้เมื่อยังไม่เคยบันทึกสัดส่วนในหน้ากำหนดสัดส่วนคะแนน
+ *  ต้องตรงกับค่าตั้งต้นใน ScoreRatioConfig (buildElectiveRatios) */
+export const DEFAULT_ELECTIVE_RATIO = { midYear: 80, endYear: 20 };
+
 export const indicatorScoreKey = (menuId: string, grade: string, year: string, semester: string) =>
   `pp5-indicator-scores-${menuId}-${grade}-${year}-${semester}`;
 
@@ -223,16 +227,32 @@ export const computeSubjectResults = (
 ): PP5SubjectResult[] => {
   const ratioData = migrateRatioGroups(readJSON<any[]>(ratioKey(gradeKey, academicYear, semester), []));
 
-  return PP5_SUBJECTS.map(baseDef => {
+  // วิชาเพิ่มเติมที่ครูเพิ่มเองในหน้าข้อมูลพื้นฐาน (เช่น วิทย์พลังสิบ) ให้รวมในการคำนวณ/สรุปผลด้วย
+  const info = getBasicInfo(gradeKey, academicYear, semester);
+  const customDefs: PP5SubjectDef[] = Array.isArray(info?.subjects)
+    ? info.subjects
+        .filter((x: any) => typeof x?.id === 'string' && x.id.startsWith('custom-elective-'))
+        .map((x: any): PP5SubjectDef => ({
+          menuId: x.id,
+          groupId: null,
+          name: x.name || 'รายวิชาเพิ่มเติม',
+          shortName: x.shortName || x.name || 'วิชาเพิ่มเติม',
+          credit: Number(x.hoursPerYear) > 0 ? Number(x.hoursPerYear) / 40 : 1.0,
+          category: 'elective',
+        }))
+    : [];
+
+  return [...PP5_SUBJECTS, ...customDefs].map(baseDef => {
     const def: PP5SubjectDef = { ...baseDef, credit: resolveCredit(baseDef, gradeKey, academicYear, semester) };
     const results: Record<string, PP5StudentSubjectResult> = {};
 
     if (def.category === 'elective') {
       const data = readJSON<any>(electiveScoreKey(def.menuId, gradeKey, academicYear, semester), null);
-      const group = ratioData.find((g: any) => g.groupId === ELECTIVE_RATIO_GROUP[def.menuId]);
-      const midTarget = group?.midYearTotal || 0;
-      const endTarget = group?.endYearScore || data?.endYearMaxScore || 0;
-      const outcomes = data?.learningOutcomes || 8;
+      const group = ratioData.find((g: any) => g.groupId === (ELECTIVE_RATIO_GROUP[def.menuId] ?? def.menuId));
+      // คะแนนดิบ (จำนวนผลการเรียนรู้ × 10) ถูกปรับเป็นสัดส่วนระหว่างปีเสมอ เช่น สอน 4 หน่วย (เต็ม 40) → 80
+      const midTarget = group?.midYearTotal || DEFAULT_ELECTIVE_RATIO.midYear;
+      const endTarget = group?.endYearScore || data?.endYearMaxScore || DEFAULT_ELECTIVE_RATIO.endYear;
+      const outcomes = data?.learningOutcomes || 8; // ต้องตรงกับค่าตั้งต้นในหน้ากรอกคะแนน
       const rawMax = outcomes * (data?.maxScorePerOutcome || 10);
       const totalMax = (midTarget || rawMax) + endTarget;
 
