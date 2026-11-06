@@ -220,6 +220,38 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
     }));
   }, []);
 
+  // ---- เติมคะแนนทั้งห้อง (ครูไม่ต้องกรอกทีละช่อง) แล้วค่อยแก้เป็นรายคน ----
+  const [fillIndicator, setFillIndicator] = useState<string>('');
+  const [fillEnd, setFillEnd] = useState<string>('');
+  const [fillOnlyEmpty, setFillOnlyEmpty] = useState<boolean>(true);
+
+  /** เติมคะแนนให้นักเรียนทุกคน: indicatorIds = ตัวชี้วัดที่จะเติม, includeEnd = เติมสอบปลายปีด้วย */
+  const fillColumns = (indicatorIds: string[], includeEnd: boolean, endMax: number) => {
+    const vInd = Math.max(0, Math.min(parseInt(fillIndicator), scoreData.maxScorePerIndicator));
+    const vEnd = Math.max(0, Math.min(parseInt(fillEnd), endMax));
+    if (indicatorIds.length > 0 && Number.isNaN(vInd)) { toast.error('กรอกคะแนนที่ต้องการเติมในช่อง "ตัวชี้วัด" ก่อน'); return; }
+    if (includeEnd && Number.isNaN(vEnd)) { toast.error('กรอกคะแนนที่ต้องการเติมในช่อง "สอบปลายปี" ก่อน'); return; }
+    if (includeEnd && endMax <= 0) { toast.error('ยังไม่ได้กำหนดสัดส่วนคะแนนสอบปลายปี'); return; }
+    if (students.length === 0) return;
+
+    setScoreData(prev => {
+      const next = { ...prev, studentScores: { ...prev.studentScores } };
+      students.forEach(st => {
+        const cur = next.studentScores[st.id];
+        const indicators = { ...(cur?.indicators || {}) };
+        let endYearScore = cur?.endYearScore ?? 0;
+        indicatorIds.forEach(id => {
+          if (fillOnlyEmpty && (indicators[id] ?? 0) > 0) return;
+          indicators[id] = vInd;
+        });
+        if (includeEnd && !(fillOnlyEmpty && endYearScore > 0)) endYearScore = vEnd;
+        next.studentScores[st.id] = { indicators, endYearScore };
+      });
+      return next;
+    });
+    toast.success('เติมคะแนนให้ทั้งห้องแล้ว — แก้รายคนได้ แล้วกด "บันทึก"');
+  };
+
   // Calculate standard summary for a student
   const calcStandardSummary = (studentId: string, group: StandardColumnGroup): number => {
     if (group.standardWeight === 0) return 0;
@@ -513,6 +545,41 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
         <Card><CardContent className="py-8 text-center text-muted-foreground">ไม่พบข้อมูลตัวชี้วัดสำหรับชั้น {gradeKey}</CardContent></Card>
       ) : (
         <>
+          {/* เติมคะแนนทั้งห้อง */}
+          <Card className="border-emerald-200 bg-emerald-50/50">
+            <CardContent className="py-3">
+              <div className="flex flex-wrap items-end gap-3 text-sm">
+                <span className="font-semibold text-emerald-800 pb-1.5">เติมคะแนนทั้งห้อง</span>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium">ตัวชี้วัด (0-{scoreData.maxScorePerIndicator})</label>
+                  <Input type="number" min={0} max={scoreData.maxScorePerIndicator} placeholder="เช่น 9" className="w-20 h-8 bg-white"
+                    value={fillIndicator} onChange={e => setFillIndicator(e.target.value)} />
+                </div>
+                <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-800 bg-white"
+                  onClick={() => fillColumns(groups.flatMap(g => g.indicators.map(i => i.id)), false, 0)}>
+                  เติมทุกตัวชี้วัด
+                </Button>
+                <div className="space-y-1 ml-2">
+                  <label className="text-xs font-medium">สอบปลายปี (0-{endYearWeight})</label>
+                  <Input type="number" min={0} max={endYearWeight} placeholder="เช่น 15" className="w-20 h-8 bg-white"
+                    value={fillEnd} onChange={e => setFillEnd(e.target.value)} />
+                </div>
+                <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-800 bg-white"
+                  onClick={() => fillColumns([], true, endYearWeight)}>
+                  เติมสอบปลายปี
+                </Button>
+                <label className="flex items-center gap-1.5 pb-1.5 ml-2 cursor-pointer">
+                  <input type="checkbox" checked={fillOnlyEmpty} onChange={e => setFillOnlyEmpty(e.target.checked)} />
+                  เติมเฉพาะช่องที่ยังว่าง (ไม่ทับคะแนนที่กรอกแล้ว)
+                </label>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                กรอกคะแนน (เช่น 9) แล้วกดเติม ทุกคนจะได้คะแนนนี้ จากนั้นแก้เฉพาะคนที่ต่างออกไป (เช่น 7) ได้เลย
+                หรือกดปุ่ม ↓ ใต้หัวคอลัมน์เพื่อเติมทีละตัวชี้วัด / ↓ทั้งหมด เพื่อเติมทั้งมาตรฐาน
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Score Entry Table */}
           <Card className="border-2 shadow-md">
             <CardHeader className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 rounded-t-lg">
@@ -524,8 +591,8 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                   <thead>
                     {/* Row 1: Strand names */}
                     <tr className="bg-teal-100">
-                      <th rowSpan={4} className="border border-gray-300 px-2 py-1 text-center sticky left-0 bg-teal-100 z-10 w-8">ที่</th>
-                      <th rowSpan={4} className="border border-gray-300 px-2 py-1 text-left sticky left-8 bg-teal-100 z-10 min-w-[120px]">ชื่อ-นามสกุล</th>
+                      <th rowSpan={5} className="border border-gray-300 px-2 py-1 text-center sticky left-0 bg-teal-100 z-10 w-8">ที่</th>
+                      <th rowSpan={5} className="border border-gray-300 px-2 py-1 text-left sticky left-8 bg-teal-100 z-10 min-w-[120px]">ชื่อ-นามสกุล</th>
                       {strandSpans.map((s, i) => (
                         <th key={i} colSpan={s.colspan} className="border border-gray-300 px-1 py-1 text-center bg-cyan-100 text-cyan-800 text-[10px]">
                           {s.name}
@@ -563,6 +630,33 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
                           <th key={`max-${g.standardCode}`} className="border border-gray-300 px-1 py-0.5 text-center bg-yellow-50 text-[10px]">{g.standardWeight.toFixed(1)}</th>
                         ])
                       )}
+                    </tr>
+                    {/* Row 5: เติมทั้งคอลัมน์ */}
+                    <tr className="bg-emerald-50">
+                      {groups.map(g => (
+                        <React.Fragment key={`fill-${g.standardCode}`}>
+                          {g.indicators.map(ind => (
+                            <th key={`fill-${ind.id}`} className="border border-gray-300 p-0 text-center">
+                              <button type="button" title={`เติมตัวชี้วัดที่ ${ind.index} (${g.standardCode}) ให้ทุกคน`}
+                                onClick={() => fillColumns([ind.id], false, 0)}
+                                className="w-full h-6 text-emerald-700 hover:bg-emerald-200 font-bold">↓</button>
+                            </th>
+                          ))}
+                          <th className="border border-gray-300 p-0 text-center bg-yellow-50">
+                            <button type="button" title={`เติมทุกตัวชี้วัดของมาตรฐาน ${g.standardCode} ให้ทุกคน`}
+                              onClick={() => fillColumns(g.indicators.map(i => i.id), false, 0)}
+                              className="w-full h-6 text-[10px] text-emerald-700 hover:bg-emerald-200 font-bold">↓ทั้งหมด</button>
+                          </th>
+                        </React.Fragment>
+                      ))}
+                      <th className="border border-gray-300 p-0 bg-green-50"></th>
+                      <th className="border border-gray-300 p-0 text-center bg-orange-50">
+                        <button type="button" title="เติมคะแนนสอบปลายปีให้ทุกคน"
+                          onClick={() => fillColumns([], true, endYearWeight)}
+                          className="w-full h-6 text-emerald-700 hover:bg-emerald-200 font-bold">↓</button>
+                      </th>
+                      <th className="border border-gray-300 p-0 bg-red-50"></th>
+                      <th className="border border-gray-300 p-0 bg-purple-50"></th>
                     </tr>
                   </thead>
                   <tbody>
