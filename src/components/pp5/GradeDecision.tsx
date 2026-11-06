@@ -10,7 +10,7 @@ import {
   computeSubjectResults, sortStudents, fullName, getBasicInfo,
   type PP5SubjectResult,
 } from '@/utils/pp5GradeCalc';
-import { loadSemesterAttendance, type SemesterAttendance } from '@/utils/pp5Attendance';
+import { loadYearAttendance, type SemesterAttendance } from '@/utils/pp5Attendance';
 import { loadActivityResults, ACTIVITY_DEFS } from '@/utils/pp5Activities';
 import { decideStudent, type FixRecordLite } from '@/utils/pp5Decision';
 import { openPrintWindow, signatureBlock } from '@/utils/pp5Print';
@@ -51,7 +51,7 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
         (idsByCode[code] = idsByCode[code] || []).push(s.id);
       });
       try {
-        const att = await loadSemesterAttendance(idsByCode, selectedSemester, selectedAcademicYear);
+        const att = await loadYearAttendance(idsByCode, selectedAcademicYear);
         if (!cancelled) setAttendance(att);
       } catch (e) {
         console.error('Error loading attendance:', e);
