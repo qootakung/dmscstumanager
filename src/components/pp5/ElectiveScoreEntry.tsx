@@ -233,6 +233,40 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
     return finalizeScore(midYearTotal, endYear, totalMax).percent;
   };
 
+  // ---- เติมคะแนนทั้งห้อง (ครูไม่ต้องกรอกทีละช่อง) แล้วค่อยแก้เป็นรายคน ----
+  const [fillOutcome, setFillOutcome] = useState<string>('');
+  const [fillEnd, setFillEnd] = useState<string>('');
+  const [fillOnlyEmpty, setFillOnlyEmpty] = useState<boolean>(true);
+
+  /** เติมคะแนนให้นักเรียนทุกคนในคอลัมน์ที่ระบุ (cols = เลขผลการเรียนรู้, 'end' = สอบปลายปี) */
+  const fillColumns = (cols: number[], includeEnd: boolean) => {
+    const vOut = Math.max(0, Math.min(parseInt(fillOutcome), scoreData.maxScorePerOutcome));
+    const vEnd = Math.max(0, Math.min(parseInt(fillEnd), scoreData.endYearMaxScore));
+    if (cols.length > 0 && Number.isNaN(vOut)) { toast.error('กรอกคะแนนที่ต้องการเติมในช่อง "ผลการเรียนรู้" ก่อน'); return; }
+    if (includeEnd && Number.isNaN(vEnd)) { toast.error('กรอกคะแนนที่ต้องการเติมในช่อง "สอบปลายปี" ก่อน'); return; }
+    if (students.length === 0) return;
+
+    let filled = 0;
+    setScoreData(prev => {
+      const next = { ...prev, studentScores: { ...prev.studentScores } };
+      students.forEach(st => {
+        const cur = next.studentScores[st.id];
+        const outcomes = { ...(cur?.outcomes || {}) };
+        let endYearScore = cur?.endYearScore ?? 0;
+        cols.forEach(i => {
+          const existing = outcomes[i.toString()] ?? 0;
+          if (fillOnlyEmpty && existing > 0) return;
+          outcomes[i.toString()] = vOut;
+          filled++;
+        });
+        if (includeEnd && !(fillOnlyEmpty && endYearScore > 0)) { endYearScore = vEnd; filled++; }
+        next.studentScores[st.id] = { outcomes, endYearScore };
+      });
+      return next;
+    });
+    toast.success('เติมคะแนนให้ทั้งห้องแล้ว — แก้รายคนได้ แล้วกด "บันทึก"');
+  };
+
   const handleSave = () => {
     const key = getStorageKey(subjectInfo.id, gradeKey, selectedAcademicYear, selectedSemester);
     localStorage.setItem(key, JSON.stringify(scoreData));
@@ -489,6 +523,41 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
         </CardContent>
       </Card>
 
+      {/* เติมคะแนนทั้งห้อง */}
+      <Card className="border-emerald-200 bg-emerald-50/50">
+        <CardContent className="py-3">
+          <div className="flex flex-wrap items-end gap-3 text-sm">
+            <span className="font-semibold text-emerald-800 pb-1.5">เติมคะแนนทั้งห้อง</span>
+            <div className="space-y-1">
+              <label className="text-xs font-medium">ผลการเรียนรู้ (0-{scoreData.maxScorePerOutcome})</label>
+              <Input type="number" min={0} max={scoreData.maxScorePerOutcome} placeholder="เช่น 9" className="w-20 h-8 bg-white"
+                value={fillOutcome} onChange={e => setFillOutcome(e.target.value)} />
+            </div>
+            <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-800 bg-white"
+              onClick={() => fillColumns(outcomeIndices, false)}>
+              เติมทุกผลการเรียนรู้ (1-{learningOutcomes})
+            </Button>
+            <div className="space-y-1 ml-2">
+              <label className="text-xs font-medium">สอบปลายปี (0-{scoreData.endYearMaxScore})</label>
+              <Input type="number" min={0} max={scoreData.endYearMaxScore} placeholder="เช่น 15" className="w-20 h-8 bg-white"
+                value={fillEnd} onChange={e => setFillEnd(e.target.value)} />
+            </div>
+            <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-800 bg-white"
+              onClick={() => fillColumns([], true)}>
+              เติมสอบปลายปี
+            </Button>
+            <label className="flex items-center gap-1.5 pb-1.5 ml-2 cursor-pointer">
+              <input type="checkbox" checked={fillOnlyEmpty} onChange={e => setFillOnlyEmpty(e.target.checked)} />
+              เติมเฉพาะช่องที่ยังว่าง (ไม่ทับคะแนนที่กรอกแล้ว)
+            </label>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            กรอกคะแนน (เช่น 9) แล้วกดเติม ทุกคนจะได้คะแนนนี้ จากนั้นแก้เฉพาะคนที่ต่างออกไป (เช่น 7) ได้เลย
+            หรือกดปุ่ม ↓ ใต้หัวคอลัมน์เพื่อเติมทีละผลการเรียนรู้
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Score Table */}
       <Card>
         <CardContent className="pt-4 overflow-x-auto">
@@ -525,6 +594,24 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
                 <td className="border border-gray-300 px-1 py-1 text-center text-xs font-medium">{scoreData.endYearMaxScore}</td>
                 <td className="border border-gray-300 px-1 py-1 text-center text-xs font-medium">{getMidYearMax() + scoreData.endYearMaxScore}</td>
                 <td className="border border-gray-300" colSpan={2}></td>
+              </tr>
+              <tr className="bg-emerald-50">
+                <td className="border border-gray-300"></td>
+                <td className="border border-gray-300 px-1 py-0.5 text-[10px] text-emerald-800">เติมทั้งคอลัมน์ ↓</td>
+                {outcomeIndices.map(i => (
+                  <td key={i} className="border border-gray-300 px-0 py-0 text-center">
+                    <button type="button" title={`เติมผลการเรียนรู้ที่ ${i} ให้ทุกคน`}
+                      onClick={() => fillColumns([i], false)}
+                      className="w-full h-6 text-emerald-700 hover:bg-emerald-200 font-bold">↓</button>
+                  </td>
+                ))}
+                <td className="border border-gray-300"></td>
+                <td className="border border-gray-300 px-0 py-0 text-center">
+                  <button type="button" title="เติมคะแนนสอบปลายปีให้ทุกคน"
+                    onClick={() => fillColumns([], true)}
+                    className="w-full h-6 text-emerald-700 hover:bg-emerald-200 font-bold">↓</button>
+                </td>
+                <td className="border border-gray-300" colSpan={3}></td>
               </tr>
             </thead>
             <tbody>
