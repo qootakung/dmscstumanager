@@ -138,7 +138,7 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
     const html = `
       <div class="center">
         <div class="title">แบบบันทึกการตัดสินผลการเรียน</div>
-        <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+        <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')} ปีการศึกษา ${selectedAcademicYear}</div>
         <div style="font-size:15pt">เกณฑ์การผ่าน: ได้คะแนนไม่น้อยกว่าร้อยละ ${passCriteria} ของทุกรายวิชา มีเวลาเรียนไม่น้อยกว่าร้อยละ 80 (ต่ำกว่านี้ได้ มส.) และผ่านกิจกรรมพัฒนาผู้เรียนทุกกิจกรรม</div>
       </div>
       <table style="margin-top:8px;font-size:14pt"><thead>${head}</thead><tbody>${body}</tbody></table>
@@ -164,7 +164,7 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
             <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
               <CheckSquare className="w-6 h-6" />การตัดสินผลการเรียน
             </CardTitle>
-            <div className="text-white text-sm">ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}</div>
+            <div className="text-white text-sm">ปีการศึกษา {selectedAcademicYear}</div>
           </div>
         </CardHeader>
       </Card>
@@ -213,7 +213,7 @@ const GradeDecision: React.FC<Props> = ({ selectedGrade, selectedSemester, selec
               )}
               {noAttendanceData && (
                 <div className="text-sm bg-yellow-50 border border-yellow-300 text-yellow-800 rounded p-2">
-                  ยังไม่พบข้อมูลเช็คเวลาเรียนของภาคเรียนนี้ ระบบจึงยังไม่ตัดสิน มส. ให้ใคร กรุณาบันทึกเวลาเรียนก่อน
+                  ยังไม่พบข้อมูลเช็คเวลาเรียนของปีการศึกษานี้ ระบบจึงยังไม่ตัดสิน มส. ให้ใคร กรุณาบันทึกเวลาเรียนก่อน
                 </div>
               )}
               <div className="overflow-auto">

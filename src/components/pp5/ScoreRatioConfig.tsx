@@ -385,7 +385,7 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
               กำหนดสัดส่วนน้ำหนักคะแนนการประเมินผล
             </h2>
             <p className="text-sm text-muted-foreground">
-              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester}
+              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear}
             </p>
           </div>
         </div>
@@ -497,7 +497,7 @@ const ScoreRatioConfig: React.FC<ScoreRatioConfigProps> = ({
         <div ref={printRef}>
           <h1>การกำหนดสัดส่วนน้ำหนักคะแนนการประเมินผล</h1>
           <p style={{ textAlign: 'center', marginBottom: '12px' }}>
-            ชั้นประถมศึกษาปีที่ {gradeKey.replace('ป.', '')} ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester} | โรงเรียนบ้านดอนมูล
+            ชั้นประถมศึกษาปีที่ {gradeKey.replace('ป.', '')} ปีการศึกษา {selectedAcademicYear} | โรงเรียนบ้านดอนมูล
           </p>
 
           {ratios.map((group, gi) => {

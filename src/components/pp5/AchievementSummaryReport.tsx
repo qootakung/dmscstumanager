@@ -420,7 +420,7 @@ const AchievementSummaryReport: React.FC<AchievementSummaryReportProps> = ({
           <div>
             <h2 className="text-lg font-bold text-primary">แบบสรุปผลสัมฤทธิ์ทางการเรียน</h2>
             <p className="text-sm text-muted-foreground">
-              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester}
+              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear}
             </p>
           </div>
         </div>

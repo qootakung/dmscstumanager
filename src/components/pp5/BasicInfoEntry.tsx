@@ -200,7 +200,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(storageKey, JSON.stringify(data));
-    toast.success(`บันทึกข้อมูลพื้นฐานแล้ว (ป.${basicInfo.gradeLevel}/${basicInfo.academicYear}/ภาค ${basicInfo.semester})`);
+    toast.success(`บันทึกข้อมูลพื้นฐานแล้ว (ป.${basicInfo.gradeLevel}/${basicInfo.academicYear}/ทั้งปี)`);
   };
 
   const updateSubject = (id: string, updates: Partial<SubjectInfo>) => {
@@ -236,7 +236,7 @@ const BasicInfoEntry: React.FC<BasicInfoEntryProps> = ({
               กรอกข้อมูลพื้นฐาน ปพ.5
             </h2>
             <p className="text-muted-foreground">
-                ประถมศึกษาปีที่ {basicInfo.gradeLevel} ภาคเรียนที่ {basicInfo.semester} ปีการศึกษา {basicInfo.academicYear}
+                ประถมศึกษาปีที่ {basicInfo.gradeLevel} ปีการศึกษา {basicInfo.academicYear}
             </p>
           </div>
         </div>

@@ -169,7 +169,7 @@ const StudentActivityAssessment: React.FC<Props> = ({
             <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
               <Users className="w-6 h-6" />{titleOverride || 'กิจกรรมพัฒนาผู้เรียน'}
             </CardTitle>
-            <div className="text-white text-sm">ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}</div>
+            <div className="text-white text-sm">ปีการศึกษา {selectedAcademicYear}</div>
           </div>
         </CardHeader>
       </Card>
@@ -380,7 +380,7 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
           <div style={{ textAlign: 'center', marginBottom: '6px' }}>
             <div style={{ fontSize: '18pt', fontWeight: 'bold' }}>แบบสรุปการประเมิน{def.name}</div>
             <div style={{ fontSize: '15pt' }}>
-              โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}
+              โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ปีการศึกษา {academicYear}
             </div>
           </div>
 
@@ -445,7 +445,7 @@ const ActivityPrintable: React.FC<PrintProps> = ({ activities, students, scores,
           <div style={{ textAlign: 'center', marginBottom: '6px' }}>
             <div style={{ fontSize: '18pt', fontWeight: 'bold' }}>สรุปกิจกรรมพัฒนาผู้เรียน</div>
             <div style={{ fontSize: '15pt' }}>
-              โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}
+              โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ปีการศึกษา {academicYear}
             </div>
           </div>
           <table className="act-table">

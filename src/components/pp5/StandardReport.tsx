@@ -353,7 +353,7 @@ const StandardReport: React.FC<StandardReportProps> = ({
               รายงานผลการประเมินตามมาตรฐาน - {config.displayName}
             </h2>
             <p className="text-sm text-muted-foreground">
-              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester}
+              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear}
             </p>
           </div>
         </div>

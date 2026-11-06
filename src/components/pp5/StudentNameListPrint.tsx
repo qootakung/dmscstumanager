@@ -68,7 +68,7 @@ const StudentNameListPrint: React.FC<Props> = ({ selectedGrade, selectedSemester
     const html = `
       <div class="center">
         <div class="title">${listTitle}</div>
-        <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+        <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')} ปีการศึกษา ${selectedAcademicYear}</div>
         <div style="font-size:15pt">จำนวนนักเรียน ${students.length} คน
           (ชาย ${students.filter(s => (s.gender || '').startsWith('ช')).length} คน หญิง ${students.filter(s => (s.gender || '').startsWith('ห') || (s.gender || '').startsWith('ญ')).length} คน)</div>
       </div>
@@ -94,7 +94,7 @@ const StudentNameListPrint: React.FC<Props> = ({ selectedGrade, selectedSemester
             <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
               <FileText className="w-6 h-6" />ใบรายชื่อนักเรียน
             </CardTitle>
-            <div className="text-white text-sm">ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}</div>
+            <div className="text-white text-sm">ปีการศึกษา {selectedAcademicYear}</div>
           </div>
         </CardHeader>
       </Card>

@@ -45,11 +45,13 @@ interface PP5AttendanceProps {
 
 const PP5Attendance: React.FC<PP5AttendanceProps> = ({
   selectedGrade: initialGrade,
-  selectedSemester,
+  selectedSemester: initialSemester,
   selectedAcademicYear,
   onBack
 }) => {
   const [currentGrade, setCurrentGrade] = useState(initialGrade);
+  // ปพ.5 เป็นรายปี แต่การเช็คเวลาเรียนต้องเลือกดูทีละภาคเรียนได้ (ภาค 1 และ 2)
+  const [selectedSemester, setSelectedSemester] = useState(initialSemester);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -316,8 +318,18 @@ const PP5Attendance: React.FC<PP5AttendanceProps> = ({
               <CalendarDays className="w-6 h-6" />
               เช็คเวลาเรียน (วัน)
             </CardTitle>
-            <div className="text-white text-sm">
-              ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}
+            <div className="text-white text-sm flex items-center gap-2">
+              <span>ภาคเรียน:</span>
+              <Select value={selectedSemester} onValueChange={(v) => { setSelectedSemester(v); setCurrentMonthIndex(0); }}>
+                <SelectTrigger className="w-20 h-8 bg-white/90 border-0 text-gray-800">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                </SelectContent>
+              </Select>
+              <span>/ {selectedAcademicYear}</span>
             </div>
           </div>
         </CardHeader>

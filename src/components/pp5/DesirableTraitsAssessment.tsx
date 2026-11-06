@@ -158,7 +158,7 @@ const DesirableTraitsAssessment: React.FC<Props> = ({
               การประเมินคุณลักษณะอันพึงประสงค์
             </CardTitle>
             <div className="text-white text-sm">
-              ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}
+              ปีการศึกษา {selectedAcademicYear}
             </div>
           </div>
         </CardHeader>
@@ -307,7 +307,7 @@ const DesirableTraitsPrintable: React.FC<PrintableProps> = ({ rows, grade, semes
       <div style={{ textAlign: 'center', marginBottom: '6px' }}>
         <div style={{ fontSize: '18pt', fontWeight: 'bold' }}>แบบสรุปการประเมินคุณลักษณะอันพึงประสงค์</div>
         <div style={{ fontSize: '16pt' }}>
-          โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}
+          โรงเรียนบ้านดอนมูล ชั้นประถมศึกษาปีที่ {grade.replace('ป.', '')} ปีการศึกษา {academicYear}
         </div>
       </div>
 

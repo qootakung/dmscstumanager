@@ -400,7 +400,7 @@ const AchievementAnalysisReport: React.FC<AchievementAnalysisReportProps> = ({
         </Button>
         <h2 className="text-xl font-bold">วิเคราะห์ผลสัมฤทธิ์ทางการเรียน</h2>
         <span className="text-sm text-muted-foreground">
-          {selectedGrade} ภาคเรียนที่ {selectedSemester} ปีการศึกษา {selectedAcademicYear}
+          {selectedGrade} ปีการศึกษา {selectedAcademicYear}
         </span>
         <Button onClick={handlePrint} className="ml-auto" size="sm">
           <Printer className="w-4 h-4 mr-1" /> พิมพ์ A4 ทุกวิชา

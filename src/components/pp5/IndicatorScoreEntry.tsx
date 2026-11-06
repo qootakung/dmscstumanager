@@ -380,7 +380,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
     const semesterMaxScore = grandTotal > 0 ? grandTotal / 2 : 50;
     pagesHtml += `
       <div class="page">
-        <div class="title">แบบรายงานผลการเรียนภาคเรียนที่ ${selectedSemester} ${displayName}</div>
+        <div class="title">แบบรายงานผลการเรียนประจำปีการศึกษา ${selectedAcademicYear} ${displayName}</div>
         <div class="subtitle">ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}</div>
         <table>
           <thead>
@@ -490,7 +490,7 @@ const IndicatorScoreEntry: React.FC<IndicatorScoreEntryProps> = ({
               แบบประเมินนักเรียนตามตัวชี้วัด {config.displayName}
             </h2>
             <p className="text-sm text-muted-foreground">
-              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester}
+              ชั้น{gradeKey} ปีการศึกษา {selectedAcademicYear}
               {midYearWeight > 0 && ` | ระหว่างปี ${midYearWeight} + ปลายปี ${endYearWeight} = ${grandTotalWeight}`}
             </p>
           </div>

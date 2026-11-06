@@ -324,7 +324,7 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
     pagesHtml += `
       <div style="page-break-before:always; padding:1cm;">
         <div style="text-align:center; margin-bottom:10px;">
-          <div style="font-size:16pt; font-weight:bold;">แบบรายงานผลการเรียนภาคเรียนที่ ${selectedSemester} สาระการเรียนรู้${subjectName}</div>
+          <div style="font-size:16pt; font-weight:bold;">แบบรายงานผลการเรียนประจำปีการศึกษา ${selectedAcademicYear} สาระการเรียนรู้${subjectName}</div>
           <div style="font-size:14pt;">ชั้น${gradeLabel} ปีการศึกษา ${selectedAcademicYear}</div>
         </div>
         <table style="width:100%; border-collapse:collapse; font-size:12pt;">
@@ -394,7 +394,7 @@ const ElectiveScoreEntry: React.FC<ElectiveScoreEntryProps> = ({
               กรอกคะแนน: {subjectInfo.name}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {selectedGrade} ภาคเรียนที่ {selectedSemester} ปีการศึกษา {selectedAcademicYear} | ผลการเรียนรู้ {learningOutcomes} ตัว
+              {selectedGrade} ปีการศึกษา {selectedAcademicYear} | ผลการเรียนรู้ {learningOutcomes} ตัว
             </p>
           </div>
         </div>

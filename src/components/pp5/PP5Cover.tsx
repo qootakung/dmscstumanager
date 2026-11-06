@@ -88,7 +88,7 @@ const PP5Cover: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedAc
       <div style="font-size:30pt;font-weight:bold">ปพ.5</div>
       <div style="font-size:24pt;font-weight:bold;margin-top:6mm">${data.documentName}</div>
       <div style="font-size:22pt;margin-top:4mm">ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')}</div>
-      <div style="font-size:20pt">ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+      <div style="font-size:20pt">ปีการศึกษา ${selectedAcademicYear}</div>
       <div style="font-size:18pt;margin-top:3mm">จำนวนนักเรียน ${studentCount.total} คน (ชาย ${studentCount.male} คน หญิง ${studentCount.female} คน)</div>
       <div style="font-size:22pt;margin-top:16mm">โรงเรียน${data.schoolName}</div>
       <div style="font-size:18pt">ตำบล${data.subDistrict} อำเภอ${data.district} จังหวัด${data.province}</div>
@@ -142,7 +142,7 @@ const PP5Cover: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedAc
             <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
               <FileText className="w-6 h-6" />หน้าปก ปพ.5
             </CardTitle>
-            <div className="text-white text-sm">ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}</div>
+            <div className="text-white text-sm">ปีการศึกษา {selectedAcademicYear}</div>
           </div>
         </CardHeader>
       </Card>

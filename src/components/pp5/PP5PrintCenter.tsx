@@ -98,7 +98,7 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
   const header = (title: string) => `
     <div class="center">
       <div class="title">${title}</div>
-      <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+      <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}</div>
     </div>`;
 
   const buildHtml = (): string => {
@@ -111,7 +111,7 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
           <div style="font-size:30pt;font-weight:bold">ปพ.5</div>
           <div style="font-size:24pt;font-weight:bold">${cover?.documentName || 'แบบบันทึกผลการเรียนประจำรายวิชา (ปพ.5)'}</div>
           <div style="font-size:22pt">ชั้นประถมศึกษาปีที่ ${gradeNum}</div>
-          <div style="font-size:20pt">ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:20pt">ปีการศึกษา ${selectedAcademicYear}</div>
           <div style="font-size:22pt;margin-top:18mm">โรงเรียน${cover?.schoolName || info?.schoolName || 'บ้านดอนมูล'}</div>
           <div style="font-size:18pt;margin-top:16mm">ครูประจำชั้น ${cover?.teacher1 || info?.homeTeacher1 || '.........................................'}</div>
         </div>`);
@@ -128,7 +128,7 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
         <div style="text-align:center;line-height:1.9">
           <div style="font-size:26pt;font-weight:bold">ปพ.5</div>
           <div style="font-size:20pt;font-weight:bold">แบบบันทึกผลการพัฒนาคุณภาพผู้เรียน</div>
-          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}</div>
           <div style="font-size:18pt">โรงเรียน${cover?.schoolName || info?.schoolName || 'บ้านดอนมูล'}</div>
           <div style="font-size:16pt">สำนักงานเขตพื้นที่การศึกษาประถมศึกษา${info?.educationArea || '..............................'}</div>
         </div>
@@ -247,7 +247,7 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
           <div style="font-size:24pt;font-weight:bold">แบบเสนอขออนุมัติผลการเรียน</div>
           <div style="font-size:22pt;font-weight:bold">รายวิชาเพิ่มเติม</div>
           <div style="font-size:18pt">${results.map(r => r.def.name).join(' / ') || '-'}</div>
-          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}</div>
           <div style="font-size:18pt">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'}</div>
         </div>
         <div style="display:flex;justify-content:space-around;margin-top:24mm">
@@ -366,7 +366,7 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
         <div style="text-align:center;line-height:2;padding-top:18mm">
           <div style="font-size:24pt;font-weight:bold">แบบเสนอขออนุมัติผลการประเมิน</div>
           <div style="font-size:22pt;font-weight:bold">กิจกรรมพัฒนาผู้เรียน</div>
-          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+          <div style="font-size:18pt">ชั้นประถมศึกษาปีที่ ${gradeNum} ปีการศึกษา ${selectedAcademicYear}</div>
           <div style="font-size:18pt">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'}</div>
         </div>
         <table style="margin-top:10mm;width:80%;margin-left:auto;margin-right:auto">
@@ -539,7 +539,7 @@ const PP5PrintCenter: React.FC<Props> = ({ selectedGrade, selectedSemester, sele
             <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
               <Printer className="w-6 h-6" />การสั่งพิมพ์ ปพ.5
             </CardTitle>
-            <div className="text-white text-sm">ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}</div>
+            <div className="text-white text-sm">ปีการศึกษา {selectedAcademicYear}</div>
           </div>
         </CardHeader>
       </Card>

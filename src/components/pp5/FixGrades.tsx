@@ -136,7 +136,7 @@ const FixGrades: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedA
     const html = `
       <div class="center">
         <div class="title">แบบบันทึกการแก้ผลการเรียน "0" , "ร" , "มส" , "มผ"</div>
-        <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')} ภาคเรียนที่ ${selectedSemester} ปีการศึกษา ${selectedAcademicYear}</div>
+        <div class="subtitle">โรงเรียน${info?.schoolName || 'บ้านดอนมูล'} ชั้นประถมศึกษาปีที่ ${selectedGrade.replace('ป.', '')} ปีการศึกษา ${selectedAcademicYear}</div>
       </div>
       <table style="margin-top:8px;font-size:15pt">
         <thead><tr>
@@ -169,7 +169,7 @@ const FixGrades: React.FC<Props> = ({ selectedGrade, selectedSemester, selectedA
             <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
               <Edit3 className="w-6 h-6" />การแก้ "0" , "ร" , "มส"
             </CardTitle>
-            <div className="text-white text-sm">ภาคเรียนที่ {selectedSemester} / {selectedAcademicYear}</div>
+            <div className="text-white text-sm">ปีการศึกษา {selectedAcademicYear}</div>
           </div>
         </CardHeader>
       </Card>

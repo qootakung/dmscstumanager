@@ -58,7 +58,7 @@ const PP5AttendanceHoursSummary: React.FC<PP5AttendanceHoursSummaryProps> = ({
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [reportType, setReportType] = useState<ReportType>(
-    selectedSemester === '1' ? 'semester1' : selectedSemester === '2' ? 'semester2' : 'semester1'
+    'fullYear'
   );
 
   // Attendance data keyed by studentId_date

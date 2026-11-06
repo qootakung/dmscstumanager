@@ -275,7 +275,7 @@ const PP5StudentInfo: React.FC<PP5StudentInfoProps> = ({
        {/* Header */}
        <div className="text-center mb-4" style={{ fontSize: '18pt' }}>
          <h3 className="font-bold" style={{ fontSize: '21pt' }}>รายชื่อนักเรียนโรงเรียนบ้านดอนมูล</h3>
-         <p style={{ fontSize: '18pt' }}>ระดับชั้น {grade} ภาคเรียนที่ {semester} ปีการศึกษา {academicYear}</p>
+         <p style={{ fontSize: '18pt' }}>ระดับชั้น {grade} ปีการศึกษา {academicYear}</p>
        </div>
  
        {/* Summary */}
