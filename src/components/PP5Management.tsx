@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -50,6 +50,9 @@ import GradeDecision from './pp5/GradeDecision';
 import FixGrades from './pp5/FixGrades';
 import PP5Cover from './pp5/PP5Cover';
 import PP5PrintCenter from './pp5/PP5PrintCenter';
+import PP5Backup from './pp5/PP5Backup';
+import { toast } from 'sonner';
+import { PP5_YEAR_SEMESTER, runYearMigrationOnce } from '@/utils/pp5YearMigration';
 import type { SubjectInfo } from './pp5/types';
 import { getDefaultSubjectsForGrade } from './pp5/types';
 
@@ -85,17 +88,6 @@ const getCustomElectives = (grade: string, academicYear: string, semester: strin
   return [];
 };
 
-// Calculate current semester based on Thai school calendar
-const getCurrentSemester = () => {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-  // Semester 1: May 16 - October 31, Semester 2: November 1 - May 15
-  if ((month === 5 && day >= 16) || (month > 5 && month <= 10)) {
-    return '1';
-  }
-  return '2';
-};
 
 // Calculate current Thai academic year (พ.ศ.) based on school calendar
 // Academic year rolls over on May 16
@@ -110,7 +102,15 @@ const getCurrentAcademicYear = (): string => {
 
 const PP5Management: React.FC = () => {
   const [selectedGrade, setSelectedGrade] = useState<string>('ป.1');
-  const [selectedSemester, setSelectedSemester] = useState<string>(getCurrentSemester());
+  const [selectedSemester] = useState<string>(PP5_YEAR_SEMESTER); // ปพ.5 ทำรายปี ใช้ภาคเรียนที่ 2 เป็นค่าคงที่
+
+  // ย้ายข้อมูลที่เคยกรอกไว้ในภาคเรียนที่ 1 มาไว้ที่ภาคเรียนที่ 2 (ครั้งเดียว ไม่ทับของเดิม)
+  useEffect(() => {
+    const r = runYearMigrationOnce(localStorage);
+    if (r && r.copied > 0) {
+      toast.success(`ปพ.5 เปลี่ยนเป็นรายปี: คัดลอกข้อมูลภาคเรียนที่ 1 มาใช้แล้ว ${r.copied} รายการ`);
+    }
+  }, []);
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
@@ -479,8 +479,6 @@ const PP5Management: React.FC = () => {
             teacherId: '',
             teacherName: '',
             subjectCode: '',
-            endTermRatio: 0,
-            midTermRatio: 0,
             category: 'elective',
           };
       return (
@@ -599,19 +597,7 @@ const PP5Management: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-white font-medium whitespace-nowrap">ภาคเรียน:</label>
-              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-                <SelectTrigger className="w-20 bg-white/90 border-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
               <label className="text-white font-medium whitespace-nowrap">ระดับชั้น:</label>
               <Select value={selectedGrade} onValueChange={setSelectedGrade}>
                 <SelectTrigger className="w-24 bg-white/90 border-0">
@@ -670,6 +656,9 @@ const PP5Management: React.FC = () => {
         ))}
       </div>
 
+      {/* สำรอง/กู้คืนข้อมูล ปพ.5 */}
+      <PP5Backup />
+
       {/* Footer Info */}
       <Card className="bg-gradient-to-r from-gray-100 to-gray-50 border-gray-200">
         <CardContent className="py-4">
@@ -681,7 +670,7 @@ const PP5Management: React.FC = () => {
               </span>
               <span className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                ปีการศึกษา {selectedAcademicYear} ภาคเรียนที่ {selectedSemester}
+                ปีการศึกษา {selectedAcademicYear} สรุปผลสิ้นปี
               </span>
             </div>
             <div className="text-gray-500">
