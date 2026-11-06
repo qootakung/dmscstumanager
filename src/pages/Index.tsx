@@ -17,6 +17,7 @@ import DentalMilkTracking from '@/components/DentalMilkTracking';
 import { StudentScoreManagement } from '@/components/StudentScoreManagement';
 import PP5Management from '@/components/PP5Management';
 import { getCurrentUser, logout } from '@/utils/userStorage';
+import { prepareLogout } from '@/utils/pp5Cloud';
 import StudentCardViewer from '@/components/student/StudentCardViewer';
 import type { User } from '@/types/student';
 import Swal from 'sweetalert2';
@@ -62,6 +63,20 @@ const Index = () => {
     });
 
     if (result.isConfirmed) {
+      // ส่งข้อมูล ปพ.5 ที่ค้างขึ้นระบบกลางและล้างสำเนาในเครื่อง ก่อนออกจากระบบ
+      const synced = await prepareLogout();
+      if (!synced) {
+        const keep = await Swal.fire({
+          title: 'ยังมีข้อมูล ปพ.5 ที่ส่งขึ้นระบบไม่สำเร็จ',
+          text: 'ถ้าออกจากระบบตอนนี้ ข้อมูลส่วนนั้นจะค้างอยู่ในเครื่องนี้ ต้องล็อกอินที่เครื่องเดิมอีกครั้งเพื่อส่งขึ้นระบบ',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ออกจากระบบต่อ',
+          cancelButtonText: 'ยกเลิก',
+          confirmButtonColor: '#ef4444',
+        });
+        if (!keep.isConfirmed) return;
+      }
       logout();
       setCurrentUser(null);
       await Swal.fire({
