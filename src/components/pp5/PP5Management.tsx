@@ -29,30 +29,30 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { generateAcademicYears, gradeOptions } from '@/utils/data';
-import BasicInfoEntry from './pp5/BasicInfoEntry';
-import PP5StudentInfo from './pp5/PP5StudentInfo';
-import PP5Attendance from './pp5/PP5Attendance';
-import PP5AttendanceHoursSummary from './pp5/PP5AttendanceHoursSummary';
-import CurriculumIndicators from './pp5/CurriculumIndicators';
-import ScoreRatioConfig from './pp5/ScoreRatioConfig';
-import IndicatorScoreEntry from './pp5/IndicatorScoreEntry';
-import ElectiveScoreEntry from './pp5/ElectiveScoreEntry';
-import StandardReport from './pp5/StandardReport';
-import AchievementSummaryReport from './pp5/AchievementSummaryReport';
-import AchievementChartReport from './pp5/AchievementChartReport';
-import AchievementAnalysisReport from './pp5/AchievementAnalysisReport';
-import DesirableTraitsAssessment from './pp5/DesirableTraitsAssessment';
-import ReadingAnalysisAssessment from './pp5/ReadingAnalysisAssessment';
-import StudentActivityAssessment from './pp5/StudentActivityAssessment';
-import IndicatorCountTable from './pp5/IndicatorCountTable';
-import StudentNameListPrint from './pp5/StudentNameListPrint';
-import GradeDecision from './pp5/GradeDecision';
-import FixGrades from './pp5/FixGrades';
-import PP5Cover from './pp5/PP5Cover';
-import PP5PrintCenter from './pp5/PP5PrintCenter';
-import PP5Backup from './pp5/PP5Backup';
-import type { SubjectInfo } from './pp5/types';
-import { getDefaultSubjectsForGrade } from './pp5/types';
+import BasicInfoEntry from './BasicInfoEntry';
+import PP5StudentInfo from './PP5StudentInfo';
+import PP5Attendance from './PP5Attendance';
+import PP5AttendanceHoursSummary from './PP5AttendanceHoursSummary';
+import CurriculumIndicators from './CurriculumIndicators';
+import ScoreRatioConfig from './ScoreRatioConfig';
+import IndicatorScoreEntry from './IndicatorScoreEntry';
+import ElectiveScoreEntry from './ElectiveScoreEntry';
+import StandardReport from './StandardReport';
+import AchievementSummaryReport from './AchievementSummaryReport';
+import AchievementChartReport from './AchievementChartReport';
+import AchievementAnalysisReport from './AchievementAnalysisReport';
+import DesirableTraitsAssessment from './DesirableTraitsAssessment';
+import ReadingAnalysisAssessment from './ReadingAnalysisAssessment';
+import StudentActivityAssessment from './StudentActivityAssessment';
+import IndicatorCountTable from './IndicatorCountTable';
+import StudentNameListPrint from './StudentNameListPrint';
+import GradeDecision from './GradeDecision';
+import FixGrades from './FixGrades';
+import PP5Cover from './PP5Cover';
+import PP5PrintCenter from './PP5PrintCenter';
+import PP5Backup from './PP5Backup';
+import type { SubjectInfo } from './types';
+import { getDefaultSubjectsForGrade } from './types';
 
 // Types for PP5 system
 interface PP5MenuCategory {
